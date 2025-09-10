@@ -1,12 +1,44 @@
 # PBIScraper
 
-Phages Bacteria Interaction data scraping, exploration and overview. 
+Phages Bacteria Interaction data scraping, exploration and overview. A first exploration of the APIs and data are done in the different notebooks and then adapted within the Snakemake pipeline. 
 
 WORK IN PROGRESS - DRAFT
 
-## Stage 1 - PhageScope
+**Current state:** The Snakemake pipieline downloads and merge the metadata from PhageScope into various dataframes (saved as CSVs) and download and extract the fasta files for DNA and protein sequences. If one of the source database contains multiple fasta files (e.g. one per phage) instead of one fasta file per source, the files are merged (check rule 'merge_phage_fasta_by_source'). 
 
-Chosen for its large number of source database, [PhageScope](https://phagescope.deepomics.org/) contains phage and protein sequences alongside multiple metadata such as virulence factor, protein annotation, anti-crispr, transmembrane protein, tRNA - mRNA or transcription terminator. Phages metadata contain the **Host species** of the phage, necessary information for further work on prediction of these interactions. Moreover, sequences are clustered 
+
+
+- 1) [PhageScope](https://phagescope.deepomics.org/) Database
+- 2) [VHRdb](https://hub.pages.pasteur.fr/viralhostrangedb/api.html)
+
+
+# Pixi and Snakemake
+
+How to and how not to. 
+
+## Download  Snakemake pipeline with Pixi
+
+For details check Snakemake 9.8.0 documentation and Pixi documentation. 
+
+For details on multi-environments with Pixi check [here](https://pixi.sh/latest/tutorials/multi_environment/#lets-get-started). 
+
+
+- Don't forget to run  `pixi install --environment <envname>`
+
+
+
+# Database 1 - PhageScope
+
+**TODO:** 
+
+- DONE ! Adapt current files for new workflow structure (everything moved within the workflow dir)
+- DONE ! Add Pixi and Snakemake files to .gitignore
+- show an extract of the .toml file
+- Check clustering info used by PhageScope https://github.com/soedinglab/mmseqs2/wiki#clustering
+
+Chosen for its large number of source database, [PhageScope](https://phagescope.deepomics.org/) contains phage and protein sequences alongside multiple metadata such as virulence factor, protein annotation, anti-crispr, transmembrane protein, tRNA - mRNA or transcription terminator. Phages metadata contain the **Host species** of the phage, necessary information for further work on prediction of these interactions. 
+
+
 
 All the data from PhageScope come from a set of 13 databases: 
 
@@ -30,34 +62,8 @@ All the data from PhageScope come from a set of 13 databases:
 ![Image from phagescope.deepomics.org](https://phagescope.deepomics.org/png/visualization.png)
 
 
-TODO: Check clustering info https://github.com/soedinglab/mmseqs2/wiki#clustering
 
-# Pixi and Snakemake
-
-How to and how not to. 
-
-### Download  Snakemake pipeline with Pixi
-
-For details check Snakemake 9.8.0 documentation and Pixi documentation. 
-
-For details on multi-environments with Pixi check [here](https://pixi.sh/latest/tutorials/multi_environment/#lets-get-started). 
-
-Snakemake is run from pixi, with pixi run
-
-
-
-- Don't forget to run  `pixi install --environment <envname>`
-
-
-# TODO: 
-
-- DONE ! Adapt current files for new workflow structure (everything moved within the workflow dir)
-- DONE ! Add Pixi and Snakemake files to .gitignore
-- show an extract of the .toml file
-
-
-
-### How to 
+## How to 
 
 Snakemake is launched from Pixi with `pixi run`. 
 
@@ -75,18 +81,16 @@ The Conda environment to use is specified within each rule (if needed) with
         "envs/pixi_base_env.yaml"
 ```
 
-Cache: to use caching, it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/` (create the destination directory first). 
+Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html), it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/` (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.
 
-- pixi run snakemake all --cache --use-conda --printshellcmds --cores 2
-    - optionally to generate the DAG you can add: --dag | dot -Tsvg > dag.svg
 
 - **Current command:** `pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --cores 4 `
-    - **DAG Option (path relative to bash location)**`--dag | dot -Tsvg > workflow/dag/dag_rerun.svg`
+    - **DAG Option (path relative to bash location)**`--dag | dot -Tsvg > workflow/dag/dag.svg`
 
 To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified):
 - pixi run snakemake --delete-temp-output
 
-- TODO: command to remove temporary objects
+
 
 ```
 --delete-temp-output
@@ -95,26 +99,24 @@ To remove the temporary files after execution, use --delete-temp-output. Has to 
 Remove all temporary files generated by the workflow. Use together with –dry-run to list files without actually deleting anything. Note that this will not recurse into subworkflows.
 ```
 
+# Database 2 - viralhostrangedb
 
-
-
-## Stage 2 - viralhostrangedb
-
-Interactions only, no sequences ? 
+It contains interactions only but no sequences. The database webpage is not very userfriendly but a good documentation is written [here](https://hub.pages.pasteur.fr/viralhostrangedb/) gives info about the API. 
 
 Data from [VHRdb](https://hub.pages.pasteur.fr/viralhostrangedb/api.html) consist of references to phages from different sources, joined to hosts of different souces. The interactions are described as being: no-data, 0: no infection, 1: intermediate and 2: infection. 
 
 Exploration and preparatory code in expl_3 notebook. 
 
+**CURRENT STATE**: the identifiers do not allow for an easy phage sequence retrieval, at least for now. More investigation on the different souces are needed but there are chances that every source has to be investigated separately in order to retrieve the sequences, if they are publicly available. 
+
+
 Notes: 
-- check phagedive for additionnal info on HER collection ?
+- check phagedive for additionnal info on HER collection 
 
 
+# Database 3 - PhageDive
 
-
-
-
-
+It seems that [Phagedive](https://phagedive.dsmz.de/advsearch) contains similar information as VRHdb however improved with additional data such as culture environment, sequence (link), etc. It can be of interest in order to explore specific strains and see e.g. where are the HER collection sequences stored (accession number). 
 
 
 
@@ -123,7 +125,9 @@ Notes:
 
 # Annexe
 
-### Phagescope Temporary files
+Here's a small list of temporary files from Phagescope, just so you can check ! Feel free to take a look at the DAG figures in the dag/ folder to visualize the phagescope files. Some of the temporary files logic might need to be redone (.extraction_done). 
+
+## Phagescope Temporary files
 
 ```
 Deleting data/intermediate_csv/phage_metadata/RefSeq_Phage_Metadata_URL.tsv
