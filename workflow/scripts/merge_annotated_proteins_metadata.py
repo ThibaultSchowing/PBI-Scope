@@ -3,10 +3,12 @@
 import sys
 print(f"Using python from: {sys.executable}")
 import pandas as pd
-import numpy as np
+import numpy as np  
 import os
 import logging
 logging.basicConfig(level=logging.INFO)
+
+import utils
 
 # Snakemake inputs and outputs
 inputs = snakemake.input
@@ -16,6 +18,13 @@ output = snakemake.output[0]
 dfs = []
 
 for infile in inputs:
+    print(f"Processing file: {infile}")
+
+    if utils.is_file_empty_or_invalid(infile):
+        print(f"[WARNING] File {infile} is empty or invalid. Skipping.")
+        logging.warning(f"File {infile} is empty or invalid. Skipping.")
+        continue
+    
     df = pd.read_csv(infile, sep="\t")
     print(f"[INFO] Processing file: {infile} with shape {df.shape}")
     #print(f"Head of {infile}:\n{df.head()}")
