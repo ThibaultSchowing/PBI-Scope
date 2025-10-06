@@ -28,6 +28,12 @@ for infile in inputs:
     df = pd.read_csv(infile, sep="\t")
     print(f"[INFO] Processing file: {infile} with shape {df.shape}")
     #print(f"Head of {infile}:\n{df.head()}")
+
+    # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
+    if 'Phage_Source' in df.columns:
+        df = df.rename(columns={'Phage_Source': 'Phage_source'})
+    if 'Phage_id' in df.columns:
+        df = df.rename(columns={'Phage_id': 'Phage_ID'})
     
     # Ajoute la colonne 'Phage_source' si elle n'existe pas
     if 'Phage_source' not in df.columns:
