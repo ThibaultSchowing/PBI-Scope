@@ -117,8 +117,8 @@ phage_virulent_factor_metadata_urls:
     "TemPhD_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/TemPhD_virulent_factor_data.tsv"
     "CHVD_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/CHVD_virulent_factor_data.tsv"
     "IGVD_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/IGVD_virulent_factor_data.tsv"
-    #"IMGVR_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/IMGVR_virulent_factor_data.tsv"
-    "GOV2_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/GOV2_virulent_factor_data.tsv"
+    "IMGVR_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/IMGVR_virulent_factor_data.tsv"
+    #"GOV2_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/GOV2_virulent_factor_data.tsv"
 
 
 phage_transmembrane_protein_metadata_intermediate_output: "data/intermediate_csv/phage_transmembrane_protein"

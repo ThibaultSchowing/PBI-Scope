@@ -71,6 +71,7 @@ rule all:
         expand("../data/phage_fasta_merged/{dataset}.fasta",
             dataset=list(phage_fasta_urls.keys())
         )
+        # TODO: add here the rule to create the SQLite database from all the merged csv files.
 
 
 # if launched with auto discovery of snakefile (from the root directory),no need to specify the workflow directory

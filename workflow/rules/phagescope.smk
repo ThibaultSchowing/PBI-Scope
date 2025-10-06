@@ -147,7 +147,8 @@ rule merge_phage_transmembrane_protein_metadata_tsvs:
 
 rule generate_report:
     input:
-        "../data/merged/merged_{feature}.csv"
+        #"../data/merged/merged_{feature}.csv"
+        lambda wildcards: config[f"{wildcards.feature}_merged_output"]
     output:
         "reports/{feature}_report.html"
     shell:

@@ -16,6 +16,13 @@ dfs = []
 
 for infile in inputs:
     df = pd.read_csv(infile, sep="\t")
+
+    # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
+    if 'Phage_Source' in df.columns:
+        df = df.rename(columns={'Phage_Source': 'Phage_source'})
+    if 'Phage_id' in df.columns:
+        df = df.rename(columns={'Phage_id': 'Phage_ID'})
+
     
     # Ajoute la colonne 'Phage_source' si elle n'existe pas
     if 'Phage_source' not in df.columns:
@@ -26,7 +33,6 @@ for infile in inputs:
         logging.info(f"Added 'Phage_source' column to {infile} with value '{source_name}'")
 
     dfs.append(df)
-    
 
 # Concatène tous les DataFrames
 merged_df = pd.concat(dfs, ignore_index=True)
