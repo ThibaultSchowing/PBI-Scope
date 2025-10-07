@@ -6,6 +6,9 @@ WORK IN PROGRESS - DRAFT
 
 **Current state:** The Snakemake pipieline downloads and merge the metadata from PhageScope into various dataframes (saved as CSVs) and download and extract the fasta files for DNA and protein sequences. If one of the source database contains multiple fasta files (e.g. one per phage) instead of one fasta file per source, the files are merged (check rule 'merge_phage_fasta_by_source'). 
 
+**Current State:**
+For the duck-db branch, the data merging causes problems as column types is not known first hand. The solution would be to parse more cleanly each DataFrame in all merge scripts to handle the columns that should be numerical but instead contains strings such as "NaN", "-" or else and replace it with consistant values. The columns can then be converted to numerical for the whole merged scripts. 
+
 
 
 - 1) [PhageScope](https://phagescope.deepomics.org/) Database

@@ -27,7 +27,7 @@ rule download_tsv:
     threads: 8
     shell:
         """
-        mkdir -p data/intermediate_csv/{wildcards.feature}
+        mkdir -p ../data/intermediate_csv/{wildcards.feature}
         wget -O {output} {params.url} || echo "Failed download for {wildcards.feature}/{wildcards.source}"
         """
 
@@ -246,7 +246,7 @@ rule merge_protein_fasta_by_source:
         # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
         # This ensures we don’t waste time unnecessarily merging a single file.
         r'''
-        mkdir -p data/protein_fasta_merged
+        mkdir -p ../data/protein_fasta_merged
         fasta_files=("$(find {params.source_dir} -type f \( -name "*.fasta" -o -name "*.fa" \))")
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
@@ -268,7 +268,7 @@ rule merge_phage_fasta_by_source:
         # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
         # This ensures we don’t waste time unnecessarily merging a single file.
         r'''
-        mkdir -p data/phage_fasta_merged
+        mkdir -p ../data/phage_fasta_merged
         fasta_files=("$(find {params.source_dir} -type f \( -name "*.fasta" -o -name "*.fa" \))")
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}

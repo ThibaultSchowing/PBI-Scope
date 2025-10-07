@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np  
 import os
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 import utils
@@ -41,6 +42,8 @@ for infile in inputs:
         logging.info(f"Processing {infile} with source name '{source_name}'")
         df['Phage_source'] = source_name
         logging.info(f"Added 'Phage_source' column to {infile} with value '{source_name}'")
+
+    logging.info(f"File {infile} has shape {df.shape} and columns: {df.columns.tolist()}")
 
     dfs.append(df)
     

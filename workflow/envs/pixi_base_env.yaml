@@ -13,3 +13,8 @@ dependencies:
 - snakemake *
 - snakemake >=7.32.4,<10
 - ydata-profiling >=4.16.0,<5
+- duckdb *
+- fastapi *
+- uvicorn *
+- streamlit *
+- plotly *

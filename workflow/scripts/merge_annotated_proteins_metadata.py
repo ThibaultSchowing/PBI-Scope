@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np  
 import os
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 import utils
@@ -46,8 +47,26 @@ for infile in inputs:
     # Replace "-" with NA in columns 9 and 11 (causes problems with multi types)
     cols_to_numeric = [df.columns[9], df.columns[11]]
 
-    for col in cols_to_numeric:
-        df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
+    #for col in cols_to_numeric:
+    #    df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
+
+    for i, col in enumerate(cols_to_numeric):
+        original_position = [9, 11][i]
+        try:
+            logging.info(f"Converting column {original_position} ({col}) to numeric in {infile}")
+            
+            # Replace "-" with NaN and convert to numeric
+            df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
+            
+            # Log conversion stats
+            null_count = df[col].isnull().sum()
+            total_count = len(df[col])
+            logging.info(f"Column {col}: {null_count}/{total_count} values became NaN after conversion")
+            
+        except Exception as e:
+            logging.error(f"Error converting column {col} in {infile}: {str(e)}")
+            # Continue processing other columns
+            continue
 
     dfs.append(df)
     
