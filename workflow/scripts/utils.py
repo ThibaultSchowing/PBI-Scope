@@ -25,3 +25,12 @@ def is_file_empty_or_invalid(filepath):
     except Exception as e:
         logging.warning(f"File {filepath} appears to be invalid: {e}")
         return True
+    
+
+# TODO : create function that takes list of numerical colums and convert them to numeric with logging
+def convert_numerical_columns(df, cols):
+    for col in cols:
+        logging.info(f"Formating column {col} to numeric")
+        df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
+        df[col] = df[col].replace("NaN", np.nan)
+    return df

@@ -15,53 +15,61 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-# Liste des DataFrames
+COLUMNS_LIST = ['Phage_ID', 'Protein_source', 'Function_prediction_source', 'Start',
+       'Stop', 'Strand', 'Protein_ID', 'Product', 'Protein_classification',
+       'Molecular_weight', 'Aromaticity', 'Instability_index',
+       'Isoelectric_point', 'Helix_fraction', 'Turn_fraction',
+       'Sheet_fraction', 'Reduced_coefficient', 'Oxidized_coefficient',
+       'Phage_source', 'Function_Prediction_source']
+
+NUMERICAL_COLUMNS = ['Start', 'Stop', 'Molecular_weight', 'Aromaticity',
+       'Instability_index', 'Isoelectric_point', 'Helix_fraction', 'Turn_fraction',
+       'Sheet_fraction', 'Reduced_coefficient', 'Oxidized_coefficient']
+
+STRING_COLUMNS = ['Phage_ID', 'Protein_source', 'Function_prediction_source',
+       'Strand', 'Protein_ID', 'Product', 'Protein_classification',
+       'Phage_source', 'Function_Prediction_source']
+
+# List of DataFrames
 dfs = []
 
+# For each input file (all databases - From PhageScope)
 for infile in inputs:
-    print(f"Processing file: {infile}")
+    logging.info(f"Processing file: {infile}")
 
+    # Check if file is empty or invalid
     if utils.is_file_empty_or_invalid(infile):
-        print(f"[WARNING] File {infile} is empty or invalid. Skipping.")
         logging.warning(f"File {infile} is empty or invalid. Skipping.")
         continue
     
     df = pd.read_csv(infile, sep="\t")
-    print(f"[INFO] Processing file: {infile} with shape {df.shape}")
-    #print(f"Head of {infile}:\n{df.head()}")
+    
 
     # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
     if 'Phage_Source' in df.columns:
         df = df.rename(columns={'Phage_Source': 'Phage_source'})
+        logging.info(f"Renamed 'Phage_Source' to 'Phage_source' in {infile}")
     if 'Phage_id' in df.columns:
         df = df.rename(columns={'Phage_id': 'Phage_ID'})
+        logging.info(f"Renamed 'Phage_id' to 'Phage_ID' in {infile}")
     
-    # Ajoute la colonne 'Phage_source' si elle n'existe pas
+    # Add 'Phage_source' column if it doesn't exist
     if 'Phage_source' not in df.columns:
         source_name = os.path.basename(infile).split("_")[0]
-        # Log info the source_name
-        #logging.info(f"Processing {infile} with source name '{source_name}'")
         df['Phage_source'] = source_name
         logging.info(f"Added 'Phage_source' column to {infile} with value '{source_name}'")
     
-    # Replace "-" with NA in columns 9 and 11 (causes problems with multi types)
-    cols_to_numeric = [df.columns[9], df.columns[11]]
+    # Replace "-" with NA in numerical columns
 
-    #for col in cols_to_numeric:
-    #    df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
-
-    for i, col in enumerate(cols_to_numeric):
-        original_position = [9, 11][i]
+    for i, col in enumerate(NUMERICAL_COLUMNS):
+        logging.info(f"Processing numerical column: {col}")
         try:
-            logging.info(f"Converting column {original_position} ({col}) to numeric in {infile}")
+            logging.info(f"Formating column {i} ({col}) to numeric in {infile}")
             
             # Replace "-" with NaN and convert to numeric
             df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
-            
-            # Log conversion stats
-            null_count = df[col].isnull().sum()
-            total_count = len(df[col])
-            logging.info(f"Column {col}: {null_count}/{total_count} values became NaN after conversion")
+            # Replace NaN with np.nan (just to be sure)
+            df[col] = df[col].replace("NaN", np.nan)
             
         except Exception as e:
             logging.error(f"Error converting column {col} in {infile}: {str(e)}")
