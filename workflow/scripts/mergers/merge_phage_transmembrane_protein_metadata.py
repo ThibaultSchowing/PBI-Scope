@@ -8,6 +8,7 @@ import os
 import logging
 logging.basicConfig(level=logging.INFO)
 
+sys.path.append('scripts')
 import utils
 
 # Snakemake inputs and outputs

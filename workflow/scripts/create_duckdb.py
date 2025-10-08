@@ -23,13 +23,13 @@ def create_star_schema_duckdb():
     
     conn = duckdb.connect(db_path)
     
-    # Create fact table with proper data type conversion
+    # Create fact table
     logging.info("Creating fact_phages table")
     conn.execute(f"""
     CREATE TABLE fact_phages AS 
     SELECT 
         Phage_ID,
-        Phage_source,
+        Source_DB,                              -- ✅ CHANGED from Phage_source
         TRY_CAST(NULLIF(Length, '-') AS INTEGER) as Length,
         TRY_CAST(NULLIF(GC_content, '-') AS DOUBLE) as GC_content,
         Taxonomy,
@@ -38,11 +38,15 @@ def create_star_schema_duckdb():
         Lifestyle,
         Cluster,
         Subcluster
-    FROM read_csv('{phage_data}', header=true, all_varchar=true)
+    FROM read_csv('{phage_data}', 
+                  header=true, 
+                  all_varchar=true, 
+                  ignore_errors=true,
+                  null_padding=true)
     WHERE Phage_ID IS NOT NULL
     """)
     
-    # Create protein dimension with numeric conversions
+    # Create protein dimension
     logging.info("Creating dim_proteins table")
     conn.execute(f"""
     CREATE TABLE dim_proteins AS
@@ -65,40 +69,49 @@ def create_star_schema_duckdb():
         TRY_CAST(NULLIF(Sheet_fraction, '-') AS DOUBLE) as Sheet_fraction,
         TRY_CAST(NULLIF(Reduced_coefficient, '-') AS DOUBLE) as Reduced_coefficient,
         TRY_CAST(NULLIF(Oxidized_coefficient, '-') AS DOUBLE) as Oxidized_coefficient,
-        Function_Prediction_source,
-        Phage_source
-    FROM read_csv('{protein_data}', header=true, all_varchar=true)
+        Source_DB                               -- ✅ CHANGED from Phage_source
+    FROM read_csv('{protein_data}', 
+                  header=true, 
+                  all_varchar=true, 
+                  ignore_errors=true,
+                  null_padding=true)
     WHERE Protein_ID IS NOT NULL AND Phage_ID IS NOT NULL
     """)
     
-    # Create terminator dimension with numeric conversions
+    # Create terminator dimension
     logging.info("Creating dim_terminators table") 
     conn.execute(f"""
     CREATE TABLE dim_terminators AS
     SELECT 
         Phage_ID,
-        terminator_type,
-        TRY_CAST(NULLIF(terminator_start, '-') AS INTEGER) as terminator_start,
-        TRY_CAST(NULLIF(terminator_end, '-') AS INTEGER) as terminator_end,
-        TRY_CAST(NULLIF(confidence_score, '-') AS DOUBLE) as confidence_score,
-        Phage_source
-    FROM read_csv('{terminator_data}', header=true, all_varchar=true)
+        Terminator as terminator_type,
+        TRY_CAST(NULLIF(Start, '-') AS INTEGER) as terminator_start,
+        TRY_CAST(NULLIF(Stop, '-') AS INTEGER) as terminator_end,
+        TRY_CAST(NULLIF(Confidence, '-') AS DOUBLE) as confidence_score,
+        Sense,
+        Loc,
+        Source_DB                               -- ✅ CHANGED from Phage_source
+    FROM read_csv('{terminator_data}', 
+                  header=true, 
+                  all_varchar=true, 
+                  ignore_errors=true,
+                  null_padding=true)
     WHERE Phage_ID IS NOT NULL
     """)
     
-    # Create performance indexes
+    # Create performance indexes - Now consistent with Source_DB
     logging.info("Creating indexes")
-    conn.execute("CREATE INDEX idx_phages_source ON fact_phages(Phage_source)")
+    conn.execute("CREATE INDEX idx_Source_DB ON fact_phages(Source_DB)")        # ✅ Now matches!
     conn.execute("CREATE INDEX idx_phages_id ON fact_phages(Phage_ID)")
     conn.execute("CREATE INDEX idx_proteins_phage ON dim_proteins(Phage_ID)")
     conn.execute("CREATE INDEX idx_terminators_phage ON dim_terminators(Phage_ID)")
     
-    # Create analytical views
+    # Create analytical views - Now consistent with Source_DB
     logging.info("Creating analytical views")
     conn.execute("""
     CREATE VIEW phage_summary AS
     SELECT 
-        Phage_source,
+        Source_DB,                              -- ✅ Now matches!
         COUNT(*) as total_phages,
         AVG(Length) as avg_length,
         AVG(GC_content) as avg_gc_content,
@@ -106,14 +119,14 @@ def create_star_schema_duckdb():
         MAX(Length) as max_length
     FROM fact_phages
     WHERE Length IS NOT NULL AND GC_content IS NOT NULL
-    GROUP BY Phage_source
+    GROUP BY Source_DB                          -- ✅ Now matches!
     ORDER BY total_phages DESC
     """)
     
     conn.execute("""
     CREATE VIEW phage_size_distribution AS
     SELECT 
-        Phage_source,
+        Source_DB,                              -- ✅ Now matches!
         CASE 
             WHEN Length < 10000 THEN 'Small (<10kb)'
             WHEN Length < 100000 THEN 'Medium (10-100kb)'
@@ -123,7 +136,7 @@ def create_star_schema_duckdb():
         AVG(Length) as avg_length
     FROM fact_phages
     WHERE Length IS NOT NULL
-    GROUP BY Phage_source, size_category
+    GROUP BY Source_DB, size_category           -- ✅ Now matches!
     """)
     
     # Get summary statistics

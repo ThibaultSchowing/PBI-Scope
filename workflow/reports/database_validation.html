@@ -1,0 +1,515 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>PhageScope Database Validation Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { background-color: #f0f0f0; padding: 20px; border-radius: 8px; }
+            .section { margin: 20px 0; }
+            .success { color: green; font-weight: bold; }
+            .warning { color: orange; font-weight: bold; }
+            .error { color: red; font-weight: bold; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .metric { font-size: 24px; font-weight: bold; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🧬 PhageScope Database Validation Report</h1>
+            <p><strong>Generated:</strong> 2025-10-08T15:56:49.414680</p>
+            <p><strong>Database:</strong> ../data/databases/phage_database_optimized.duckdb</p>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Summary</h2>
+            <div style="display: flex; justify-content: space-around;">
+                <div class="metric">
+                    <div>873,718</div>
+                    <div style="font-size: 16px;">Phages</div>
+                </div>
+                <div class="metric">
+                    <div>41,736,214</div>
+                    <div style="font-size: 16px;">Proteins</div>
+                </div>
+                <div class="metric">
+                    <div>4,640,129</div>
+                    <div style="font-size: 16px;">Terminators</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🗃️ Table Status</h2>
+            <table>
+                <tr><th>Check</th><th>Status</th><th>Details</th></tr>
+                <tr>
+                    <td>All tables present</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>
+                        Present: dim_proteins, dim_terminators, fact_phages, phage_size_distribution, phage_summary<br>
+                        
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>📈 Data Quality</h2>
+            <table>
+                <tr><th>Check</th><th>Status</th><th>Details</th></tr>
+    
+                <tr>
+                    <td>Duplicate Phage IDs</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 duplicates found</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned Proteins</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 proteins without matching phages</td>
+                </tr>
+        
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>🔧 Database Objects</h2>
+            <p><strong>Indexes:</strong> idx_phages_id, idx_proteins_phage, idx_Source_DB, idx_terminators_phage</p>
+            <p><strong>Views:</strong> phage_size_distribution, phage_summary</p>
+        </div>
+        
+        <div class="section">
+            <h2>📋 Detailed Statistics</h2>
+            <pre style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; overflow-x: auto;">{
+  "timestamp": "2025-10-08T15:56:49.414680",
+  "database_path": "../data/databases/phage_database_optimized.duckdb",
+  "tables": {
+    "existing": [
+      "dim_proteins",
+      "dim_terminators",
+      "fact_phages",
+      "phage_size_distribution",
+      "phage_summary"
+    ],
+    "missing": [],
+    "all_present": true,
+    "fact_phages": {
+      "schema": [
+        [
+          "Phage_ID",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Source_DB",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Length",
+          "INTEGER",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "GC_content",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Taxonomy",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Completeness",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Host",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Lifestyle",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Cluster",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Subcluster",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ]
+      ],
+      "row_count": 873718,
+      "null_counts": {
+        "Phage_ID": 0,
+        "Source_DB": 0,
+        "Length": 0,
+        "GC_content": 0,
+        "Taxonomy": 48768,
+        "Completeness": 873718,
+        "Host": 13,
+        "Lifestyle": 0,
+        "Cluster": 0,
+        "Subcluster": 0
+      }
+    },
+    "dim_proteins": {
+      "schema": [
+        [
+          "Phage_ID",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Protein_ID",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Protein_source",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Function_prediction_source",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Start",
+          "INTEGER",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Stop",
+          "INTEGER",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Strand",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Product",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Protein_classification",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Molecular_weight",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Aromaticity",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Instability_index",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Isoelectric_point",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Helix_fraction",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Turn_fraction",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Sheet_fraction",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Reduced_coefficient",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Oxidized_coefficient",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Source_DB",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ]
+      ],
+      "row_count": 41736214,
+      "null_counts": {
+        "Phage_ID": 0,
+        "Protein_ID": 0,
+        "Protein_source": 0,
+        "Function_prediction_source": 18594540,
+        "Start": 0,
+        "Stop": 0,
+        "Strand": 0,
+        "Product": 0,
+        "Protein_classification": 0,
+        "Molecular_weight": 2925448,
+        "Aromaticity": 1241,
+        "Instability_index": 60231,
+        "Isoelectric_point": 1241,
+        "Helix_fraction": 0,
+        "Turn_fraction": 0,
+        "Sheet_fraction": 0,
+        "Reduced_coefficient": 0,
+        "Oxidized_coefficient": 0,
+        "Source_DB": 0
+      }
+    },
+    "dim_terminators": {
+      "schema": [
+        [
+          "Phage_ID",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "terminator_type",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "terminator_start",
+          "INTEGER",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "terminator_end",
+          "INTEGER",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "confidence_score",
+          "DOUBLE",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Sense",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Loc",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ],
+        [
+          "Source_DB",
+          "VARCHAR",
+          "YES",
+          null,
+          null,
+          null
+        ]
+      ],
+      "row_count": 4640129,
+      "null_counts": {
+        "Phage_ID": 0,
+        "terminator_type": 0,
+        "terminator_start": 0,
+        "terminator_end": 0,
+        "confidence_score": 0,
+        "Sense": 0,
+        "Loc": 0,
+        "Source_DB": 0
+      }
+    }
+  },
+  "data_quality": {
+    "fact_phages": {
+      "duplicate_phage_ids": 0,
+      "length_stats": {
+        "min": 203,
+        "max": 553716,
+        "avg": 37564.41,
+        "count": 873718
+      },
+      "source_distribution": {
+        "GOV2": 195699,
+        "MGV": 189680,
+        "IMGVR": 177361,
+        "GPD": 142809,
+        "TemPhD": 66823,
+        "CHVD": 44935,
+        "GVD": 31402,
+        "IGVD": 10021,
+        "RefSeq": 4637,
+        "STV": 4065,
+        "PhagesDB": 3754,
+        "Genbank": 2086,
+        "DDBJ": 290,
+        "EMBL": 156
+      }
+    },
+    "dim_proteins": {
+      "orphaned_proteins": 0
+    },
+    "dim_terminators": {
+      "orphaned_terminators": 0
+    }
+  },
+  "summary": {
+    "total_phages": 873718,
+    "total_proteins": 41736214,
+    "total_terminators": 4640129,
+    "all_tables_present": true,
+    "data_quality_passed": true
+  },
+  "indexes": [
+    "idx_phages_id",
+    "idx_proteins_phage",
+    "idx_Source_DB",
+    "idx_terminators_phage"
+  ],
+  "views": [
+    "phage_size_distribution",
+    "phage_summary"
+  ]
+}</pre>
+        </div>
+    </body>
+    </html>
+    

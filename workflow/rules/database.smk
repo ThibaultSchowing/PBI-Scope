@@ -28,4 +28,4 @@ rule validate_database:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/validate_database.py"
+        "../scripts/validate_db.py"
