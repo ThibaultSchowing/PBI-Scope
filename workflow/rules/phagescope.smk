@@ -45,7 +45,7 @@ rule merge_transcription_terminator_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/merge_transcription_terminator_metadata.py"
+        "../scripts/mergers/merge_transcription_terminator_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE METADATA
@@ -61,7 +61,7 @@ rule merge_phage_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/merge_phage_metadata.py"
+        "../scripts/mergers/merge_phage_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE ANNOTATED PROTEINS METADATA
@@ -77,7 +77,7 @@ rule merge_annotated_proteins_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/merge_annotated_proteins_metadata.py"
+        "../scripts/mergers/merge_annotated_proteins_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE tRNA/tmRNA METADATA
@@ -93,7 +93,7 @@ rule merge_phage_trna_tmrna_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/merge_phage_trna_tmrna_metadata.py"
+        "../scripts/mergers/merge_phage_trna_tmrna_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE ANTI-CRISPR METADATA
@@ -109,7 +109,7 @@ rule merge_phage_anti_crispr_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/merge_phage_anti_crispr_metadata.py"
+        "../scripts/mergers/merge_phage_anti_crispr_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE VIRULENT FACTOR METADATA
@@ -126,7 +126,7 @@ rule merge_phage_virulent_factor_metadata_tsvs:
         "../envs/pixi_base_env.yaml"
     
     script:
-        "../scripts/merge_phage_virulent_factor_metadata.py"
+        "../scripts/mergers/merge_phage_virulent_factor_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE TRANSMEMBRANE PROTEIN METADATA
@@ -142,7 +142,7 @@ rule merge_phage_transmembrane_protein_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/merge_phage_transmembrane_protein_metadata.py"
+        "../scripts/mergers/merge_phage_transmembrane_protein_metadata.py"
 
 
 rule generate_report:
@@ -251,7 +251,7 @@ rule merge_protein_fasta_by_source:
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
         else
-            pixi run -e base python scripts/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
+            pixi run -e base python scripts/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
         fi
         '''
     
@@ -273,7 +273,7 @@ rule merge_phage_fasta_by_source:
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
         else
-            pixi run -e base python scripts/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
+            pixi run -e base python scripts/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
         fi
         '''
 
