@@ -29,7 +29,7 @@ def create_star_schema_duckdb():
     CREATE TABLE fact_phages AS 
     SELECT 
         Phage_ID,
-        Source_DB,                              -- ✅ CHANGED from Phage_source
+        Source_DB,
         TRY_CAST(NULLIF(Length, '-') AS INTEGER) as Length,
         TRY_CAST(NULLIF(GC_content, '-') AS DOUBLE) as GC_content,
         Taxonomy,
@@ -69,7 +69,7 @@ def create_star_schema_duckdb():
         TRY_CAST(NULLIF(Sheet_fraction, '-') AS DOUBLE) as Sheet_fraction,
         TRY_CAST(NULLIF(Reduced_coefficient, '-') AS DOUBLE) as Reduced_coefficient,
         TRY_CAST(NULLIF(Oxidized_coefficient, '-') AS DOUBLE) as Oxidized_coefficient,
-        Source_DB                               -- ✅ CHANGED from Phage_source
+        Source_DB
     FROM read_csv('{protein_data}', 
                   header=true, 
                   all_varchar=true, 

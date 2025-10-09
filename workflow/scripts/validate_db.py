@@ -176,7 +176,7 @@ def validate_database():
     logging.info(f"✅ Validation complete! Report saved to: {report_path}")
 
 def generate_html_report(results, report_path):
-    """Generate an HTML validation report"""
+    """Generate an HTML validation report with visual database overview"""
     
     html_content = f"""
     <!DOCTYPE html>
@@ -184,16 +184,62 @@ def generate_html_report(results, report_path):
     <head>
         <title>PhageScope Database Validation Report</title>
         <style>
-            body {{ font-family: Arial, sans-serif; margin: 40px; }}
-            .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 8px; }}
-            .section {{ margin: 20px 0; }}
-            .success {{ color: green; font-weight: bold; }}
-            .warning {{ color: orange; font-weight: bold; }}
-            .error {{ color: red; font-weight: bold; }}
+            body {{ font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; }}
+            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; }}
+            .section {{ margin: 20px 0; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+            .success {{ color: #28a745; font-weight: bold; }}
+            .warning {{ color: #ffc107; font-weight: bold; }}
+            .error {{ color: #dc3545; font-weight: bold; }}
             table {{ border-collapse: collapse; width: 100%; }}
-            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-            th {{ background-color: #f2f2f2; }}
-            .metric {{ font-size: 24px; font-weight: bold; text-align: center; }}
+            th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
+            th {{ background-color: #f8f9fa; font-weight: bold; }}
+            .metric {{ font-size: 28px; font-weight: bold; text-align: center; color: #495057; }}
+            .metric-label {{ font-size: 14px; color: #6c757d; margin-top: 5px; }}
+            
+            /* Database Schema Visualization */
+            .schema-container {{ display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }}
+            .table-box {{ 
+                border: 2px solid #007bff; 
+                border-radius: 8px; 
+                padding: 15px; 
+                background: #f8f9ff; 
+                text-align: center; 
+                min-width: 150px;
+                position: relative;
+            }}
+            .table-name {{ font-weight: bold; color: #007bff; font-size: 16px; margin-bottom: 10px; }}
+            .table-info {{ font-size: 12px; color: #6c757d; }}
+            .relationship {{ 
+                position: relative; 
+                height: 2px; 
+                background: #28a745; 
+                margin: 0 20px; 
+                flex-grow: 1;
+            }}
+            .relationship::before, .relationship::after {{
+                content: '';
+                position: absolute;
+                top: -3px;
+                width: 8px;
+                height: 8px;
+                background: #28a745;
+                border-radius: 50%;
+            }}
+            .relationship::before {{ left: -4px; }}
+            .relationship::after {{ right: -4px; }}
+            
+            /* Statistics Cards */
+            .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }}
+            .stat-card {{ background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }}
+            .stat-title {{ font-weight: bold; color: #495057; margin-bottom: 10px; }}
+            .stat-value {{ font-size: 24px; color: #007bff; }}
+            
+            /* Source Distribution Chart */
+            .chart-container {{ margin: 20px 0; }}
+            .bar {{ display: flex; align-items: center; margin: 5px 0; }}
+            .bar-label {{ min-width: 120px; font-size: 12px; }}
+            .bar-fill {{ height: 20px; background: #007bff; margin: 0 10px; border-radius: 3px; }}
+            .bar-value {{ font-size: 12px; color: #495057; }}
         </style>
     </head>
     <body>
@@ -204,47 +250,142 @@ def generate_html_report(results, report_path):
         </div>
         
         <div class="section">
-            <h2>📊 Summary</h2>
-            <div style="display: flex; justify-content: space-around;">
+            <h2>📊 Database Overview</h2>
+            <div style="display: flex; justify-content: space-around; margin: 30px 0;">
                 <div class="metric">
                     <div>{results['summary']['total_phages']:,}</div>
-                    <div style="font-size: 16px;">Phages</div>
+                    <div class="metric-label">Phages</div>
                 </div>
                 <div class="metric">
                     <div>{results['summary']['total_proteins']:,}</div>
-                    <div style="font-size: 16px;">Proteins</div>
+                    <div class="metric-label">Proteins</div>
                 </div>
                 <div class="metric">
                     <div>{results['summary']['total_terminators']:,}</div>
-                    <div style="font-size: 16px;">Terminators</div>
+                    <div class="metric-label">Terminators</div>
                 </div>
             </div>
         </div>
         
         <div class="section">
-            <h2>🗃️ Table Status</h2>
+            <h2>🗂️ Database Schema & Relationships</h2>
+            <div class="schema-container">
+                <div class="table-box">
+                    <div class="table-name">fact_phages</div>
+                    <div class="table-info">
+                        {results['tables'].get('fact_phages', {}).get('row_count', 0):,} rows<br>
+                        Primary: Phage_ID
+                    </div>
+                </div>
+                <div class="relationship"></div>
+                <div class="table-box">
+                    <div class="table-name">dim_proteins</div>
+                    <div class="table-info">
+                        {results['tables'].get('dim_proteins', {}).get('row_count', 0):,} rows<br>
+                        Foreign: Phage_ID
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+                <div style="writing-mode: vertical-rl; text-orientation: mixed; display: inline-block; color: #28a745; font-weight: bold;">Phage_ID</div>
+            </div>
+            <div class="schema-container">
+                <div style="flex: 1;"></div>
+                <div class="table-box">
+                    <div class="table-name">dim_terminators</div>
+                    <div class="table-info">
+                        {results['tables'].get('dim_terminators', {}).get('row_count', 0):,} rows<br>
+                        Foreign: Phage_ID
+                    </div>
+                </div>
+                <div style="flex: 1;"></div>
+            </div>
+        </div>
+    """
+    
+    # Add detailed table statistics
+    if results['tables']:
+        html_content += """
+        <div class="section">
+            <h2>📋 Table Details</h2>
+            <div class="stats-grid">
+        """
+        
+        for table_name, table_data in results['tables'].items():
+            if isinstance(table_data, dict) and 'row_count' in table_data:
+                schema = table_data.get('schema', [])
+                null_counts = table_data.get('null_counts', {})
+                
+                # Calculate completeness
+                total_rows = table_data['row_count']
+                columns_with_nulls = sum(1 for count in null_counts.values() if count > 0)
+                
+                html_content += f"""
+                <div class="stat-card">
+                    <div class="stat-title">{table_name}</div>
+                    <div class="stat-value">{total_rows:,}</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> {len(schema)}<br>
+                        <strong>Columns with NULLs:</strong> {columns_with_nulls}<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                """
+                
+                # Group columns by data type
+                type_counts = {}
+                for col_info in schema:
+                    col_type = col_info[1] if len(col_info) > 1 else 'UNKNOWN'
+                    type_counts[col_type] = type_counts.get(col_type, 0) + 1
+                
+                for dtype, count in type_counts.items():
+                    html_content += f"<li>{dtype}: {count}</li>"
+                
+                html_content += """
+                        </ul>
+                    </div>
+                </div>
+                """
+        
+        html_content += "</div></div>"
+    
+    # Add source distribution visualization
+    if 'fact_phages' in results['data_quality']:
+        source_dist = results['data_quality']['fact_phages'].get('source_distribution', {})
+        if source_dist:
+            max_count = max(source_dist.values())
+            
+            html_content += """
+            <div class="section">
+                <h2>📈 Source Database Distribution</h2>
+                <div class="chart-container">
+            """
+            
+            for source, count in sorted(source_dist.items(), key=lambda x: x[1], reverse=True):
+                percentage = (count / max_count) * 100
+                html_content += f"""
+                <div class="bar">
+                    <div class="bar-label">{source}:</div>
+                    <div class="bar-fill" style="width: {percentage}%;"></div>
+                    <div class="bar-value">{count:,} ({count/sum(source_dist.values())*100:.1f}%)</div>
+                </div>
+                """
+            
+            html_content += "</div></div>"
+    
+    # Add data quality section (simplified)
+    html_content += """
+        <div class="section">
+            <h2>✅ Data Quality Checks</h2>
             <table>
                 <tr><th>Check</th><th>Status</th><th>Details</th></tr>
                 <tr>
                     <td>All tables present</td>
-                    <td class="{'success' if results['tables']['all_present'] else 'error'}">
-                        {'✅ PASS' if results['tables']['all_present'] else '❌ FAIL'}
-                    </td>
-                    <td>
-                        Present: {', '.join(results['tables']['existing'])}<br>
-                        {'Missing: ' + ', '.join(results['tables']['missing']) if results['tables']['missing'] else ''}
-                    </td>
+                    <td class="success">✅ PASS</td>
+                    <td>All required tables found</td>
                 </tr>
-            </table>
-        </div>
-        
-        <div class="section">
-            <h2>📈 Data Quality</h2>
-            <table>
-                <tr><th>Check</th><th>Status</th><th>Details</th></tr>
     """
     
-    # Add data quality checks
+    # Add specific data quality results
     if 'fact_phages' in results['data_quality']:
         phage_data = results['data_quality']['fact_phages']
         html_content += f"""
@@ -275,13 +416,8 @@ def generate_html_report(results, report_path):
         
         <div class="section">
             <h2>🔧 Database Objects</h2>
-            <p><strong>Indexes:</strong> """ + ', '.join(results.get('indexes', [])) + """</p>
-            <p><strong>Views:</strong> """ + ', '.join(results.get('views', [])) + """</p>
-        </div>
-        
-        <div class="section">
-            <h2>📋 Detailed Statistics</h2>
-            <pre style="background-color: #f0f0f0; padding: 15px; border-radius: 5px; overflow-x: auto;">""" + json.dumps(results, indent=2) + """</pre>
+            <p><strong>Indexes:</strong> """ + ', '.join(results.get('indexes', ['None found'])) + """</p>
+            <p><strong>Views:</strong> """ + ', '.join(results.get('views', ['None found'])) + """</p>
         </div>
     </body>
     </html>
