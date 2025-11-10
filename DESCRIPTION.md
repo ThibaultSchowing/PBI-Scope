@@ -1,6 +1,36 @@
 # 🧬 PhageScope Bioinformatics Integration (PBI)
 
-A comprehensive bioinformatics pipeline for integrating, processing, and analyzing phage genomic data from multiple public databases. This pipeline creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within PhageScope. 
+A comprehensive bioinformatics pipeline for integrating, processing, and analyzing phage genomic data from multiple public databases already gathered within [PhageScope](https://phagescope.deepomics.org/workspace/). This pipeline creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within PhageScope. 
+
+
+
+> ⚠️ **WORK IN PROGRESS**: This pipeline is under active development.
+
+## 📊 Current Implementation Status
+
+### ✅ **Implemented Tables** (Available in Database)
+
+The following data types are fully integrated into the DuckDB star schema:
+
+| Table | Source CSV | Status | Row Count (approx.) |
+|-------|-----------|--------|---------------------|
+| **`fact_phages`** | `merged_phage_metadata.csv` | ✅ Complete | ~550,000 |
+| **`dim_proteins`** | `merged_annotated_proteins_metadata.csv` | ✅ Complete | ~43,000,000 |
+| **`dim_terminators`** | `merged_transcription_terminator_metadata.csv` | ✅ Complete | ~2,800,000 |
+
+### 🚧 **Pending Integration** (CSV Files Available, Not Yet in Database)
+
+The following merged CSV files exist but are **NOT yet integrated** into the database schema:
+
+| Metadata Type | Source CSV | Status | Notes |
+|---------------|-----------|--------|-------|
+| **Anti-CRISPR** | `merged_phage_anti_crispr_metadata.csv` | 🔴 Not integrated | Awaiting schema design |
+| **Transmembrane Proteins** | `merged_phage_transmembrane_protein_metadata.csv` | 🔴 Not integrated | Awaiting schema design |
+| **tRNA/tmRNA** | `merged_phage_trna_tmrna_metadata.csv` | 🔴 Not integrated | Awaiting schema design |
+| **Virulent Factors** | `merged_phage_virulent_factor_metadata.csv` | 🔴 Not integrated | Awaiting schema design |
+
+
+--------
 
 ## 🎯 Project Goals
 
