@@ -22,9 +22,9 @@ Raw Data Sources → Download → Merge → Validate → Optimized Database
   PhagesDB        NCBI       CSVs     Reports    
 ```
 
-### 🏗️ Architecture
+### 🏗️ Architecture 
 
-The pipeline implements a **star schema** database design optimized for analytical queries:
+The pipeline implements a **star schema** database design optimized for analytical queries :
 
 - **`fact_phages`**: Central table with phage metadata (genome size, GC content, taxonomy, etc.)
 - **`dim_proteins`**: Protein annotations and functional predictions
