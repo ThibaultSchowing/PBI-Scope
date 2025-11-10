@@ -10,6 +10,8 @@ logging.basicConfig(level=logging.INFO)
 
 import sys
 sys.path.append('scripts')
+
+from utils import is_file_empty_or_invalid
 import utils
 
 # Snakemake inputs and outputs
@@ -31,6 +33,7 @@ for infile in inputs:
     # Check if file is empty or invalid
     if utils.is_file_empty_or_invalid(infile):
         logging.warning(f"File {infile} is empty or invalid. Skipping.")
+        continue
     
     df = pd.read_csv(infile, sep="\t")
     

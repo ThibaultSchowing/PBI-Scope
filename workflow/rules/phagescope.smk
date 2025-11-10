@@ -21,7 +21,7 @@ rule download_all_tsvs:
 
 rule download_tsv:
     output:
-        temp("../data/intermediate_csv/{feature}/{source}.tsv")
+        "../data/intermediate_csv/{feature}/{source}.tsv" # removed temp() to keep files for debugging
     params: 
         url = lambda wildcards: config[f"{wildcards.feature}_urls"][wildcards.source]
     threads: 8

@@ -50,6 +50,7 @@ for infile in inputs:
     # Validate that the DataFrame contains all expected columns
     if not utils.validate_columns(df, COLUMNS_LIST):
         logging.warning(f"File {infile} is missing expected columns. Skipping.")
+        continue
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
