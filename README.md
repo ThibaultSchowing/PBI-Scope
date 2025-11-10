@@ -87,7 +87,7 @@ The Conda environment to use is specified within each rule (if needed) with
 Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html), it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/` (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.
 
 
-- **Current command:** `pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --cores 4 `
+- **Current command:** `pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4 `
     - **DAG Option (path relative to bash location)**`--dag | dot -Tsvg > workflow/dag/dag.svg`
 
 To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified). In the mean time, the temp() option was removed from the intermediairy files as it takes too long to regenerage when modifying the script.:

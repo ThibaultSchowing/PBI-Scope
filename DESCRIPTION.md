@@ -52,13 +52,13 @@ pixi install
 
 ```bash
 # Full pipeline execution
-pixi run snakemake --directory workflow --cores 4
+`pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --cores 4 `
 
 # Run specific components
-pixi run snakemake --directory workflow --cores 4 ../data/databases/phage_database.duckdb
+`pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --cores 4  ../data/databases/phage_database.duckdb `
 
 # Generate validation report
-pixi run snakemake --directory workflow --cores 4 reports/database_validation.html
+`pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --cores 4   reports/database_validation.html`
 ```
 
 ### Development Mode
@@ -84,6 +84,7 @@ PBI/
 │   │   ├── validate_db.py          # Quality validation
 │   │   ├── mergers/                # Data integration scripts
 │   │   └── utils.py                # Shared utilities
+│   ├── notebooks/                  # Exploratory analysis notebooks
 │   └── envs/                       # Conda environments
 ├── data/                           # Generated data
 │   ├── intermediate_csv/           # Downloaded raw data
@@ -95,32 +96,6 @@ PBI/
 ## 🗄️ Using the Database
 
 The pipeline generates a **DuckDB** database optimized for analytical queries.
-
-### Basic Queries
-
-```sql
--- Connect to the database
-.open data/databases/phage_database_optimized.duckdb
-
--- Get phage statistics by source
-SELECT Source_DB, 
-       COUNT(*) as total_phages,
-       AVG(Length) as avg_length,
-       AVG(GC_content) as avg_gc
-FROM fact_phages 
-GROUP BY Source_DB;
-
--- Find large phages with high GC content
-SELECT Phage_ID, Length, GC_content, Taxonomy
-FROM fact_phages 
-WHERE Length > 100000 AND GC_content > 65;
-
--- Get protein annotations for a specific phage
-SELECT p.Phage_ID, pr.Product, pr.Protein_classification
-FROM fact_phages p
-JOIN dim_proteins pr ON p.Phage_ID = pr.Phage_ID
-WHERE p.Phage_ID = 'NC_123456';
-```
 
 ### Python Integration
 
