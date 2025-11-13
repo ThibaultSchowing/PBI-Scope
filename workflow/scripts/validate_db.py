@@ -1,5 +1,4 @@
 #!.pixi/envs/default/bin/python
-# filepath: /home/twg/workplace/PBI/workflow/scripts/validate_database.py
 
 import duckdb
 import os
@@ -24,7 +23,7 @@ def validate_database():
     logging.info(f"Report will be saved to: {report_path}")
     
     # Connect to database
-    conn = duckdb.connect(db_path)
+    conn = duckdb.connect(db_path, read_only=True)
     
     # Collect validation results
     validation_results = {
@@ -41,7 +40,7 @@ def validate_database():
         tables = conn.execute("SHOW TABLES").fetchall()
         table_names = [table[0] for table in tables]
         
-        expected_tables = ['fact_phages', 'dim_proteins', 'dim_terminators']
+        expected_tables = ['fact_phages', 'dim_proteins', 'dim_terminators', 'dim_anti_crispr']
         missing_tables = [t for t in expected_tables if t not in table_names]
         
         validation_results['tables']['existing'] = table_names
@@ -63,8 +62,11 @@ def validate_database():
                 null_counts = {}
                 for col_info in schema:
                     col_name = col_info[0]
-                    null_count = conn.execute(f"SELECT COUNT(*) FROM {table} WHERE {col_name} IS NULL").fetchone()[0]
-                    null_counts[col_name] = null_count
+                    try:
+                        null_count = conn.execute(f'SELECT COUNT(*) FROM {table} WHERE "{col_name}" IS NULL').fetchone()[0]
+                        null_counts[col_name] = null_count
+                    except:
+                        null_counts[col_name] = 0
                 
                 validation_results['tables'][table] = {
                     'schema': schema,
@@ -75,6 +77,7 @@ def validate_database():
         # 3. Data quality checks
         logging.info("Performing data quality checks...")
         
+        # FACT_PHAGES validation
         if 'fact_phages' in table_names:
             # Check for duplicate Phage_IDs
             duplicate_phages = conn.execute("""
@@ -112,6 +115,7 @@ def validate_database():
                 'source_distribution': dict(source_distribution)
             }
         
+        # DIM_PROTEINS validation
         if 'dim_proteins' in table_names:
             # Check protein-phage relationships
             orphaned_proteins = conn.execute("""
@@ -120,10 +124,31 @@ def validate_database():
                 WHERE f.Phage_ID IS NULL
             """).fetchone()[0]
             
+            # Check for duplicate Protein_IDs
+            duplicate_proteins = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT Protein_ID, COUNT(*) as cnt 
+                    FROM dim_proteins 
+                    GROUP BY Protein_ID 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            # Check Source_DB distribution
+            protein_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_proteins 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
             validation_results['data_quality']['dim_proteins'] = {
-                'orphaned_proteins': orphaned_proteins
+                'orphaned_proteins': orphaned_proteins,
+                'duplicate_protein_ids': duplicate_proteins,
+                'source_distribution': dict(protein_sources)
             }
         
+        # DIM_TERMINATORS validation
         if 'dim_terminators' in table_names:
             # Check terminator-phage relationships
             orphaned_terminators = conn.execute("""
@@ -132,8 +157,71 @@ def validate_database():
                 WHERE f.Phage_ID IS NULL
             """).fetchone()[0]
             
+            # Check terminator type distribution
+            terminator_types = conn.execute("""
+                SELECT terminator_type, COUNT(*) as count
+                FROM dim_terminators 
+                WHERE terminator_type IS NOT NULL
+                GROUP BY terminator_type 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            # Check Source_DB distribution
+            terminator_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_terminators 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
             validation_results['data_quality']['dim_terminators'] = {
-                'orphaned_terminators': orphaned_terminators
+                'orphaned_terminators': orphaned_terminators,
+                'terminator_type_distribution': dict(terminator_types),
+                'source_distribution': dict(terminator_sources)
+            }
+        
+        # DIM_ANTI_CRISPR validation - ✅ FIXED
+        if 'dim_anti_crispr' in table_names:
+            # Check anti-CRISPR-phage relationships
+            orphaned_anti_crispr = conn.execute("""
+                SELECT COUNT(*) FROM dim_anti_crispr a
+                LEFT JOIN fact_phages f ON a.Phage_ID = f.Phage_ID
+                WHERE f.Phage_ID IS NULL
+            """).fetchone()[0]
+            
+            # ✅ FIXED: Check for duplicate Protein_IDs (not Anti_CRISPR_ID)
+            duplicate_acr = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT Protein_ID, COUNT(*) as cnt 
+                    FROM dim_anti_crispr 
+                    WHERE Protein_ID IS NOT NULL
+                    GROUP BY Protein_ID 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            # ✅ ADDED: Check Source_DB distribution
+            acr_source_db = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_anti_crispr 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            # ✅ ADDED: Check Source type distribution
+            acr_source_type = conn.execute("""
+                SELECT Source, COUNT(*) as count
+                FROM dim_anti_crispr 
+                WHERE Source IS NOT NULL
+                GROUP BY Source 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            validation_results['data_quality']['dim_anti_crispr'] = {
+                'orphaned_anti_crispr': orphaned_anti_crispr,
+                'duplicate_protein_ids': duplicate_acr,
+                'source_db_distribution': dict(acr_source_db),
+                'source_type_distribution': dict(acr_source_type)
             }
         
         # 4. Check indexes exist
@@ -146,26 +234,36 @@ def validate_database():
         views = conn.execute("SELECT name FROM sqlite_master WHERE type='view'").fetchall()
         validation_results['views'] = [view[0] for view in views]
         
-        # 6. Overall summary
+        # 6. Overall summary - ✅ ADDED anti_crispr
         total_phages = validation_results['tables'].get('fact_phages', {}).get('row_count', 0)
         total_proteins = validation_results['tables'].get('dim_proteins', {}).get('row_count', 0)
         total_terminators = validation_results['tables'].get('dim_terminators', {}).get('row_count', 0)
+        total_anti_crispr = validation_results['tables'].get('dim_anti_crispr', {}).get('row_count', 0)
+        
+        # Calculate overall data quality
+        data_quality_passed = True
+        if 'fact_phages' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['fact_phages'].get('duplicate_phage_ids', 0) == 0
+        if 'dim_proteins' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_proteins'].get('orphaned_proteins', 0) == 0
+        if 'dim_terminators' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_terminators'].get('orphaned_terminators', 0) == 0
+        if 'dim_anti_crispr' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_anti_crispr'].get('orphaned_anti_crispr', 0) == 0
         
         validation_results['summary'] = {
             'total_phages': total_phages,
             'total_proteins': total_proteins,
             'total_terminators': total_terminators,
+            'total_anti_crispr': total_anti_crispr,  # ✅ ADDED
             'all_tables_present': validation_results['tables']['all_present'],
-            'data_quality_passed': (
-                validation_results['data_quality'].get('fact_phages', {}).get('duplicate_phage_ids', 0) == 0 and
-                validation_results['data_quality'].get('dim_proteins', {}).get('orphaned_proteins', 0) == 0 and
-                validation_results['data_quality'].get('dim_terminators', {}).get('orphaned_terminators', 0) == 0
-            )
+            'data_quality_passed': data_quality_passed
         }
         
     except Exception as e:
         logging.error(f"Error during validation: {str(e)}")
         validation_results['error'] = str(e)
+        raise
     
     finally:
         conn.close()
@@ -197,36 +295,30 @@ def generate_html_report(results, report_path):
             .metric-label {{ font-size: 14px; color: #6c757d; margin-top: 5px; }}
             
             /* Database Schema Visualization */
-            .schema-container {{ display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }}
+            .schema-container {{ display: flex; justify-content: center; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 20px; }}
+            .schema-vertical {{ display: flex; flex-direction: column; align-items: center; gap: 15px; }}
             .table-box {{ 
                 border: 2px solid #007bff; 
                 border-radius: 8px; 
                 padding: 15px; 
                 background: #f8f9ff; 
                 text-align: center; 
-                min-width: 150px;
-                position: relative;
+                min-width: 180px;
+            }}
+            .table-box.central {{ 
+                border-color: #28a745; 
+                background: #f0fff4;
+                font-size: 1.1em;
             }}
             .table-name {{ font-weight: bold; color: #007bff; font-size: 16px; margin-bottom: 10px; }}
+            .table-name.central {{ color: #28a745; }}
             .table-info {{ font-size: 12px; color: #6c757d; }}
-            .relationship {{ 
-                position: relative; 
-                height: 2px; 
+            .relationship-vertical {{ 
+                width: 2px;
+                height: 40px; 
                 background: #28a745; 
-                margin: 0 20px; 
-                flex-grow: 1;
+                margin: 0 auto;
             }}
-            .relationship::before, .relationship::after {{
-                content: '';
-                position: absolute;
-                top: -3px;
-                width: 8px;
-                height: 8px;
-                background: #28a745;
-                border-radius: 50%;
-            }}
-            .relationship::before {{ left: -4px; }}
-            .relationship::after {{ right: -4px; }}
             
             /* Statistics Cards */
             .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }}
@@ -251,7 +343,7 @@ def generate_html_report(results, report_path):
         
         <div class="section">
             <h2>📊 Database Overview</h2>
-            <div style="display: flex; justify-content: space-around; margin: 30px 0;">
+            <div style="display: flex; justify-content: space-around; margin: 30px 0; flex-wrap: wrap;">
                 <div class="metric">
                     <div>{results['summary']['total_phages']:,}</div>
                     <div class="metric-label">Phages</div>
@@ -264,41 +356,59 @@ def generate_html_report(results, report_path):
                     <div>{results['summary']['total_terminators']:,}</div>
                     <div class="metric-label">Terminators</div>
                 </div>
+                <div class="metric">
+                    <div>{results['summary']['total_anti_crispr']:,}</div>
+                    <div class="metric-label">Anti-CRISPR</div>
+                </div>
             </div>
         </div>
         
         <div class="section">
             <h2>🗂️ Database Schema & Relationships</h2>
+            <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">
+                All dimension tables are linked to fact_phages via <strong>Phage_ID</strong>
+            </p>
             <div class="schema-container">
-                <div class="table-box">
-                    <div class="table-name">fact_phages</div>
+                <div class="schema-vertical">
+                    <div class="table-box">
+                        <div class="table-name">dim_proteins</div>
+                        <div class="table-info">
+                            {results['tables'].get('dim_proteins', {}).get('row_count', 0):,} rows<br>
+                            Foreign: Phage_ID
+                        </div>
+                    </div>
+                    <div class="relationship-vertical"></div>
+                </div>
+                
+                <div class="table-box central">
+                    <div class="table-name central">fact_phages</div>
                     <div class="table-info">
                         {results['tables'].get('fact_phages', {}).get('row_count', 0):,} rows<br>
                         Primary: Phage_ID
                     </div>
                 </div>
-                <div class="relationship"></div>
-                <div class="table-box">
-                    <div class="table-name">dim_proteins</div>
-                    <div class="table-info">
-                        {results['tables'].get('dim_proteins', {}).get('row_count', 0):,} rows<br>
-                        Foreign: Phage_ID
+                
+                <div class="schema-vertical">
+                    <div class="table-box">
+                        <div class="table-name">dim_terminators</div>
+                        <div class="table-info">
+                            {results['tables'].get('dim_terminators', {}).get('row_count', 0):,} rows<br>
+                            Foreign: Phage_ID
+                        </div>
                     </div>
+                    <div class="relationship-vertical"></div>
                 </div>
-            </div>
-            <div style="text-align: center; margin: 20px 0;">
-                <div style="writing-mode: vertical-rl; text-orientation: mixed; display: inline-block; color: #28a745; font-weight: bold;">Phage_ID</div>
-            </div>
-            <div class="schema-container">
-                <div style="flex: 1;"></div>
-                <div class="table-box">
-                    <div class="table-name">dim_terminators</div>
-                    <div class="table-info">
-                        {results['tables'].get('dim_terminators', {}).get('row_count', 0):,} rows<br>
-                        Foreign: Phage_ID
+                
+                <div class="schema-vertical">
+                    <div class="table-box">
+                        <div class="table-name">dim_anti_crispr</div>
+                        <div class="table-info">
+                            {results['tables'].get('dim_anti_crispr', {}).get('row_count', 0):,} rows<br>
+                            Foreign: Phage_ID
+                        </div>
                     </div>
+                    <div class="relationship-vertical"></div>
                 </div>
-                <div style="flex: 1;"></div>
             </div>
         </div>
     """
@@ -352,11 +462,12 @@ def generate_html_report(results, report_path):
     if 'fact_phages' in results['data_quality']:
         source_dist = results['data_quality']['fact_phages'].get('source_distribution', {})
         if source_dist:
-            max_count = max(source_dist.values())
+            max_count = max(source_dist.values()) if source_dist.values() else 1
+            total = sum(source_dist.values())
             
             html_content += """
             <div class="section">
-                <h2>📈 Source Database Distribution</h2>
+                <h2>📈 Source Database Distribution (fact_phages)</h2>
                 <div class="chart-container">
             """
             
@@ -366,26 +477,28 @@ def generate_html_report(results, report_path):
                 <div class="bar">
                     <div class="bar-label">{source}:</div>
                     <div class="bar-fill" style="width: {percentage}%;"></div>
-                    <div class="bar-value">{count:,} ({count/sum(source_dist.values())*100:.1f}%)</div>
+                    <div class="bar-value">{count:,} ({count/total*100:.1f}%)</div>
                 </div>
                 """
             
             html_content += "</div></div>"
     
-    # Add data quality section (simplified)
+    # Add data quality section
     html_content += """
         <div class="section">
             <h2>✅ Data Quality Checks</h2>
             <table>
                 <tr><th>Check</th><th>Status</th><th>Details</th></tr>
                 <tr>
-                    <td>All tables present</td>
-                    <td class="success">✅ PASS</td>
-                    <td>All required tables found</td>
+                    <td>All expected tables present</td>
+                    <td class="{'success' if results['tables']['all_present'] else 'error'}">
+                        {'✅ PASS' if results['tables']['all_present'] else '❌ FAIL'}
+                    </td>
+                    <td>{'All 4 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
                 </tr>
     """
     
-    # Add specific data quality results
+    # Add specific data quality results for each table
     if 'fact_phages' in results['data_quality']:
         phage_data = results['data_quality']['fact_phages']
         html_content += f"""
@@ -407,6 +520,45 @@ def generate_html_report(results, report_path):
                         {'✅ PASS' if protein_data['orphaned_proteins'] == 0 else '⚠️ WARNING'}
                     </td>
                     <td>{protein_data['orphaned_proteins']} proteins without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs</td>
+                    <td class="{'success' if protein_data['duplicate_protein_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if protein_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{protein_data['duplicate_protein_ids']} duplicate protein IDs found</td>
+                </tr>
+        """
+    
+    if 'dim_terminators' in results['data_quality']:
+        term_data = results['data_quality']['dim_terminators']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned Terminators</td>
+                    <td class="{'success' if term_data['orphaned_terminators'] == 0 else 'warning'}">
+                        {'✅ PASS' if term_data['orphaned_terminators'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{term_data['orphaned_terminators']} terminators without matching phages</td>
+                </tr>
+        """
+    
+    # ✅ ADDED: Anti-CRISPR quality checks
+    if 'dim_anti_crispr' in results['data_quality']:
+        acr_data = results['data_quality']['dim_anti_crispr']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned Anti-CRISPR</td>
+                    <td class="{'success' if acr_data['orphaned_anti_crispr'] == 0 else 'warning'}">
+                        {'✅ PASS' if acr_data['orphaned_anti_crispr'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{acr_data['orphaned_anti_crispr']} anti-CRISPR entries without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (Anti-CRISPR)</td>
+                    <td class="{'success' if acr_data['duplicate_protein_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if acr_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{acr_data['duplicate_protein_ids']} duplicate protein IDs in anti-CRISPR table</td>
                 </tr>
         """
     

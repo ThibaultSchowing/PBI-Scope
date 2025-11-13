@@ -17,36 +17,30 @@
             .metric-label { font-size: 14px; color: #6c757d; margin-top: 5px; }
             
             /* Database Schema Visualization */
-            .schema-container { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }
+            .schema-container { display: flex; justify-content: center; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 20px; }
+            .schema-vertical { display: flex; flex-direction: column; align-items: center; gap: 15px; }
             .table-box { 
                 border: 2px solid #007bff; 
                 border-radius: 8px; 
                 padding: 15px; 
                 background: #f8f9ff; 
                 text-align: center; 
-                min-width: 150px;
-                position: relative;
+                min-width: 180px;
+            }
+            .table-box.central { 
+                border-color: #28a745; 
+                background: #f0fff4;
+                font-size: 1.1em;
             }
             .table-name { font-weight: bold; color: #007bff; font-size: 16px; margin-bottom: 10px; }
+            .table-name.central { color: #28a745; }
             .table-info { font-size: 12px; color: #6c757d; }
-            .relationship { 
-                position: relative; 
-                height: 2px; 
+            .relationship-vertical { 
+                width: 2px;
+                height: 40px; 
                 background: #28a745; 
-                margin: 0 20px; 
-                flex-grow: 1;
+                margin: 0 auto;
             }
-            .relationship::before, .relationship::after {
-                content: '';
-                position: absolute;
-                top: -3px;
-                width: 8px;
-                height: 8px;
-                background: #28a745;
-                border-radius: 50%;
-            }
-            .relationship::before { left: -4px; }
-            .relationship::after { right: -4px; }
             
             /* Statistics Cards */
             .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
@@ -65,13 +59,13 @@
     <body>
         <div class="header">
             <h1>🧬 PhageScope Database Validation Report</h1>
-            <p><strong>Generated:</strong> 2025-11-10T14:42:05.928332</p>
+            <p><strong>Generated:</strong> 2025-11-13T14:56:42.320386</p>
             <p><strong>Database:</strong> ../data/databases/phage_database_optimized.duckdb</p>
         </div>
         
         <div class="section">
             <h2>📊 Database Overview</h2>
-            <div style="display: flex; justify-content: space-around; margin: 30px 0;">
+            <div style="display: flex; justify-content: space-around; margin: 30px 0; flex-wrap: wrap;">
                 <div class="metric">
                     <div>873,718</div>
                     <div class="metric-label">Phages</div>
@@ -84,41 +78,59 @@
                     <div>4,229,116</div>
                     <div class="metric-label">Terminators</div>
                 </div>
+                <div class="metric">
+                    <div>299,832</div>
+                    <div class="metric-label">Anti-CRISPR</div>
+                </div>
             </div>
         </div>
         
         <div class="section">
             <h2>🗂️ Database Schema & Relationships</h2>
+            <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">
+                All dimension tables are linked to fact_phages via <strong>Phage_ID</strong>
+            </p>
             <div class="schema-container">
-                <div class="table-box">
-                    <div class="table-name">fact_phages</div>
+                <div class="schema-vertical">
+                    <div class="table-box">
+                        <div class="table-name">dim_proteins</div>
+                        <div class="table-info">
+                            20,276,531 rows<br>
+                            Foreign: Phage_ID
+                        </div>
+                    </div>
+                    <div class="relationship-vertical"></div>
+                </div>
+                
+                <div class="table-box central">
+                    <div class="table-name central">fact_phages</div>
                     <div class="table-info">
                         873,718 rows<br>
                         Primary: Phage_ID
                     </div>
                 </div>
-                <div class="relationship"></div>
-                <div class="table-box">
-                    <div class="table-name">dim_proteins</div>
-                    <div class="table-info">
-                        20,276,531 rows<br>
-                        Foreign: Phage_ID
+                
+                <div class="schema-vertical">
+                    <div class="table-box">
+                        <div class="table-name">dim_terminators</div>
+                        <div class="table-info">
+                            4,229,116 rows<br>
+                            Foreign: Phage_ID
+                        </div>
                     </div>
+                    <div class="relationship-vertical"></div>
                 </div>
-            </div>
-            <div style="text-align: center; margin: 20px 0;">
-                <div style="writing-mode: vertical-rl; text-orientation: mixed; display: inline-block; color: #28a745; font-weight: bold;">Phage_ID</div>
-            </div>
-            <div class="schema-container">
-                <div style="flex: 1;"></div>
-                <div class="table-box">
-                    <div class="table-name">dim_terminators</div>
-                    <div class="table-info">
-                        4,229,116 rows<br>
-                        Foreign: Phage_ID
+                
+                <div class="schema-vertical">
+                    <div class="table-box">
+                        <div class="table-name">dim_anti_crispr</div>
+                        <div class="table-info">
+                            299,832 rows<br>
+                            Foreign: Phage_ID
+                        </div>
                     </div>
+                    <div class="relationship-vertical"></div>
                 </div>
-                <div style="flex: 1;"></div>
             </div>
         </div>
     
@@ -164,9 +176,22 @@
                         </ul>
                     </div>
                 </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_anti_crispr</div>
+                    <div class="stat-value">299,832</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 5<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 5</li>
+                        </ul>
+                    </div>
+                </div>
                 </div></div>
             <div class="section">
-                <h2>📈 Source Database Distribution</h2>
+                <h2>📈 Source Database Distribution (fact_phages)</h2>
                 <div class="chart-container">
             
                 <div class="bar">
@@ -258,9 +283,11 @@
             <table>
                 <tr><th>Check</th><th>Status</th><th>Details</th></tr>
                 <tr>
-                    <td>All tables present</td>
-                    <td class="success">✅ PASS</td>
-                    <td>All required tables found</td>
+                    <td>All expected tables present</td>
+                    <td class="{'success' if results['tables']['all_present'] else 'error'}">
+                        {'✅ PASS' if results['tables']['all_present'] else '❌ FAIL'}
+                    </td>
+                    <td>{'All 4 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
                 </tr>
     
                 <tr>
@@ -278,13 +305,43 @@
                     </td>
                     <td>0 proteins without matching phages</td>
                 </tr>
+                <tr>
+                    <td>Duplicate Protein IDs</td>
+                    <td class="warning">
+                        ⚠️ WARNING
+                    </td>
+                    <td>1912 duplicate protein IDs found</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned Terminators</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 terminators without matching phages</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned Anti-CRISPR</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 anti-CRISPR entries without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (Anti-CRISPR)</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 duplicate protein IDs in anti-CRISPR table</td>
+                </tr>
         
             </table>
         </div>
         
         <div class="section">
             <h2>🔧 Database Objects</h2>
-            <p><strong>Indexes:</strong> idx_phages_id, idx_proteins_phage, idx_Source_DB, idx_terminators_phage</p>
+            <p><strong>Indexes:</strong> idx_anti_crispr_phage, idx_anti_crispr_source, idx_phages_id, idx_proteins_phage, idx_proteins_source, idx_Source_DB, idx_terminators_phage</p>
             <p><strong>Views:</strong> phage_size_distribution, phage_summary</p>
         </div>
     </body>

@@ -14,6 +14,10 @@ def create_star_schema_duckdb():
     phage_data = snakemake.input.phage_data
     protein_data = snakemake.input.protein_data
     terminator_data = snakemake.input.terminator_data
+    anti_crispr_data = snakemake.input.anti_crispr_data
+    virulent_factor_data = snakemake.input.virulent_factor_data
+    transmembrane_data = snakemake.input.transmembrane_data
+    trna_tmrna_data = snakemake.input.trna_tmrna_data
     db_path = snakemake.output.db
     
     # Create output directory
@@ -98,13 +102,37 @@ def create_star_schema_duckdb():
                   null_padding=true)
     WHERE Phage_ID IS NOT NULL
     """)
+
+    # 4. CREATE DIM_ANTI_CRISPR TABLE
+    logging.info("Creating dim_anti_crispr table")
+    
+    conn.execute(f"""
+        CREATE TABLE dim_anti_crispr AS 
+        SELECT 
+            Phage_ID,
+            Protein_ID,
+            Source,
+            Phage_source,
+            Source_DB
+        FROM read_csv_auto('{anti_crispr_data}')
+    """)
+    
+    # Log row count
+    anti_crispr_count = conn.execute("SELECT COUNT(*) FROM dim_anti_crispr").fetchone()[0]
+    logging.info(f"✅ Created dim_anti_crispr: {anti_crispr_count:,} rows")
+    
     
     # Create performance indexes - Now consistent with Source_DB
     logging.info("Creating indexes")
     conn.execute("CREATE INDEX idx_Source_DB ON fact_phages(Source_DB)")        # ✅ Now matches!
     conn.execute("CREATE INDEX idx_phages_id ON fact_phages(Phage_ID)")
+    conn.execute("CREATE INDEX idx_proteins_source ON dim_proteins(Source_DB)") # To verify
     conn.execute("CREATE INDEX idx_proteins_phage ON dim_proteins(Phage_ID)")
     conn.execute("CREATE INDEX idx_terminators_phage ON dim_terminators(Phage_ID)")
+
+    conn.execute("CREATE INDEX idx_anti_crispr_phage ON dim_anti_crispr(Phage_ID)")  
+    conn.execute("CREATE INDEX idx_anti_crispr_source ON dim_anti_crispr(Source_DB)")  
+    
     
     # Create analytical views - Now consistent with Source_DB
     logging.info("Creating analytical views")
