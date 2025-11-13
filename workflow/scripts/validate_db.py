@@ -40,7 +40,15 @@ def validate_database():
         tables = conn.execute("SHOW TABLES").fetchall()
         table_names = [table[0] for table in tables]
         
-        expected_tables = ['fact_phages', 'dim_proteins', 'dim_terminators', 'dim_anti_crispr']
+        expected_tables = [
+            'fact_phages', 
+            'dim_proteins', 
+            'dim_terminators', 
+            'dim_anti_crispr',
+            'dim_virulent_factors',
+            'dim_transmembrane_proteins',
+            'dim_trna_tmrna'
+        ]
         missing_tables = [t for t in expected_tables if t not in table_names]
         
         validation_results['tables']['existing'] = table_names
@@ -79,7 +87,6 @@ def validate_database():
         
         # FACT_PHAGES validation
         if 'fact_phages' in table_names:
-            # Check for duplicate Phage_IDs
             duplicate_phages = conn.execute("""
                 SELECT COUNT(*) FROM (
                     SELECT Phage_ID, COUNT(*) as cnt 
@@ -89,14 +96,12 @@ def validate_database():
                 )
             """).fetchone()[0]
             
-            # Check data range for Length
             length_stats = conn.execute("""
                 SELECT MIN(Length), MAX(Length), AVG(Length), COUNT(Length)
                 FROM fact_phages 
                 WHERE Length IS NOT NULL
             """).fetchone()
             
-            # Check Source_DB distribution
             source_distribution = conn.execute("""
                 SELECT Source_DB, COUNT(*) as count
                 FROM fact_phages 
@@ -117,14 +122,12 @@ def validate_database():
         
         # DIM_PROTEINS validation
         if 'dim_proteins' in table_names:
-            # Check protein-phage relationships
             orphaned_proteins = conn.execute("""
                 SELECT COUNT(*) FROM dim_proteins p
                 LEFT JOIN fact_phages f ON p.Phage_ID = f.Phage_ID
                 WHERE f.Phage_ID IS NULL
             """).fetchone()[0]
             
-            # Check for duplicate Protein_IDs
             duplicate_proteins = conn.execute("""
                 SELECT COUNT(*) FROM (
                     SELECT Protein_ID, COUNT(*) as cnt 
@@ -134,7 +137,6 @@ def validate_database():
                 )
             """).fetchone()[0]
             
-            # Check Source_DB distribution
             protein_sources = conn.execute("""
                 SELECT Source_DB, COUNT(*) as count
                 FROM dim_proteins 
@@ -150,14 +152,12 @@ def validate_database():
         
         # DIM_TERMINATORS validation
         if 'dim_terminators' in table_names:
-            # Check terminator-phage relationships
             orphaned_terminators = conn.execute("""
                 SELECT COUNT(*) FROM dim_terminators t
                 LEFT JOIN fact_phages f ON t.Phage_ID = f.Phage_ID
                 WHERE f.Phage_ID IS NULL
             """).fetchone()[0]
             
-            # Check terminator type distribution
             terminator_types = conn.execute("""
                 SELECT terminator_type, COUNT(*) as count
                 FROM dim_terminators 
@@ -166,7 +166,6 @@ def validate_database():
                 ORDER BY count DESC
             """).fetchall()
             
-            # Check Source_DB distribution
             terminator_sources = conn.execute("""
                 SELECT Source_DB, COUNT(*) as count
                 FROM dim_terminators 
@@ -180,16 +179,14 @@ def validate_database():
                 'source_distribution': dict(terminator_sources)
             }
         
-        # DIM_ANTI_CRISPR validation - ✅ FIXED
+        # DIM_ANTI_CRISPR validation
         if 'dim_anti_crispr' in table_names:
-            # Check anti-CRISPR-phage relationships
             orphaned_anti_crispr = conn.execute("""
                 SELECT COUNT(*) FROM dim_anti_crispr a
                 LEFT JOIN fact_phages f ON a.Phage_ID = f.Phage_ID
                 WHERE f.Phage_ID IS NULL
             """).fetchone()[0]
             
-            # ✅ FIXED: Check for duplicate Protein_IDs (not Anti_CRISPR_ID)
             duplicate_acr = conn.execute("""
                 SELECT COUNT(*) FROM (
                     SELECT Protein_ID, COUNT(*) as cnt 
@@ -200,7 +197,6 @@ def validate_database():
                 )
             """).fetchone()[0]
             
-            # ✅ ADDED: Check Source_DB distribution
             acr_source_db = conn.execute("""
                 SELECT Source_DB, COUNT(*) as count
                 FROM dim_anti_crispr 
@@ -208,7 +204,6 @@ def validate_database():
                 ORDER BY count DESC
             """).fetchall()
             
-            # ✅ ADDED: Check Source type distribution
             acr_source_type = conn.execute("""
                 SELECT Source, COUNT(*) as count
                 FROM dim_anti_crispr 
@@ -224,6 +219,168 @@ def validate_database():
                 'source_type_distribution': dict(acr_source_type)
             }
         
+        # DIM_VIRULENT_FACTORS validation
+        if 'dim_virulent_factors' in table_names:
+            orphaned_virulent = conn.execute("""
+                SELECT COUNT(*) FROM dim_virulent_factors v
+                LEFT JOIN fact_phages f ON v.Phage_ID = f.Phage_ID
+                WHERE f.Phage_ID IS NULL
+            """).fetchone()[0]
+            
+            duplicate_vf = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT Protein_ID, COUNT(*) as cnt 
+                    FROM dim_virulent_factors 
+                    WHERE Protein_ID IS NOT NULL
+                    GROUP BY Protein_ID 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            vf_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_virulent_factors 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            # Distribution of aligned proteins
+            vf_aligned = conn.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    COUNT(DISTINCT aligned_protein_vfdb) as unique_vfdb_proteins
+                FROM dim_virulent_factors 
+                WHERE aligned_protein_vfdb IS NOT NULL
+            """).fetchone()
+            
+            validation_results['data_quality']['dim_virulent_factors'] = {
+                'orphaned_virulent_factors': orphaned_virulent,
+                'duplicate_protein_ids': duplicate_vf,
+                'source_distribution': dict(vf_sources),
+                'vfdb_alignment_stats': {
+                    'total_aligned': vf_aligned[0],
+                    'unique_vfdb_proteins': vf_aligned[1]
+                }
+            }
+        
+        # DIM_TRANSMEMBRANE_PROTEINS validation
+        if 'dim_transmembrane_proteins' in table_names:
+            orphaned_transmembrane = conn.execute("""
+                SELECT COUNT(*) FROM dim_transmembrane_proteins tm
+                LEFT JOIN fact_phages f ON tm.Phage_ID = f.Phage_ID
+                WHERE f.Phage_ID IS NULL
+            """).fetchone()[0]
+            
+            duplicate_tm = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT Protein_ID, COUNT(*) as cnt 
+                    FROM dim_transmembrane_proteins 
+                    WHERE Protein_ID IS NOT NULL
+                    GROUP BY Protein_ID 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            tmh_stats = conn.execute("""
+                SELECT 
+                    AVG(predicted_tmhs_number) as avg_tmhs,
+                    MIN(predicted_tmhs_number) as min_tmhs,
+                    MAX(predicted_tmhs_number) as max_tmhs,
+                    COUNT(predicted_tmhs_number) as count_with_tmhs
+                FROM dim_transmembrane_proteins 
+                WHERE predicted_tmhs_number IS NOT NULL
+            """).fetchone()
+            
+            tm_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_transmembrane_proteins 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            # Distribution of TMH counts
+            tmh_distribution = conn.execute("""
+                SELECT predicted_tmhs_number, COUNT(*) as count
+                FROM dim_transmembrane_proteins 
+                WHERE predicted_tmhs_number IS NOT NULL
+                GROUP BY predicted_tmhs_number 
+                ORDER BY predicted_tmhs_number
+            """).fetchall()
+            
+            validation_results['data_quality']['dim_transmembrane_proteins'] = {
+                'orphaned_transmembrane': orphaned_transmembrane,
+                'duplicate_protein_ids': duplicate_tm,
+                'tmh_stats': {
+                    'avg': round(tmh_stats[0], 2) if tmh_stats[0] else None,
+                    'min': tmh_stats[1],
+                    'max': tmh_stats[2],
+                    'count': tmh_stats[3]
+                },
+                'source_distribution': dict(tm_sources),
+                'tmh_distribution': dict(tmh_distribution)
+            }
+        
+        # DIM_TRNA_TMRNA validation
+        if 'dim_trna_tmrna' in table_names:
+            orphaned_trna = conn.execute("""
+                SELECT COUNT(*) FROM dim_trna_tmrna tr
+                LEFT JOIN fact_phages f ON tr.Phage_ID = f.Phage_ID
+                WHERE f.Phage_ID IS NULL
+            """).fetchone()[0]
+            
+            duplicate_trna = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT trna_tmrna_id, COUNT(*) as cnt 
+                    FROM dim_trna_tmrna 
+                    WHERE trna_tmrna_id IS NOT NULL
+                    GROUP BY trna_tmrna_id 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            trna_types = conn.execute("""
+                SELECT trna_type, COUNT(*) as count
+                FROM dim_trna_tmrna 
+                WHERE trna_type IS NOT NULL
+                GROUP BY trna_type 
+                ORDER BY count DESC
+                LIMIT 20
+            """).fetchall()
+            
+            trna_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_trna_tmrna 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            # Strand distribution
+            strand_distribution = conn.execute("""
+                SELECT Strand, COUNT(*) as count
+                FROM dim_trna_tmrna 
+                WHERE Strand IS NOT NULL
+                GROUP BY Strand 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            # Permuted status
+            permuted_stats = conn.execute("""
+                SELECT permuted, COUNT(*) as count
+                FROM dim_trna_tmrna 
+                WHERE permuted IS NOT NULL
+                GROUP BY permuted 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            validation_results['data_quality']['dim_trna_tmrna'] = {
+                'orphaned_trna': orphaned_trna,
+                'duplicate_trna_ids': duplicate_trna,
+                'type_distribution': dict(trna_types),
+                'source_distribution': dict(trna_sources),
+                'strand_distribution': dict(strand_distribution),
+                'permuted_distribution': dict(permuted_stats)
+            }
+        
         # 4. Check indexes exist
         logging.info("Checking indexes...")
         indexes = conn.execute("SELECT name FROM sqlite_master WHERE type='index'").fetchall()
@@ -234,11 +391,14 @@ def validate_database():
         views = conn.execute("SELECT name FROM sqlite_master WHERE type='view'").fetchall()
         validation_results['views'] = [view[0] for view in views]
         
-        # 6. Overall summary - ✅ ADDED anti_crispr
+        # 6. Overall summary
         total_phages = validation_results['tables'].get('fact_phages', {}).get('row_count', 0)
         total_proteins = validation_results['tables'].get('dim_proteins', {}).get('row_count', 0)
         total_terminators = validation_results['tables'].get('dim_terminators', {}).get('row_count', 0)
         total_anti_crispr = validation_results['tables'].get('dim_anti_crispr', {}).get('row_count', 0)
+        total_virulent = validation_results['tables'].get('dim_virulent_factors', {}).get('row_count', 0)
+        total_transmembrane = validation_results['tables'].get('dim_transmembrane_proteins', {}).get('row_count', 0)
+        total_trna = validation_results['tables'].get('dim_trna_tmrna', {}).get('row_count', 0)
         
         # Calculate overall data quality
         data_quality_passed = True
@@ -250,12 +410,21 @@ def validate_database():
             data_quality_passed &= validation_results['data_quality']['dim_terminators'].get('orphaned_terminators', 0) == 0
         if 'dim_anti_crispr' in validation_results['data_quality']:
             data_quality_passed &= validation_results['data_quality']['dim_anti_crispr'].get('orphaned_anti_crispr', 0) == 0
+        if 'dim_virulent_factors' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_virulent_factors'].get('orphaned_virulent_factors', 0) == 0
+        if 'dim_transmembrane_proteins' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_transmembrane_proteins'].get('orphaned_transmembrane', 0) == 0
+        if 'dim_trna_tmrna' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_trna_tmrna'].get('orphaned_trna', 0) == 0
         
         validation_results['summary'] = {
             'total_phages': total_phages,
             'total_proteins': total_proteins,
             'total_terminators': total_terminators,
-            'total_anti_crispr': total_anti_crispr,  # ✅ ADDED
+            'total_anti_crispr': total_anti_crispr,
+            'total_virulent_factors': total_virulent,
+            'total_transmembrane_proteins': total_transmembrane,
+            'total_trna_tmrna': total_trna,
             'all_tables_present': validation_results['tables']['all_present'],
             'data_quality_passed': data_quality_passed
         }
@@ -291,12 +460,33 @@ def generate_html_report(results, report_path):
             table {{ border-collapse: collapse; width: 100%; }}
             th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
             th {{ background-color: #f8f9fa; font-weight: bold; }}
-            .metric {{ font-size: 28px; font-weight: bold; text-align: center; color: #495057; }}
-            .metric-label {{ font-size: 14px; color: #6c757d; margin-top: 5px; }}
+            .metric {{ font-size: 24px; font-weight: bold; text-align: center; color: #495057; }}
+            .metric-label {{ font-size: 12px; color: #6c757d; margin-top: 5px; }}
             
             /* Database Schema Visualization */
-            .schema-container {{ display: flex; justify-content: center; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 20px; }}
-            .schema-vertical {{ display: flex; flex-direction: column; align-items: center; gap: 15px; }}
+            .schema-container {{ 
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin: 20px 0;
+            }}
+            .schema-center {{ 
+                grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }}
+            .schema-left {{ 
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }}
+            .schema-right {{ 
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }}
             .table-box {{ 
                 border: 2px solid #007bff; 
                 border-radius: 8px; 
@@ -309,19 +499,18 @@ def generate_html_report(results, report_path):
                 border-color: #28a745; 
                 background: #f0fff4;
                 font-size: 1.1em;
+                min-width: 200px;
             }}
             .table-name {{ font-weight: bold; color: #007bff; font-size: 16px; margin-bottom: 10px; }}
             .table-name.central {{ color: #28a745; }}
             .table-info {{ font-size: 12px; color: #6c757d; }}
-            .relationship-vertical {{ 
-                width: 2px;
-                height: 40px; 
-                background: #28a745; 
-                margin: 0 auto;
-            }}
             
             /* Statistics Cards */
-            .stats-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }}
+            .stats-grid {{ 
+                display: grid; 
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                gap: 15px; 
+            }}
             .stat-card {{ background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }}
             .stat-title {{ font-weight: bold; color: #495057; margin-bottom: 10px; }}
             .stat-value {{ font-size: 24px; color: #007bff; }}
@@ -343,22 +532,34 @@ def generate_html_report(results, report_path):
         
         <div class="section">
             <h2>📊 Database Overview</h2>
-            <div style="display: flex; justify-content: space-around; margin: 30px 0; flex-wrap: wrap;">
-                <div class="metric">
-                    <div>{results['summary']['total_phages']:,}</div>
-                    <div class="metric-label">Phages</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Phages</div>
+                    <div class="stat-value">{results['summary']['total_phages']:,}</div>
                 </div>
-                <div class="metric">
-                    <div>{results['summary']['total_proteins']:,}</div>
-                    <div class="metric-label">Proteins</div>
+                <div class="stat-card">
+                    <div class="stat-title">Proteins</div>
+                    <div class="stat-value">{results['summary']['total_proteins']:,}</div>
                 </div>
-                <div class="metric">
-                    <div>{results['summary']['total_terminators']:,}</div>
-                    <div class="metric-label">Terminators</div>
+                <div class="stat-card">
+                    <div class="stat-title">Terminators</div>
+                    <div class="stat-value">{results['summary']['total_terminators']:,}</div>
                 </div>
-                <div class="metric">
-                    <div>{results['summary']['total_anti_crispr']:,}</div>
-                    <div class="metric-label">Anti-CRISPR</div>
+                <div class="stat-card">
+                    <div class="stat-title">Anti-CRISPR</div>
+                    <div class="stat-value">{results['summary']['total_anti_crispr']:,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Virulent Factors</div>
+                    <div class="stat-value">{results['summary']['total_virulent_factors']:,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Transmembrane</div>
+                    <div class="stat-value">{results['summary']['total_transmembrane_proteins']:,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">tRNA/tmRNA</div>
+                    <div class="stat-value">{results['summary']['total_trna_tmrna']:,}</div>
                 </div>
             </div>
         </div>
@@ -369,45 +570,64 @@ def generate_html_report(results, report_path):
                 All dimension tables are linked to fact_phages via <strong>Phage_ID</strong>
             </p>
             <div class="schema-container">
-                <div class="schema-vertical">
+                <div class="schema-left">
                     <div class="table-box">
                         <div class="table-name">dim_proteins</div>
                         <div class="table-info">
                             {results['tables'].get('dim_proteins', {}).get('row_count', 0):,} rows<br>
-                            Foreign: Phage_ID
+                            FK: Phage_ID
                         </div>
                     </div>
-                    <div class="relationship-vertical"></div>
-                </div>
-                
-                <div class="table-box central">
-                    <div class="table-name central">fact_phages</div>
-                    <div class="table-info">
-                        {results['tables'].get('fact_phages', {}).get('row_count', 0):,} rows<br>
-                        Primary: Phage_ID
-                    </div>
-                </div>
-                
-                <div class="schema-vertical">
                     <div class="table-box">
                         <div class="table-name">dim_terminators</div>
                         <div class="table-info">
                             {results['tables'].get('dim_terminators', {}).get('row_count', 0):,} rows<br>
-                            Foreign: Phage_ID
+                            FK: Phage_ID
                         </div>
                     </div>
-                    <div class="relationship-vertical"></div>
                 </div>
                 
-                <div class="schema-vertical">
+                <div class="schema-center">
+                    <div class="table-box central">
+                        <div class="table-name central">fact_phages</div>
+                        <div class="table-info">
+                            {results['tables'].get('fact_phages', {}).get('row_count', 0):,} rows<br>
+                            PK: Phage_ID
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schema-right">
                     <div class="table-box">
                         <div class="table-name">dim_anti_crispr</div>
                         <div class="table-info">
                             {results['tables'].get('dim_anti_crispr', {}).get('row_count', 0):,} rows<br>
-                            Foreign: Phage_ID
+                            FK: Phage_ID
                         </div>
                     </div>
-                    <div class="relationship-vertical"></div>
+                    <div class="table-box">
+                        <div class="table-name">dim_virulent_factors</div>
+                        <div class="table-info">
+                            {results['tables'].get('dim_virulent_factors', {}).get('row_count', 0):,} rows<br>
+                            FK: Phage_ID
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="table-box">
+                    <div class="table-name">dim_transmembrane_proteins</div>
+                    <div class="table-info">
+                        {results['tables'].get('dim_transmembrane_proteins', {}).get('row_count', 0):,} rows<br>
+                        FK: Phage_ID
+                    </div>
+                </div>
+                <div class="table-box">
+                    <div class="table-name">dim_trna_tmrna</div>
+                    <div class="table-info">
+                        {results['tables'].get('dim_trna_tmrna', {}).get('row_count', 0):,} rows<br>
+                        FK: Phage_ID
+                    </div>
                 </div>
             </div>
         </div>
@@ -426,7 +646,6 @@ def generate_html_report(results, report_path):
                 schema = table_data.get('schema', [])
                 null_counts = table_data.get('null_counts', {})
                 
-                # Calculate completeness
                 total_rows = table_data['row_count']
                 columns_with_nulls = sum(1 for count in null_counts.values() if count > 0)
                 
@@ -441,7 +660,6 @@ def generate_html_report(results, report_path):
                         <ul style="margin: 5px 0; padding-left: 20px;">
                 """
                 
-                # Group columns by data type
                 type_counts = {}
                 for col_info in schema:
                     col_type = col_info[1] if len(col_info) > 1 else 'UNKNOWN'
@@ -458,31 +676,6 @@ def generate_html_report(results, report_path):
         
         html_content += "</div></div>"
     
-    # Add source distribution visualization
-    if 'fact_phages' in results['data_quality']:
-        source_dist = results['data_quality']['fact_phages'].get('source_distribution', {})
-        if source_dist:
-            max_count = max(source_dist.values()) if source_dist.values() else 1
-            total = sum(source_dist.values())
-            
-            html_content += """
-            <div class="section">
-                <h2>📈 Source Database Distribution (fact_phages)</h2>
-                <div class="chart-container">
-            """
-            
-            for source, count in sorted(source_dist.items(), key=lambda x: x[1], reverse=True):
-                percentage = (count / max_count) * 100
-                html_content += f"""
-                <div class="bar">
-                    <div class="bar-label">{source}:</div>
-                    <div class="bar-fill" style="width: {percentage}%;"></div>
-                    <div class="bar-value">{count:,} ({count/total*100:.1f}%)</div>
-                </div>
-                """
-            
-            html_content += "</div></div>"
-    
     # Add data quality section
     html_content += """
         <div class="section">
@@ -494,7 +687,7 @@ def generate_html_report(results, report_path):
                     <td class="{'success' if results['tables']['all_present'] else 'error'}">
                         {'✅ PASS' if results['tables']['all_present'] else '❌ FAIL'}
                     </td>
-                    <td>{'All 4 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
+                    <td>{'All 7 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
                 </tr>
     """
     
@@ -526,7 +719,7 @@ def generate_html_report(results, report_path):
                     <td class="{'success' if protein_data['duplicate_protein_ids'] == 0 else 'warning'}">
                         {'✅ PASS' if protein_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
                     </td>
-                    <td>{protein_data['duplicate_protein_ids']} duplicate protein IDs found</td>
+                    <td>{protein_data['duplicate_protein_ids']} duplicate protein IDs</td>
                 </tr>
         """
     
@@ -542,7 +735,6 @@ def generate_html_report(results, report_path):
                 </tr>
         """
     
-    # ✅ ADDED: Anti-CRISPR quality checks
     if 'dim_anti_crispr' in results['data_quality']:
         acr_data = results['data_quality']['dim_anti_crispr']
         html_content += f"""
@@ -558,7 +750,69 @@ def generate_html_report(results, report_path):
                     <td class="{'success' if acr_data['duplicate_protein_ids'] == 0 else 'warning'}">
                         {'✅ PASS' if acr_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
                     </td>
-                    <td>{acr_data['duplicate_protein_ids']} duplicate protein IDs in anti-CRISPR table</td>
+                    <td>{acr_data['duplicate_protein_ids']} duplicate protein IDs</td>
+                </tr>
+        """
+    
+    if 'dim_virulent_factors' in results['data_quality']:
+        vf_data = results['data_quality']['dim_virulent_factors']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned Virulent Factors</td>
+                    <td class="{'success' if vf_data['orphaned_virulent_factors'] == 0 else 'warning'}">
+                        {'✅ PASS' if vf_data['orphaned_virulent_factors'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{vf_data['orphaned_virulent_factors']} virulent factors without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (Virulent Factors)</td>
+                    <td class="{'success' if vf_data['duplicate_protein_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if vf_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{vf_data['duplicate_protein_ids']} duplicate protein IDs</td>
+                </tr>
+        """
+    
+    if 'dim_transmembrane_proteins' in results['data_quality']:
+        tm_data = results['data_quality']['dim_transmembrane_proteins']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned Transmembrane Proteins</td>
+                    <td class="{'success' if tm_data['orphaned_transmembrane'] == 0 else 'warning'}">
+                        {'✅ PASS' if tm_data['orphaned_transmembrane'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{tm_data['orphaned_transmembrane']} transmembrane proteins without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (Transmembrane)</td>
+                    <td class="{'success' if tm_data['duplicate_protein_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if tm_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{tm_data['duplicate_protein_ids']} duplicate protein IDs</td>
+                </tr>
+                <tr>
+                    <td>TMH Statistics</td>
+                    <td class="success">ℹ️ INFO</td>
+                    <td>Avg TMHs: {tm_data['tmh_stats']['avg']}, Range: {tm_data['tmh_stats']['min']}-{tm_data['tmh_stats']['max']}</td>
+                </tr>
+        """
+    
+    if 'dim_trna_tmrna' in results['data_quality']:
+        trna_data = results['data_quality']['dim_trna_tmrna']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned tRNA/tmRNA</td>
+                    <td class="{'success' if trna_data['orphaned_trna'] == 0 else 'warning'}">
+                        {'✅ PASS' if trna_data['orphaned_trna'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{trna_data['orphaned_trna']} tRNA/tmRNA entries without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate tRNA IDs</td>
+                    <td class="{'success' if trna_data['duplicate_trna_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if trna_data['duplicate_trna_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{trna_data['duplicate_trna_ids']} duplicate tRNA IDs</td>
                 </tr>
         """
     

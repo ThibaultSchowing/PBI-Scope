@@ -13,12 +13,33 @@
             table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
             th { background-color: #f8f9fa; font-weight: bold; }
-            .metric { font-size: 28px; font-weight: bold; text-align: center; color: #495057; }
-            .metric-label { font-size: 14px; color: #6c757d; margin-top: 5px; }
+            .metric { font-size: 24px; font-weight: bold; text-align: center; color: #495057; }
+            .metric-label { font-size: 12px; color: #6c757d; margin-top: 5px; }
             
             /* Database Schema Visualization */
-            .schema-container { display: flex; justify-content: center; align-items: center; margin: 20px 0; flex-wrap: wrap; gap: 20px; }
-            .schema-vertical { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+            .schema-container { 
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin: 20px 0;
+            }
+            .schema-center { 
+                grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .schema-left { 
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .schema-right { 
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
             .table-box { 
                 border: 2px solid #007bff; 
                 border-radius: 8px; 
@@ -31,19 +52,18 @@
                 border-color: #28a745; 
                 background: #f0fff4;
                 font-size: 1.1em;
+                min-width: 200px;
             }
             .table-name { font-weight: bold; color: #007bff; font-size: 16px; margin-bottom: 10px; }
             .table-name.central { color: #28a745; }
             .table-info { font-size: 12px; color: #6c757d; }
-            .relationship-vertical { 
-                width: 2px;
-                height: 40px; 
-                background: #28a745; 
-                margin: 0 auto;
-            }
             
             /* Statistics Cards */
-            .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+            .stats-grid { 
+                display: grid; 
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                gap: 15px; 
+            }
             .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff; }
             .stat-title { font-weight: bold; color: #495057; margin-bottom: 10px; }
             .stat-value { font-size: 24px; color: #007bff; }
@@ -59,28 +79,40 @@
     <body>
         <div class="header">
             <h1>🧬 PhageScope Database Validation Report</h1>
-            <p><strong>Generated:</strong> 2025-11-13T14:56:42.320386</p>
+            <p><strong>Generated:</strong> 2025-11-13T15:57:49.686456</p>
             <p><strong>Database:</strong> ../data/databases/phage_database_optimized.duckdb</p>
         </div>
         
         <div class="section">
             <h2>📊 Database Overview</h2>
-            <div style="display: flex; justify-content: space-around; margin: 30px 0; flex-wrap: wrap;">
-                <div class="metric">
-                    <div>873,718</div>
-                    <div class="metric-label">Phages</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Phages</div>
+                    <div class="stat-value">873,718</div>
                 </div>
-                <div class="metric">
-                    <div>20,276,531</div>
-                    <div class="metric-label">Proteins</div>
+                <div class="stat-card">
+                    <div class="stat-title">Proteins</div>
+                    <div class="stat-value">20,276,531</div>
                 </div>
-                <div class="metric">
-                    <div>4,229,116</div>
-                    <div class="metric-label">Terminators</div>
+                <div class="stat-card">
+                    <div class="stat-title">Terminators</div>
+                    <div class="stat-value">4,229,116</div>
                 </div>
-                <div class="metric">
-                    <div>299,832</div>
-                    <div class="metric-label">Anti-CRISPR</div>
+                <div class="stat-card">
+                    <div class="stat-title">Anti-CRISPR</div>
+                    <div class="stat-value">299,832</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Virulent Factors</div>
+                    <div class="stat-value">23,764</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Transmembrane</div>
+                    <div class="stat-value">2,820,232</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">tRNA/tmRNA</div>
+                    <div class="stat-value">1,298,181</div>
                 </div>
             </div>
         </div>
@@ -91,45 +123,64 @@
                 All dimension tables are linked to fact_phages via <strong>Phage_ID</strong>
             </p>
             <div class="schema-container">
-                <div class="schema-vertical">
+                <div class="schema-left">
                     <div class="table-box">
                         <div class="table-name">dim_proteins</div>
                         <div class="table-info">
                             20,276,531 rows<br>
-                            Foreign: Phage_ID
+                            FK: Phage_ID
                         </div>
                     </div>
-                    <div class="relationship-vertical"></div>
-                </div>
-                
-                <div class="table-box central">
-                    <div class="table-name central">fact_phages</div>
-                    <div class="table-info">
-                        873,718 rows<br>
-                        Primary: Phage_ID
-                    </div>
-                </div>
-                
-                <div class="schema-vertical">
                     <div class="table-box">
                         <div class="table-name">dim_terminators</div>
                         <div class="table-info">
                             4,229,116 rows<br>
-                            Foreign: Phage_ID
+                            FK: Phage_ID
                         </div>
                     </div>
-                    <div class="relationship-vertical"></div>
                 </div>
                 
-                <div class="schema-vertical">
+                <div class="schema-center">
+                    <div class="table-box central">
+                        <div class="table-name central">fact_phages</div>
+                        <div class="table-info">
+                            873,718 rows<br>
+                            PK: Phage_ID
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schema-right">
                     <div class="table-box">
                         <div class="table-name">dim_anti_crispr</div>
                         <div class="table-info">
                             299,832 rows<br>
-                            Foreign: Phage_ID
+                            FK: Phage_ID
                         </div>
                     </div>
-                    <div class="relationship-vertical"></div>
+                    <div class="table-box">
+                        <div class="table-name">dim_virulent_factors</div>
+                        <div class="table-info">
+                            23,764 rows<br>
+                            FK: Phage_ID
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="table-box">
+                    <div class="table-name">dim_transmembrane_proteins</div>
+                    <div class="table-info">
+                        2,820,232 rows<br>
+                        FK: Phage_ID
+                    </div>
+                </div>
+                <div class="table-box">
+                    <div class="table-name">dim_trna_tmrna</div>
+                    <div class="table-info">
+                        1,298,181 rows<br>
+                        FK: Phage_ID
+                    </div>
                 </div>
             </div>
         </div>
@@ -189,93 +240,44 @@
                         </ul>
                     </div>
                 </div>
-                </div></div>
-            <div class="section">
-                <h2>📈 Source Database Distribution (fact_phages)</h2>
-                <div class="chart-container">
-            
-                <div class="bar">
-                    <div class="bar-label">GOV2:</div>
-                    <div class="bar-fill" style="width: 100.0%;"></div>
-                    <div class="bar-value">195,699 (22.4%)</div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_virulent_factors</div>
+                    <div class="stat-value">23,764</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 5<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 5</li>
+                        </ul>
+                    </div>
                 </div>
                 
-                <div class="bar">
-                    <div class="bar-label">MGV:</div>
-                    <div class="bar-fill" style="width: 96.92435832579625%;"></div>
-                    <div class="bar-value">189,680 (21.7%)</div>
+                <div class="stat-card">
+                    <div class="stat-title">dim_transmembrane_proteins</div>
+                    <div class="stat-value">2,820,232</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 18<br>
+                        <strong>Columns with NULLs:</strong> 1<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 7</li><li>INTEGER: 8</li><li>DOUBLE: 3</li>
+                        </ul>
+                    </div>
                 </div>
                 
-                <div class="bar">
-                    <div class="bar-label">IMGVR:</div>
-                    <div class="bar-fill" style="width: 90.62948712052693%;"></div>
-                    <div class="bar-value">177,361 (20.3%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">GPD:</div>
-                    <div class="bar-fill" style="width: 72.9738016034829%;"></div>
-                    <div class="bar-value">142,809 (16.3%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">TemPhD:</div>
-                    <div class="bar-fill" style="width: 34.14580554831655%;"></div>
-                    <div class="bar-value">66,823 (7.6%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">CHVD:</div>
-                    <div class="bar-fill" style="width: 22.961282377528754%;"></div>
-                    <div class="bar-value">44,935 (5.1%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">GVD:</div>
-                    <div class="bar-fill" style="width: 16.046070751511248%;"></div>
-                    <div class="bar-value">31,402 (3.6%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">IGVD:</div>
-                    <div class="bar-fill" style="width: 5.120618909652068%;"></div>
-                    <div class="bar-value">10,021 (1.1%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">RefSeq:</div>
-                    <div class="bar-fill" style="width: 2.369455132627147%;"></div>
-                    <div class="bar-value">4,637 (0.5%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">STV:</div>
-                    <div class="bar-fill" style="width: 2.077169530758972%;"></div>
-                    <div class="bar-value">4,065 (0.5%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">PhagesDB:</div>
-                    <div class="bar-fill" style="width: 1.9182520094635127%;"></div>
-                    <div class="bar-value">3,754 (0.4%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">Genbank:</div>
-                    <div class="bar-fill" style="width: 1.0659226669528206%;"></div>
-                    <div class="bar-value">2,086 (0.2%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">DDBJ:</div>
-                    <div class="bar-fill" style="width: 0.14818675619190697%;"></div>
-                    <div class="bar-value">290 (0.0%)</div>
-                </div>
-                
-                <div class="bar">
-                    <div class="bar-label">EMBL:</div>
-                    <div class="bar-fill" style="width: 0.07971425505495684%;"></div>
-                    <div class="bar-value">156 (0.0%)</div>
+                <div class="stat-card">
+                    <div class="stat-title">dim_trna_tmrna</div>
+                    <div class="stat-value">1,298,181</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 12<br>
+                        <strong>Columns with NULLs:</strong> 3<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 9</li><li>INTEGER: 3</li>
+                        </ul>
+                    </div>
                 </div>
                 </div></div>
         <div class="section">
@@ -287,7 +289,7 @@
                     <td class="{'success' if results['tables']['all_present'] else 'error'}">
                         {'✅ PASS' if results['tables']['all_present'] else '❌ FAIL'}
                     </td>
-                    <td>{'All 4 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
+                    <td>{'All 7 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
                 </tr>
     
                 <tr>
@@ -310,7 +312,7 @@
                     <td class="warning">
                         ⚠️ WARNING
                     </td>
-                    <td>1912 duplicate protein IDs found</td>
+                    <td>1912 duplicate protein IDs</td>
                 </tr>
         
                 <tr>
@@ -333,7 +335,57 @@
                     <td class="success">
                         ✅ PASS
                     </td>
-                    <td>0 duplicate protein IDs in anti-CRISPR table</td>
+                    <td>0 duplicate protein IDs</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned Virulent Factors</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 virulent factors without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (Virulent Factors)</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 duplicate protein IDs</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned Transmembrane Proteins</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 transmembrane proteins without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (Transmembrane)</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 duplicate protein IDs</td>
+                </tr>
+                <tr>
+                    <td>TMH Statistics</td>
+                    <td class="success">ℹ️ INFO</td>
+                    <td>Avg TMHs: 1.89, Range: 1-48</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned tRNA/tmRNA</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 tRNA/tmRNA entries without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate tRNA IDs</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 duplicate tRNA IDs</td>
                 </tr>
         
             </table>
@@ -341,8 +393,8 @@
         
         <div class="section">
             <h2>🔧 Database Objects</h2>
-            <p><strong>Indexes:</strong> idx_anti_crispr_phage, idx_anti_crispr_source, idx_phages_id, idx_proteins_phage, idx_proteins_source, idx_Source_DB, idx_terminators_phage</p>
-            <p><strong>Views:</strong> phage_size_distribution, phage_summary</p>
+            <p><strong>Indexes:</strong> idx_anti_crispr_phage, idx_anti_crispr_source, idx_phages_id, idx_phages_source, idx_proteins_phage, idx_proteins_source, idx_terminators_phage, idx_terminators_source, idx_transmembrane_phage, idx_transmembrane_source, idx_trna_phage, idx_trna_source, idx_virulent_phage, idx_virulent_source</p>
+            <p><strong>Views:</strong> phage_complete_profile, phage_size_distribution, phage_summary</p>
         </div>
     </body>
     </html>

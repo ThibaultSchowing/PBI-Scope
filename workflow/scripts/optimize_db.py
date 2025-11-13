@@ -29,6 +29,10 @@ def optimize_database():
     conn.execute("ANALYZE fact_phages")
     conn.execute("ANALYZE dim_proteins") 
     conn.execute("ANALYZE dim_terminators")
+    conn.execute("ANALYZE dim_anti_crispr")
+    conn.execute("ANALYZE dim_virulent_factors")
+    conn.execute("ANALYZE dim_transmembrane_proteins")
+    conn.execute("ANALYZE dim_trna_tmrna")
     
     # Vacuum for cleanup
     logging.info("Vacuuming database")
