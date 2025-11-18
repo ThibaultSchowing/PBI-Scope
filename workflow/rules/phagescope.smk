@@ -45,7 +45,7 @@ rule merge_transcription_terminator_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/mergers/merge_transcription_terminator_metadata.py"
+        "./scripts/preprocessing/mergers/merge_transcription_terminator_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE METADATA
@@ -61,7 +61,7 @@ rule merge_phage_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/mergers/merge_phage_metadata.py"
+        "./scripts/preprocessing/mergers/merge_phage_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE ANNOTATED PROTEINS METADATA
@@ -77,7 +77,7 @@ rule merge_annotated_proteins_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/mergers/merge_annotated_proteins_metadata.py"
+        "./scripts/preprocessing/mergers/merge_annotated_proteins_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE tRNA/tmRNA METADATA
@@ -93,7 +93,7 @@ rule merge_phage_trna_tmrna_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/mergers/merge_phage_trna_tmrna_metadata.py"
+        "./scripts/preprocessing/mergers/merge_phage_trna_tmrna_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE ANTI-CRISPR METADATA
@@ -109,7 +109,7 @@ rule merge_phage_anti_crispr_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/mergers/merge_phage_anti_crispr_metadata.py"
+        "./scripts/preprocessing/mergers/merge_phage_anti_crispr_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE VIRULENT FACTOR METADATA
@@ -126,7 +126,7 @@ rule merge_phage_virulent_factor_metadata_tsvs:
         "../envs/pixi_base_env.yaml"
     
     script:
-        "../scripts/mergers/merge_phage_virulent_factor_metadata.py"
+        "./scripts/preprocessing/mergers/merge_phage_virulent_factor_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE TRANSMEMBRANE PROTEIN METADATA
@@ -142,7 +142,7 @@ rule merge_phage_transmembrane_protein_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "../scripts/mergers/merge_phage_transmembrane_protein_metadata.py"
+        "./scripts/preprocessing/mergers/merge_phage_transmembrane_protein_metadata.py"
 
 
 rule generate_report:
@@ -181,19 +181,13 @@ rule extract_protein_fasta:
     input:
         os.path.join(compressed_dir, "{dataset}.tar.gz")
     output:
-        #done_flag = temp(os.path.join(output_protein_fasta_dir, "{dataset}", ".extraction_done"))
         extracted_dir = temp(directory(os.path.join(output_protein_fasta_dir, "{dataset}")))
     shell:
         """
         mkdir -p {output.extracted_dir}
         tar -xzf {input} -C {output.extracted_dir}
         
-        """
-
-        #mkdir -p $(dirname {output.done_flag})
-        #tar -xzf {input} -C $(dirname {output.done_flag})
-        #touch {output.done_flag}
-        
+        """        
 
 # Phage fasta files
 
@@ -221,7 +215,6 @@ rule extract_phage_fasta:
     input:
         os.path.join(compressed_phage_dir, "{dataset}.tar.gz")
     output:
-        #done_flag = temp(os.path.join(output_phage_fasta_dir, "{dataset}", ".extraction_done"))
         extracted_dir = temp(directory(os.path.join(output_phage_fasta_dir, "{dataset}")))
     shell:
         """
@@ -229,19 +222,14 @@ rule extract_phage_fasta:
         tar -xzf {input} -C {output.extracted_dir}
         
         """
-        #mkdir -p $(dirname {output.done_flag})
-        #tar -xzf {input} -C $(dirname {output.done_flag})
-        #touch {output.done_flag}
 
 rule merge_protein_fasta_by_source:
     input:
-        #done_flag = os.path.join(output_protein_fasta_dir, "{dataset}", ".extraction_done"),
         source_dir = os.path.join(output_protein_fasta_dir, "{dataset}")
     output:
         merged_fasta = os.path.join("../data/protein_fasta_merged", "{dataset}.fasta")
     params:
         source_dir = lambda wildcards: os.path.join(output_protein_fasta_dir, wildcards.dataset),
-        #dataset = lambda wildcards: wildcards.dataset
     shell:
         # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
         # This ensures we don’t waste time unnecessarily merging a single file.
@@ -251,19 +239,17 @@ rule merge_protein_fasta_by_source:
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
         else
-            pixi run -e base python scripts/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
+            pixi run -e base python scripts/preprocessing/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
         fi
         '''
     
 rule merge_phage_fasta_by_source:
     input:
-        #done_flag = os.path.join(output_phage_fasta_dir, "{dataset}", ".extraction_done"),
         source_dir = os.path.join(output_phage_fasta_dir, "{dataset}")
     output:
         merged_fasta = os.path.join("../data/phage_fasta_merged", "{dataset}.fasta")
     params:
         source_dir = lambda wildcards: os.path.join(output_phage_fasta_dir, wildcards.dataset),
-        #dataset = lambda wildcards: wildcards.dataset
     shell:
         # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
         # This ensures we don’t waste time unnecessarily merging a single file.
@@ -273,7 +259,7 @@ rule merge_phage_fasta_by_source:
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
         else
-            pixi run -e base python scripts/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
+            pixi run -e base python scripts/preprocessing/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
         fi
         '''
 

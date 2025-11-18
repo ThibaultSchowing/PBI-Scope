@@ -412,8 +412,8 @@ def main():
         
         # Determine report path
         fasta_name = Path(fasta_path).stem
-        report_path = f"reports/{fasta_name}_duplicates.html"
-        os.makedirs("reports", exist_ok=True)
+        report_path = f"../reports/{fasta_name}_duplicates.html"
+        os.makedirs("../reports", exist_ok=True)
         
         # IMPORTANT: Normalize and deduplicate IN PLACE
         # This modifies the original file before indexing
