@@ -478,3 +478,37 @@ For questions, issues, or contributions:
 ---
 
 **Note**: This pipeline processes large genomic datasets. Ensure adequate system resources for smooth execution. The complete pipeline typically runs in 30-60 minutes on a modern workstation with 4+ cores.
+
+## 4.3 Sequence Retrieval
+
+### Design Decisions
+
+**FASTA Header Indexing:**
+- Protein FASTA uses full header as ID: `Phage_ID Protein_ID [description]`
+- pyfaidx configured with `split_char='\x00'` to preserve full headers
+- Critical for distinguishing multiple proteins from same phage
+
+**Query Interface:**
+- SQL-based retrieval for flexibility
+- Supports both query-based and direct ID lookup
+- Fuzzy matching fallback for ID format variations
+
+### Usage Examples
+
+```python
+from pbi.retrieval import SequenceRetriever
+
+# Initialize
+retriever = SequenceRetriever(
+    db_path="data/processed/databases/phage_database.duckdb",
+    phage_fasta="data/processed/sequences/all_phages.fasta",
+    protein_fasta="data/processed/sequences/all_proteins.fasta"
+)
+
+# Query-based retrieval
+query = "SELECT Phage_ID FROM fact_phages WHERE Length > 50000"
+phages = retriever.get_phage_sequences(query, limit=1000)
+
+# Export to FASTA
+retriever.export_fasta(phages, "output/large_phages.fasta")
+```
