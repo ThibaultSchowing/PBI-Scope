@@ -4,9 +4,7 @@
 # Each merging is unique and is handled by a dedicated script.
 
 
-configfile: "./config/config.yaml"
-
-
+configfile: "config/config.yaml"
 
 import os
 
@@ -65,17 +63,17 @@ rule all:
             feature=FEATURES
         ),
         expand(
-            "../data/protein_fasta_preprocessed/{dataset}.fasta",
+            "../data/intermediate/fasta/proteins/{dataset}.fasta",
             dataset=list(protein_fasta_urls.keys())
         ),
-        expand("../data/phage_fasta_preprocessed/{dataset}.fasta",
+        expand("../data/intermediate/fasta/phages/{dataset}.fasta",
             dataset=list(phage_fasta_urls.keys())
         ),
         "../data/processed/databases/phage_database_optimized.duckdb",
-        "./reports/database_validation.html",
+        "reports/database_validation.html",
         # Sequence indexing files
-        "../data/sequences/all_phages.fasta.fai",
-        "../data/sequences/all_proteins.fasta.fai"
+        "../data/processed/sequences/all_phages.fasta.fai",
+        "../data/processed/sequences/all_proteins.fasta.fai"
 
 
 

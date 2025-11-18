@@ -6,9 +6,12 @@ PROTEIN_FASTA_SOURCES = list(config["protein_fasta_urls"].keys())
 
 rule merge_phage_fasta:
     input:
-        expand("../data/phage_fasta_merged/{source}.fasta", source=PHAGE_FASTA_SOURCES)
+        expand(
+            config["phage_fasta_merged_output"] + "/{source}.fasta",
+            source=PHAGE_FASTA_SOURCES
+        )
     output:
-        "../data/sequences/all_phages.fasta"
+        config["all_phages_fasta"]
     log:
         "logs/merge_phage_fasta.log"
     run:
@@ -43,9 +46,12 @@ rule merge_phage_fasta:
 
 rule merge_protein_fasta:
     input:
-        expand("../data/protein_fasta_merged/{source}.fasta", source=PROTEIN_FASTA_SOURCES)
+        expand(
+            config["protein_fasta_merged_output"] + "/{source}.fasta", 
+            source=PROTEIN_FASTA_SOURCES
+        )
     output:
-        "../data/sequences/all_proteins.fasta"
+        config["all_proteins_fasta"]
     log:
         "logs/merge_protein_fasta.log"
     run:
@@ -80,9 +86,9 @@ rule merge_protein_fasta:
 
 rule index_phage_sequences:
     input:
-        "../data/sequences/all_phages.fasta"
+        config["all_phages_fasta"]
     output:
-        "../data/sequences/all_phages.fasta.fai"
+        config["all_phages_fasta"] + ".fai"
     log:
         "logs/index_phage_sequences.log"
     conda:
@@ -92,9 +98,9 @@ rule index_phage_sequences:
 
 rule index_protein_sequences:
     input:
-        "../data/sequences/all_proteins.fasta"
+        config["all_proteins_fasta"]
     output:
-        "../data/sequences/all_proteins.fasta.fai"
+        config["all_proteins_fasta"] + ".fai"
     log:
         "logs/index_protein_sequences.log"
     conda:
@@ -104,5 +110,5 @@ rule index_protein_sequences:
 
 rule all_sequences:
     input:
-        "../data/sequences/all_phages.fasta.fai",
-        "../data/sequences/all_proteins.fasta.fai"
+        config["all_phages_fasta"] + ".fai",
+        config["all_proteins_fasta"] + ".fai"

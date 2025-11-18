@@ -10,7 +10,7 @@ rule download_all_tsvs:
         sum(
             [
                 [
-                    f"../data/intermediate_csv/{feature}/{source}.tsv"
+                    f"{config['intermediate_csv_output']}/{feature}/{source}.tsv"
                     for source in config[f"{feature}_urls"].keys()
                 ]
                 for feature in FEATURES
@@ -21,13 +21,13 @@ rule download_all_tsvs:
 
 rule download_tsv:
     output:
-        "../data/intermediate_csv/{feature}/{source}.tsv" # removed temp() to keep files for debugging
+        config["intermediate_csv_output"] + "/{feature}/{source}.tsv" # removed temp() to keep files for debugging
     params: 
         url = lambda wildcards: config[f"{wildcards.feature}_urls"][wildcards.source]
     threads: 8
     shell:
         """
-        mkdir -p ../data/intermediate_csv/{wildcards.feature}
+        mkdir -p {config["intermediate_csv_output"]}/{wildcards.feature}
         wget -O {output} {params.url} || echo "Failed download for {wildcards.feature}/{wildcards.source}"
         """
 
@@ -37,7 +37,7 @@ rule download_tsv:
 rule merge_transcription_terminator_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/transcription_terminator_metadata/{source}.tsv",
+            config["transcription_terminator_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["transcription_terminator_metadata_urls"].keys())
         )
     output:
@@ -53,7 +53,7 @@ rule merge_transcription_terminator_metadata_tsvs:
 rule merge_phage_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/phage_metadata/{source}.tsv",
+            config["phage_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["phage_metadata_urls"].keys())
         )
     output:
@@ -69,7 +69,7 @@ rule merge_phage_metadata_tsvs:
 rule merge_annotated_proteins_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/annotated_proteins_metadata/{source}.tsv",
+            config["annotated_proteins_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["annotated_proteins_metadata_urls"].keys())
         )
     output:
@@ -85,7 +85,7 @@ rule merge_annotated_proteins_metadata_tsvs:
 rule merge_phage_trna_tmrna_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/phage_trna_tmrna_metadata/{source}.tsv",
+            config["phage_trna_tmrna_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["phage_trna_tmrna_metadata_urls"].keys())
         )
     output:
@@ -101,7 +101,7 @@ rule merge_phage_trna_tmrna_metadata_tsvs:
 rule merge_phage_anti_crispr_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/phage_anti_crispr_metadata/{source}.tsv",
+            config["phage_anti_crispr_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["phage_anti_crispr_metadata_urls"].keys())
         )
     output:
@@ -117,7 +117,7 @@ rule merge_phage_anti_crispr_metadata_tsvs:
 rule merge_phage_virulent_factor_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/phage_virulent_factor_metadata/{source}.tsv",
+            config["phage_virulent_factor_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["phage_virulent_factor_metadata_urls"].keys())
         )
     output:
@@ -134,7 +134,7 @@ rule merge_phage_virulent_factor_metadata_tsvs:
 rule merge_phage_transmembrane_protein_metadata_tsvs:
     input:
         expand(
-            "../data/intermediate_csv/phage_transmembrane_protein_metadata/{source}.tsv",
+            config["phage_transmembrane_protein_metadata_intermediate_output"] + "/{source}.tsv",
             source=list(config["phage_transmembrane_protein_metadata_urls"].keys()) # e.g. STV_Phage_Metadata_URL
         )
     output:
@@ -153,7 +153,7 @@ rule generate_report:
         "reports/{feature}_report.html"
     shell:
         """
-        pixi run -e reporting python scripts/generate_reports.py {input} {output}
+        pixi run -e reporting python scripts/utils/generate_reports.py {input} {output}
         """
 
 # Protein fasta files
