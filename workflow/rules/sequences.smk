@@ -94,7 +94,7 @@ rule index_phage_sequences:
     conda:
         "../envs/sequences.yaml"
     script:
-        "../scripts/index_sequences.py"
+        "../scripts/sequences/index_sequences.py"
 
 rule index_protein_sequences:
     input:
@@ -106,7 +106,7 @@ rule index_protein_sequences:
     conda:
         "../envs/sequences.yaml"
     script:
-        "../scripts/index_sequences.py"
+        "../scripts/sequences/index_sequences.py"
 
 rule all_sequences:
     input:

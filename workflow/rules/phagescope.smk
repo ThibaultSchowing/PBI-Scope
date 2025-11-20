@@ -23,11 +23,12 @@ rule download_tsv:
     output:
         config["intermediate_csv_output"] + "/{feature}/{source}.tsv" # removed temp() to keep files for debugging
     params: 
-        url = lambda wildcards: config[f"{wildcards.feature}_urls"][wildcards.source]
+        url = lambda wildcards: config[f"{wildcards.feature}_urls"][wildcards.source],
+        intermediate_csv_output = config["intermediate_csv_output"]
     threads: 8
     shell:
         """
-        mkdir -p {config["intermediate_csv_output"]}/{wildcards.feature}
+        mkdir -p {params.intermediate_csv_output}/{wildcards.feature}
         wget -O {output} {params.url} || echo "Failed download for {wildcards.feature}/{wildcards.source}"
         """
 
@@ -45,7 +46,7 @@ rule merge_transcription_terminator_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/preprocessing/mergers/merge_transcription_terminator_metadata.py"
+        "../scripts/preprocessing/mergers/merge_transcription_terminator_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE METADATA
@@ -61,7 +62,7 @@ rule merge_phage_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/preprocessing/mergers/merge_phage_metadata.py"
+        "../scripts/preprocessing/mergers/merge_phage_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE ANNOTATED PROTEINS METADATA
@@ -77,7 +78,7 @@ rule merge_annotated_proteins_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/preprocessing/mergers/merge_annotated_proteins_metadata.py"
+        "../scripts/preprocessing/mergers/merge_annotated_proteins_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE tRNA/tmRNA METADATA
@@ -93,7 +94,7 @@ rule merge_phage_trna_tmrna_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/preprocessing/mergers/merge_phage_trna_tmrna_metadata.py"
+        "../scripts/preprocessing/mergers/merge_phage_trna_tmrna_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE ANTI-CRISPR METADATA
@@ -109,7 +110,7 @@ rule merge_phage_anti_crispr_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/preprocessing/mergers/merge_phage_anti_crispr_metadata.py"
+        "../scripts/preprocessing/mergers/merge_phage_anti_crispr_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE VIRULENT FACTOR METADATA
@@ -126,7 +127,7 @@ rule merge_phage_virulent_factor_metadata_tsvs:
         "../envs/pixi_base_env.yaml"
     
     script:
-        "./scripts/preprocessing/mergers/merge_phage_virulent_factor_metadata.py"
+        "../scripts/preprocessing/mergers/merge_phage_virulent_factor_metadata.py"
 
 # ----------------------------------------
 # RULE MERGE PHAGE TRANSMEMBRANE PROTEIN METADATA
@@ -142,7 +143,7 @@ rule merge_phage_transmembrane_protein_metadata_tsvs:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/preprocessing/mergers/merge_phage_transmembrane_protein_metadata.py"
+        "../scripts/preprocessing/mergers/merge_phage_transmembrane_protein_metadata.py"
 
 
 rule generate_report:

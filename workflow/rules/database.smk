@@ -11,11 +11,11 @@ rule create_duckdb:
         transmembrane_data=config["phage_transmembrane_protein_metadata_merged_output"],
         trna_tmrna_data=config["phage_trna_tmrna_metadata_merged_output"]
     output:
-        db="../data/processed/databases/phage_database.duckdb"
+        db=config["duckdb_output"]
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/database/create_duckdb.py"   
+        "../scripts/database/create_duckdb.py"   
 
 rule optimize_database:
     input:
@@ -25,14 +25,14 @@ rule optimize_database:
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/database/optimize_db.py"
+        "../scripts/database/optimize_db.py"
 
 rule validate_database:
     input:
         db=config["optimized_duckdb_output"]
     output:
-        report="../reports/database_validation.html"  
+        report=config["database_validation_report_output"]  
     conda:
         "../envs/pixi_base_env.yaml"
     script:
-        "./scripts/database/validate_db.py"
+        "../scripts/database/validate_db.py"
