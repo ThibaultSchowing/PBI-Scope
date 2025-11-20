@@ -7,7 +7,7 @@ PROTEIN_FASTA_SOURCES = list(config["protein_fasta_urls"].keys())
 rule merge_phage_fasta:
     input:
         expand(
-            config["phage_fasta_merged_output"] + "/{source}.fasta",
+            config["phage_fasta_merged_output"] + "{source}.fasta",
             source=PHAGE_FASTA_SOURCES
         )
     output:
@@ -47,7 +47,7 @@ rule merge_phage_fasta:
 rule merge_protein_fasta:
     input:
         expand(
-            config["protein_fasta_merged_output"] + "/{source}.fasta", 
+            config["protein_fasta_merged_output"] + "{source}.fasta", 
             source=PROTEIN_FASTA_SOURCES
         )
     output:

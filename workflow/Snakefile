@@ -27,27 +27,18 @@ FEATURES = [
 # For the fasta files, the snakemake rules simply check that the directories are created but cannot check 
 # the content of the directories, as files are too numerous and not named in a predictable way.
 
-# Récupération des paramètres de config
-protein_fasta_urls = config["protein_fasta_urls"]
-compressed_dir = config["protein_fasta_compressed_output"]
-output_protein_fasta_dir = config["protein_fasta_output"]
-
 
 # Génération de la liste des dossiers extraits attendus pour les fichiers fasta (protéines)
 extracted_dirs_prot = [
-    os.path.join(output_protein_fasta_dir, name)
-    for name in protein_fasta_urls.keys()
+    os.path.join(config["protein_fasta_merged_output"], name)
+    for name in config["protein_fasta_urls"].keys()
 ]
 
-# Récupération des paramètres de config pour les fichiers fasta de phages
-phage_fasta_urls = config["phage_fasta_urls"]
-compressed_phage_dir = config["phage_fasta_compressed_output"]
-output_phage_fasta_dir = config["phage_fasta_output"]
 
 # Génération de la liste des dossiers extraits attendus pour les fichiers fasta de phages
 extracted_dirs_phages = [
-    os.path.join(output_phage_fasta_dir, name)
-    for name in phage_fasta_urls.keys()
+    os.path.join(config["phage_fasta_merged_output"], name)
+    for name in config["phage_fasta_urls"].keys()
 ]
 
 
@@ -58,23 +49,26 @@ extracted_dirs_phages = [
 
 rule all:
     input:
+        # Generated reports -> triggering the downloading and merging of metadata tsvs
         expand(
-            "reports/{feature}_report.html",
+            config["reports_output"] + "{feature}_report.html",
             feature=FEATURES
         ),
+        # Merging the protein fasta files -> triggering the downloading of protein fasta files
         expand(
-            "../data/intermediate/fasta/proteins/{dataset}.fasta",
-            dataset=list(protein_fasta_urls.keys())
+            config["protein_fasta_merged_output"] + "{dataset}.fasta",
+            dataset=list(config["protein_fasta_urls"].keys())
         ),
-        expand("../data/intermediate/fasta/phages/{dataset}.fasta",
-            dataset=list(phage_fasta_urls.keys())
+        # Merging the phage fasta files -> triggering the downloading of phage fasta files
+        expand(config["phage_fasta_merged_output"] + "{dataset}.fasta",
+            dataset=list(config["phage_fasta_urls"].keys())
         ),
-        "../data/processed/databases/phage_database_optimized.duckdb",
-        "reports/database_validation.html",
+        # DuckDB database and validation report
+        config["optimized_duckdb_output"],
+        config["reports_output"] + "database_validation.html",
         # Sequence indexing files
-        "../data/processed/sequences/all_phages.fasta.fai",
-        "../data/processed/sequences/all_proteins.fasta.fai"
-
+        config["all_phages_fasta"] + ".fai",
+        config["all_proteins_fasta"] + ".fai"
 
 
 # if launched with auto discovery of snakefile (from the root directory),no need to specify the workflow directory
