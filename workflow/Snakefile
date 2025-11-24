@@ -49,7 +49,7 @@ extracted_dirs_phages = [
 
 rule all:
     input:
-        # Generated reports -> triggering the downloading and merging of metadata tsvs
+        # Generated metadata reports -> triggering the downloading and merging of metadata tsvs
         expand(
             config["reports_output"] + "{feature}_report.html",
             feature=FEATURES
@@ -65,7 +65,7 @@ rule all:
         ),
         # DuckDB database and validation report
         config["optimized_duckdb_output"],
-        config["reports_output"] + "database_validation.html",
+        config["database_validation_report_output"],
         # Sequence indexing files
         config["all_phages_fasta"] + ".fai",
         config["all_proteins_fasta"] + ".fai"
