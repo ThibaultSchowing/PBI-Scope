@@ -90,6 +90,8 @@ Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/cac
 - **Current command:** `pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4 `
     - **DAG Option (path relative to bash location)**`--dag | dot -Tsvg > workflow/dag/dag.svg`
 
+- **Install pbi**: to install pbi use the command `pixi run pip install -e .` in the root directory. 
+
 To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified). In the mean time, the temp() option was removed from the intermediairy files as it takes too long to regenerage when modifying the script.:
 
 - pixi run snakemake --delete-temp-output
