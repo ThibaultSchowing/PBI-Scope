@@ -14,7 +14,7 @@ from .sequence_retrieval import SequenceRetriever
 
 # Package metadata
 __version__ = "0.1.0"
-__author__ = "Thibault Schowing"
+__author__ = "Thibault Schowing, CI4CB"
 
 # Define what gets imported with "from pbi import *"
 __all__ = [
