@@ -4,6 +4,16 @@ A comprehensive bioinformatics pipeline for integrating, processing, and analyzi
 
 > ⚠️ **WORK IN PROGRESS**: This pipeline is under active development.
 
+## Next Steps
+
+- Add data
+- Prepare to add data
+- Database update module
+- ML integration
+- Docker
+
+
+
 ## 📊 Current Implementation Status
 
 ### ✅ **Fully Integrated Tables** (Available in Database)
@@ -12,26 +22,30 @@ The following data types are fully integrated into the DuckDB star schema:
 
 | Table | Source CSV | Status | Row Count (approx.) | Description |
 |-------|-----------|--------|---------------------|-------------|
-| **`fact_phages`** | `merged_phage_metadata.csv` | ✅ Complete | ~550,000 | Core phage metadata (genome size, GC content, taxonomy, host, lifestyle) |
-| **`dim_proteins`** | `merged_annotated_proteins_metadata.csv` | ✅ Complete | ~43,000,000 | Protein annotations, functional predictions, physicochemical properties |
-| **`dim_terminators`** | `merged_transcription_terminator_metadata.csv` | ✅ Complete | ~2,800,000 | Transcription terminator predictions and confidence scores |
-| **`dim_anti_crispr`** | `merged_phage_anti_crispr_metadata.csv` | ✅ Complete | ~500,000 | Anti-CRISPR protein predictions and sources |
-| **`dim_virulent_factors`** | `merged_phage_virulent_factor_metadata.csv` | ✅ Complete | ~1,200,000 | Virulence factor predictions aligned to VFDB |
-| **`dim_transmembrane_proteins`** | `merged_phage_transmembrane_protein_metadata.csv` | ✅ Complete | ~8,500,000 | Transmembrane helix predictions (TMHMM) |
-| **`dim_trna_tmrna`** | `merged_phage_trna_tmrna_metadata.csv` | ✅ Complete | ~3,200,000 | tRNA and tmRNA predictions with sequences |
+| **`fact_phages`** | `merged_phage_metadata.csv` | ✅ Complete | 873,718 | Core phage metadata (genome size, GC content, taxonomy, host, lifestyle) |
+| **`dim_proteins`** | `merged_annotated_proteins_metadata.csv` | ✅ Complete | 43,088,582 | Protein annotations, functional predictions, physicochemical properties |
+| **`dim_terminators`** | `merged_transcription_terminator_metadata.csv` | ✅ Complete | 6,462,417 | Transcription terminator predictions and confidence scores |
+| **`dim_anti_crispr`** | `merged_phage_anti_crispr_metadata.csv` | ✅ Complete | 307,329 | Anti-CRISPR protein predictions and sources |
+| **`dim_virulent_factors`** | `merged_phage_virulent_factor_metadata.csv` | ✅ Complete | 41,609 | Virulence factor predictions aligned to VFDB |
+| **`dim_transmembrane_proteins`** | `merged_phage_transmembrane_protein_metadata.csv` | ✅ Complete | 4,020,770 | Transmembrane helix predictions (TMHMM) |
+| **`dim_trna_tmrna`** | `merged_phage_trna_tmrna_metadata.csv` | ✅ Complete | 702,607 | tRNA and tmRNA predictions with sequences |
+| CRISPR Arrays | `` | 🔄 In Progress | 56,652 |
+| Antimicrobial Resistance Genes | `` | 🔄 In Progress | 2,602 |
 
 ### 🎯 **Database Schema Overview**
 
-The pipeline implements a **7-table star schema** with `fact_phages` as the central fact table:
+The pipeline implements a **9-table star schema** with `fact_phages` as the central fact table:
 
 ```
-              dim_proteins ──┐
-           dim_terminators ──┤
-                             ├──> fact_phages (central)
-         dim_anti_crispr ──┤
-      dim_virulent_factors ──┤
-dim_transmembrane_proteins ──┤
-           dim_trna_tmrna ──┘
+                     dim_proteins ──┐
+                  dim_terminators ──┤
+                                    ├──> fact_phages (central)
+                  dim_anti_crispr ──┤
+             dim_virulent_factors ──┤
+       dim_transmembrane_proteins ──┤
+dim_antimicrobial_resistance_genes ─┤ 🔄 In Progress
+                  dim_crispr_array ─┤ 🔄 In Progress
+                   dim_trna_tmrna ──┘
 ```
 
 All dimension tables link to `fact_phages` via **`Phage_ID`** foreign key, enabling comprehensive multi-dimensional analysis.
@@ -42,8 +56,8 @@ All dimension tables link to `fact_phages` via **`Phage_ID`** foreign key, enabl
 
 The PBI pipeline addresses key challenges in phage genomics research:
 
-- **Data Integration**: Harmonizes phage data from multiple heterogeneous sources
-- **Standardization**: Creates consistent data schemas across different databases
+- **Data Integration**: Harmonizes phage data from multiple heterogeneous sources, done here by PhageScope
+- **Standardization**: Creates consistent data schemas across different databases. PhageScope is already merging heterogenous sources. Here we plan to allow for custom sources addition, via PhageScope or not, TBD
 - **Performance**: Builds optimized analytical databases for large-scale queries
 - **Reproducibility**: Provides a fully automated, version-controlled pipeline
 - **Accessibility**: Generates easy-to-use databases for downstream analysis
