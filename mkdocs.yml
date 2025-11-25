@@ -1,0 +1,16 @@
+site_name: PBI documentation
+site_description: Documentation for the PBI repository
+# Important: set the full site_url for correct absolute links when hosted under /PBI/
+site_url: https://ThibaultSchowing.github.io/PBI/
+repo_name: ThibaultSchowing/PBI
+repo_url: https://github.com/ThibaultSchowing/PBI
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Getting started:
+      - Overview: getting-started/overview.md
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ThibaultSchowing/PBI
