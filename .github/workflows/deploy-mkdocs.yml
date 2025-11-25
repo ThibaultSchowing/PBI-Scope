@@ -1,3 +1,6 @@
+permissions:
+  contents: write
+
 name: Deploy MkDocs site to GitHub Pages
 
 # Build on pull requests and pushes. Deploy only when pushing to main.
