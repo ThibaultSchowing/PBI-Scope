@@ -48,6 +48,7 @@ for infile in inputs:
     df = utils.rename_columns(df, infile)
 
     # Validate that the DataFrame contains all expected columns
+    # TODO: instead of skipping, we could add missing columns with NaN values
     if not utils.validate_columns(df, COLUMNS_LIST):
         logging.warning(f"File {infile} is missing expected columns. Skipping.")
         continue

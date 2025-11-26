@@ -9,7 +9,9 @@ rule create_duckdb:
         anti_crispr_data=config["phage_anti_crispr_metadata_merged_output"], 
         virulent_factor_data=config["phage_virulent_factor_metadata_merged_output"],
         transmembrane_data=config["phage_transmembrane_protein_metadata_merged_output"],
-        trna_tmrna_data=config["phage_trna_tmrna_metadata_merged_output"]
+        trna_tmrna_data=config["phage_trna_tmrna_metadata_merged_output"],
+        antimicrobial_resistance_data=config["antimicrobial_resistance_gene_metadata_merged_output"],
+        crispr_array_data=config["crispr_array_metadata_merged_output"]
     output:
         db=config["duckdb_output"]
     conda:

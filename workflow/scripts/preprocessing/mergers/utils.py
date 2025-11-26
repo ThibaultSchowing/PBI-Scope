@@ -29,6 +29,14 @@ def is_file_empty_or_invalid(filepath):
 def validate_columns(df, expected_columns):
     '''Validate that the DataFrame contains all expected columns.'''
     missing_cols = [col for col in expected_columns if col not in df.columns]
+    # add missing cols with NaN values, and place them at the correct position
+    for col in missing_cols:
+        df.insert(expected_columns.index(col), col, np.nan)
+        logging.info(f"Added missing column {col} with NaN values")
+    
+    # Recompute missing cols
+    missing_cols = [col for col in expected_columns if col not in df.columns]
+
     if missing_cols:
         logging.warning(f"Missing columns: {missing_cols}")
         return False

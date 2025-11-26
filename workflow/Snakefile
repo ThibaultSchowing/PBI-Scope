@@ -21,7 +21,9 @@ FEATURES = [
     "phage_trna_tmrna_metadata", 
     "phage_anti_crispr_metadata", 
     "phage_virulent_factor_metadata", 
-    "phage_transmembrane_protein_metadata"
+    "phage_transmembrane_protein_metadata",
+    "antimicrobial_resistance_gene_metadata",
+    "crispr_array_metadata"
 ]
 
 # For the fasta files, the snakemake rules simply check that the directories are created but cannot check 

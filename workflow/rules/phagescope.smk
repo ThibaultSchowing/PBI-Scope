@@ -145,6 +145,37 @@ rule merge_phage_transmembrane_protein_metadata_tsvs:
     script:
         "../scripts/preprocessing/mergers/merge_phage_transmembrane_protein_metadata.py"
 
+# ----------------------------------------
+# RULE MERGE ANTIMICROBIAL RESISTANCE GENE METADATA
+# ----------------------------------------
+rule merge_antimicrobial_resistance_gene_metadata_tsvs:
+    input:
+        expand(
+            config["antimicrobial_resistance_gene_metadata_intermediate_output"] + "/{source}.tsv",
+            source=list(config["antimicrobial_resistance_gene_metadata_urls"].keys()) # e.g. RefSeq_Antimicrobial_Resistance_Gene_Metadata_URL
+        )
+    output:
+        config["antimicrobial_resistance_gene_metadata_merged_output"]
+    conda:
+        "../envs/pixi_base_env.yaml"
+    script:
+        "../scripts/preprocessing/mergers/merge_antimicrobial_resistance_gene_metadata.py"
+
+# ----------------------------------------
+# RULE MERGE CRISPR ARRAY METADATA
+# ----------------------------------------
+rule merge_crispr_array_metadata_tsvs:
+    input:
+        expand(
+            config["crispr_array_metadata_intermediate_output"] + "/{source}.tsv",
+            source=list(config["crispr_array_metadata_urls"].keys())
+        )
+    output:
+        config["crispr_array_metadata_merged_output"]
+    conda:
+        "../envs/pixi_base_env.yaml"
+    script:
+        "../scripts/preprocessing/mergers/merge_crispr_array_metadata.py"
 
 rule generate_report:
     input:

@@ -1,10 +1,10 @@
 # PBI Scraper
 
-![HEIG](./docs/img/English_HEIG-VD_logotype_rouge-rvb.jpg)
-
 Phages Bacteria Interaction data scraping.
 
 WORK IN PROGRESS - DRAFT
+
+Future documentation in [github pages](https://thibaultschowing.github.io/PBI/).
 
 ## Summary
 
