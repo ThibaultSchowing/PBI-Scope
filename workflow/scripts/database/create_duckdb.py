@@ -278,24 +278,32 @@ def create_star_schema_duckdb():
 
     # CREATE PERFORMANCE INDEXES
     logging.info("Creating indexes")
+
+    # Indexes for fact_phages table
     conn.execute("CREATE INDEX idx_phages_id ON fact_phages(Phage_ID)")
     conn.execute("CREATE INDEX idx_phages_source ON fact_phages(Source_DB)")
     
+    # Indexes for dim_proteins table
     conn.execute("CREATE INDEX idx_proteins_phage ON dim_proteins(Phage_ID)")
     conn.execute("CREATE INDEX idx_proteins_source ON dim_proteins(Source_DB)")
     
+    # Indexes for terminator table
     conn.execute("CREATE INDEX idx_terminators_phage ON dim_terminators(Phage_ID)")
     conn.execute("CREATE INDEX idx_terminators_source ON dim_terminators(Source_DB)")
     
+    # Indexes for anti_crispr table
     conn.execute("CREATE INDEX idx_anti_crispr_phage ON dim_anti_crispr(Phage_ID)")
     conn.execute("CREATE INDEX idx_anti_crispr_source ON dim_anti_crispr(Source_DB)")
     
+    # Indexes for virulent_factors table
     conn.execute("CREATE INDEX idx_virulent_phage ON dim_virulent_factors(Phage_ID)")
     conn.execute("CREATE INDEX idx_virulent_source ON dim_virulent_factors(Source_DB)")
     
+    # Indexes for transmembrane_proteins table
     conn.execute("CREATE INDEX idx_transmembrane_phage ON dim_transmembrane_proteins(Phage_ID)")
     conn.execute("CREATE INDEX idx_transmembrane_source ON dim_transmembrane_proteins(Source_DB)")
     
+    # Indexes for trna_tmrna table
     conn.execute("CREATE INDEX idx_trna_phage ON dim_trna_tmrna(Phage_ID)")
     conn.execute("CREATE INDEX idx_trna_source ON dim_trna_tmrna(Source_DB)")
 

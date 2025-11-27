@@ -10,6 +10,17 @@ nav:
   - Home: index.md
   - Getting started:
       - Overview: getting-started/overview.md
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+  - User Guide:
+      - Data Preparation: user-guide/data-preparation.md
+      - Running PBI: user-guide/running-pbi.md
+      - Analyzing Results: user-guide/analyzing-results.md
+  - Developer Guide:
+      - Code Structure: developer-guide/code-structure.md
+#      - Contributing: developer-guide/contributing.md
+  - API Reference: api-reference.md
+  - Changelog: changelog.md
 extra:
   social:
     - icon: fontawesome/brands/github
