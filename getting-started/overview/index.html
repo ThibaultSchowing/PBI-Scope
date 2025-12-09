@@ -366,7 +366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../quickstart/" class="md-nav__link">
+      <a href="../quickstart.md" class="md-nav__link">
         
   
   
@@ -711,9 +711,8 @@
 <p>⚠️ <strong>WORK IN PROGRESS</strong> 🔄 : This pipeline and documentation are under active development. </p>
 </blockquote>
 <h1 id="phage-bacteria-interaction-pbi">🧬 Phage Bacteria Interaction (PBI)</h1>
-<p>A comprehensive bioinformatics pipeline for integrating, processing, and analyzing phage and host genomic data from multiple public databases already gathered within <a href="https://phagescope.deepomics.org/workspace/">PhageScope</a>. This pipeline creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within PhageScope. </p>
+<p>This pipeline and API is used to gather phage and host genomic data from multiple public databases and creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within <a href="https://phagescope.deepomics.org/workspace/">PhageScope</a>. </p>
 <p>The broader goal is to integrate more sources and automatize these integration as much as possible, while allowing retrieval of the host (bacteria) sequence retrieval either by getting the reference sequence or ideally having a specific strain matching a specitic phage.  </p>
-<p><strong>Disclaimer</strong> : The project has been written with obvious help from Copilot Pro and Claude Sonnet 4.5. </p>
 <h2 id="project-goals">🎯 Project Goals</h2>
 <p>The PBI pipeline addresses key challenges in phage genomics research:</p>
 <ul>
@@ -835,41 +834,52 @@ dim_antimicrobial_resistance_genes ─┤
 <li>Source database tracking</li>
 </ul>
 <h4 id="dimension-tables"><strong>Dimension Tables</strong></h4>
-<details>
-<summary>Table details</summary>
-
-- **`dim_proteins`**: Detailed protein information
-  - Functional annotations and classifications
-  - Physicochemical properties (MW, pI, stability)
-  - Secondary structure predictions
-  - Multi-source predictions (Prokka, Pharokka, etc.)
-
-- **`dim_terminators`**: Transcription termination sites
-  - Terminator type and location
-  - Confidence scores
-  - Strand orientation
-
-- **`dim_anti_crispr`**: Anti-CRISPR defense systems
-  - Protein identification
-  - Source and prediction method
-  - Phage-host interactions
-
-- **`dim_virulent_factors`**: Virulence determinants
-  - VFDB alignment matches
-  - Pathogenicity markers
-
-- **`dim_transmembrane_proteins`**: Membrane protein predictions
-  - TMH (transmembrane helix) counts and positions
-  - Signal peptide predictions
-  - Topology (inside/outside/TMH regions)
-
-- **`dim_trna_tmrna`**: Transfer RNA and tmRNA features
-  - tRNA type (amino acid specificity)
-  - Genomic coordinates
-  - Sequences and permutation status
-
-</details>
-
+<ul>
+<li><strong><code>dim_proteins</code></strong>: Detailed protein information</li>
+<li>Functional annotations and classifications</li>
+<li>Physicochemical properties (MW, pI, stability)</li>
+<li>Secondary structure predictions</li>
+<li>
+<p>Multi-source predictions (Prokka, Pharokka, etc.)</p>
+</li>
+<li>
+<p><strong><code>dim_terminators</code></strong>: Transcription termination sites</p>
+</li>
+<li>Terminator type and location</li>
+<li>Confidence scores</li>
+<li>
+<p>Strand orientation</p>
+</li>
+<li>
+<p><strong><code>dim_anti_crispr</code></strong>: Anti-CRISPR defense systems</p>
+</li>
+<li>Protein identification</li>
+<li>Source and prediction method</li>
+<li>
+<p>Phage-host interactions</p>
+</li>
+<li>
+<p><strong><code>dim_virulent_factors</code></strong>: Virulence determinants</p>
+</li>
+<li>VFDB alignment matches</li>
+<li>
+<p>Pathogenicity markers</p>
+</li>
+<li>
+<p><strong><code>dim_transmembrane_proteins</code></strong>: Membrane protein predictions</p>
+</li>
+<li>TMH (transmembrane helix) counts and positions</li>
+<li>Signal peptide predictions</li>
+<li>
+<p>Topology (inside/outside/TMH regions)</p>
+</li>
+<li>
+<p><strong><code>dim_trna_tmrna</code></strong>: Transfer RNA and tmRNA features</p>
+</li>
+<li>tRNA type (amino acid specificity)</li>
+<li>Genomic coordinates</li>
+<li>Sequences and permutation status</li>
+</ul>
 <h2 id="project-structure">📁 Project Structure</h2>
 <details>
 <summary>Table details</summary>
@@ -1011,6 +1021,8 @@ The project is separated into:
 
 
 </details>
+
+<p><strong>Disclaimer</strong> : The project has been written with obvious help from Copilot Pro and Claude Sonnet 4.5. </p>
 
 
 

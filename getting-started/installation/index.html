@@ -16,7 +16,7 @@
         <link rel="prev" href="../overview/">
       
       
-        <link rel="next" href="../quickstart/">
+        <link rel="next" href="../../user-guide/data-preparation/">
       
       
         
@@ -554,7 +554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../quickstart/" class="md-nav__link">
+      <a href="../quickstart.md" class="md-nav__link">
         
   
   
@@ -1061,11 +1061,14 @@
 <p>Get started with PBI in under 10 minutes!</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
-<li>Linux/macOS (Windows via WSL2)</li>
-<li>~50 GB free disk space (for full database)</li>
-<li>8+ GB RAM recommended</li>
-<li>Internet connection</li>
-<li>Patience for the first execution</li>
+<li><strong>Linux</strong>/macOS (Windows via WSL2)</li>
+<li><strong>Python 3.8+</strong></li>
+<li><strong>Pixi package manager</strong> (<a href="https://pixi.sh/latest/">installation guide</a>)</li>
+<li><strong>Conda</strong> (used via Snakemake's <code>--use-conda</code> option)</li>
+<li><strong>Internet connection</strong> (for data downloads)</li>
+<li><strong>Disk space</strong>: &gt;50GB recommended</li>
+<li><strong>RAM</strong>: &gt;32GB recommended for a smooth non-swapping execution</li>
+<li><strong>Patience</strong>: building the full database and reports from scratch takes 2-4 hours</li>
 </ul>
 <h3 id="step-by-step-installation">Step-by-Step Installation</h3>
 <h4 id="1-install-pixi">1. Install Pixi</h4>
@@ -1125,6 +1128,35 @@ pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory wo
 # pixi run snakemake --cores all --use-conda
 
 </code></pre>
+<details>
+<summary>Pipeline details</summary>
+
+### Running the Pipeline piece by piece
+
+
+<pre><code class="language-bash">
+# Development (keep temp files with --notemp) - Full pipeline execution (all tables + validation)
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
+
+# Create database only
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores 4 \
+  ../data/databases/phage_database.duckdb
+
+# Generate validation report
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores 4 \
+  reports/database_validation.html
+
+# Create optimized database
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores 4 \
+  ../data/databases/phage_database_optimized.duckdb
+</code></pre>
+
+
+</details>
+
 <p><strong>Command Breakdown:</strong></p>
 <ul>
 <li><code>--cores 4</code>: Use 4 CPU cores (adjust based on your system)</li>
