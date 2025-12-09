@@ -88,6 +88,7 @@ pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory wo
 ```
 
 **Command Breakdown:**
+
 - `--cores 4`: Use 4 CPU cores (adjust based on your system)
 - `--use-conda`: Automatically create required conda environments
 - `--printshellcmds`: Show commands being executed (useful for debugging)
