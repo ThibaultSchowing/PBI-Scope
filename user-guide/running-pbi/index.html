@@ -67,6 +67,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#running-the-pipeline" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -468,6 +473,24 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running PBI
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -484,6 +507,62 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗄️ Using the Database
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗄️ Using the Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -679,6 +758,53 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running the pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-the-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗄️ Using the Database
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗄️ Using the Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -699,7 +825,88 @@
 
   <h1>Running PBI</h1>
 
+<h2 id="running-the-pipeline">Running the pipeline</h2>
+<p>Snakemake is launched from Pixi with <code>pixi run</code>. </p>
+<p>When executing for the first time <strong>do not</strong> use more than 2-4 cores as the I/O operations on your drive will be the bottleneck and might crash the program. </p>
+<p>Input, output, log, and benchmark files are considered to be relative to the working directory (<strong>either the directory in which you have invoked Snakemake</strong> or whatever was specified for --directory or the workdir: directive). -&gt; from the workflow directory !</p>
+<p>The Pixi environment needs to be exported first with <code>pixi workspace export conda-environment -e base envs/pixi_base_enf.yaml</code></p>
+<p>The Conda environment to use is specified within each rule (if needed) with </p>
+<pre><code>    conda:
+        &quot;envs/pixi_base_env.yaml&quot;
+</code></pre>
+<p>Cache: to use <a href="https://snakemake.readthedocs.io/en/stable/executing/caching.html">caching</a>, it is first needed to export snakemake cache with <code>export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/</code> (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.</p>
+<ul>
+<li>
+<p><strong>Current command:</strong> <code>pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4</code></p>
+<ul>
+<li><strong>DAG Option (path relative to bash location)</strong><code>--dag | dot -Tsvg &gt; workflow/dag/dag.svg</code></li>
+</ul>
+</li>
+<li>
+<p><strong>Install pbi</strong>: to install pbi use the command <code>pixi run pip install -e .</code> in the root directory. </p>
+</li>
+</ul>
+<p>To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified). In the mean time, the temp() option was removed from the intermediairy files as it takes too long to regenerage when modifying the script.:</p>
+<ul>
+<li>pixi run snakemake --delete-temp-output</li>
+</ul>
+<h2 id="using-the-database">🗄️ Using the Database</h2>
+<p>The pipeline generates a <strong>DuckDB</strong> database optimized for analytical queries.</p>
+<h3 id="python-integration">Python Integration</h3>
+<pre><code class="language-python">import duckdb
 
+# Connect to database
+conn = duckdb.connect('data/databases/phage_database_optimized.duckdb')
+
+# Simple query
+df = conn.execute(&quot;&quot;&quot;
+    SELECT Source_DB, COUNT(*) as count 
+    FROM fact_phages 
+    GROUP BY Source_DB
+&quot;&quot;&quot;).df()
+
+# Complex analytical query - phage characterization
+results = conn.execute(&quot;&quot;&quot;
+    SELECT 
+        f.Source_DB,
+        f.Phage_ID,
+        f.Length,
+        f.GC_content,
+        f.Host,
+        f.Lifestyle,
+        COUNT(DISTINCT p.Protein_ID) as protein_count,
+        COUNT(DISTINCT t.terminator_type) as terminator_types,
+        COUNT(DISTINCT a.Protein_ID) as anti_crispr_count,
+        COUNT(DISTINCT v.Protein_ID) as virulent_factor_count,
+        COUNT(DISTINCT tm.Protein_ID) as transmembrane_count,
+        COUNT(DISTINCT tr.trna_tmrna_id) as trna_count
+    FROM fact_phages f
+    LEFT JOIN dim_proteins p ON f.Phage_ID = p.Phage_ID
+    LEFT JOIN dim_terminators t ON f.Phage_ID = t.Phage_ID
+    LEFT JOIN dim_anti_crispr a ON f.Phage_ID = a.Phage_ID
+    LEFT JOIN dim_virulent_factors v ON f.Phage_ID = v.Phage_ID
+    LEFT JOIN dim_transmembrane_proteins tm ON f.Phage_ID = tm.Phage_ID
+    LEFT JOIN dim_trna_tmrna tr ON f.Phage_ID = tr.Phage_ID
+    WHERE f.Length &gt; 50000
+    GROUP BY f.Source_DB, f.Phage_ID, f.Length, f.GC_content, f.Host, f.Lifestyle
+    ORDER BY f.Length DESC
+    LIMIT 100
+&quot;&quot;&quot;).fetchall()
+
+# Query specific dimension tables
+transmembrane_stats = conn.execute(&quot;&quot;&quot;
+    SELECT 
+        predicted_tmhs_number,
+        COUNT(*) as protein_count,
+        AVG(protein_length) as avg_length
+    FROM dim_transmembrane_proteins
+    WHERE predicted_tmhs_number IS NOT NULL
+    GROUP BY predicted_tmhs_number
+    ORDER BY predicted_tmhs_number
+&quot;&quot;&quot;).df()
+
+conn.close()
+</code></pre>
 
 
 
