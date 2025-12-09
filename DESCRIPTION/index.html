@@ -23,7 +23,7 @@
     
     
       
-        <title>🧬 PhageScope Bioinformatics Integration (PBI) - PBI documentation</title>
+        <title>DESCRIPTION - PBI documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#phagescope-bioinformatics-integration-pbi" class="md-skip">
+        <a href="#next-steps" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              🧬 PhageScope Bioinformatics Integration (PBI)
+              DESCRIPTION
             
           </span>
         </div>
@@ -669,8 +669,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -687,147 +685,8 @@
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#current-implementation-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📊 Current Implementation Status
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="📊 Current Implementation Status">
+    <nav class="md-nav" aria-label="Next Steps">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fully-integrated-tables-available-in-database" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ✅ Fully Integrated Tables (Available in Database)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-schema-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🎯 Database Schema Overview
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-goals" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🎯 Project Goals
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pipeline-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📊 Pipeline Overview
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="📊 Pipeline Overview">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#architecture" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🏗️ Architecture
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🏗️ Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fact-table" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fact Table
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dimension-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dimension Tables
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#project-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📁 Project Structure
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-the-database" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🗄️ Using the Database
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🗄️ Using the Database">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#python-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python Integration
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#available-views" class="md-nav__link">
@@ -1215,11 +1074,8 @@
   
 
 
-<h1 id="phagescope-bioinformatics-integration-pbi">🧬 PhageScope Bioinformatics Integration (PBI)</h1>
-<p>A comprehensive bioinformatics pipeline for integrating, processing, and analyzing phage genomic data from multiple public databases already gathered within <a href="https://phagescope.deepomics.org/workspace/">PhageScope</a>. This pipeline creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within PhageScope.</p>
-<blockquote>
-<p>⚠️ <strong>WORK IN PROGRESS</strong>: This pipeline is under active development.</p>
-</blockquote>
+  <h1>DESCRIPTION</h1>
+
 <h2 id="next-steps">Next Steps</h2>
 <ul>
 <li>Add data</li>
@@ -1228,273 +1084,6 @@
 <li>ML integration</li>
 <li>Docker</li>
 </ul>
-<h2 id="current-implementation-status">📊 Current Implementation Status</h2>
-<h3 id="fully-integrated-tables-available-in-database">✅ <strong>Fully Integrated Tables</strong> (Available in Database)</h3>
-<p>The following data types are fully integrated into the DuckDB star schema:</p>
-<table>
-<thead>
-<tr>
-<th>Table</th>
-<th>Source CSV</th>
-<th>Status</th>
-<th>Row Count (approx.)</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><code>fact_phages</code></strong></td>
-<td><code>merged_phage_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>873,718</td>
-<td>Core phage metadata (genome size, GC content, taxonomy, host, lifestyle)</td>
-</tr>
-<tr>
-<td><strong><code>dim_proteins</code></strong></td>
-<td><code>merged_annotated_proteins_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>43,088,582</td>
-<td>Protein annotations, functional predictions, physicochemical properties</td>
-</tr>
-<tr>
-<td><strong><code>dim_terminators</code></strong></td>
-<td><code>merged_transcription_terminator_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>6,462,417</td>
-<td>Transcription terminator predictions and confidence scores</td>
-</tr>
-<tr>
-<td><strong><code>dim_anti_crispr</code></strong></td>
-<td><code>merged_phage_anti_crispr_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>307,329</td>
-<td>Anti-CRISPR protein predictions and sources</td>
-</tr>
-<tr>
-<td><strong><code>dim_virulent_factors</code></strong></td>
-<td><code>merged_phage_virulent_factor_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>41,609</td>
-<td>Virulence factor predictions aligned to VFDB</td>
-</tr>
-<tr>
-<td><strong><code>dim_transmembrane_proteins</code></strong></td>
-<td><code>merged_phage_transmembrane_protein_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>4,020,770</td>
-<td>Transmembrane helix predictions (TMHMM)</td>
-</tr>
-<tr>
-<td><strong><code>dim_trna_tmrna</code></strong></td>
-<td><code>merged_phage_trna_tmrna_metadata.csv</code></td>
-<td>✅ Complete</td>
-<td>702,607</td>
-<td>tRNA and tmRNA predictions with sequences</td>
-</tr>
-<tr>
-<td>CRISPR Arrays</td>
-<td>``</td>
-<td>🔄 In Progress</td>
-<td>56,652</td>
-<td></td>
-</tr>
-<tr>
-<td>Antimicrobial Resistance Genes</td>
-<td>``</td>
-<td>🔄 In Progress</td>
-<td>2,602</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h3 id="database-schema-overview">🎯 <strong>Database Schema Overview</strong></h3>
-<p>The pipeline implements a <strong>9-table star schema</strong> with <code>fact_phages</code> as the central fact table:</p>
-<pre><code>                     dim_proteins ──┐
-                  dim_terminators ──┤
-                                    ├──&gt; fact_phages (central)
-                  dim_anti_crispr ──┤
-             dim_virulent_factors ──┤
-       dim_transmembrane_proteins ──┤
-dim_antimicrobial_resistance_genes ─┤ 🔄 In Progress
-                  dim_crispr_array ─┤ 🔄 In Progress
-                   dim_trna_tmrna ──┘
-</code></pre>
-<p>All dimension tables link to <code>fact_phages</code> via <strong><code>Phage_ID</code></strong> foreign key, enabling comprehensive multi-dimensional analysis.</p>
-<hr />
-<h2 id="project-goals">🎯 Project Goals</h2>
-<p>The PBI pipeline addresses key challenges in phage genomics research:</p>
-<ul>
-<li><strong>Data Integration</strong>: Harmonizes phage data from multiple heterogeneous sources, done here by PhageScope</li>
-<li><strong>Standardization</strong>: Creates consistent data schemas across different databases. PhageScope is already merging heterogenous sources. Here we plan to allow for custom sources addition, via PhageScope or not, TBD</li>
-<li><strong>Performance</strong>: Builds optimized analytical databases for large-scale queries</li>
-<li><strong>Reproducibility</strong>: Provides a fully automated, version-controlled pipeline</li>
-<li><strong>Accessibility</strong>: Generates easy-to-use databases for downstream analysis</li>
-<li><strong>Quality Assurance</strong>: Comprehensive validation and HTML reporting</li>
-</ul>
-<h2 id="pipeline-overview">📊 Pipeline Overview</h2>
-<pre><code>Raw Data Sources → Download → Merge → Validate → Optimized Database
-     ↓               ↓        ↓        ↓            ↓
-  PhageScope      TSV Files  Clean    Quality    DuckDB Star
-  14 databases    CSV merge  Unified  Checks     Schema (7 tables)
-  GenBank/RefSeq  Standard   CSVs     Reports    Indexed &amp; Optimized
-</code></pre>
-<h3 id="architecture">🏗️ Architecture</h3>
-<p>The pipeline implements a <strong>star schema</strong> database design optimized for analytical queries:</p>
-<h4 id="fact-table"><strong>Fact Table</strong></h4>
-<ul>
-<li><strong><code>fact_phages</code></strong>: Central table with core phage metadata</li>
-<li>Genome characteristics (length, GC content)</li>
-<li>Taxonomy and classification</li>
-<li>Host information</li>
-<li>Lifestyle (lytic/lysogenic)</li>
-<li>Source database tracking</li>
-</ul>
-<h4 id="dimension-tables"><strong>Dimension Tables</strong></h4>
-<ul>
-<li><strong><code>dim_proteins</code></strong>: Detailed protein information</li>
-<li>Functional annotations and classifications</li>
-<li>Physicochemical properties (MW, pI, stability)</li>
-<li>Secondary structure predictions</li>
-<li>
-<p>Multi-source predictions (Prokka, Pharokka, etc.)</p>
-</li>
-<li>
-<p><strong><code>dim_terminators</code></strong>: Transcription termination sites</p>
-</li>
-<li>Terminator type and location</li>
-<li>Confidence scores</li>
-<li>
-<p>Strand orientation</p>
-</li>
-<li>
-<p><strong><code>dim_anti_crispr</code></strong>: Anti-CRISPR defense systems</p>
-</li>
-<li>Protein identification</li>
-<li>Source and prediction method</li>
-<li>
-<p>Phage-host interactions</p>
-</li>
-<li>
-<p><strong><code>dim_virulent_factors</code></strong>: Virulence determinants</p>
-</li>
-<li>VFDB alignment matches</li>
-<li>
-<p>Pathogenicity markers</p>
-</li>
-<li>
-<p><strong><code>dim_transmembrane_proteins</code></strong>: Membrane protein predictions</p>
-</li>
-<li>TMH (transmembrane helix) counts and positions</li>
-<li>Signal peptide predictions</li>
-<li>
-<p>Topology (inside/outside/TMH regions)</p>
-</li>
-<li>
-<p><strong><code>dim_trna_tmrna</code></strong>: Transfer RNA and tmRNA features</p>
-</li>
-<li>tRNA type (amino acid specificity)</li>
-<li>Genomic coordinates</li>
-<li>Sequences and permutation status</li>
-</ul>
-<h2 id="project-structure">📁 Project Structure</h2>
-<pre><code>PBI/
-├── workflow/
-│   ├── Snakefile                    # Main pipeline definition
-│   ├── rules/                       # Modular pipeline rules
-│   │   ├── phagescope.smk          # Data download &amp; merging
-│   │   └── database.smk            # Database creation &amp; validation
-│   ├── scripts/                     # Processing scripts
-│   │   ├── create_duckdb.py        # Database creation (7 tables)
-│   │   ├── validate_db.py          # Quality validation &amp; reporting
-│   │   ├── optimize_db.py          # Database optimization
-│   │   ├── mergers/                # Data integration scripts
-│   │   │   ├── merge_phage_metadata.py
-│   │   │   ├── merge_protein_metadata.py
-│   │   │   ├── merge_terminator_metadata.py
-│   │   │   ├── merge_anti_crispr_metadata.py
-│   │   │   ├── merge_virulent_factor_metadata.py
-│   │   │   ├── merge_transmembrane_metadata.py
-│   │   │   └── merge_trna_tmrna_metadata.py
-│   │   └── utils.py                # Shared utilities
-│   ├── notebooks/                  # Exploratory analysis notebooks
-│   │   ├── expl_5_TestDB.ipynb    # Database exploration &amp; visualization
-│   │   └── ...
-│   └── envs/                       # Conda environments
-│       ├── pixi_base_env.yaml     # Base environment
-│       └── duckdb_analysis.yaml   # Analysis environment
-├── data/                           # Generated data
-│   ├── intermediate_csv/           # Downloaded raw data (by source)
-│   ├── merged/                     # Integrated datasets (7 CSVs)
-│   └── databases/                  # Final databases
-│       ├── phage_database.duckdb
-│       └── phage_database_optimized.duckdb
-└── reports/                        # Validation reports (HTML)
-    ├── database_validation.html
-    ├── phage_metadata_report.html
-    ├── annotated_proteins_metadata_report.html
-    ├── transcription_terminator_metadata_report.html
-    ├── phage_anti_crispr_metadata_report.html
-    ├── phage_virulent_factor_metadata_report.html
-    ├── phage_transmembrane_protein_metadata_report.html
-    └── phage_trna_tmrna_metadata_report.html
-</code></pre>
-<h2 id="using-the-database">🗄️ Using the Database</h2>
-<p>The pipeline generates a <strong>DuckDB</strong> database optimized for analytical queries.</p>
-<h3 id="python-integration">Python Integration</h3>
-<pre><code class="language-python">import duckdb
-
-# Connect to database
-conn = duckdb.connect('data/databases/phage_database_optimized.duckdb')
-
-# Simple query
-df = conn.execute(&quot;&quot;&quot;
-    SELECT Source_DB, COUNT(*) as count 
-    FROM fact_phages 
-    GROUP BY Source_DB
-&quot;&quot;&quot;).df()
-
-# Complex analytical query - phage characterization
-results = conn.execute(&quot;&quot;&quot;
-    SELECT 
-        f.Source_DB,
-        f.Phage_ID,
-        f.Length,
-        f.GC_content,
-        f.Host,
-        f.Lifestyle,
-        COUNT(DISTINCT p.Protein_ID) as protein_count,
-        COUNT(DISTINCT t.terminator_type) as terminator_types,
-        COUNT(DISTINCT a.Protein_ID) as anti_crispr_count,
-        COUNT(DISTINCT v.Protein_ID) as virulent_factor_count,
-        COUNT(DISTINCT tm.Protein_ID) as transmembrane_count,
-        COUNT(DISTINCT tr.trna_tmrna_id) as trna_count
-    FROM fact_phages f
-    LEFT JOIN dim_proteins p ON f.Phage_ID = p.Phage_ID
-    LEFT JOIN dim_terminators t ON f.Phage_ID = t.Phage_ID
-    LEFT JOIN dim_anti_crispr a ON f.Phage_ID = a.Phage_ID
-    LEFT JOIN dim_virulent_factors v ON f.Phage_ID = v.Phage_ID
-    LEFT JOIN dim_transmembrane_proteins tm ON f.Phage_ID = tm.Phage_ID
-    LEFT JOIN dim_trna_tmrna tr ON f.Phage_ID = tr.Phage_ID
-    WHERE f.Length &gt; 50000
-    GROUP BY f.Source_DB, f.Phage_ID, f.Length, f.GC_content, f.Host, f.Lifestyle
-    ORDER BY f.Length DESC
-    LIMIT 100
-&quot;&quot;&quot;).fetchall()
-
-# Query specific dimension tables
-transmembrane_stats = conn.execute(&quot;&quot;&quot;
-    SELECT 
-        predicted_tmhs_number,
-        COUNT(*) as protein_count,
-        AVG(protein_length) as avg_length
-    FROM dim_transmembrane_proteins
-    WHERE predicted_tmhs_number IS NOT NULL
-    GROUP BY predicted_tmhs_number
-    ORDER BY predicted_tmhs_number
-&quot;&quot;&quot;).df()
-
-conn.close()
-</code></pre>
 <h3 id="available-views">Available Views</h3>
 <p>The database includes pre-built analytical views:</p>
 <ul>

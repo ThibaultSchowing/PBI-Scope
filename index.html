@@ -231,6 +231,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -247,6 +265,47 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#todos-and-broader-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TODO's and broader goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -684,6 +743,36 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#todos-and-broader-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TODO's and broader goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -703,10 +792,50 @@
 
 
 <h1 id="pbi">PBI</h1>
-<p>Welcome to the documentation for the PBI repository.</p>
-<ul>
-<li><a href="getting-started/overview/">Getting started</a></li>
-</ul>
+<p>Welcome to the documentation for the PBI repository. To get an overview of the project  <a href="getting-started/overview/">start here</a>. For a detailed installation <a href="getting-started/installation/">go here</a> and for a quick start guide <a href="getting-started/quickstart/">go here</a>. </p>
+<h2 id="status">Status</h2>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Integrate <a href="https://phagescope.deepomics.org/workspace/">PhageScope</a> tables</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td>Installation manual and documentation</td>
+<td>🔄 In Progress</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>🔄 In Progress</td>
+</tr>
+<tr>
+<td>Python package and API to interrogate the database</td>
+<td>🔄 In Progress</td>
+</tr>
+<tr>
+<td>Review Snakemake pipeline logic</td>
+<td>📆 Todo</td>
+</tr>
+<tr>
+<td>Host (bacteria) genome retrieval tool from species name</td>
+<td>📆 Todo</td>
+</tr>
+<tr>
+<td>Plan external (other databases) data integration</td>
+<td>📆 Todo</td>
+</tr>
+</tbody>
+</table>
+<h2 id="todos-and-broader-goals">TODO's and broader goals</h2>
+<p>Gathering and merging the data from <a href="https://phagescope.deepomics.org/workspace/">PhageScope</a> into a SQL database is mainly done. Now the goal is to make this database useable by preparing and testing an installation guide, filling the PBI python package with various functionnality allowing for data retrieval and usage and completing a standard API documentation. </p>
+<p>From a strong base, the project can be lead forward to integrate other more detailed Phage Bacteria Iteraction data. At this point various choices will have to be made about where the new data will be integrated. </p>
+<p>The preferred option for now is to create a new database, directly suited for our needs and populating it directly with the desired sequences. This database scheme can be inspired from older project such as <a href="https://www.ingenierie-sante.ch/fr/projects/84/INPHINITY">INPHINITY</a>. </p>
 
 
 
