@@ -5,11 +5,14 @@ Get started with PBI in under 10 minutes!
 
 ### Prerequisites
 
-- Linux/macOS (Windows via WSL2)
-- ~50 GB free disk space (for full database)
-- 8+ GB RAM recommended
-- Internet connection
-- Patience for the first execution
+- **Linux**/macOS (Windows via WSL2)
+- **Python 3.8+**
+- **Pixi package manager** ([installation guide](https://pixi.sh/latest/))
+- **Conda** (used via Snakemake's `--use-conda` option)
+- **Internet connection** (for data downloads)
+- **Disk space**: >50GB recommended
+- **RAM**: >32GB recommended for a smooth non-swapping execution
+- **Patience**: building the full database and reports from scratch takes 2-4 hours
 
 ### Step-by-Step Installation
 
@@ -86,6 +89,33 @@ pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory wo
 # pixi run snakemake --cores all --use-conda
 
 ```
+<details>
+<summary>Pipeline details</summary>
+
+### Running the Pipeline piece by piece
+
+```bash
+
+# Development (keep temp files with --notemp) - Full pipeline execution (all tables + validation)
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
+
+# Create database only
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores 4 \
+  ../data/databases/phage_database.duckdb
+
+# Generate validation report
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores 4 \
+  reports/database_validation.html
+
+# Create optimized database
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores 4 \
+  ../data/databases/phage_database_optimized.duckdb
+```
+
+</details>
 
 **Command Breakdown:**
 

@@ -4,11 +4,10 @@
 
 # 🧬 Phage Bacteria Interaction (PBI)
 
-A comprehensive bioinformatics pipeline for integrating, processing, and analyzing phage and host genomic data from multiple public databases already gathered within [PhageScope](https://phagescope.deepomics.org/workspace/). This pipeline creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within PhageScope. 
+This pipeline and API is used to gather phage and host genomic data from multiple public databases and creates a unified, queryable database from diverse phage data sources including GenBank, RefSeq, and PhagesDB, all already unified within [PhageScope](https://phagescope.deepomics.org/workspace/). 
 
 The broader goal is to integrate more sources and automatize these integration as much as possible, while allowing retrieval of the host (bacteria) sequence retrieval either by getting the reference sequence or ideally having a specific strain matching a specitic phage.  
 
-**Disclaimer** : The project has been written with obvious help from Copilot Pro and Claude Sonnet 4.5. 
 
 
 ## 🎯 Project Goals
@@ -83,8 +82,7 @@ The pipeline implements a **star schema** database design optimized for analytic
 
 #### **Dimension Tables**
 
-<details>
-<summary>Table details</summary>
+
 
 - **`dim_proteins`**: Detailed protein information
   - Functional annotations and classifications
@@ -115,8 +113,6 @@ The pipeline implements a **star schema** database design optimized for analytic
   - tRNA type (amino acid specificity)
   - Genomic coordinates
   - Sequences and permutation status
-
-</details>
 
 
 ## 📁 Project Structure
@@ -261,3 +257,5 @@ PBI/
 
 </details>
 
+
+**Disclaimer** : The project has been written with obvious help from Copilot Pro and Claude Sonnet 4.5. 
