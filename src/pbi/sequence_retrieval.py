@@ -293,6 +293,8 @@ class SequenceRetriever:
         logging.info(f"   Proteins: {stats['fasta']['proteins']:,}")
         
         return stats
+
+    
     
     def help(self):
         """Print help information"""
@@ -322,7 +324,84 @@ class SequenceRetriever:
         """Close database connection"""
         self.conn.close()
         logging.info("🔒 Database connection closed")
+    
+    def _fetch_phage_sequences(self, phage_ids: list) -> pd.DataFrame:
+        """
+        Fetch phage sequences for given Phage IDs.
+        
+        Args:
+            phage_ids: List of Phage IDs to retrieve sequences for
+            
+        Returns:
+            DataFrame with Phage_ID and Sequence columns
+        """
+        if not phage_ids:
+            logging.warning("No Phage IDs provided")
+            return pd.DataFrame(columns=['Phage_ID', 'Sequence'])
+        
+        logging.info(f"🔍 Fetching sequences for {len(phage_ids):,} phages")
+        
+        # Read sequences from the FASTA index
+        sequences = []
+        missing_ids = []
+        
+        for phage_id in phage_ids:
+            try:
+                # Fetch sequence from indexed FASTA
+                seq = self.phage_fasta[phage_id][:].seq
+                sequences.append({
+                    'Phage_ID': phage_id,
+                    'Sequence': str(seq)
+                })
+            except KeyError:
+                missing_ids.append(phage_id)
+                logging.warning(f"⚠️  Phage ID '{phage_id}' not found in FASTA")
+        
+        if missing_ids:
+            logging.warning(f"⚠️  {len(missing_ids):,} phage IDs not found in FASTA file")
+        
+        df = pd.DataFrame(sequences)
+        logging.info(f"✅ Retrieved {len(df):,} sequences")
+        
+        return df
 
+    def _fetch_protein_sequences(self, protein_ids: list) -> pd.DataFrame:
+        """
+        Fetch protein sequences for given Protein IDs.
+        
+        Args:
+            protein_ids: List of Protein IDs to retrieve sequences for
+            
+        Returns:
+            DataFrame with Protein_ID and Sequence columns
+        """
+        if not protein_ids:
+            logging.warning("No Protein IDs provided")
+            return pd.DataFrame(columns=['Protein_ID', 'Sequence'])
+        
+        logging.info(f"🔍 Fetching sequences for {len(protein_ids):,} proteins")
+        
+        sequences = []
+        missing_ids = []
+        
+        for protein_id in protein_ids:
+            try:
+                seq = self.protein_fasta[protein_id][:].seq
+                sequences.append({
+                    'Protein_ID': protein_id,
+                    'Sequence': str(seq)
+                })
+            except KeyError:
+                missing_ids.append(protein_id)
+                logging.warning(f"⚠️  Protein ID '{protein_id}' not found in FASTA")
+        
+        if missing_ids:
+            logging.warning(f"⚠️  {len(missing_ids):,} protein IDs not found in FASTA file")
+        
+        df = pd.DataFrame(sequences)
+        logging.info(f"✅ Retrieved {len(df):,} sequences")
+        
+        return df
 
 # Example usage and testing
 if __name__ == "__main__":
