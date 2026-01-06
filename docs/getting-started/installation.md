@@ -44,6 +44,11 @@ ls -la
 # Should see: workflow/, src/, data/, notebooks/, README.md, etc.
 ```
 
+
+#### 2.5 Install Anaconda
+
+Install Anaconda. Make sure that the conda command is in your path
+
 #### 3. Install PBI Package
 
 **TODO**
