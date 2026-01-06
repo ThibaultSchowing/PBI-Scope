@@ -259,7 +259,7 @@ rule merge_protein_fasta_by_source:
     input:
         source_dir = os.path.join(config["protein_fasta_extracted_output"], "{dataset}")
     output:
-        merged_fasta = os.path.join("../data/protein_fasta_merged", "{dataset}.fasta")
+        merged_fasta = os.path.join(config["protein_fasta_merged_output"], "{dataset}.fasta")
     params:
         source_dir = lambda wildcards: os.path.join(config["protein_fasta_extracted_output"], wildcards.dataset),
         merged_fasta_dir = config["protein_fasta_merged_output"]
