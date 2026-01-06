@@ -15,7 +15,7 @@ merged_csv_output: "../data/intermediate/csv/merged/"
 duckdb_output: "../data/processed/databases/phage_database.duckdb"
 optimized_duckdb_output: "../data/processed/databases/phage_database_optimized.duckdb"
 
-database_validation_report_output: "reports/database_validation_report.html"
+database_validation_report_output: "reports/database_validation.html"
 
 
 # -----------------------------------

@@ -11,7 +11,6 @@ nav:
   - Getting started:
       - Overview: getting-started/overview.md
       - Installation: getting-started/installation.md
-      - Quickstart: getting-started/quickstart.md
   - User Guide:
       - Data Preparation: user-guide/data-preparation.md
       - Running PBI: user-guide/running-pbi.md

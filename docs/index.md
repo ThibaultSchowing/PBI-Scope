@@ -1,6 +1,6 @@
 # PBI
 
-Welcome to the documentation for the PBI repository. To get an overview of the project  [start here](getting-started/overview.md). For a detailed installation [go here](getting-started/installation.md) and for a quick start guide [go here](getting-started/quickstart.md). 
+Welcome to the documentation for the PBI repository. To get an overview of the project  [start here](getting-started/overview.md). For a detailed installation [go here](getting-started/installation.md). 
 
 
 ## Status
