@@ -66,7 +66,7 @@ Or use pixi :
 
 ```bash
 # Install PBI as an editable Python package
-pixi run pip install -e .
+pixi run pip install -e . --no-deps
 
 # Verify installation
 pixi run python -c "import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')"
@@ -84,14 +84,12 @@ mkdir -p /mnt/snakemake-cache
 # [OPTIONAL] You have to export this each time you restart or move this in you bashrc
 export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
 
-# Navigate to workflow directory
-cd workflow
 
 # Run Snakemake pipeline (first run: use 2-4 cores due to I/O bottleneck), add --cache if you set up caching
 pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory workflow --snakefile workflow/Snakefile
 
 # For subsequent runs, you can use more cores:
-# pixi run snakemake --cores all --use-conda
+# pixi run snakemake --cores all --directory workflow --snakefile workflow/Snakefile
 
 ```
 <details>
