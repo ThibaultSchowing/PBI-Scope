@@ -23,6 +23,26 @@ The PBI pipeline addresses key challenges in phage genomics research:
 
 ## 📊 Current Implementation Status
 
+### ✅ **Current Database Report** (Available in the '_workflow/reports_' folder)
+
+Each metadata table as well as the final database ```phage_database_optimized.duckdb``` are analysed and a report is created for each. 
+
+📊 **[View Database Validation Report](../reports/database_validation_report.html)**
+
+View individual table reports:
+- [Phage Metadata Report](../reports/phage_metadata_report.html)
+- [Annotated Proteins Report](../reports/annotated_proteins_metadata_report.html)
+- [Transcription Terminator Report](../reports/transcription_terminator_metadata_report.html)
+- [Anti-CRISPR Report](../reports/phage_anti_crispr_metadata_report.html)
+- [Virulent Factor Report](../reports/phage_virulent_factor_metadata_report.html)
+- [Transmembrane Protein Report](../reports/phage_transmembrane_protein_metadata_report.html)
+- [tRNA/tmRNA Report](../reports/phage_trna_tmrna_metadata_report.html)
+- [CRISPR Array Report](../reports/crispr_array_metadata_report.html)
+- [Antimicrobial Resistance Gene Report](../reports/antimicrobial_resistance_gene_metadata_report.html)
+
+
+Note: the report folder is currently manually copied within the documentation folder after each execution. 
+
 ### ✅ **Fully Integrated Tables** (Available in Database)
 
 The following data types are fully integrated into the DuckDB star schema:
