@@ -49,7 +49,7 @@ def validate_database():
             'dim_transmembrane_proteins',
             'dim_trna_tmrna',
             'dim_crispr_arrays',
-            'dim_antimicrobial_resistance'
+            'dim_antimicrobial_resistance_genes'  # Changed from dim_antimicrobial_resistance
         ]
         missing_tables = [t for t in expected_tables if t not in table_names]
         
@@ -414,36 +414,47 @@ def validate_database():
                 'source_distribution': dict(crispr_sources)
             }
         
-        # DIM_ANTIMICROBIAL_RESISTANCE validation
-        if 'dim_antimicrobial_resistance' in table_names:
+        # DIM_ANTIMICROBIAL_RESISTANCE_GENES validation
+        if 'dim_antimicrobial_resistance_genes' in table_names:  # Changed table name
+            logging.info("Validating dim_antimicrobial_resistance_genes table...")
+            
+            # Debug: Check actual row count
+            actual_count = conn.execute("SELECT COUNT(*) FROM dim_antimicrobial_resistance_genes").fetchone()[0]
+            logging.info(f"dim_antimicrobial_resistance_genes actual row count: {actual_count}")
+            
             orphaned_amr = conn.execute("""
-                SELECT COUNT(*) FROM dim_antimicrobial_resistance amr
+                SELECT COUNT(*) FROM dim_antimicrobial_resistance_genes amr
                 LEFT JOIN fact_phages f ON amr.Phage_ID = f.Phage_ID
                 WHERE f.Phage_ID IS NULL
             """).fetchone()[0]
+            logging.info(f"Orphaned AMR entries: {orphaned_amr}")
             
             duplicate_amr = conn.execute("""
                 SELECT COUNT(*) FROM (
                     SELECT Protein_ID, COUNT(*) as cnt 
-                    FROM dim_antimicrobial_resistance 
+                    FROM dim_antimicrobial_resistance_genes 
                     WHERE Protein_ID IS NOT NULL
                     GROUP BY Protein_ID 
                     HAVING COUNT(*) > 1
                 )
             """).fetchone()[0]
+            logging.info(f"Duplicate AMR Protein IDs: {duplicate_amr}")
             
             amr_sources = conn.execute("""
                 SELECT Source_DB, COUNT(*) as count
-                FROM dim_antimicrobial_resistance 
+                FROM dim_antimicrobial_resistance_genes 
                 GROUP BY Source_DB 
                 ORDER BY count DESC
             """).fetchall()
+            logging.info(f"AMR source distribution: {dict(amr_sources)}")
             
-            validation_results['data_quality']['dim_antimicrobial_resistance'] = {
+            validation_results['data_quality']['dim_antimicrobial_resistance_genes'] = {
                 'orphaned_amr': orphaned_amr,
                 'duplicate_protein_ids': duplicate_amr,
                 'source_distribution': dict(amr_sources)
             }
+        else:
+            logging.warning("dim_antimicrobial_resistance_genes table not found in database!")
         
         # 4. Check indexes exist
         logging.info("Checking indexes...")
@@ -464,8 +475,11 @@ def validate_database():
         total_transmembrane = validation_results['tables'].get('dim_transmembrane_proteins', {}).get('row_count', 0)
         total_trna = validation_results['tables'].get('dim_trna_tmrna', {}).get('row_count', 0)
         total_crispr = validation_results['tables'].get('dim_crispr_arrays', {}).get('row_count', 0)
-        total_amr = validation_results['tables'].get('dim_antimicrobial_resistance', {}).get('row_count', 0)
+        total_amr = validation_results['tables'].get('dim_antimicrobial_resistance_genes', {}).get('row_count', 0)
         
+        # Debug logging
+        logging.info(f"Summary - AMR count from validation_results: {total_amr}")
+
         # Calculate overall data quality
         data_quality_passed = True
         if 'fact_phages' in validation_results['data_quality']:
@@ -484,8 +498,8 @@ def validate_database():
             data_quality_passed &= validation_results['data_quality']['dim_trna_tmrna'].get('orphaned_trna', 0) == 0
         if 'dim_crispr_arrays' in validation_results['data_quality']:
             data_quality_passed &= validation_results['data_quality']['dim_crispr_arrays'].get('orphaned_crispr_arrays', 0) == 0
-        if 'dim_antimicrobial_resistance' in validation_results['data_quality']:
-            data_quality_passed &= validation_results['data_quality']['dim_antimicrobial_resistance'].get('orphaned_amr', 0) == 0
+        if 'dim_antimicrobial_resistance_genes' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_antimicrobial_resistance_genes'].get('orphaned_amr', 0) == 0
         
         validation_results['summary'] = {
             'total_phages': total_phages,
@@ -717,9 +731,9 @@ def generate_html_report(results, report_path):
                     </div>
                 </div>
                 <div class="table-box">
-                    <div class="table-name">dim_antimicrobial_resistance</div>
+                    <div class="table-name">dim_antimicrobial_resistance_genes</div>
                     <div class="table-info">
-                        {results['tables'].get('dim_antimicrobial_resistance', {}).get('row_count', 0):,} rows<br>
+                        {results['tables'].get('dim_antimicrobial_resistance_genes', {}).get('row_count', 0):,} rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
@@ -945,8 +959,8 @@ def generate_html_report(results, report_path):
                 </tr>
         """
     
-    if 'dim_antimicrobial_resistance' in results['data_quality']:
-        amr_data = results['data_quality']['dim_antimicrobial_resistance']
+    if 'dim_antimicrobial_resistance_genes' in results['data_quality']:
+        amr_data = results['data_quality']['dim_antimicrobial_resistance_genes']
         html_content += f"""
                 <tr>
                     <td>Orphaned AMR Genes</td>
