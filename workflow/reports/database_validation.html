@@ -79,7 +79,7 @@
     <body>
         <div class="header">
             <h1>🧬 PhageScope Database Validation Report</h1>
-            <p><strong>Generated:</strong> 2026-01-07T09:23:25.359557</p>
+            <p><strong>Generated:</strong> 2026-01-07T09:39:04.128439</p>
             <p><strong>Database:</strong> ../data/processed/databases/phage_database_optimized.duckdb</p>
         </div>
         
@@ -120,7 +120,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">AMR Genes</div>
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">2,602</div>
                 </div>
             </div>
         </div>
@@ -198,9 +198,9 @@
                     </div>
                 </div>
                 <div class="table-box">
-                    <div class="table-name">dim_antimicrobial_resistance</div>
+                    <div class="table-name">dim_antimicrobial_resistance_genes</div>
                     <div class="table-info">
-                        0 rows<br>
+                        2,602 rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
@@ -346,6 +346,23 @@
                         </ul>
                     </div>
                 </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_antimicrobial_resistance_genes</div>
+                    <div class="stat-value">2,602</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 5<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 5</li>
+                        </ul>
+                        <strong>Column Names:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>aligned_protein_card</code> (VARCHAR)</li><li><code>Phage_source</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                        </ul>
+                    </div>
+                </div>
                 </div></div>
         <div class="section">
             <h2>✅ Data Quality Checks</h2>
@@ -353,10 +370,10 @@
                 <tr><th>Check</th><th>Status</th><th>Details</th></tr>
                 <tr>
                     <td>All expected tables present</td>
-                    <td class="error">
-                        ❌ FAIL
+                    <td class="success">
+                        ✅ PASS
                     </td>
-                    <td>Missing: dim_antimicrobial_resistance</td>
+                    <td>All 9 tables found</td>
                 </tr>
     
                 <tr>
@@ -468,6 +485,21 @@
                         ⚠️ WARNING
                     </td>
                     <td>31 duplicate CRISPR IDs</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned AMR Genes</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 AMR genes without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (AMR)</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 duplicate protein IDs</td>
                 </tr>
         
             </table>
