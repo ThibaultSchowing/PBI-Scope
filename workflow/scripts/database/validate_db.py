@@ -47,7 +47,9 @@ def validate_database():
             'dim_anti_crispr',
             'dim_virulent_factors',
             'dim_transmembrane_proteins',
-            'dim_trna_tmrna'
+            'dim_trna_tmrna',
+            'dim_crispr_arrays',
+            'dim_antimicrobial_resistance'
         ]
         missing_tables = [t for t in expected_tables if t not in table_names]
         
@@ -381,6 +383,68 @@ def validate_database():
                 'permuted_distribution': dict(permuted_stats)
             }
         
+        # DIM_CRISPR_ARRAYS validation
+        if 'dim_crispr_arrays' in table_names:
+            orphaned_crispr = conn.execute("""
+                SELECT COUNT(*) FROM dim_crispr_arrays ca
+                LEFT JOIN fact_phages f ON ca.Phage_ID = f.Phage_ID
+                WHERE f.Phage_ID IS NULL
+            """).fetchone()[0]
+            
+            duplicate_crispr = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT crispr_id, COUNT(*) as cnt 
+                    FROM dim_crispr_arrays 
+                    WHERE crispr_id IS NOT NULL
+                    GROUP BY crispr_id 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            crispr_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_crispr_arrays 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            validation_results['data_quality']['dim_crispr_arrays'] = {
+                'orphaned_crispr_arrays': orphaned_crispr,
+                'duplicate_crispr_ids': duplicate_crispr,
+                'source_distribution': dict(crispr_sources)
+            }
+        
+        # DIM_ANTIMICROBIAL_RESISTANCE validation
+        if 'dim_antimicrobial_resistance' in table_names:
+            orphaned_amr = conn.execute("""
+                SELECT COUNT(*) FROM dim_antimicrobial_resistance amr
+                LEFT JOIN fact_phages f ON amr.Phage_ID = f.Phage_ID
+                WHERE f.Phage_ID IS NULL
+            """).fetchone()[0]
+            
+            duplicate_amr = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT Protein_ID, COUNT(*) as cnt 
+                    FROM dim_antimicrobial_resistance 
+                    WHERE Protein_ID IS NOT NULL
+                    GROUP BY Protein_ID 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            
+            amr_sources = conn.execute("""
+                SELECT Source_DB, COUNT(*) as count
+                FROM dim_antimicrobial_resistance 
+                GROUP BY Source_DB 
+                ORDER BY count DESC
+            """).fetchall()
+            
+            validation_results['data_quality']['dim_antimicrobial_resistance'] = {
+                'orphaned_amr': orphaned_amr,
+                'duplicate_protein_ids': duplicate_amr,
+                'source_distribution': dict(amr_sources)
+            }
+        
         # 4. Check indexes exist
         logging.info("Checking indexes...")
         indexes = conn.execute("SELECT name FROM sqlite_master WHERE type='index'").fetchall()
@@ -399,6 +463,8 @@ def validate_database():
         total_virulent = validation_results['tables'].get('dim_virulent_factors', {}).get('row_count', 0)
         total_transmembrane = validation_results['tables'].get('dim_transmembrane_proteins', {}).get('row_count', 0)
         total_trna = validation_results['tables'].get('dim_trna_tmrna', {}).get('row_count', 0)
+        total_crispr = validation_results['tables'].get('dim_crispr_arrays', {}).get('row_count', 0)
+        total_amr = validation_results['tables'].get('dim_antimicrobial_resistance', {}).get('row_count', 0)
         
         # Calculate overall data quality
         data_quality_passed = True
@@ -416,6 +482,10 @@ def validate_database():
             data_quality_passed &= validation_results['data_quality']['dim_transmembrane_proteins'].get('orphaned_transmembrane', 0) == 0
         if 'dim_trna_tmrna' in validation_results['data_quality']:
             data_quality_passed &= validation_results['data_quality']['dim_trna_tmrna'].get('orphaned_trna', 0) == 0
+        if 'dim_crispr_arrays' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_crispr_arrays'].get('orphaned_crispr_arrays', 0) == 0
+        if 'dim_antimicrobial_resistance' in validation_results['data_quality']:
+            data_quality_passed &= validation_results['data_quality']['dim_antimicrobial_resistance'].get('orphaned_amr', 0) == 0
         
         validation_results['summary'] = {
             'total_phages': total_phages,
@@ -425,6 +495,8 @@ def validate_database():
             'total_virulent_factors': total_virulent,
             'total_transmembrane_proteins': total_transmembrane,
             'total_trna_tmrna': total_trna,
+            'total_crispr_arrays': total_crispr,
+            'total_amr': total_amr,
             'all_tables_present': validation_results['tables']['all_present'],
             'data_quality_passed': data_quality_passed
         }
@@ -561,6 +633,14 @@ def generate_html_report(results, report_path):
                     <div class="stat-title">tRNA/tmRNA</div>
                     <div class="stat-value">{results['summary']['total_trna_tmrna']:,}</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-title">CRISPR Arrays</div>
+                    <div class="stat-value">{results['summary']['total_crispr_arrays']:,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">AMR Genes</div>
+                    <div class="stat-value">{results['summary']['total_amr']:,}</div>
+                </div>
             </div>
         </div>
         
@@ -612,6 +692,13 @@ def generate_html_report(results, report_path):
                             FK: Phage_ID
                         </div>
                     </div>
+                    <div class="table-box">
+                        <div class="table-name">dim_crispr_arrays</div>
+                        <div class="table-info">
+                            {results['tables'].get('dim_crispr_arrays', {}).get('row_count', 0):,} rows<br>
+                            FK: Phage_ID
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="stats-grid" style="margin-top: 20px;">
@@ -626,6 +713,13 @@ def generate_html_report(results, report_path):
                     <div class="table-name">dim_trna_tmrna</div>
                     <div class="table-info">
                         {results['tables'].get('dim_trna_tmrna', {}).get('row_count', 0):,} rows<br>
+                        FK: Phage_ID
+                    </div>
+                </div>
+                <div class="table-box">
+                    <div class="table-name">dim_antimicrobial_resistance</div>
+                    <div class="table-info">
+                        {results['tables'].get('dim_antimicrobial_resistance', {}).get('row_count', 0):,} rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
@@ -691,7 +785,7 @@ def generate_html_report(results, report_path):
     all_present = results['tables']['all_present']
     status_class = 'success' if all_present else 'error'
     status_text = '✅ PASS' if all_present else '❌ FAIL'
-    details_text = 'All 7 tables found' if all_present else f"Missing: {', '.join(results['tables']['missing'])}"
+    details_text = 'All 9 tables found' if all_present else f"Missing: {', '.join(results['tables']['missing'])}"
     
     html_content += f"""
         <div class="section">
@@ -832,6 +926,44 @@ def generate_html_report(results, report_path):
                 </tr>
         """
     
+    if 'dim_crispr_arrays' in results['data_quality']:
+        crispr_data = results['data_quality']['dim_crispr_arrays']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned CRISPR Arrays</td>
+                    <td class="{'success' if crispr_data['orphaned_crispr_arrays'] == 0 else 'warning'}">
+                        {'✅ PASS' if crispr_data['orphaned_crispr_arrays'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{crispr_data['orphaned_crispr_arrays']} CRISPR arrays without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate CRISPR IDs</td>
+                    <td class="{'success' if crispr_data['duplicate_crispr_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if crispr_data['duplicate_crispr_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{crispr_data['duplicate_crispr_ids']} duplicate CRISPR IDs</td>
+                </tr>
+        """
+    
+    if 'dim_antimicrobial_resistance' in results['data_quality']:
+        amr_data = results['data_quality']['dim_antimicrobial_resistance']
+        html_content += f"""
+                <tr>
+                    <td>Orphaned AMR Genes</td>
+                    <td class="{'success' if amr_data['orphaned_amr'] == 0 else 'warning'}">
+                        {'✅ PASS' if amr_data['orphaned_amr'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{amr_data['orphaned_amr']} AMR genes without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate Protein IDs (AMR)</td>
+                    <td class="{'success' if amr_data['duplicate_protein_ids'] == 0 else 'warning'}">
+                        {'✅ PASS' if amr_data['duplicate_protein_ids'] == 0 else '⚠️ WARNING'}
+                    </td>
+                    <td>{amr_data['duplicate_protein_ids']} duplicate protein IDs</td>
+                </tr>
+        """
+
     html_content += """
             </table>
         </div>

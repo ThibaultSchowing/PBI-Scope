@@ -79,7 +79,7 @@
     <body>
         <div class="header">
             <h1>🧬 PhageScope Database Validation Report</h1>
-            <p><strong>Generated:</strong> 2026-01-07T08:48:52.343239</p>
+            <p><strong>Generated:</strong> 2026-01-07T09:14:01.022481</p>
             <p><strong>Database:</strong> ../data/processed/databases/phage_database_optimized.duckdb</p>
         </div>
         
@@ -113,6 +113,14 @@
                 <div class="stat-card">
                     <div class="stat-title">tRNA/tmRNA</div>
                     <div class="stat-value">1,298,181</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">CRISPR Arrays</div>
+                    <div class="stat-value">56,652</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">AMR Genes</div>
+                    <div class="stat-value">0</div>
                 </div>
             </div>
         </div>
@@ -165,6 +173,13 @@
                             FK: Phage_ID
                         </div>
                     </div>
+                    <div class="table-box">
+                        <div class="table-name">dim_crispr_arrays</div>
+                        <div class="table-info">
+                            56,652 rows<br>
+                            FK: Phage_ID
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="stats-grid" style="margin-top: 20px;">
@@ -179,6 +194,13 @@
                     <div class="table-name">dim_trna_tmrna</div>
                     <div class="table-info">
                         1,298,181 rows<br>
+                        FK: Phage_ID
+                    </div>
+                </div>
+                <div class="table-box">
+                    <div class="table-name">dim_antimicrobial_resistance</div>
+                    <div class="table-info">
+                        0 rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
@@ -307,6 +329,23 @@
                         </ul>
                     </div>
                 </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_crispr_arrays</div>
+                    <div class="stat-value">56,652</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 26<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 8</li><li>INTEGER: 9</li><li>DOUBLE: 9</li>
+                        </ul>
+                        <strong>Column Names:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>crispr_id</code> (VARCHAR)</li><li><code>duplicated_spacers</code> (INTEGER)</li><li><code>crispr_start</code> (INTEGER)</li><li><code>crispr_end</code> (INTEGER)</li><li><code>crispr_length</code> (INTEGER)</li><li><code>potential_orientation_at_percent</code> (VARCHAR)</li><li><code>crispr_direction</code> (VARCHAR)</li><li><code>consensus_repeat</code> (VARCHAR)</li><li><code>repeat_id_crisprdb</code> (VARCHAR)</li><li><code>nb_crisprs_same_repeat</code> (INTEGER)</li><li><code>repeat_length</code> (INTEGER)</li><li><code>spacers_count</code> (INTEGER)</li><li><code>mean_spacer_size</code> (DOUBLE)</li><li><code>std_dev_spacers</code> (DOUBLE)</li><li><code>repeats_matching_consensus</code> (INTEGER)</li><li><code>ratio_repeats_match_total</code> (DOUBLE)</li><li><code>conservation_repeats_pct</code> (DOUBLE)</li><li><code>ebcons_repeats</code> (DOUBLE)</li><li><code>conservation_spacers_pct</code> (DOUBLE)</li><li><code>ebcons_spacers</code> (DOUBLE)</li><li><code>repeat_plus_spacer_length</code> (DOUBLE)</li><li><code>ratio_repeat_spacer_length</code> (DOUBLE)</li><li><code>crispr_found_in_db</code> (VARCHAR)</li><li><code>evidence_level</code> (INTEGER)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                        </ul>
+                    </div>
+                </div>
                 </div></div>
         <div class="section">
             <h2>✅ Data Quality Checks</h2>
@@ -314,10 +353,10 @@
                 <tr><th>Check</th><th>Status</th><th>Details</th></tr>
                 <tr>
                     <td>All expected tables present</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="error">
+                        ❌ FAIL
                     </td>
-                    <td>All 7 tables found</td>
+                    <td>Missing: dim_antimicrobial_resistance</td>
                 </tr>
     
                 <tr>
@@ -414,6 +453,21 @@
                         ✅ PASS
                     </td>
                     <td>0 duplicate tRNA IDs</td>
+                </tr>
+        
+                <tr>
+                    <td>Orphaned CRISPR Arrays</td>
+                    <td class="success">
+                        ✅ PASS
+                    </td>
+                    <td>0 CRISPR arrays without matching phages</td>
+                </tr>
+                <tr>
+                    <td>Duplicate CRISPR IDs</td>
+                    <td class="warning">
+                        ⚠️ WARNING
+                    </td>
+                    <td>31 duplicate CRISPR IDs</td>
                 </tr>
         
             </table>
