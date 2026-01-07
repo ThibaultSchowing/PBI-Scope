@@ -670,6 +670,17 @@ def generate_html_report(results, report_path):
                 
                 html_content += """
                         </ul>
+                        <strong>Column Names:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
+                """
+                
+                for col_info in schema:
+                    col_name = col_info[0]
+                    col_type = col_info[1] if len(col_info) > 1 else 'UNKNOWN'
+                    html_content += f"<li><code>{col_name}</code> ({col_type})</li>"
+                
+                html_content += """
+                        </ul>
                     </div>
                 </div>
                 """
@@ -677,17 +688,22 @@ def generate_html_report(results, report_path):
         html_content += "</div></div>"
     
     # Add data quality section
-    html_content += """
+    all_present = results['tables']['all_present']
+    status_class = 'success' if all_present else 'error'
+    status_text = '✅ PASS' if all_present else '❌ FAIL'
+    details_text = 'All 7 tables found' if all_present else f"Missing: {', '.join(results['tables']['missing'])}"
+    
+    html_content += f"""
         <div class="section">
             <h2>✅ Data Quality Checks</h2>
             <table>
                 <tr><th>Check</th><th>Status</th><th>Details</th></tr>
                 <tr>
                     <td>All expected tables present</td>
-                    <td class="{'success' if results['tables']['all_present'] else 'error'}">
-                        {'✅ PASS' if results['tables']['all_present'] else '❌ FAIL'}
+                    <td class="{status_class}">
+                        {status_text}
                     </td>
-                    <td>{'All 7 tables found' if results['tables']['all_present'] else f"Missing: {', '.join(results['tables']['missing'])}"}</td>
+                    <td>{details_text}</td>
                 </tr>
     """
     

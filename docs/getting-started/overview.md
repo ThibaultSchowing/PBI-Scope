@@ -27,7 +27,7 @@ The PBI pipeline addresses key challenges in phage genomics research:
 
 Each metadata table as well as the final database ```phage_database_optimized.duckdb``` are analysed and a report is created for each. 
 
-📊 **[View Database Validation Report](../reports/database_validation_report.html)**
+📊 **[View Database Validation Report](../reports/database_validation.html)**
 
 View individual table reports:
 - [Phage Metadata Report](../reports/phage_metadata_report.html)
