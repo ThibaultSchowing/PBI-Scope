@@ -1,5 +1,5 @@
 # Dockerfile for PBI Pipeline - Creates the database from PhageScope data
-FROM mambaorg/micromamba:1.5.8
+FROM condaforge/mambaforge:latest
 
 # Set working directory
 WORKDIR /app
@@ -7,20 +7,16 @@ WORKDIR /app
 # Copy environment configuration
 COPY workflow/envs/pixi_base_env.yaml /tmp/env.yaml
 
-# Install base dependencies using micromamba
-USER root
-RUN micromamba install -y -n base -f /tmp/env.yaml && \
-    micromamba clean --all --yes
+# Install base dependencies using mamba
+RUN mamba env create -f /tmp/env.yaml && \
+    mamba clean --all --yes
 
-# Install additional required packages
-RUN micromamba install -y -n base \
-    snakemake \
-    pandas \
-    numpy \
-    duckdb \
-    pyfaidx \
-    python=3.10 && \
-    micromamba clean --all --yes
+# Activate the environment
+SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
+
+# Install additional required packages if needed
+RUN mamba install -n base -y pyfaidx && \
+    mamba clean --all --yes
 
 # Copy the workflow files
 COPY workflow/ /app/workflow/
@@ -33,8 +29,9 @@ RUN mkdir -p /data/raw \
     && chmod -R 777 /data
 
 # Set environment variables
-ENV PATH="/opt/conda/bin:$PATH"
+ENV PATH="/opt/conda/envs/base/bin:$PATH"
 ENV PYTHONPATH="/app:$PYTHONPATH"
 
 # Default command - run the Snakemake workflow
-CMD ["snakemake", "--directory", "/app/workflow", "--cores", "all", "--use-conda"]
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "base"]
+CMD ["snakemake", "--directory", "/app/workflow", "--cores", "all"]

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Pipeline service - creates the database from PhageScope data
   pipeline:
