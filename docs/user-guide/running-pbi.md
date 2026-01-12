@@ -1,7 +1,7 @@
 
 ## Running the Pipeline
 
-**⚠️ IMPORTANT FOR FIRST-TIME USERS:**
+**⚠️ IMPORTANT FOR FIRST-TIME USERS**
 
 If this is your **first time** running the pipeline:
 - **The database creation will take 2-4 hours** to download, merge, and validate all data

@@ -95,11 +95,9 @@ export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
 echo 'export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/' >> ~/.bashrc
 source ~/.bashrc
 
-# Step 3: Export the Pixi conda environment (required for Snakemake)
-pixi shell-hook > /dev/null
-
-# Step 4: Run the Snakemake pipeline
+# Step 3: Run the Snakemake pipeline
 # ⚠️ Use ONLY 2-4 cores on first run to avoid I/O bottleneck crashes
+# Pixi automatically manages the conda environment
 pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
 
 # The pipeline will:
