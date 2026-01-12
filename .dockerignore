@@ -1,0 +1,79 @@
+# Git and version control
+.git
+.gitignore
+.github
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+notebooks/
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pixi/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data files (build them in container)
+data/
+*.duckdb
+*.fasta
+*.fai
+*.tsv
+*.csv
+*.tar.gz
+
+# Test files
+tests/
+pytest_cache/
+.pytest_cache/
+
+# Reports
+workflow/reports/
+*.html
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+*.tmp

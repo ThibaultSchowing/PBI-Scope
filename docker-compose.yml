@@ -1,0 +1,50 @@
+services:
+  # Pipeline service - creates the database from PhageScope data
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile.pipeline
+    container_name: pbi-pipeline
+    volumes:
+      - pbi-data:/data
+      - ./workflow:/app/workflow
+    environment:
+      - SNAKEMAKE_CORES=4
+    networks:
+      - pbi-network
+    # This service runs once to create the database
+    # You can run it manually with: docker-compose run pipeline
+
+  # API service - serves the database via REST API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: pbi-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - pbi-data:/data:ro  # Read-only access to data
+    environment:
+      - DB_PATH=/data/processed/databases/phage_database_optimized.duckdb
+      - PHAGE_FASTA_PATH=/data/processed/sequences/all_phages.fasta
+      - PROTEIN_FASTA_PATH=/data/processed/sequences/all_proteins.fasta
+    networks:
+      - pbi-network
+    depends_on:
+      - pipeline
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  pbi-network:
+    driver: bridge
+
+volumes:
+  pbi-data:
+    driver: local
