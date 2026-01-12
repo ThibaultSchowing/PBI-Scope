@@ -26,7 +26,7 @@ The easiest way to use PBI is through Docker, which provides:
 # 1. Build the containers
 docker compose build
 
-# 2. Run the pipeline to create the database (takes several hours)
+# 2. Run the pipeline to create the database (⚠️ takes 2-4 hours on first run)
 docker compose run --rm pipeline
 
 # 3. Start the API server

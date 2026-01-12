@@ -32,12 +32,15 @@ This will build both the pipeline and API containers. The build process may take
 docker-compose run --rm pipeline
 ```
 
-**Note**: This step can take several hours (4-12 hours depending on your internet connection and CPU) as it:
+**⚠️ Important**: This step can take 2-4 hours (depending on your internet connection and CPU) as it:
 - Downloads all PhageScope metadata files (~2GB)
-- Downloads FASTA files for sequences (~20GB)
+- Downloads FASTA files for sequences (~50GB)
 - Processes and merges all data
-- Creates the DuckDB database
+- Creates the DuckDB database (~15GB)
 - Generates validation reports
+- Creates optimized database (~12GB)
+
+**The database will not be queryable until this process completes.**
 
 The data will be stored in a Docker volume named `pbi-data` and persists between container runs.
 
