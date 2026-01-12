@@ -1,0 +1,40 @@
+# Dockerfile for PBI Pipeline - Creates the database from PhageScope data
+FROM mambaorg/micromamba:1.5.8
+
+# Set working directory
+WORKDIR /app
+
+# Copy environment configuration
+COPY workflow/envs/pixi_base_env.yaml /tmp/env.yaml
+
+# Install base dependencies using micromamba
+USER root
+RUN micromamba install -y -n base -f /tmp/env.yaml && \
+    micromamba clean --all --yes
+
+# Install additional required packages
+RUN micromamba install -y -n base \
+    snakemake \
+    pandas \
+    numpy \
+    duckdb \
+    pyfaidx \
+    python=3.10 && \
+    micromamba clean --all --yes
+
+# Copy the workflow files
+COPY workflow/ /app/workflow/
+
+# Create data directories
+RUN mkdir -p /data/raw \
+    /data/intermediate \
+    /data/processed/databases \
+    /data/processed/sequences \
+    && chmod -R 777 /data
+
+# Set environment variables
+ENV PATH="/opt/conda/bin:$PATH"
+ENV PYTHONPATH="/app:$PYTHONPATH"
+
+# Default command - run the Snakemake workflow
+CMD ["snakemake", "--directory", "/app/workflow", "--cores", "all", "--use-conda"]
