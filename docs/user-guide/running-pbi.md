@@ -1,33 +1,136 @@
 
-## Running the pipeline
+## Running the Pipeline
+
+**⚠️ IMPORTANT FOR FIRST-TIME USERS:**
+
+If this is your **first time** running the pipeline:
+- **The database creation will take 2-4 hours** to download, merge, and validate all data
+- The database **will not be queryable** until this initial process completes
+- See the complete **[First-Time Setup Procedure](../getting-started/installation.md#4-build-the-database-first-time-setup)** in the installation guide
+
+---
+
+### Quick Reference for Experienced Users
 
 Snakemake is launched from Pixi with `pixi run`. 
 
-When executing for the first time **do not** use more than 2-4 cores as the I/O operations on your drive will be the bottleneck and might crash the program. 
+**Standard execution command:**
 
-Input, output, log, and benchmark files are considered to be relative to the working directory (**either the directory in which you have invoked Snakemake** or whatever was specified for --directory or the workdir: directive). -> from the workflow directory !
-
-
-The Pixi environment needs to be exported first with `pixi workspace export conda-environment -e base envs/pixi_base_enf.yaml`
-
-The Conda environment to use is specified within each rule (if needed) with 
-
-```
-    conda:
-        "envs/pixi_base_env.yaml"
+```bash
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
 ```
 
-Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html), it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/` (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.
+---
 
+### Environment Setup
 
-- **Current command:** `pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4 `
-    - **DAG Option (path relative to bash location)**`--dag | dot -Tsvg > workflow/dag/dag.svg`
+#### Cache Configuration (Recommended)
 
-- **Install pbi**: to install pbi use the command `pixi run pip install -e .` in the root directory. 
+To use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html) for intermediate files:
 
-To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified). In the mean time, the temp() option was removed from the intermediairy files as it takes too long to regenerage when modifying the script.:
+1. **Create the cache directory** (only needed once):
+   ```bash
+   mkdir -p /mnt/snakemake-cache
+   ```
 
-- pixi run snakemake --delete-temp-output
+2. **Set the environment variable** (required each session, or add to your shell config):
+   ```bash
+   # For current session
+   export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
+   
+   # To make persistent, add to ~/.bashrc or ~/.zshrc:
+   echo 'export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+#### Conda Environment
+
+The Conda environment is specified within each Snakemake rule (if needed):
+
+```yaml
+conda:
+    "envs/pixi_base_env.yaml"
+```
+
+---
+
+### Execution Commands
+
+#### First Run (Database Creation)
+
+**⚠️ Use only 2-4 cores** on first execution to avoid I/O bottleneck crashes:
+
+```bash
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --notemp --cores 4
+```
+
+#### Subsequent Runs (Updates)
+
+When re-running or updating:
+- You can use more cores
+- You can omit `--notemp` to remove temporary files
+
+```bash
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --cores all
+```
+
+#### Generating Workflow Diagram
+
+```bash
+# From root directory - path relative to bash location
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --dag | dot -Tsvg > workflow/dag/dag.svg
+```
+
+---
+
+### Core Execution Settings
+
+**For First-Time Execution:**
+- Use **2-4 cores maximum**
+- I/O operations on your drive will be the bottleneck
+- Using more cores may crash the program during initial downloads
+
+**For Subsequent Runs:**
+- You can use more cores: `--cores 8` or `--cores all`
+- The bottleneck shifts to CPU after data is downloaded
+
+---
+
+### Working Directory
+
+Input, output, log, and benchmark files are considered relative to the working directory:
+- Either the directory where you invoked Snakemake
+- Or whatever was specified with `--directory`
+
+**Note:** This is why we use `--directory workflow` in the commands above.
+
+---
+
+### Installing PBI Package
+
+To install PBI as an editable package:
+
+```bash
+# From the root directory of PBI
+pixi run pip install -e .
+```
+
+---
+
+### Managing Temporary Files
+
+By default, the `--notemp` flag keeps temporary files (useful for debugging).
+
+To remove temporary files after a successful run:
+
+```bash
+pixi run snakemake --delete-temp-output
+```
+
+**Note:** Without `--notemp`, regenerating temporary files takes a long time if you modify scripts, which is why it's included in the recommended command during development.
 
 
 

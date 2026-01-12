@@ -72,47 +72,73 @@ pixi run pip install -e . --no-deps
 pixi run python -c "import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')"
 ```
 
-#### 4. Build the Database
+#### 4. Build the Database (First-Time Setup)
 
-**⚠️ Important:** The first run downloads ~50 GB of data and may take 1-4 hours depending on your connection.
+**⚠️ CRITICAL: First-Time Execution Information**
+
+The initial pipeline execution is **required to create the database** and will take significant time:
+- **Duration**: 2-4 hours (depending on internet speed and CPU)
+- **Download**: ~50 GB of data from PhageScope
+- **Process**: Downloads, merges, validates data, and creates the queryable database
+- **Result**: Until this completes, **the database will not be queryable**
+
+**📋 First-Time Setup Procedure:**
 
 ```bash
-
-# [OPTIONAL] You can use caching if you plan to modify or update the data
+# Step 1: [RECOMMENDED] Set up caching for intermediate files
+# This allows resuming if the pipeline is interrupted
 mkdir -p /mnt/snakemake-cache
-
-# [OPTIONAL] You have to export this each time you restart or move this in you bashrc
 export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
 
+# Step 2: [OPTIONAL] Make the cache environment variable persistent
+# Add to your shell configuration file (~/.bashrc, ~/.zshrc, or ~/.bash_profile)
+echo 'export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/' >> ~/.bashrc
+source ~/.bashrc
 
-# Run Snakemake pipeline (first run: use 2-4 cores due to I/O bottleneck), add --cache if you set up caching
-pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory workflow --snakefile workflow/Snakefile
+# Step 3: Export the Pixi conda environment (required for Snakemake)
+pixi shell-hook > /dev/null
 
-# For subsequent runs, you can use more cores:
-# pixi run snakemake --cores all --directory workflow --snakefile workflow/Snakefile
+# Step 4: Run the Snakemake pipeline
+# ⚠️ Use ONLY 2-4 cores on first run to avoid I/O bottleneck crashes
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
 
+# The pipeline will:
+# 1. Download metadata from PhageScope (~2 GB)
+# 2. Download FASTA files (~50 GB total)
+# 3. Merge and process all data
+# 4. Create DuckDB database (~15 GB)
+# 5. Generate validation reports
+# 6. Create optimized database (~12 GB)
+# 7. Index sequence files
+
+# Progress can be monitored in real-time as commands are printed (--printshellcmds)
+```
+
+**For subsequent runs** (after database is created):
+
+```bash
+# You can use more cores for updates/re-runs
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile --use-conda --cores all
 ```
 <details>
-<summary>Pipeline details</summary>
+<summary>Advanced: Running specific pipeline targets</summary>
 
 ### Running the Pipeline piece by piece
 
+For development or troubleshooting, you can run specific parts of the pipeline:
+
 ```bash
-
-# Development (keep temp files with --notemp) - Full pipeline execution (all tables + validation)
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
-
-# Create database only
+# Create database only (without optimization)
 pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   ../data/databases/phage_database.duckdb
 
-# Generate validation report
+# Generate validation report only
 pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   reports/database_validation.html
 
-# Create optimized database
+# Create optimized database only
 pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   ../data/databases/phage_database_optimized.duckdb
@@ -120,14 +146,15 @@ pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
 
 </details>
 
-**Command Breakdown:**
+**🔧 Command Options Explained:**
 
-- `--cores 4`: Use 4 CPU cores (adjust based on your system)
-- `--use-conda`: Automatically create required conda environments
-- `--printshellcmds`: Show commands being executed (useful for debugging)
-- `--cache` : Use caching for intermediary files
-- `--directory` : Specify the workflow directory
-- `--snakefile` : Specify the Snakefile
+- `--directory workflow`: Working directory for the pipeline
+- `--snakefile workflow/Snakefile`: Path to the Snakefile
+- `--cache`: Use caching for intermediate files (requires SNAKEMAKE_OUTPUT_CACHE)
+- `--use-conda`: Automatically create and use conda environments for each rule
+- `--printshellcmds`: Display all shell commands as they execute (useful for monitoring)
+- `--notemp`: Keep temporary files (useful for debugging; omit for production)
+- `--cores 4`: Use 4 CPU cores (2-4 recommended for first run; increase later)
 
 #### 5. Start Jupyter Lab
 
@@ -195,11 +222,19 @@ source ~/.bashrc
 
 **Issue:** Snakemake fails with "No space left on device"
 ```bash
-# Check disk space
+# Check disk space (ensure >50GB free)
 df -h
 
 # Clean Snakemake cache if needed
 rm -rf .snakemake/
+```
+
+**Issue:** Pipeline interrupted or crashes during first run
+```bash
+# If you set up caching, simply re-run the same command
+# It will resume from where it stopped
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --notemp --cores 4
 ```
 
 **Issue:** Import error: `ModuleNotFoundError: No module named 'pbi'`
@@ -207,6 +242,22 @@ rm -rf .snakemake/
 # Reinstall PBI package from project root
 cd /path/to/PBI
 pixi run pip install -e .
+```
+
+**Issue:** Conda environment creation fails
+```bash
+# Ensure conda is in your PATH
+which conda
+
+# Install Anaconda/Miniconda if not present
+# See: https://docs.conda.io/en/latest/miniconda.html
+```
+
+**Issue:** Cache directory permission denied
+```bash
+# Use a directory you have write access to
+mkdir -p ~/snakemake-cache
+export SNAKEMAKE_OUTPUT_CACHE=~/snakemake-cache/
 ```
 
 ### 📦 What Gets Installed

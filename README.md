@@ -59,3 +59,64 @@ open http://localhost:8000/docs
 
 See [examples/api_usage.py](examples/api_usage.py) for Python usage examples.
 
+## 💻 Manual Setup (Alternative)
+
+For users who prefer to run the pipeline directly without Docker:
+
+### Prerequisites
+- Python 3.8+
+- [Pixi package manager](https://pixi.sh/latest/)
+- Conda/Mamba
+- 50GB+ disk space
+- 32GB+ RAM recommended
+
+### Quick Start
+
+**⚠️ Important: First-time database creation takes 2-4 hours**
+
+```bash
+# 1. Clone and navigate to repository
+git clone <repository-url>
+cd PBI
+
+# 2. Install Pixi (if not already installed)
+curl -fsSL https://pixi.sh/install.sh | bash
+
+# 3. Install PBI package
+pixi run pip install -e .
+
+# 4. Set up caching (recommended)
+mkdir -p /mnt/snakemake-cache
+export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
+
+# 5. Run pipeline to create database (2-4 hours on first run)
+pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cache --use-conda --printshellcmds --notemp --cores 4
+
+# The database will not be queryable until this completes!
+```
+
+**📖 For detailed manual setup instructions, see [Installation Guide](https://thibaultschowing.github.io/PBI/getting-started/installation/)**
+
+### Using the Database
+
+Once the pipeline completes, you can query the database:
+
+```python
+import pbi
+
+# Connect to database
+retriever = pbi.quick_connect()
+
+# Get statistics
+stats = retriever.get_stats()
+print(f"Phages: {stats['database']['phages']:,}")
+print(f"Proteins: {stats['database']['proteins']:,}")
+
+# Query phages
+df = retriever.get_phage_sequences(
+    "SELECT * FROM fact_phages WHERE Length > 100000 LIMIT 10"
+)
+```
+
+
