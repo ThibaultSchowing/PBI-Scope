@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Pipeline service for building the phage database
   pipeline:
