@@ -8,6 +8,7 @@ import logging
 import os
 from pathlib import Path
 from typing import Optional, List, Dict, Any
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -22,13 +23,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger('api.app')
-
-# Initialize FastAPI app
-app = FastAPI(
-    title="PBI Database API",
-    description="API for querying phage bioinformatics database and retrieving sequences",
-    version="0.1.0"
-)
 
 # Global retriever instance
 retriever: Optional[SequenceRetriever] = None
@@ -50,11 +44,12 @@ def get_data_paths():
     }
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database connection on startup."""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown."""
     global retriever
     
+    # Startup
     try:
         paths = get_data_paths()
         logger.info(f"Connecting to database: {paths['database']}")
@@ -80,15 +75,22 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Failed to connect to database: {e}")
         raise
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up resources on shutdown."""
-    global retriever
+    
+    yield
+    
+    # Shutdown
     if retriever:
         retriever.close()
         logger.info("Database connection closed")
+
+
+# Initialize FastAPI app with lifespan
+app = FastAPI(
+    title="PBI Database API",
+    description="API for querying phage bioinformatics database and retrieving sequences",
+    version="0.1.0",
+    lifespan=lifespan
+)
 
 
 class QueryRequest(BaseModel):
@@ -197,7 +199,10 @@ async def get_phages(request: PhageSequenceRequest):
                 limit=request.limit
             )
         elif request.phage_ids:
-            result = retriever.get_phage_sequences_by_ids(request.phage_ids)
+            # Build SQL query from IDs
+            ids_str = "', '".join(request.phage_ids)
+            query = f"SELECT Phage_ID FROM fact_phages WHERE Phage_ID IN ('{ids_str}')"
+            result = retriever.get_phage_sequences(query)
         else:
             raise HTTPException(
                 status_code=400,
@@ -227,7 +232,10 @@ async def get_proteins(request: ProteinSequenceRequest):
                 limit=request.limit
             )
         elif request.protein_ids:
-            result = retriever.get_protein_sequences_by_ids(request.protein_ids)
+            # Build SQL query from IDs
+            ids_str = "', '".join(request.protein_ids)
+            query = f"SELECT Protein_ID FROM dim_proteins WHERE Protein_ID IN ('{ids_str}')"
+            result = retriever.get_protein_sequences(query)
         else:
             raise HTTPException(
                 status_code=400,
@@ -257,7 +265,10 @@ async def get_phages_fasta(request: PhageSequenceRequest):
                 limit=request.limit
             )
         elif request.phage_ids:
-            result = retriever.get_phage_sequences_by_ids(request.phage_ids)
+            # Build SQL query from IDs
+            ids_str = "', '".join(request.phage_ids)
+            query = f"SELECT Phage_ID FROM fact_phages WHERE Phage_ID IN ('{ids_str}')"
+            result = retriever.get_phage_sequences(query)
         else:
             raise HTTPException(
                 status_code=400,
@@ -289,7 +300,10 @@ async def get_proteins_fasta(request: ProteinSequenceRequest):
                 limit=request.limit
             )
         elif request.protein_ids:
-            result = retriever.get_protein_sequences_by_ids(request.protein_ids)
+            # Build SQL query from IDs
+            ids_str = "', '".join(request.protein_ids)
+            query = f"SELECT Protein_ID FROM dim_proteins WHERE Protein_ID IN ('{ids_str}')"
+            result = retriever.get_protein_sequences(query)
         else:
             raise HTTPException(
                 status_code=400,
