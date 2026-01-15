@@ -14,3 +14,28 @@ Overall the Snakemake pipeline downloads and merges the metadata into a SQL data
 
 Tables and project overview available on [this page](https://thibaultschowing.github.io/PBI/getting-started/overview/). This page includes data summary on all tables as well as [a database validation report](https://thibaultschowing.github.io/PBI/reports/database_validation.html) helping visualize the database structure and elements and compare it to the data available on [PhageScope](https://phagescope.deepomics.org/database).
 
+## Quick Start Options
+
+### Option 1: Docker (Recommended for API users)
+
+The easiest way to run the PBI pipeline and API is using Docker:
+
+```bash
+# Build and run the pipeline to create the database
+docker compose build pipeline
+docker compose run --rm pipeline
+
+# Start the API service
+docker compose build api
+docker compose up -d api
+
+# Access the API at http://localhost:8000
+curl http://localhost:8000/health
+```
+
+See [DOCKER.md](DOCKER.md) for detailed Docker instructions and API documentation.
+
+### Option 2: Local Installation
+
+For local development and analysis, see the [installation guide](https://thibaultschowing.github.io/PBI/getting-started/installation/) in the documentation.
+
