@@ -112,6 +112,7 @@ curl http://localhost:8000/stats
 ## Security
 
 - CodeQL analysis: 0 vulnerabilities found
+- FastAPI updated to 0.109.1 to patch ReDoS vulnerability (CVE in Content-Type header handling)
 - API runs with read-only access to data volume
 - Proper error handling and input validation
 - No secrets in code or configuration
