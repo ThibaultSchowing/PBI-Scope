@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Pipeline service for building the phage database
+  pipeline:
+    build:
+      context: .
+      dockerfile: workflow/Dockerfile
+    container_name: pbi-pipeline
+    volumes:
+      # Mount data directory to persist database and sequences
+      - pbi-data:/data
+      # Mount workflow directory for development (optional)
+      - ./workflow:/app/workflow
+    environment:
+      - SNAKEMAKE_OUTPUT_CACHE=/data/cache
+    networks:
+      - pbi-network
+
+  # API service for querying the database
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: pbi-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount the same data directory (read-only for safety)
+      - pbi-data:/data:ro
+    environment:
+      - DATA_PATH=/data/processed
+    depends_on:
+      - pipeline
+    networks:
+      - pbi-network
+    restart: unless-stopped
+
+volumes:
+  # Named volume for persistent data storage
+  pbi-data:
+    driver: local
+
+networks:
+  pbi-network:
+    driver: bridge
