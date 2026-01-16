@@ -2,7 +2,7 @@ name: snakemake_base
 channels:
   - conda-forge
   - bioconda
-  - defaults
+  - nodefaults
 dependencies:
   - python>=3.8
   - snakemake>=7.32.4

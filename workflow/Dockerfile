@@ -20,7 +20,9 @@ COPY setup.py /app/
 COPY workflow/envs/base_environment.yaml /tmp/base_environment.yaml
 
 # Install snakemake and core dependencies using conda env
-# Temporarily disable SSL verification for conda due to build environment issues
+# NOTE: SSL verification is temporarily disabled due to self-signed certificates in
+# the GitHub Actions CI environment. In production, ensure proper CA certificates are
+# configured or use a trusted mirror. Re-enable with: conda config --set ssl_verify true
 # Update the base environment instead of creating a new one
 RUN conda config --set ssl_verify false && \
     conda env update -n base -f /tmp/base_environment.yaml && \
