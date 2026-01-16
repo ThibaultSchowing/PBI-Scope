@@ -1,0 +1,27 @@
+# Dockerfile for the PBI API service
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy source code and setup files
+COPY src /app/src
+COPY setup.py /app/
+COPY api /app/api
+
+# Install PBI package and API dependencies
+RUN pip install --no-cache-dir -e . && \
+    pip install --no-cache-dir -r api/requirements.txt
+
+# Expose API port
+EXPOSE 8000
+
+# Set environment variable for data path
+ENV DATA_PATH=/data/processed
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+
+# Run the API
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
