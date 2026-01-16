@@ -272,7 +272,7 @@ rule merge_protein_fasta_by_source:
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
         else
-            pixi run -e base python scripts/preprocessing/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
+            python scripts/preprocessing/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
         fi
         '''
     
@@ -293,7 +293,7 @@ rule merge_phage_fasta_by_source:
         if [ $(echo "$fasta_files" | wc -l) -eq 1 ]; then
             cp "$fasta_files" {output.merged_fasta}
         else
-            pixi run -e base python scripts/preprocessing/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
+            python scripts/preprocessing/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
         fi
         '''
 
