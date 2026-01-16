@@ -30,8 +30,8 @@ docker compose build pipeline
 ```
 
 This will:
-- Install Pixi and conda dependencies
-- Set up the Snakemake environment
+- Install Snakemake and conda dependencies
+- Set up the workflow environment
 - Prepare the workflow directory
 
 ### 2. Run the Pipeline to Build the Database

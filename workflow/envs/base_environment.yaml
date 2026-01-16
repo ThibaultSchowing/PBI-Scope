@@ -1,12 +1,12 @@
-name: base
+name: snakemake_base
 channels:
   - conda-forge
   - bioconda
   - nodefaults
 dependencies:
   - python>=3.8
+  - snakemake>=7.32.4
   - pandas>=2.0.0
-  - numpy>=1.24.0
-  - matplotlib
+  - numpy
   - duckdb>=0.9.0
-  - ydata-profiling>=4.0.0
+  - pyfaidx>=0.7.0
