@@ -44,7 +44,7 @@ rule merge_transcription_terminator_metadata_tsvs:
     output:
         config["transcription_terminator_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_transcription_terminator_metadata.py"
 
@@ -60,7 +60,7 @@ rule merge_phage_metadata_tsvs:
     output:
         config["phage_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_phage_metadata.py"
 
@@ -76,7 +76,7 @@ rule merge_annotated_proteins_metadata_tsvs:
     output:
         config["annotated_proteins_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_annotated_proteins_metadata.py"
 
@@ -92,7 +92,7 @@ rule merge_phage_trna_tmrna_metadata_tsvs:
     output:
         config["phage_trna_tmrna_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_phage_trna_tmrna_metadata.py"
 
@@ -108,7 +108,7 @@ rule merge_phage_anti_crispr_metadata_tsvs:
     output:
         config["phage_anti_crispr_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_phage_anti_crispr_metadata.py"
 
@@ -124,7 +124,7 @@ rule merge_phage_virulent_factor_metadata_tsvs:
     output:
         config["phage_virulent_factor_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     
     script:
         "../scripts/preprocessing/mergers/merge_phage_virulent_factor_metadata.py"
@@ -141,7 +141,7 @@ rule merge_phage_transmembrane_protein_metadata_tsvs:
     output:
         config["phage_transmembrane_protein_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_phage_transmembrane_protein_metadata.py"
 
@@ -157,7 +157,7 @@ rule merge_antimicrobial_resistance_gene_metadata_tsvs:
     output:
         config["antimicrobial_resistance_gene_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_antimicrobial_resistance_gene_metadata.py"
 
@@ -173,7 +173,7 @@ rule merge_crispr_array_metadata_tsvs:
     output:
         config["crispr_array_metadata_merged_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/preprocessing/mergers/merge_crispr_array_metadata.py"
 
@@ -183,10 +183,10 @@ rule generate_report:
         lambda wildcards: config[f"{wildcards.feature}_merged_output"]
     output:
         config["reports_output"] + "{feature}_report.html"
-    shell:
-        """
-        pixi run -e reporting python scripts/utils/generate_reports.py {input} {output}
-        """
+    conda:
+        "../envs/reporting.yaml"
+    script:
+        "../scripts/utils/generate_reports.py"
 
 # Protein fasta files
 

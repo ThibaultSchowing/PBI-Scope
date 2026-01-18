@@ -1,4 +1,4 @@
-#!.pixi/envs/reporting/bin/python
+#!/usr/bin/env python
 # Generate HTML reports from the merged CSV files 
 
 import sys
@@ -55,8 +55,15 @@ def fast_sample_known_size(file_path, sample_size, total_rows):
     return df_sample
 
 def main():
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
+    # Support both direct execution and Snakemake script directive
+    try:
+        # When called via Snakemake script directive
+        input_file = snakemake.input[0]
+        output_file = snakemake.output[0]
+    except NameError:
+        # When called directly via command line
+        input_file = sys.argv[1]
+        output_file = sys.argv[2]
 
     logging.info(f"Input: {input_file}")
     logging.info(f"Output: {output_file}")

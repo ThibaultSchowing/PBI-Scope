@@ -1,4 +1,4 @@
-#!.pixi/envs/default/bin/python
+#!/usr/bin/env python
 
 import sys
 print(f"Using python from: {sys.executable}")
