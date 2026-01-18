@@ -1,4 +1,4 @@
-#!.pixi/envs/reporting/bin/python
+#!/usr/bin/env python
 # Generate HTML reports from the merged CSV files 
 
 import sys
