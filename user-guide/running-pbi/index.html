@@ -798,29 +798,27 @@
   <h1>Running PBI</h1>
 
 <h2 id="running-the-pipeline">Running the pipeline</h2>
-<p>Snakemake is launched from Pixi with <code>pixi run</code>. </p>
 <p>When executing for the first time <strong>do not</strong> use more than 2-4 cores as the I/O operations on your drive will be the bottleneck and might crash the program. </p>
 <p>Input, output, log, and benchmark files are considered to be relative to the working directory (<strong>either the directory in which you have invoked Snakemake</strong> or whatever was specified for --directory or the workdir: directive). -&gt; from the workflow directory !</p>
-<p>The Pixi environment needs to be exported first with <code>pixi workspace export conda-environment -e base envs/pixi_base_enf.yaml</code></p>
 <p>The Conda environment to use is specified within each rule (if needed) with </p>
 <pre><code>    conda:
-        &quot;envs/pixi_base_env.yaml&quot;
+        &quot;envs/base_env.yaml&quot;
 </code></pre>
 <p>Cache: to use <a href="https://snakemake.readthedocs.io/en/stable/executing/caching.html">caching</a>, it is first needed to export snakemake cache with <code>export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/</code> (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.</p>
 <ul>
 <li>
-<p><strong>Current command:</strong> <code>pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4</code></p>
+<p><strong>Current command:</strong> <code>snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4</code></p>
 <ul>
 <li><strong>DAG Option (path relative to bash location)</strong><code>--dag | dot -Tsvg &gt; workflow/dag/dag.svg</code></li>
 </ul>
 </li>
 <li>
-<p><strong>Install pbi</strong>: to install pbi use the command <code>pixi run pip install -e .</code> in the root directory. </p>
+<p><strong>Install pbi</strong>: to install pbi use the command <code>pip install -e .</code> in the root directory. </p>
 </li>
 </ul>
 <p>To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified). In the mean time, the temp() option was removed from the intermediairy files as it takes too long to regenerage when modifying the script.:</p>
 <ul>
-<li>pixi run snakemake --delete-temp-output</li>
+<li>snakemake --delete-temp-output</li>
 </ul>
 <h2 id="using-the-database">🗄️ Using the Database</h2>
 <p>The pipeline generates a <strong>DuckDB</strong> database optimized for analytical queries.</p>

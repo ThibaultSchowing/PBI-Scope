@@ -419,10 +419,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-install-pixi" class="md-nav__link">
+  <a href="#1-clone-the-repository" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Install Pixi
+        1. Clone the Repository
       
     </span>
   </a>
@@ -430,21 +430,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-clone-the-repository" class="md-nav__link">
+  <a href="#2-install-anaconda" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Clone the Repository
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#25-install-anaconda" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2.5 Install Anaconda
+        2. Install Anaconda
       
     </span>
   </a>
@@ -899,10 +888,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-install-pixi" class="md-nav__link">
+  <a href="#1-clone-the-repository" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Install Pixi
+        1. Clone the Repository
       
     </span>
   </a>
@@ -910,21 +899,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-clone-the-repository" class="md-nav__link">
+  <a href="#2-install-anaconda" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Clone the Repository
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#25-install-anaconda" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2.5 Install Anaconda
+        2. Install Anaconda
       
     </span>
   </a>
@@ -1057,7 +1035,6 @@
 <ul>
 <li><strong>Linux</strong>/macOS (Windows via WSL2)</li>
 <li><strong>Python 3.8+</strong></li>
-<li><strong>Pixi package manager</strong> (<a href="https://pixi.sh/latest/">installation guide</a>)</li>
 <li><strong>Conda</strong> (used via Snakemake's <code>--use-conda</code> option)</li>
 <li><strong>Internet connection</strong> (for data downloads)</li>
 <li><strong>Disk space</strong>: &gt;50GB recommended</li>
@@ -1065,18 +1042,7 @@
 <li><strong>Patience</strong>: building the full database and reports from scratch takes 2-4 hours</li>
 </ul>
 <h3 id="step-by-step-installation">Step-by-Step Installation</h3>
-<h4 id="1-install-pixi">1. Install Pixi</h4>
-<p>Pixi is a fast, modern package manager that handles all dependencies automatically.</p>
-<pre><code class="language-bash"># Install Pixi (one-time setup)
-curl -fsSL https://pixi.sh/install.sh | bash
-
-# Restart your shell or run:
-export PATH=&quot;$HOME/.pixi/bin:$PATH&quot;
-
-# Verify installation
-pixi --version
-</code></pre>
-<h4 id="2-clone-the-repository">2. Clone the Repository</h4>
+<h4 id="1-clone-the-repository">1. Clone the Repository</h4>
 <pre><code class="language-bash"># Clone PBI repository
 
 git clone &lt;repository-url&gt;
@@ -1086,24 +1052,16 @@ cd PBI
 ls -la
 # Should see: workflow/, src/, data/, notebooks/, README.md, etc.
 </code></pre>
-<h4 id="25-install-anaconda">2.5 Install Anaconda</h4>
+<h4 id="2-install-anaconda">2. Install Anaconda</h4>
 <p>Install Anaconda. Make sure that the conda command is in your path</p>
 <h4 id="3-install-pbi-package">3. Install PBI Package</h4>
-<p><strong>TODO</strong></p>
-<blockquote>
-<p>Check if <code>pixi install</code> is necessary before installing the package</p>
-</blockquote>
 <p>You can install the package in a virtual environment with conda or venv by running the following command from within PBI/</p>
 <pre><code class="language-bash">
 # Install PBI 
 (myenv) pip install -e .
-</code></pre>
-<p>Or use pixi :</p>
-<pre><code class="language-bash"># Install PBI as an editable Python package
-pixi run pip install -e . --no-deps
 
 # Verify installation
-pixi run python -c &quot;import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')&quot;
+python -c &quot;import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')&quot;
 </code></pre>
 <h4 id="4-build-the-database">4. Build the Database</h4>
 <p><strong>⚠️ Important:</strong> The first run downloads ~50 GB of data and may take 1-4 hours depending on your connection.</p>
@@ -1116,10 +1074,10 @@ export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
 
 
 # Run Snakemake pipeline (first run: use 2-4 cores due to I/O bottleneck), add --cache if you set up caching
-pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory workflow --snakefile workflow/Snakefile
+snakemake --cores 4 --cache --use-conda --printshellcmds --directory workflow --snakefile workflow/Snakefile
 
 # For subsequent runs, you can use more cores:
-# pixi run snakemake --cores all --directory workflow --snakefile workflow/Snakefile
+# snakemake --cores all --directory workflow --snakefile workflow/Snakefile
 
 </code></pre>
 <details>
@@ -1130,20 +1088,20 @@ pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory wo
 
 <pre><code class="language-bash">
 # Development (keep temp files with --notemp) - Full pipeline execution (all tables + validation)
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
+snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
 
 # Create database only
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   ../data/databases/phage_database.duckdb
 
 # Generate validation report
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   reports/database_validation.html
 
 # Create optimized database
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   ../data/databases/phage_database_optimized.duckdb
 </code></pre>
@@ -1164,10 +1122,10 @@ pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
 <p>Run your notebook as you do usualy</p>
 <pre><code class="language-bash"># From project root directory
 cd ..
-pixi run jupyter lab
+jupyter lab
 
 # Or specify a custom port:
-# pixi run jupyter lab --port 8889
+# jupyter lab --port 8889
 </code></pre>
 <h4 id="6-test-your-installation">6. Test Your Installation</h4>
 <p>Create a new notebook and run:</p>
@@ -1190,26 +1148,21 @@ print(f&quot;\n✅ Retrieved {len(df)} large phages&quot;)
 </code></pre>
 <h3 id="quick-command-reference">🎯 Quick Command Reference</h3>
 <pre><code class="language-bash"># Update database (re-run workflow for new data)
-cd workflow &amp;&amp; pixi run snakemake --cores 4
+cd workflow &amp;&amp; snakemake --cores 4
 
 # Start Jupyter Lab
-pixi run jupyter lab
+jupyter lab
 
 # Run Python interactively
-pixi run python
+python
 
 # Check what would be updated (dry-run)
-cd workflow &amp;&amp; pixi run snakemake -n
+cd workflow &amp;&amp; snakemake -n
 
 # Generate workflow diagram
-cd workflow &amp;&amp; pixi run snakemake --dag | dot -Tsvg &gt; dag/workflow.svg
+cd workflow &amp;&amp; snakemake --dag | dot -Tsvg &gt; dag/workflow.svg
 </code></pre>
 <h3 id="troubleshooting">🐛 Troubleshooting</h3>
-<p><strong>Issue:</strong> <code>pixi: command not found</code></p>
-<pre><code class="language-bash"># Add Pixi to PATH permanently
-echo 'export PATH=&quot;$HOME/.pixi/bin:$PATH&quot;' &gt;&gt; ~/.bashrc
-source ~/.bashrc
-</code></pre>
 <p><strong>Issue:</strong> Snakemake fails with "No space left on device"</p>
 <pre><code class="language-bash"># Check disk space
 df -h
@@ -1220,7 +1173,7 @@ rm -rf .snakemake/
 <p><strong>Issue:</strong> Import error: <code>ModuleNotFoundError: No module named 'pbi'</code></p>
 <pre><code class="language-bash"># Reinstall PBI package from project root
 cd /path/to/PBI
-pixi run pip install -e .
+pip install -e .
 </code></pre>
 <h3 id="what-gets-installed">📦 What Gets Installed</h3>
 <p><strong>TODO</strong></p>
@@ -1228,7 +1181,6 @@ pixi run pip install -e .
 <p>update values </p>
 </blockquote>
 <ul>
-<li><strong>Pixi environments</strong>: <code>~/.pixi/</code> (~500 MB)</li>
 <li><strong>Conda packages</strong>: <code>.snakemake/conda/</code> (~2 GB)</li>
 <li><strong>Raw data</strong>: <code>data/raw/</code> (~40 GB compressed) - Temporary files</li>
 <li><strong>Processed data</strong>: <code>data/processed/</code> (~50 GB)</li>
