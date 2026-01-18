@@ -185,10 +185,8 @@ rule generate_report:
         config["reports_output"] + "{feature}_report.html"
     conda:
         "../envs/reporting.yaml"
-    shell:
-        """
-        python scripts/utils/generate_reports.py {input} {output}
-        """
+    script:
+        "../scripts/utils/generate_reports.py"
 
 # Protein fasta files
 
