@@ -1,33 +1,29 @@
 
 ## Running the pipeline
 
-Snakemake is launched from Pixi with `pixi run`. 
-
 When executing for the first time **do not** use more than 2-4 cores as the I/O operations on your drive will be the bottleneck and might crash the program. 
 
 Input, output, log, and benchmark files are considered to be relative to the working directory (**either the directory in which you have invoked Snakemake** or whatever was specified for --directory or the workdir: directive). -> from the workflow directory !
 
 
-The Pixi environment needs to be exported first with `pixi workspace export conda-environment -e base envs/pixi_base_enf.yaml`
-
 The Conda environment to use is specified within each rule (if needed) with 
 
 ```
     conda:
-        "envs/pixi_base_env.yaml"
+        "envs/base_env.yaml"
 ```
 
 Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html), it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/` (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.
 
 
-- **Current command:** `pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4 `
+- **Current command:** `snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4 `
     - **DAG Option (path relative to bash location)**`--dag | dot -Tsvg > workflow/dag/dag.svg`
 
-- **Install pbi**: to install pbi use the command `pixi run pip install -e .` in the root directory. 
+- **Install pbi**: to install pbi use the command `pip install -e .` in the root directory. 
 
 To remove the temporary files after execution, use --delete-temp-output. Has to be done separately  (to be verified). In the mean time, the temp() option was removed from the intermediairy files as it takes too long to regenerage when modifying the script.:
 
-- pixi run snakemake --delete-temp-output
+- snakemake --delete-temp-output
 
 
 

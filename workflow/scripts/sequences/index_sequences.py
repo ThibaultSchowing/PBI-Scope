@@ -1,4 +1,4 @@
-#!.pixi/envs/default/bin/python
+#!/usr/bin/env python
 
 import pyfaidx
 from pathlib import Path

@@ -1,4 +1,4 @@
-#!.pixi/envs/default/bin/python
+#!/usr/bin/env python
 
 import duckdb
 import os

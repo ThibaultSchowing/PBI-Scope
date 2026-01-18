@@ -15,7 +15,7 @@ rule create_duckdb:
     output:
         db=config["duckdb_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/database/create_duckdb.py"   
 
@@ -25,7 +25,7 @@ rule optimize_database:
     output:
         optimized_db=config["optimized_duckdb_output"]
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/database/optimize_db.py"
 
@@ -35,6 +35,6 @@ rule validate_database:
     output:
         report=config["database_validation_report_output"]  
     conda:
-        "../envs/pixi_base_env.yaml"
+        "../envs/base_env.yaml"
     script:
         "../scripts/database/validate_db.py"

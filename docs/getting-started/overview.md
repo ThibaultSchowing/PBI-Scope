@@ -180,10 +180,11 @@ PBI/
 │   │       └── common.py                 # Shared utilities & helpers
 │   ├── config/
 │   │   └── config.yaml                   # Pipeline configuration
-│   ├── envs/                             # Conda/Pixi environments
-│   │   ├── pixi_base_env.yaml           # Base environment
-│   │   ├── duckdb_analysis.yaml         # Analysis environment
-│   │   └── sequences.yaml               # Sequence processing environment
+│   ├── envs/                             # Conda environments
+│   │   ├── base_env.yaml                 # Base environment
+│   │   ├── reporting.yaml                # Report generation environment
+│   │   ├── duckdb_analysis.yaml          # Analysis environment
+│   │   └── sequences.yaml                # Sequence processing environment
 │   ├── notebooks/                        # Analysis & exploration notebooks
 │   │   ├── expl_5_TestDB.ipynb          # Database exploration
 │   │   ├── sequence_retrieval_demo.ipynb # Sequence API examples
@@ -271,7 +272,7 @@ PBI/
 ├── README.md                            # Project overview
 ├── LICENSE                              # License information
 ├── pyproject.toml                       # Python package metadata
-├── pixi.toml                            # Pixi environment config
+├── pixi.toml                            # Legacy config (not used)
 └── setup.py                             # Package installation script
 ```
 
