@@ -36,4 +36,4 @@ RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermedi
 WORKDIR /app/workflow
 
 # Default command to run the pipeline
-CMD ["snakemake", "--cores", "all", "--use-conda", "--printshellcmds", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]
+CMD ["snakemake", "--cores", "all", "--use-conda", "--printshellcmds", "--cache", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]

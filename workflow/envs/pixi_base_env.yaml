@@ -10,3 +10,4 @@ dependencies:
   - matplotlib
   - duckdb>=0.9.0
   - ydata-profiling>=4.0.0
+  - psutil

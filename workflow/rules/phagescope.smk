@@ -183,9 +183,11 @@ rule generate_report:
         lambda wildcards: config[f"{wildcards.feature}_merged_output"]
     output:
         config["reports_output"] + "{feature}_report.html"
+    conda:
+        "../envs/reporting.yaml"
     shell:
         """
-        pixi run -e reporting python scripts/utils/generate_reports.py {input} {output}
+        python scripts/utils/generate_reports.py {input} {output}
         """
 
 # Protein fasta files
