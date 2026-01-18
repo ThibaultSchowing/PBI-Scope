@@ -7,7 +7,6 @@ Get started with PBI in under 10 minutes!
 
 - **Linux**/macOS (Windows via WSL2)
 - **Python 3.8+**
-- **Pixi package manager** ([installation guide](https://pixi.sh/latest/))
 - **Conda** (used via Snakemake's `--use-conda` option)
 - **Internet connection** (for data downloads)
 - **Disk space**: >50GB recommended
@@ -16,22 +15,7 @@ Get started with PBI in under 10 minutes!
 
 ### Step-by-Step Installation
 
-#### 1. Install Pixi
-
-Pixi is a fast, modern package manager that handles all dependencies automatically.
-
-```bash
-# Install Pixi (one-time setup)
-curl -fsSL https://pixi.sh/install.sh | bash
-
-# Restart your shell or run:
-export PATH="$HOME/.pixi/bin:$PATH"
-
-# Verify installation
-pixi --version
-```
-
-#### 2. Clone the Repository
+#### 1. Clone the Repository
 
 ```bash
 # Clone PBI repository
@@ -45,14 +29,11 @@ ls -la
 ```
 
 
-#### 2.5 Install Anaconda
+#### 2. Install Anaconda
 
 Install Anaconda. Make sure that the conda command is in your path
 
 #### 3. Install PBI Package
-
-**TODO**
-> Check if `pixi install` is necessary before installing the package
 
 You can install the package in a virtual environment with conda or venv by running the following command from within PBI/
 
@@ -60,16 +41,9 @@ You can install the package in a virtual environment with conda or venv by runni
 
 # Install PBI 
 (myenv) pip install -e .
-```
-
-Or use pixi :
-
-```bash
-# Install PBI as an editable Python package
-pixi run pip install -e . --no-deps
 
 # Verify installation
-pixi run python -c "import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')"
+python -c "import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')"
 ```
 
 #### 4. Build the Database
@@ -86,10 +60,10 @@ export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
 
 
 # Run Snakemake pipeline (first run: use 2-4 cores due to I/O bottleneck), add --cache if you set up caching
-pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory workflow --snakefile workflow/Snakefile
+snakemake --cores 4 --cache --use-conda --printshellcmds --directory workflow --snakefile workflow/Snakefile
 
 # For subsequent runs, you can use more cores:
-# pixi run snakemake --cores all --directory workflow --snakefile workflow/Snakefile
+# snakemake --cores all --directory workflow --snakefile workflow/Snakefile
 
 ```
 <details>
@@ -100,20 +74,20 @@ pixi run snakemake --cores 4 --cache --use-conda --printshellcmds --directory wo
 ```bash
 
 # Development (keep temp files with --notemp) - Full pipeline execution (all tables + validation)
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
+snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4
 
 # Create database only
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   ../data/databases/phage_database.duckdb
 
 # Generate validation report
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   reports/database_validation.html
 
 # Create optimized database
-pixi run snakemake --directory workflow --snakefile workflow/Snakefile \
+snakemake --directory workflow --snakefile workflow/Snakefile \
   --cache --use-conda --printshellcmds --cores 4 \
   ../data/databases/phage_database_optimized.duckdb
 ```
@@ -136,10 +110,10 @@ Run your notebook as you do usualy
 ```bash
 # From project root directory
 cd ..
-pixi run jupyter lab
+jupyter lab
 
 # Or specify a custom port:
-# pixi run jupyter lab --port 8889
+# jupyter lab --port 8889
 ```
 
 #### 6. Test Your Installation
@@ -169,29 +143,22 @@ print(f"\n✅ Retrieved {len(df)} large phages")
 
 ```bash
 # Update database (re-run workflow for new data)
-cd workflow && pixi run snakemake --cores 4
+cd workflow && snakemake --cores 4
 
 # Start Jupyter Lab
-pixi run jupyter lab
+jupyter lab
 
 # Run Python interactively
-pixi run python
+python
 
 # Check what would be updated (dry-run)
-cd workflow && pixi run snakemake -n
+cd workflow && snakemake -n
 
 # Generate workflow diagram
-cd workflow && pixi run snakemake --dag | dot -Tsvg > dag/workflow.svg
+cd workflow && snakemake --dag | dot -Tsvg > dag/workflow.svg
 ```
 
 ### 🐛 Troubleshooting
-
-**Issue:** `pixi: command not found`
-```bash
-# Add Pixi to PATH permanently
-echo 'export PATH="$HOME/.pixi/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
-```
 
 **Issue:** Snakemake fails with "No space left on device"
 ```bash
@@ -206,7 +173,7 @@ rm -rf .snakemake/
 ```bash
 # Reinstall PBI package from project root
 cd /path/to/PBI
-pixi run pip install -e .
+pip install -e .
 ```
 
 ### 📦 What Gets Installed
@@ -214,7 +181,6 @@ pixi run pip install -e .
 **TODO**
 > update values 
 
-- **Pixi environments**: `~/.pixi/` (~500 MB)
 - **Conda packages**: `.snakemake/conda/` (~2 GB)
 - **Raw data**: `data/raw/` (~40 GB compressed) - Temporary files
 - **Processed data**: `data/processed/` (~50 GB)
