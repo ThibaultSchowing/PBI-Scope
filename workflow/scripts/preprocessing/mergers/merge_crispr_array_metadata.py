@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np  
 import os
 import logging
+import csv
 logging.basicConfig(level=logging.INFO)
 
 sys.path.append('scripts')
@@ -42,7 +43,7 @@ for infile in inputs:
         logging.warning(f"File {infile} is empty or invalid. Skipping.")
         continue
     
-    df = pd.read_csv(infile, sep="\t")
+    df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
     
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
