@@ -98,7 +98,7 @@ def merge_dataframes_chunked(dfs, output_file):
     if not dfs:
         logging.warning("No dataframes to merge")
         # Create empty file
-        with open(output_file, 'w'):
+        with open(output_file, 'w', encoding='utf-8'):
             pass
         return 0
     
@@ -107,13 +107,13 @@ def merge_dataframes_chunked(dfs, output_file):
     # Write first dataframe with header
     first_df = dfs[0]
     logging.info(f"Writing first dataframe with {len(first_df)} rows and header")
-    first_df.to_csv(output_file, index=False, mode='w')
+    first_df.to_csv(output_file, index=False, mode='w', encoding='utf-8')
     total_rows += len(first_df)
     
     # Append remaining dataframes without header
     for i, df in enumerate(dfs[1:], start=2):
         logging.info(f"Appending dataframe {i}/{len(dfs)} with {len(df)} rows")
-        df.to_csv(output_file, index=False, mode='a', header=False)
+        df.to_csv(output_file, index=False, mode='a', header=False, encoding='utf-8')
         total_rows += len(df)
     
     logging.info(f"Total rows written: {total_rows}")

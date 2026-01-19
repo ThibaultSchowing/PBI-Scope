@@ -19,7 +19,7 @@ The PBI pipeline was experiencing two main issues:
 
 1. **New utility function** in `workflow/scripts/preprocessing/mergers/utils.py`:
    ```python
-   def merge_dataframes_chunked(dfs, output_file, chunk_size=100000):
+   def merge_dataframes_chunked(dfs, output_file):
        '''Merge multiple DataFrames by writing them in chunks to avoid OOM errors.'''
    ```
    
