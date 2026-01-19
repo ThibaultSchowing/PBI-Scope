@@ -9,6 +9,7 @@ import sys
 import tempfile
 import pandas as pd
 import numpy as np
+import csv
 from pathlib import Path
 
 # Add the scripts directory to the path
@@ -52,11 +53,11 @@ def test_chunked_merge_basic():
         assert total_rows == 6, f"Expected 6 rows, got {total_rows}"
         
         # Read back and verify
-        result_df = pd.read_csv(output_file)
+        result_df = pd.read_csv(output_file, quoting=csv.QUOTE_NONNUMERIC)
         assert len(result_df) == 6, f"Expected 6 rows in file, got {len(result_df)}"
         assert list(result_df.columns) == ['ID', 'Value', 'Name'], "Columns mismatch"
         assert list(result_df['ID']) == ['A', 'B', 'C', 'D', 'E', 'F'], "IDs mismatch"
-        assert list(result_df['Value']) == [1, 2, 3, 4, 5, 6], "Values mismatch"
+        assert list(result_df['Value'].astype(int)) == [1, 2, 3, 4, 5, 6], "Values mismatch"
         
         print("✅ Basic chunked merge test PASSED")
     finally:
@@ -110,7 +111,7 @@ def test_chunked_merge_large_dataframes():
         assert total_rows == 5000, f"Expected 5000 rows, got {total_rows}"
         
         # Read back and verify
-        result_df = pd.read_csv(output_file)
+        result_df = pd.read_csv(output_file, quoting=csv.QUOTE_NONNUMERIC)
         assert len(result_df) == 5000, f"Expected 5000 rows in file, got {len(result_df)}"
         assert list(result_df.columns) == ['Phage_ID', 'Length', 'GC_content', 'Source_DB'], "Columns mismatch"
         
@@ -150,7 +151,7 @@ def test_chunked_merge_maintains_column_order():
         utils.merge_dataframes_chunked(dfs, output_file)
         
         # Read back and verify column order
-        result_df = pd.read_csv(output_file)
+        result_df = pd.read_csv(output_file, quoting=csv.QUOTE_NONNUMERIC)
         assert list(result_df.columns) == ['Col_A', 'Col_B', 'Col_C'], "Column order not preserved"
         
         print("✅ Column order preservation test PASSED")
