@@ -20,7 +20,7 @@ def is_file_empty_or_invalid(filepath):
                 return True
             
         # Try to read with pandas to see if it has columns
-        df_test = pd.read_csv(filepath, sep="\t", nrows=0)
+        df_test = pd.read_csv(filepath, sep="\t", nrows=0, quoting=csv.QUOTE_NONNUMERIC)
         return len(df_test.columns) == 0
         
     except Exception as e:
