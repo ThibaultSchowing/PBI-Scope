@@ -2,6 +2,8 @@
 # Cleanup script for PBI Docker cache volume
 # This script removes the Snakemake cache volume to free up space
 # while preserving the main data volume
+#
+# Make executable with: chmod +x cleanup_cache.sh
 
 set -e
 
@@ -23,11 +25,13 @@ if ! docker volume inspect pbi-cache >/dev/null 2>&1; then
 fi
 
 # Check if volume is in use
-if docker ps -q -f volume=pbi-cache | grep -q .; then
+CONTAINERS_USING_CACHE=$(docker ps -q | xargs -r docker inspect --format '{{.Name}}{{range .Mounts}}{{if eq .Name "pbi_pbi-cache"}} USES_CACHE{{end}}{{end}}' 2>/dev/null | grep "USES_CACHE" | cut -d' ' -f1 || true)
+
+if [ -n "$CONTAINERS_USING_CACHE" ]; then
     echo "⚠ Warning: The cache volume is currently in use by running containers."
     echo ""
-    echo "Running containers using pbi-cache:"
-    docker ps --filter volume=pbi-cache --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+    echo "Containers using pbi-cache:"
+    echo "$CONTAINERS_USING_CACHE"
     echo ""
     read -p "Do you want to stop these containers? (y/N): " -n 1 -r
     echo ""
