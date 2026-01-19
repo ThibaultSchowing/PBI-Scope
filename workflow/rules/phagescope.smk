@@ -196,13 +196,13 @@ rule download_protein_fasta:
     L'input est dynamique et dépend du nom.
     """
     output:
-        temp(os.path.join(config["protein_fasta_compressed_output"] , "{dataset}.tar.gz"))
+        os.path.join(config["protein_fasta_compressed_output"] , "{dataset}.tar.gz")
     params:
         url = lambda wildcards: config["protein_fasta_urls"] [wildcards.dataset]
     cache: True 
     shell:
         """
-        wget -O {output} {params.url}
+        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output}
         """
 
 rule extract_protein_fasta:
@@ -229,14 +229,14 @@ rule download_phage_fasta:
     L'input est dynamique et dépend du nom.
     """
     output:
-        temp(os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz"))
+        os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
     params:
         url = lambda wildcards: config["phage_fasta_urls"][wildcards.dataset]
     cache: True 
     threads: 8
     shell:
         """
-        wget -O {output} {params.url}
+        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output}
         """
 
 rule extract_phage_fasta:

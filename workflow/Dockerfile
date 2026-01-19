@@ -30,10 +30,10 @@ RUN conda config --set ssl_verify false && \
     conda config --set ssl_verify true
 
 # Create data directory structure
-RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermediate
+RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermediate /cache
 
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
 
 # Default command to run the pipeline
-CMD ["snakemake", "--cores", "all", "--use-conda", "--printshellcmds", "--cache", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]
+CMD ["snakemake", "--cores", "all", "--use-conda", "--printshellcmds", "--cache", "--conda-prefix", "/cache/conda", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]

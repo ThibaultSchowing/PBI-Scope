@@ -9,11 +9,10 @@ services:
       # Mount data directory to persist database and sequences
       - pbi-data:/data
       # Mount cache directory to persist Snakemake metadata and conda environments
-      - pbi-cache:/app/workflow/.snakemake
-      # Mount workflow directory for development (optional)
-      - ./workflow:/app/workflow
+      - pbi-cache:/cache
     environment:
-      - SNAKEMAKE_OUTPUT_CACHE=/data/cache
+      - SNAKEMAKE_OUTPUT_CACHE=/cache
+      - SNAKEMAKE_CONDA_PREFIX=/cache/conda
     networks:
       - pbi-network
 
