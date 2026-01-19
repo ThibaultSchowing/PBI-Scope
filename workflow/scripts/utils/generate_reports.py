@@ -43,6 +43,7 @@ def fast_sample_known_size(file_path, sample_size, total_rows):
     chunksize = 100000  # 100k lignes par chunk
 
     for chunk in pd.read_csv(file_path, chunksize=chunksize, quoting=csv.QUOTE_NONNUMERIC):
+        logging.info(f"Number of columns in chunk: {len(chunk.columns)}")
         chunk_indices = range(current_row, current_row + len(chunk))
         rows_to_keep = list(sample_indices.intersection(chunk_indices))
         if rows_to_keep:
@@ -87,6 +88,7 @@ def main():
             # Small file: read entirely and sample
             logging.info("File is smaller than 500 MB, reading entirely.")
             df = pd.read_csv(input_file, quoting=csv.QUOTE_NONNUMERIC)
+            logging.info(f"DataFrame loaded with {len(df)} rows.")
             if df.empty:
                 raise ValueError("The input DataFrame is empty. Cannot generate report.")
             sample_size_adjusted = min(len(df), sample_size)
@@ -97,6 +99,7 @@ def main():
             if psutil.virtual_memory().available > 40 * 1024**3:
                 logging.info("Available memory is sufficient, reading the entire file.")
                 df = pd.read_csv(input_file, quoting=csv.QUOTE_NONNUMERIC)
+
                 if df.empty:
                     raise ValueError("The input DataFrame is empty. Cannot generate report.")
                 sample_size_adjusted = min(len(df), sample_size)
