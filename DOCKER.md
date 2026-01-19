@@ -237,6 +237,20 @@ docker rmi pbi-pipeline pbi-api
 
 To remove only the cache volume (Snakemake metadata and conda environments) while keeping the database:
 
+**Option 1: Using the cleanup script (recommended)**
+
+```bash
+./cleanup_cache.sh
+```
+
+The script will:
+- Check if the cache volume exists
+- Warn you if containers are using it
+- Prompt for confirmation before deletion
+- Provide next steps after cleanup
+
+**Option 2: Manual cleanup**
+
 ```bash
 # Stop all services
 docker compose down
