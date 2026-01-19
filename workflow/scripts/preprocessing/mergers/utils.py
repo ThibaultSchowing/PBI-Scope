@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import logging
 import os
+import csv
 
 
 def is_file_empty_or_invalid(filepath):
@@ -107,13 +108,13 @@ def merge_dataframes_chunked(dfs, output_file):
     # Write first dataframe with header
     first_df = dfs[0]
     logging.info(f"Writing first dataframe with {len(first_df)} rows and header")
-    first_df.to_csv(output_file, index=False, mode='w', encoding='utf-8')
+    first_df.to_csv(output_file, index=False, mode='w', encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     total_rows += len(first_df)
     
     # Append remaining dataframes without header
     for i, df in enumerate(dfs[1:], start=2):
         logging.info(f"Appending dataframe {i}/{len(dfs)} with {len(df)} rows")
-        df.to_csv(output_file, index=False, mode='a', header=False, encoding='utf-8')
+        df.to_csv(output_file, index=False, mode='a', header=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
         total_rows += len(df)
     
     logging.info(f"Total rows written: {total_rows}")

@@ -8,6 +8,7 @@ import random
 import logging
 from ydata_profiling import ProfileReport
 import psutil
+import csv
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,7 +20,7 @@ def reservoir_sampling(file_path, sample_size):
     Too slow but can be used for smaller files.
     """
     sample = []
-    reader = pd.read_csv(file_path, chunksize=1)
+    reader = pd.read_csv(file_path, chunksize=1, quoting=csv.QUOTE_NONNUMERIC)
     logging.info(f"Sampling {sample_size} rows from {file_path} using reservoir sampling....")
     for i, row in enumerate(reader, start=1):
         if i <= sample_size:
@@ -41,7 +42,7 @@ def fast_sample_known_size(file_path, sample_size, total_rows):
 
     chunksize = 100000  # 100k lignes par chunk
 
-    for chunk in pd.read_csv(file_path, chunksize=chunksize):
+    for chunk in pd.read_csv(file_path, chunksize=chunksize, quoting=csv.QUOTE_NONNUMERIC):
         chunk_indices = range(current_row, current_row + len(chunk))
         rows_to_keep = list(sample_indices.intersection(chunk_indices))
         if rows_to_keep:
@@ -85,7 +86,7 @@ def main():
         if file_size_mb < 500:
             # Small file: read entirely and sample
             logging.info("File is smaller than 500 MB, reading entirely.")
-            df = pd.read_csv(input_file)
+            df = pd.read_csv(input_file, quoting=csv.QUOTE_NONNUMERIC)
             if df.empty:
                 raise ValueError("The input DataFrame is empty. Cannot generate report.")
             sample_size_adjusted = min(len(df), sample_size)
@@ -95,7 +96,7 @@ def main():
             # Large file, large memory: if memory is higher than 40 GB, read the entire file. Still faster than sampling method.
             if psutil.virtual_memory().available > 40 * 1024**3:
                 logging.info("Available memory is sufficient, reading the entire file.")
-                df = pd.read_csv(input_file)
+                df = pd.read_csv(input_file, quoting=csv.QUOTE_NONNUMERIC)
                 if df.empty:
                     raise ValueError("The input DataFrame is empty. Cannot generate report.")
                 sample_size_adjusted = min(len(df), sample_size)
