@@ -27,7 +27,7 @@ def is_file_empty_or_invalid(filepath):
         return True
 
 def validate_columns(df, expected_columns):
-    '''Validate that the DataFrame contains all expected columns.'''
+    """Validate that the DataFrame contains all expected columns."""
     missing_cols = [col for col in expected_columns if col not in df.columns]
     # add missing cols with NaN values, and place them at the correct position
     for col in missing_cols:
@@ -44,7 +44,7 @@ def validate_columns(df, expected_columns):
 
 # TODO : create function that takes list of numerical colums and convert them to numeric with logging
 def convert_numerical_columns(df, cols):
-    '''Convert specified columns to numeric, coercing errors to NaN (np.nan).'''
+    """Convert specified columns to numeric, coercing errors to NaN (np.nan)."""
     for col in cols:
         logging.info(f"Formating column {col} to numeric")
         try:
@@ -57,11 +57,11 @@ def convert_numerical_columns(df, cols):
     return df
 
 def rename_columns(df, infile):
-    '''Rename columns in the DataFrame to ensure consistency.
+    """Rename columns in the DataFrame to ensure consistency.
     This function checks for common misnamings and corrects them.
     It also adds a 'Source_DB' column if it doesn't exist.
     
-    '''
+    """
 
     # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
     if 'Phage_Source' in df.columns:
@@ -83,7 +83,7 @@ def rename_columns(df, infile):
 
 
 def merge_dataframes_chunked(dfs, output_file):
-    '''Merge multiple DataFrames by writing them in chunks to avoid OOM errors.
+    """Merge multiple DataFrames by writing them in chunks to avoid OOM errors.
     
     This function writes DataFrames to CSV file one by one in append mode,
     which avoids loading all data into memory at once.
@@ -94,7 +94,7 @@ def merge_dataframes_chunked(dfs, output_file):
     
     Returns:
         Total number of rows written
-    '''
+    """
     if not dfs:
         logging.warning("No dataframes to merge")
         # Create empty file
