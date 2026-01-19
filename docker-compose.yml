@@ -8,6 +8,8 @@ services:
     volumes:
       # Mount data directory to persist database and sequences
       - pbi-data:/data
+      # Mount cache directory to persist Snakemake metadata and conda environments
+      - pbi-cache:/app/workflow/.snakemake
       # Mount workflow directory for development (optional)
       - ./workflow:/app/workflow
     environment:
@@ -37,6 +39,10 @@ services:
 volumes:
   # Named volume for persistent data storage
   pbi-data:
+    driver: local
+  # Named volume for Snakemake cache (conda environments, metadata, logs)
+  # This persists across container runs to avoid re-downloading dependencies
+  pbi-cache:
     driver: local
 
 networks:

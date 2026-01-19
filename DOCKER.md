@@ -56,6 +56,11 @@ The `--rm` flag automatically removes the container after completion.
 - `/data/processed/sequences/all_phages.fasta` (+ `.fai` index)
 - `/data/processed/sequences/all_proteins.fasta` (+ `.fai` index)
 
+**Cache files** (stored in the `pbi-cache` volume):
+- Snakemake metadata and workflow state
+- Conda environments (~2 GB)
+- This volume persists across runs, so failed pipeline runs don't require re-downloading dependencies
+
 ### 3. Build the API Image
 
 Once the pipeline completes successfully, build the API image:
@@ -202,8 +207,11 @@ docker compose up -d api
 To inspect or backup the data:
 
 ```bash
-# List volume contents
+# List database contents
 docker run --rm -v pbi-data:/data alpine ls -lah /data/processed/databases
+
+# List cache contents
+docker run --rm -v pbi-cache:/cache alpine ls -lah /cache
 
 # Copy database to host
 docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
@@ -224,6 +232,42 @@ docker compose down -v
 # Remove images
 docker rmi pbi-pipeline pbi-api
 ```
+
+### Clean Cache Only
+
+To remove only the cache volume (Snakemake metadata and conda environments) while keeping the database:
+
+**Option 1: Using the cleanup script (recommended)**
+
+```bash
+./cleanup_cache.sh
+```
+
+The script will:
+- Check if the cache volume exists
+- Warn you if containers are using it
+- Prompt for confirmation before deletion
+- Provide next steps after cleanup
+
+**Option 2: Manual cleanup**
+
+```bash
+# Stop all services
+docker compose down
+
+# Remove only the cache volume
+docker volume rm pbi-cache
+
+# Next run will rebuild conda environments but reuse existing data
+docker compose run --rm pipeline
+```
+
+This is useful when you want to:
+- Free up disk space (~2 GB)
+- Force a clean rebuild of conda environments
+- Troubleshoot environment-related issues
+
+**Note**: The cache volume persists across container runs to speed up development. After a failed pipeline run, the cache remains intact, so the next run doesn't need to re-download conda packages or rebuild environments.
 
 ## Customization
 
@@ -267,6 +311,7 @@ services:
 
 - Check available disk space: `df -h`
 - Clean up Docker: `docker system prune -a --volumes`
+- Clean up cache volume only: `docker volume rm pbi-cache`
 - Ensure at least 60 GB free space
 
 ### API Can't Connect to Database
@@ -344,6 +389,14 @@ The `pbi-data` volume is created automatically and persists data between contain
 - Database is built once and reused
 - No need to rebuild when restarting API
 - Data survives container removal
+
+The `pbi-cache` volume is also created automatically and persists Snakemake's working directory. This ensures:
+- Conda environments are preserved across runs (~2 GB)
+- Failed pipeline runs don't require re-downloading dependencies
+- Workflow metadata and logs are retained
+- Faster iteration during development and debugging
+
+**Important**: Both volumes persist even when containers are removed with `--rm`. This is intentional to speed up development. Clean them manually when needed (see "Clean Up" sections).
 
 ## Development
 
