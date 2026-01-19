@@ -13,7 +13,7 @@ The Conda environment to use is specified within each rule (if needed) with
         "envs/base_env.yaml"
 ```
 
-Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html), it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/` (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.
+Cache: to use [caching](https://snakemake.readthedocs.io/en/stable/executing/caching.html), it is first needed to export snakemake cache with `export SNAKEMAKE_OUTPUT_CACHE=/cache/` (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.
 
 
 - **Current command:** `snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4 `

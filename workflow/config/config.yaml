@@ -4,16 +4,16 @@
 reports_output: "reports/"
 
 # Final outputs
-all_phages_fasta: "../data/processed/sequences/all_phages.fasta"
-all_proteins_fasta: "../data/processed/sequences/all_proteins.fasta"
+all_phages_fasta: "/data/processed/sequences/all_phages.fasta"
+all_proteins_fasta: "/data/processed/sequences/all_proteins.fasta"
 
 # Metadata
-intermediate_csv_output: "../data/intermediate/csv"
-merged_csv_output: "../data/intermediate/csv/merged/"
+intermediate_csv_output: "/data/intermediate/csv"
+merged_csv_output: "/data/intermediate/csv/merged/"
 
 # Databases files
-duckdb_output: "../data/processed/databases/phage_database.duckdb"
-optimized_duckdb_output: "../data/processed/databases/phage_database_optimized.duckdb"
+duckdb_output: "/data/processed/databases/phage_database.duckdb"
+optimized_duckdb_output: "/data/processed/databases/phage_database_optimized.duckdb"
 
 database_validation_report_output: "reports/database_validation.html"
 
@@ -22,13 +22,13 @@ database_validation_report_output: "reports/database_validation.html"
 # Fasta files configuration
 # -----------------------------------
 
-phage_fasta_compressed_output: "../data/raw/phage_fasta_compressed/"
-phage_fasta_extracted_output:        "../data/raw/phage_fasta_extracted/"
-phage_fasta_merged_output: "../data/intermediate/fasta/phages/"
+phage_fasta_compressed_output: "/data/raw/phage_fasta_compressed/"
+phage_fasta_extracted_output: "/data/raw/phage_fasta_extracted/"
+phage_fasta_merged_output: "/data/intermediate/fasta/phages/"
 
-protein_fasta_compressed_output: "../data/raw/protein_fasta_compressed/"
-protein_fasta_extracted_output:        "../data/raw/protein_fasta_extracted/"
-protein_fasta_merged_output: "../data/intermediate/fasta/proteins/" # Used in sequence.smk to generate the merged fasta file (one per source)
+protein_fasta_compressed_output: "/data/raw/protein_fasta_compressed/"
+protein_fasta_extracted_output: "/data/raw/protein_fasta_extracted/"
+protein_fasta_merged_output: "/data/intermediate/fasta/proteins/" # Used in sequence.smk to generate the merged fasta file (one per source)
 
 
 protein_fasta_urls:
@@ -68,8 +68,8 @@ phage_fasta_urls:
 # Metadata - Features configuration
 # -----------------------------------
 
-phage_metadata_intermediate_output: "../data/intermediate/csv/phage_metadata"
-phage_metadata_merged_output: "../data/intermediate/csv/merged/merged_phage_metadata.csv"
+phage_metadata_intermediate_output: "/data/intermediate/csv/phage_metadata"
+phage_metadata_merged_output: "/data/intermediate/csv/merged/merged_phage_metadata.csv"
 phage_metadata_report_output: "reports/phage_metadata_report.html"
 
 phage_metadata_urls:
@@ -88,8 +88,8 @@ phage_metadata_urls:
   "GOV2_Phage_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Phage_meta_data/gov2_phage_meta_data.tsv"
   "STV_Phage_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Phage_meta_data/stv_phage_meta_data.tsv"
 
-annotated_proteins_metadata_intermediate_output: "../data/intermediate/csv/annotated_proteins_metadata"
-annotated_proteins_metadata_merged_output: "../data/intermediate/csv/merged/merged_annotated_proteins_metadata.csv"
+annotated_proteins_metadata_intermediate_output: "/data/intermediate/csv/annotated_proteins_metadata"
+annotated_proteins_metadata_merged_output: "/data/intermediate/csv/merged/merged_annotated_proteins_metadata.csv"
 annotated_proteins_metadata_report_output: "reports/annotated_proteins_report.html"
 
 annotated_proteins_metadata_urls:
@@ -110,8 +110,8 @@ annotated_proteins_metadata_urls:
 
 
 
-transcription_terminator_metadata_intermediate_output: "../data/intermediate/csv/transcription_terminator_metadata"
-transcription_terminator_metadata_merged_output: "../data/intermediate/csv/merged/merged_transcription_terminator_metadata.csv"
+transcription_terminator_metadata_intermediate_output: "/data/intermediate/csv/transcription_terminator_metadata"
+transcription_terminator_metadata_merged_output: "/data/intermediate/csv/merged/merged_transcription_terminator_metadata.csv"
 transcription_terminator_metadata_report_output: "reports/transcription_terminator_report.html"
 
 transcription_terminator_metadata_urls:
@@ -131,8 +131,8 @@ transcription_terminator_metadata_urls:
     "STV_Phage_Transcription_Terminator_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Transcription_terminators_meta_data/stv_phage_transcription_terminator_meta_data.tsv"
 
 
-phage_trna_tmrna_metadata_intermediate_output: "../data/intermediate/csv/phage_trna_tmrna_metadata"
-phage_trna_tmrna_metadata_merged_output: "../data/intermediate/csv/merged/merged_phage_trna_tmrna_metadata.csv"
+phage_trna_tmrna_metadata_intermediate_output: "/data/intermediate/csv/phage_trna_tmrna_metadata"
+phage_trna_tmrna_metadata_merged_output: "/data/intermediate/csv/merged/merged_phage_trna_tmrna_metadata.csv"
 phage_trna_tmrna_metadata_report_output: "reports/phage_trna_tmrna_report.html"
 
 phage_trna_tmrna_metadata_urls:
@@ -151,8 +151,8 @@ phage_trna_tmrna_metadata_urls:
     "GOV2_Phage_tRNA_tmRNA_Metadata_URL": "https://phageapi.deepomics.org/files/Download/tRNA_tmRNA_gene_meta_data_v2/gov2_phage_trna_gene_meta_data.tsv"
     "STV_Phage_tRNA_tmRNA_Metadata_URL": "https://phageapi.deepomics.org/files/Download/tRNA_tmRNA_gene_meta_data_v2/stv_phage_trna_gene_meta_data.tsv"
 
-phage_anti_crispr_metadata_intermediate_output: "../data/intermediate/csv/phage_anti_crispr_metadata"
-phage_anti_crispr_metadata_merged_output: "../data/intermediate/csv/merged/merged_phage_anti_crispr_metadata.csv"
+phage_anti_crispr_metadata_intermediate_output: "/data/intermediate/csv/phage_anti_crispr_metadata"
+phage_anti_crispr_metadata_merged_output: "/data/intermediate/csv/merged/merged_phage_anti_crispr_metadata.csv"
 phage_anti_crispr_metadata_report_output: "reports/phage_anti_crispr_report.html"
 
 phage_anti_crispr_metadata_urls:
@@ -172,8 +172,8 @@ phage_anti_crispr_metadata_urls:
     "STV_Phage_AntiCRISPR_Metadata_URL": "https://phageapi.deepomics.org/files/Download/AntiCRISPR_protein_meta_data_v2/stv_phage_anticrispr_protein_meta_data.tsv"
 
 
-phage_virulent_factor_metadata_intermediate_output: "../data/intermediate/csv/phage_virulent_factor_metadata"
-phage_virulent_factor_metadata_merged_output: "../data/intermediate/csv/merged/merged_phage_virulent_factor_metadata.csv"
+phage_virulent_factor_metadata_intermediate_output: "/data/intermediate/csv/phage_virulent_factor_metadata"
+phage_virulent_factor_metadata_merged_output: "/data/intermediate/csv/merged/merged_phage_virulent_factor_metadata.csv"
 phage_virulent_factor_metadata_report_output: "reports/phage_virulent_factor_report.html"
 
 phage_virulent_factor_metadata_urls:
@@ -191,8 +191,8 @@ phage_virulent_factor_metadata_urls:
     "GOV2_Phage_Virulent_Factor_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Virulent_factor_meta_data_v2/GOV2_virulent_factor_data.tsv"
 
 
-phage_transmembrane_protein_metadata_intermediate_output: "../data/intermediate/csv/phage_transmembrane_protein_metadata"
-phage_transmembrane_protein_metadata_merged_output: "../data/intermediate/csv/merged/merged_phage_transmembrane_protein_metadata.csv"
+phage_transmembrane_protein_metadata_intermediate_output: "/data/intermediate/csv/phage_transmembrane_protein_metadata"
+phage_transmembrane_protein_metadata_merged_output: "/data/intermediate/csv/merged/merged_phage_transmembrane_protein_metadata.csv"
 phage_transmembrane_protein_metadata_report_output: "reports/phage_transmembrane_protein_report.html"
 
 phage_transmembrane_protein_metadata_urls:
@@ -213,8 +213,8 @@ phage_transmembrane_protein_metadata_urls:
 
 
 
-crispr_array_metadata_intermediate_output: "../data/intermediate/csv/crispr_array_metadata"
-crispr_array_metadata_merged_output: "../data/intermediate/csv/merged/merged_crispr_array_metadata.csv"
+crispr_array_metadata_intermediate_output: "/data/intermediate/csv/crispr_array_metadata"
+crispr_array_metadata_merged_output: "/data/intermediate/csv/merged/merged_crispr_array_metadata.csv"
 crispr_array_metadata_report_output: "reports/crispr_array_report.html"
 
 crispr_array_metadata_urls:
@@ -233,8 +233,8 @@ crispr_array_metadata_urls:
     "GOV2_Crispr_Array_Metadata_URL": "https://phageapi.deepomics.org/files/Download/CRISPR_array_meta_data/gov2_phage_crispr_array_meta_data.tsv"
     "STV_Crispr_Array_Metadata_URL": "https://phageapi.deepomics.org/files/Download/CRISPR_array_meta_data/stv_phage_crispr_array_meta_data.tsv"
 
-antimicrobial_resistance_gene_metadata_intermediate_output: "../data/intermediate/csv/antimicrobial_resistance_gene_metadata"
-antimicrobial_resistance_gene_metadata_merged_output: "../data/intermediate/csv/merged/merged_antimicrobial_resistance_gene_metadata.csv"
+antimicrobial_resistance_gene_metadata_intermediate_output: "/data/intermediate/csv/antimicrobial_resistance_gene_metadata"
+antimicrobial_resistance_gene_metadata_merged_output: "/data/intermediate/csv/merged/merged_antimicrobial_resistance_gene_metadata.csv"
 antimicrobial_resistance_gene_metadata_report_output: "reports/antimicrobial_resistance_gene_report.html"
 
 antimicrobial_resistance_gene_metadata_urls:

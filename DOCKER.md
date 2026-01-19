@@ -19,6 +19,86 @@ Both services share a common data volume to ensure the API can access the databa
 - At least 16 GB of RAM (32 GB recommended)
 - Stable internet connection (for initial data download)
 
+## Migration Guide for Existing Users
+
+If you're upgrading from a previous version of PBI that used relative paths and the old cache configuration, follow these steps to migrate:
+
+### Step 1: Stop All Containers
+
+```bash
+docker compose down
+```
+
+### Step 2: Clear Corrupted Metadata (Optional but Recommended)
+
+The cache structure has changed, so it's best to clear the old metadata while preserving your downloaded data:
+
+```bash
+# Clear the cache volume (preserves data files in pbi-data volume)
+docker run --rm -v pbi-cache:/cache alpine rm -rf /cache/*
+```
+
+**Note**: This only removes Snakemake metadata and conda environments (~2 GB), not your downloaded data files (~50 GB).
+
+### Step 3: Pull Latest Changes
+
+```bash
+git pull origin main
+```
+
+### Step 4: Rebuild Images
+
+Due to changes in the Dockerfile and workflow configuration, you must rebuild with the `--no-cache` flag:
+
+```bash
+docker compose build --no-cache pipeline
+```
+
+### Step 5: Verify Volume Mounts
+
+The new configuration uses:
+- `/data` for all data files (raw, intermediate, processed)
+- `/cache` for Snakemake metadata and conda environments
+
+Check your `docker-compose.yml` to ensure it matches the new structure (see Quick Start section).
+
+### Step 6: Run the Pipeline
+
+```bash
+docker compose run --rm pipeline
+```
+
+**Expected behavior**:
+- First run: Downloads data to `/data/raw/*_compressed/` (will take 2-4 hours)
+- Extracted files in `/data/raw/*_extracted/` are temporary and removed after merging
+- Downloaded archives persist and won't be re-downloaded on subsequent runs
+- Subsequent runs: "Nothing to be done (all requested files are present and up to date)"
+
+### Step 7: Verify Data Persistence
+
+After the pipeline completes, verify downloaded files persist in the volume:
+
+```bash
+# Check compressed archives (should persist)
+docker run --rm -v pbi-data:/data alpine ls -lh /data/raw/protein_fasta_compressed/
+
+# Check cache (should contain conda environments)
+docker run --rm -v pbi-cache:/cache alpine ls -lh /cache/conda/
+```
+
+### Troubleshooting Migration Issues
+
+**Issue**: "Missing output files" warnings during first run after migration
+
+**Solution**: This is expected if you cleared the cache. Snakemake will detect existing files and skip re-downloading them.
+
+**Issue**: Pipeline re-downloads all data despite existing files
+
+**Solution**: 
+1. Verify paths in `workflow/config/config.yaml` use absolute paths (e.g., `/data/raw/...`)
+2. Ensure `temp()` is removed from download rules in `workflow/rules/phagescope.smk`
+3. Check that volumes are mounted correctly in `docker-compose.yml`
+
 ## Quick Start
 
 ### 1. Build the Pipeline Image
@@ -58,8 +138,8 @@ The `--rm` flag automatically removes the container after completion.
 - `/data/processed/sequences/all_proteins.fasta` (+ `.fai` index)
 
 **Cache files** (stored in the `pbi-cache` volume):
-- Snakemake metadata and workflow state in `/app/workflow/.snakemake/metadata/`
-- Conda environments (~2 GB) in `/app/workflow/.snakemake/conda/`
+- Snakemake metadata and workflow state in `/cache/metadata/`
+- Conda environments (~2 GB) in `/cache/conda/`
 - This volume persists across runs, so failed pipeline runs don't require re-downloading dependencies
 
 ### 3. Build the API Image
@@ -435,7 +515,7 @@ Final, optimized outputs ready for use:
 
 #### Cache Volume (`pbi-cache`)
 Separate from the data volume, the cache stores Snakemake's working directory:
-- **Location**: `/app/workflow/.snakemake` (inside container)
+- **Location**: `/cache` (inside container)
 - **Contents**:
   - Conda environments (~2 GB) - Persist across runs to avoid re-downloading packages
   - Workflow metadata - Tracks which steps completed successfully
@@ -456,7 +536,7 @@ Docker Volumes:
 │  └─ /data/processed/        # Final database and sequences (API uses this)
 │
 └─ pbi-cache (Snakemake cache, ~2-3 GB)
-   └─ /app/workflow/.snakemake/  # Conda envs, metadata, logs
+   └─ /cache/  # Conda envs, metadata, logs
 ```
 
 ## Development
