@@ -45,11 +45,12 @@ docker compose run --rm pipeline
 The `--rm` flag automatically removes the container after completion.
 
 **What happens during this step:**
-- Downloads ~50 GB of phage genomic data from multiple sources
-- Processes and merges data from 14+ databases
-- Creates optimized DuckDB database
-- Generates indexed FASTA files for sequences
-- Produces validation reports
+- Downloads ~50 GB of phage genomic data from multiple sources to `/data/raw/`
+- Extracts and processes data to `/data/intermediate/`
+- Merges data from 14+ databases using chunked processing to avoid out-of-memory errors
+- Creates optimized DuckDB database in `/data/processed/databases/`
+- Generates indexed FASTA files for sequences in `/data/processed/sequences/`
+- Produces validation reports in `workflow/reports/`
 
 **Output files** (stored in the `pbi-data` volume):
 - `/data/processed/databases/phage_database_optimized.duckdb`
@@ -57,8 +58,8 @@ The `--rm` flag automatically removes the container after completion.
 - `/data/processed/sequences/all_proteins.fasta` (+ `.fai` index)
 
 **Cache files** (stored in the `pbi-cache` volume):
-- Snakemake metadata and workflow state
-- Conda environments (~2 GB)
+- Snakemake metadata and workflow state in `/app/workflow/.snakemake/metadata/`
+- Conda environments (~2 GB) in `/app/workflow/.snakemake/conda/`
 - This volume persists across runs, so failed pipeline runs don't require re-downloading dependencies
 
 ### 3. Build the API Image
@@ -397,6 +398,66 @@ The `pbi-cache` volume is also created automatically and persists Snakemake's wo
 - Faster iteration during development and debugging
 
 **Important**: Both volumes persist even when containers are removed with `--rm`. This is intentional to speed up development. Clean them manually when needed (see "Clean Up" sections).
+
+### Data Storage Organization
+
+The pipeline organizes data into three distinct categories, all stored in the `pbi-data` volume:
+
+#### 1. Raw Data (`/data/raw/`)
+Downloaded directly from external sources without modification. This includes:
+- **Compressed FASTA files**: `/data/raw/protein_fasta_compressed/` and `/data/raw/phage_fasta_compressed/`
+  - Downloaded `.tar.gz` archives from PhageScope API
+  - ~50 GB of compressed genomic data
+- **Extracted FASTA files**: `/data/raw/protein_fasta_extracted/` and `/data/raw/phage_fasta_extracted/`
+  - Individual FASTA files extracted from archives
+  - Used as input for merging operations
+
+#### 2. Intermediate Data (`/data/intermediate/`)
+Temporary processing files that are used to build the final outputs:
+- **CSV metadata files**: `/data/intermediate/csv/`
+  - Downloaded TSV files for each feature (phage metadata, protein annotations, etc.)
+  - Individual files per database source
+- **Merged CSV files**: `/data/intermediate/csv/merged/`
+  - Consolidated metadata from all sources
+  - Used to populate the DuckDB database
+- **Merged FASTA files by source**: `/data/intermediate/fasta/phages/` and `/data/intermediate/fasta/proteins/`
+  - One FASTA file per database (RefSeq, GenBank, MGV, etc.)
+  - Intermediate step before final concatenation
+
+#### 3. Processed Data (`/data/processed/`)
+Final, optimized outputs ready for use:
+- **Databases**: `/data/processed/databases/`
+  - `phage_database_optimized.duckdb` - Main queryable database (~10-20 GB)
+- **Sequences**: `/data/processed/sequences/`
+  - `all_phages.fasta` + `.fai` index - Complete phage genome sequences
+  - `all_proteins.fasta` + `.fai` index - Complete protein sequences
+  - Indexed for fast random access
+
+#### Cache Volume (`pbi-cache`)
+Separate from the data volume, the cache stores Snakemake's working directory:
+- **Location**: `/app/workflow/.snakemake` (inside container)
+- **Contents**:
+  - Conda environments (~2 GB) - Persist across runs to avoid re-downloading packages
+  - Workflow metadata - Tracks which steps completed successfully
+  - Log files - Detailed execution logs
+  
+**Note**: The corrupted metadata warnings shown in the problem statement occur when:
+- Pipeline is interrupted mid-execution
+- Snakemake metadata becomes inconsistent
+- Solution: These warnings are harmless and can be ignored. Snakemake will rebuild affected files.
+
+#### Volume Storage Summary
+
+```
+Docker Volumes:
+├─ pbi-data (main data volume, ~60-80 GB)
+│  ├─ /data/raw/              # Downloaded archives and extracted files
+│  ├─ /data/intermediate/     # Processing artifacts and merged files
+│  └─ /data/processed/        # Final database and sequences (API uses this)
+│
+└─ pbi-cache (Snakemake cache, ~2-3 GB)
+   └─ /app/workflow/.snakemake/  # Conda envs, metadata, logs
+```
 
 ## Development
 
