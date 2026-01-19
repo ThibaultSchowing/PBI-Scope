@@ -30,7 +30,7 @@ RUN conda config --set ssl_verify false && \
     conda config --set ssl_verify true
 
 # Create data directory structure
-RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermediate /cache
+RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermediate /data/raw /cache
 
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
