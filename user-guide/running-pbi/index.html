@@ -804,7 +804,7 @@
 <pre><code>    conda:
         &quot;envs/base_env.yaml&quot;
 </code></pre>
-<p>Cache: to use <a href="https://snakemake.readthedocs.io/en/stable/executing/caching.html">caching</a>, it is first needed to export snakemake cache with <code>export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/</code> (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.</p>
+<p>Cache: to use <a href="https://snakemake.readthedocs.io/en/stable/executing/caching.html">caching</a>, it is first needed to export snakemake cache with <code>export SNAKEMAKE_OUTPUT_CACHE=/cache/</code> (create the destination directory first). After every startup, or set the environment variable in the .bashrc file.</p>
 <ul>
 <li>
 <p><strong>Current command:</strong> <code>snakemake --directory workflow --snakefile workflow/Snakefile --cache --use-conda --printshellcmds --notemp --cores 4</code></p>
