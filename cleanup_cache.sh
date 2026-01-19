@@ -19,13 +19,19 @@ echo "The main data volume (pbi-data) with your database will NOT be affected."
 echo ""
 
 # Check if volume exists
-if ! docker volume inspect pbi-cache >/dev/null 2>&1; then
+# Note: Docker Compose prefixes volumes with project name (e.g., pbi_pbi-cache)
+VOLUME_NAME=$(docker volume ls --format '{{.Name}}' | grep -E '(^|_)pbi-cache$' | head -1)
+
+if [ -z "$VOLUME_NAME" ]; then
     echo "✓ Cache volume 'pbi-cache' does not exist or is already removed."
     exit 0
 fi
 
+echo "Found cache volume: $VOLUME_NAME"
+echo ""
+
 # Check if volume is in use
-CONTAINERS_USING_CACHE=$(docker ps -q | xargs -r docker inspect --format '{{.Name}}{{range .Mounts}}{{if eq .Name "pbi_pbi-cache"}} USES_CACHE{{end}}{{end}}' 2>/dev/null | grep "USES_CACHE" | cut -d' ' -f1 || true)
+CONTAINERS_USING_CACHE=$(docker ps -q | xargs -r docker inspect --format "{{.Name}}{{range .Mounts}}{{if eq .Name \"$VOLUME_NAME\"}} USES_CACHE{{end}}{{end}}" 2>/dev/null | grep "USES_CACHE" | cut -d' ' -f1 || true)
 
 if [ -n "$CONTAINERS_USING_CACHE" ]; then
     echo "⚠ Warning: The cache volume is currently in use by running containers."
@@ -53,8 +59,8 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # Remove the volume
-echo "Removing cache volume..."
-docker volume rm pbi-cache
+echo "Removing cache volume $VOLUME_NAME..."
+docker volume rm "$VOLUME_NAME"
 
 echo "✓ Cache volume removed successfully!"
 echo ""
