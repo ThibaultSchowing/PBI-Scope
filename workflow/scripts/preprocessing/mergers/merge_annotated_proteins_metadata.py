@@ -58,13 +58,10 @@ for infile in inputs:
 
     dfs.append(df)
 
-# Concatenate all the DataFrames into one
-merged_df = pd.concat(dfs, ignore_index=True)
-
 # Create the output directory if needed
 os.makedirs(os.path.dirname(output), exist_ok=True)
 
-# Save
-merged_df.to_csv(output, index=False)
+# Use chunked merge to avoid OOM errors
+total_rows = utils.merge_dataframes_chunked(dfs, output)
 
-print(f"[INFO] Merged {len(inputs)} files into {output} with shape {merged_df.shape}")
+print(f"[INFO] Merged {len(inputs)} files into {output} with {total_rows} total rows")

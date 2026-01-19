@@ -80,3 +80,41 @@ def rename_columns(df, infile):
         logging.info(f"Added 'Source_DB' column to {infile} with value '{source_name}'")
 
     return df
+
+
+def merge_dataframes_chunked(dfs, output_file, chunk_size=100000):
+    '''Merge multiple DataFrames by writing them in chunks to avoid OOM errors.
+    
+    This function writes DataFrames to CSV file one by one in append mode,
+    which avoids loading all data into memory at once.
+    
+    Args:
+        dfs: List of pandas DataFrames to merge
+        output_file: Path to output CSV file
+        chunk_size: Number of rows to write at once (default: 100000)
+    
+    Returns:
+        Total number of rows written
+    '''
+    if not dfs:
+        logging.warning("No dataframes to merge")
+        # Create empty file
+        open(output_file, 'w').close()
+        return 0
+    
+    total_rows = 0
+    
+    # Write first dataframe with header
+    first_df = dfs[0]
+    logging.info(f"Writing first dataframe with {len(first_df)} rows and header")
+    first_df.to_csv(output_file, index=False, mode='w')
+    total_rows += len(first_df)
+    
+    # Append remaining dataframes without header
+    for i, df in enumerate(dfs[1:], start=2):
+        logging.info(f"Appending dataframe {i}/{len(dfs)} with {len(df)} rows")
+        df.to_csv(output_file, index=False, mode='a', header=False)
+        total_rows += len(df)
+    
+    logging.info(f"Total rows written: {total_rows}")
+    return total_rows
