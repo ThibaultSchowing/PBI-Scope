@@ -88,7 +88,7 @@ def main():
             # Small file: read entirely and sample
             logging.info("File is smaller than 500 MB, reading entirely.")
             df = pd.read_csv(input_file, quoting=csv.QUOTE_NONNUMERIC)
-            logging.info(f"DataFrame loaded with {len(df)} rows.")
+            logging.info(f"DataFrame loaded with {len(df)} rows and {len(df.columns)} columns.")
             if df.empty:
                 raise ValueError("The input DataFrame is empty. Cannot generate report.")
             sample_size_adjusted = min(len(df), sample_size)
@@ -99,6 +99,7 @@ def main():
             if psutil.virtual_memory().available > 40 * 1024**3:
                 logging.info("Available memory is sufficient, reading the entire file.")
                 df = pd.read_csv(input_file, quoting=csv.QUOTE_NONNUMERIC)
+                logging.info(f"DataFrame loaded with {len(df)} rows and {len(df.columns)} columns.")
 
                 if df.empty:
                     raise ValueError("The input DataFrame is empty. Cannot generate report.")
@@ -116,6 +117,7 @@ def main():
                 total_rows = sum(1 for _ in open(input_file)) - 1
                 logging.info(f"Total rows in the file: {total_rows}")
                 df_sampled = fast_sample_known_size(input_file, sample_size, total_rows)
+                logging.info(f"DataFrame loaded with {len(df_sampled)} rows and {len(df_sampled.columns)} columns.")
 
             if df_sampled.empty:
                 raise ValueError("The input DataFrame is empty after sampling. Cannot generate report.")
