@@ -82,9 +82,9 @@ def rename_columns(df, infile):
     """
 
     # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
-    if 'Phage_Source' in df.columns:
-        df = df.rename(columns={'Phage_Source': 'Phage_source'})
-        logging.info(f"Renamed 'Phage_Source' to 'Phage_source' in {infile}")
+    if 'Phage_source' in df.columns:
+        df = df.rename(columns={'Phage_source': 'Phage_Source'})
+        logging.info(f"Renamed 'Phage_source' to 'Phage_Source' in {infile}")
     if 'Phage_id' in df.columns:
         df = df.rename(columns={'Phage_id': 'Phage_ID'})
         logging.info(f"Renamed 'Phage_id' to 'Phage_ID' in {infile}")

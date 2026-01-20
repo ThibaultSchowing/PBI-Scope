@@ -16,12 +16,11 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["t(m)RNA_ID", "Source", "t(m)RNA", "Start", "Stop", "Strand", "Length", "Permuted", "Sequence", "Phage_ID", "Phage_source", "Source_DB"]
+COLUMNS_LIST = ["t(m)RNA_ID", "Source", "t(m)RNA", "Start", "Stop", "Strand", "Length", "Permuted", "Sequence", "Phage_ID", "Phage_Source", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Start", "Stop", "Length"]
 
-STRING_COLUMNS = ["t(m)RNA_ID", "Source", "t(m)RNA", "Strand", "Permuted", "Sequence", "Phage_ID", "Phage_source", "Source_DB"]
-
+STRING_COLUMNS = ["t(m)RNA_ID", "Source", "t(m)RNA", "Strand", "Permuted", "Sequence", "Phage_ID", "Phage_Source", "Source_DB"]
 # List of DataFrames
 dfs = []
 
@@ -35,12 +34,12 @@ for infile in inputs:
         continue
     
     df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
-    
-    # Ensure all expected columns are named correctly
-    df = utils.rename_columns(df, infile)
 
     # Validate and reorder columns to match expected schema
     df = utils.validate_columns(df, COLUMNS_LIST)
+    
+    # Ensure all expected columns are named correctly
+    df = utils.rename_columns(df, infile)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

@@ -21,7 +21,7 @@ COLUMNS_LIST = ['Phage_ID', 'Protein_source', 'Function_prediction_source', 'Sta
        'Stop', 'Strand', 'Protein_ID', 'Product', 'Protein_classification',
        'Molecular_weight', 'Aromaticity', 'Instability_index',
        'Isoelectric_point', 'Helix_fraction', 'Turn_fraction',
-       'Sheet_fraction', 'Reduced_coefficient', 'Oxidized_coefficient', 'Source_DB']
+       'Sheet_fraction', 'Reduced_coefficient', 'Oxidized_coefficient', "Phage_Source", "Source_DB"]
 
 NUMERICAL_COLUMNS = ['Start', 'Stop', 'Molecular_weight', 'Aromaticity',
        'Instability_index', 'Isoelectric_point', 'Helix_fraction', 'Turn_fraction',
@@ -29,7 +29,7 @@ NUMERICAL_COLUMNS = ['Start', 'Stop', 'Molecular_weight', 'Aromaticity',
 
 STRING_COLUMNS = ['Phage_ID', 'Protein_source', 'Function_prediction_source',
        'Strand', 'Protein_ID', 'Product', 'Protein_classification',
-       'Source_DB']
+       "Phage_Source", "Source_DB"]
 
 # List of DataFrames
 dfs = []
@@ -44,12 +44,12 @@ for infile in inputs:
         continue
     
     df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
-    
-    # Ensure all expected columns are named correctly 
-    df = utils.rename_columns(df, infile)
 
     # Validate and reorder columns to match expected schema
     df = utils.validate_columns(df, COLUMNS_LIST)
+    
+    # Ensure all expected columns are named correctly 
+    df = utils.rename_columns(df, infile)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

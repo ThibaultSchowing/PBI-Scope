@@ -19,10 +19,10 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["Phage_ID", "Terminator", "Start", "Stop", "Sense", "Loc", "Confidence", "Source_DB"]
+COLUMNS_LIST = ["Phage_ID", "Terminator", "Start", "Stop", "Sense", "Loc", "Confidence", "Phage_Source", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Start", "Stop", "Confidence"]
-STRING_COLUMNS = ["Phage_ID", "Terminator", "Sense", "Loc", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "Terminator", "Sense", "Loc", "Phage_Source", "Source_DB"]
 
 # List of DataFrames
 dfs = []
@@ -37,12 +37,12 @@ for infile in inputs:
         continue
     
     df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
-    
-    # Ensure all expected columns are named correctly
-    df = utils.rename_columns(df, infile)
 
     # Validate and reorder columns to match expected schema
     df = utils.validate_columns(df, COLUMNS_LIST)
+    
+    # Ensure all expected columns are named correctly
+    df = utils.rename_columns(df, infile)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

@@ -24,12 +24,12 @@ COLUMNS_LIST = [
     "Ratio_Repeats_match/TotalRepeat", "Conservation_Repeats (% identity)", "EBcons_Repeats",
     "Conservation_Spacers (% identity)", "EBcons_Spacers", "Repeat_Length_plus_mean_size_Spacers",
     "Ratio_Repeat/mean_Spacers_Length", "CRISPR_found_in_DB (if sequence IDs are similar)",
-    "Evidence_Level", "Source_DB"
+    "Evidence_Level", "Phage_Source", "Source_DB"
 ]
 
 NUMERICAL_COLUMNS = ["Duplicated_Spacers", "CRISPR_Start", "CRISPR_End", "CRISPR_Length", "Repeat_Length", "Spacers_Nb", "Mean_size_Spacers", "Standard_Deviation_Spacers", "Nb_Repeats_matching_Consensus", "Ratio_Repeats_match/TotalRepeat", "Conservation_Repeats (% identity)", "EBcons_Repeats", "Conservation_Spacers (% identity)", "EBcons_Spacers", "Repeat_Length_plus_mean_size_Spacers", "Ratio_Repeat/mean_Spacers_Length", "CRISPR_found_in_DB (if sequence IDs are similar)", "Evidence_Level"]
 
-STRING_COLUMNS = ["Phage_ID", "CRISPR_ID", "Potential_Orientation (AT%)", "CRISPRDirection", "Consensus_Repeat", "Repeat_ID (CRISPRdb)", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "CRISPR_ID", "Potential_Orientation (AT%)", "CRISPRDirection", "Consensus_Repeat", "Repeat_ID (CRISPRdb)", "Phage_Source", "Source_DB"]
 
 # List of DataFrames
 dfs = []
@@ -44,12 +44,14 @@ for infile in inputs:
         continue
     
     df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
+
+    logging.warning(f"We have {len(df.columns)} columns in {infile}: {df.columns.tolist()}")
+    
+    # Validate and reorder columns to match expected schema
+    df = utils.validate_columns(df, COLUMNS_LIST)
     
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
-
-    # Validate and reorder columns to match expected schema
-    df = utils.validate_columns(df, COLUMNS_LIST)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
