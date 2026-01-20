@@ -16,11 +16,11 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Expnumberfirst60AAs", "TotalprobofNin", "POSSIBLENterm", "Insidesource", "Insidestart", "Insideend", "TMhelixsource", "TMhelixstart", "TMhelixend", "Outsidesource", "Outsidestart", "Outsideend", "Phage_Source", "Source_DB"]
+COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Expnumberfirst60AAs", "TotalprobofNin", "POSSIBLENterm", "Insidesource", "Insidestart", "Insideend", "TMhelixsource", "TMhelixstart", "TMhelixend", "Outsidesource", "Outsidestart", "Outsideend", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Insidestart", "Insideend", "Expnumberfirst60AAs", "Insidestart", "Insideend", "TMhelixstart", "TMhelixend", "TotalprobofNin" , "Outsidestart", "Outsideend"]
 
-STRING_COLUMNS = ["Phage_ID", "Protein_ID", "POSSIBLENterm", "Insidesource", "TMhelixsource", "Outsidesource", "Phage_Source", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "Protein_ID", "POSSIBLENterm", "Insidesource", "TMhelixsource", "Outsidesource", "Source_DB"]
 
 # List of DataFrames
 dfs = []

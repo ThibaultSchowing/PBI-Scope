@@ -19,10 +19,10 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["Phage_ID", "Terminator", "Start", "Stop", "Sense", "Loc", "Confidence", "Phage_Source", "Source_DB"]
+COLUMNS_LIST = ["Phage_ID", "Terminator", "Start", "Stop", "Sense", "Loc", "Confidence", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Start", "Stop", "Confidence"]
-STRING_COLUMNS = ["Phage_ID", "Terminator", "Sense", "Loc", "Phage_Source", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "Terminator", "Sense", "Loc", "Source_DB"]
 
 # List of DataFrames
 dfs = []

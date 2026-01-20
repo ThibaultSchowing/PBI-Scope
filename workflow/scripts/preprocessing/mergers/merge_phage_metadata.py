@@ -17,10 +17,10 @@ inputs = snakemake.input
 output = snakemake.output[0]
 
 COLUMNS_LIST = ["Phage_ID", "Length", "GC_content", "Taxonomy", "Completeness", 
-                "Host", "Lifestyle", "Cluster", "Subcluster", "Phage_Source", "Source_DB"]
+                "Host", "Lifestyle", "Cluster", "Subcluster", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Length", "GC_content", "Completeness"]
-STRING_COLUMNS = ["Phage_ID", "Taxonomy", "Host", "Lifestyle", "Cluster", "Subcluster", "Phage_Source", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "Taxonomy", "Host", "Lifestyle", "Cluster", "Subcluster", "Source_DB"]
 
 # List of DataFrames
 dfs = []

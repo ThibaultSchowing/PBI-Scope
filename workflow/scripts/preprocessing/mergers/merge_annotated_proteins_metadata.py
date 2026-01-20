@@ -21,7 +21,7 @@ COLUMNS_LIST = ['Phage_ID', 'Protein_source', 'Function_prediction_source', 'Sta
        'Stop', 'Strand', 'Protein_ID', 'Product', 'Protein_classification',
        'Molecular_weight', 'Aromaticity', 'Instability_index',
        'Isoelectric_point', 'Helix_fraction', 'Turn_fraction',
-       'Sheet_fraction', 'Reduced_coefficient', 'Oxidized_coefficient', "Phage_Source", "Source_DB"]
+       'Sheet_fraction', 'Reduced_coefficient', 'Oxidized_coefficient', "Source_DB"]
 
 NUMERICAL_COLUMNS = ['Start', 'Stop', 'Molecular_weight', 'Aromaticity',
        'Instability_index', 'Isoelectric_point', 'Helix_fraction', 'Turn_fraction',
@@ -29,7 +29,7 @@ NUMERICAL_COLUMNS = ['Start', 'Stop', 'Molecular_weight', 'Aromaticity',
 
 STRING_COLUMNS = ['Phage_ID', 'Protein_source', 'Function_prediction_source',
        'Strand', 'Protein_ID', 'Product', 'Protein_classification',
-       "Phage_Source", "Source_DB"]
+       "Source_DB"]
 
 # List of DataFrames
 dfs = []

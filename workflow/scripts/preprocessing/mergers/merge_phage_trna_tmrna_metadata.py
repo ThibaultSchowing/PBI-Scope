@@ -16,11 +16,11 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["t(m)RNA_ID", "Source", "t(m)RNA", "Start", "Stop", "Strand", "Length", "Permuted", "Sequence", "Phage_ID", "Phage_Source", "Source_DB"]
+COLUMNS_LIST = ["t(m)RNA_ID", "Source", "t(m)RNA", "Start", "Stop", "Strand", "Length", "Permuted", "Sequence", "Phage_ID", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Start", "Stop", "Length"]
 
-STRING_COLUMNS = ["t(m)RNA_ID", "Source", "t(m)RNA", "Strand", "Permuted", "Sequence", "Phage_ID", "Phage_Source", "Source_DB"]
+STRING_COLUMNS = ["t(m)RNA_ID", "Source", "t(m)RNA", "Strand", "Permuted", "Sequence", "Phage_ID", "Source_DB"]
 # List of DataFrames
 dfs = []
 

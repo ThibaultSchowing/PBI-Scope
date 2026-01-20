@@ -20,10 +20,10 @@ output = snakemake.output[0]
 # List of DataFrames
 dfs = []
 
-COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Source", "Phage_Source", "Source_DB"]
+COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Source", "Source_DB"]
 
 NUMERICAL_COLUMNS = []
-STRING_COLUMNS = ["Phage_ID", "Protein_ID", "Source", "Phage_Source", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "Protein_ID", "Source", "Source_DB"]
 
 # For each input file (all databases - From PhageScope)
 for infile in inputs:
