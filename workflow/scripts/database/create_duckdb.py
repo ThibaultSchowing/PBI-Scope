@@ -122,7 +122,6 @@ def create_star_schema_duckdb():
         Phage_ID,
         Protein_ID,
         Source,
-        Phage_source,
         Source_DB
     FROM read_csv_auto('{anti_crispr_data}')
     WHERE Phage_ID IS NOT NULL
@@ -132,7 +131,7 @@ def create_star_schema_duckdb():
     logging.info(f"✅ Created dim_anti_crispr: {anti_crispr_count:,} rows")
     
     # 5. CREATE DIM_VIRULENT_FACTORS TABLE
-    # Columns: Protein_ID, Aligned_Protein_in_VFDB, Phage_ID, Phage_source, Source_DB
+    # Columns: Protein_ID, Aligned_Protein_in_VFDB, Phage_ID, Source_DB
     logging.info("Creating dim_virulent_factors table")
     conn.execute(f"""
     CREATE TABLE dim_virulent_factors AS 
@@ -140,7 +139,6 @@ def create_star_schema_duckdb():
         Phage_ID,
         Protein_ID,
         Aligned_Protein_in_VFDB as aligned_protein_vfdb,
-        Phage_source,
         Source_DB
     FROM read_csv_auto('{virulent_factor_data}')
     WHERE Phage_ID IS NOT NULL
@@ -189,7 +187,7 @@ def create_star_schema_duckdb():
     
     # 7. CREATE DIM_TRNA_TMRNA TABLE
     # Columns: t(m)RNA_ID, Source, t(m)RNA, Start, Stop, Strand, Length, Permuted, 
-    #          Sequence, Phage_ID, Phage_source, Source_DB
+    #          Sequence, Phage_ID, Source_DB
     logging.info("Creating dim_trna_tmrna table")
     conn.execute(f"""
     CREATE TABLE dim_trna_tmrna AS 
@@ -204,7 +202,6 @@ def create_star_schema_duckdb():
         TRY_CAST(NULLIF(Length, '-') AS INTEGER) as length,
         Permuted as permuted,
         Sequence as sequence,
-        Phage_source,
         Source_DB
     FROM read_csv('{trna_tmrna_data}',
                   header=true,
@@ -226,7 +223,6 @@ def create_star_schema_duckdb():
         Phage_ID,
         Protein_ID,
         Aligned_Protein_in_CARD as aligned_protein_card,
-        Phage_source,
         Source_DB
     FROM read_csv_auto('{antimicrobial_resistance_data}')
     WHERE Phage_ID IS NOT NULL
