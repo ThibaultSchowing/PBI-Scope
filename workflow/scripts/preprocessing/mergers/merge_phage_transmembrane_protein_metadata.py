@@ -16,11 +16,11 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Expnumberfirst60AAs", "TotalprobofNin", "POSSIBLENterm", "Insidesource", "Insidestart", "Insideend", "TMhelixsource", "TMhelixstart", "TMhelixend", "Outsidesource", "Outsidestart", "Outsideend"]
+COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Expnumberfirst60AAs", "TotalprobofNin", "POSSIBLENterm", "Insidesource", "Insidestart", "Insideend", "TMhelixsource", "TMhelixstart", "TMhelixend", "Outsidesource", "Outsidestart", "Outsideend", "Source_DB"]
 
 NUMERICAL_COLUMNS = ["Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Insidestart", "Insideend", "Expnumberfirst60AAs", "Insidestart", "Insideend", "TMhelixstart", "TMhelixend", "TotalprobofNin" , "Outsidestart", "Outsideend"]
 
-STRING_COLUMNS = ["Phage_ID", "Protein_ID", "POSSIBLENterm", "Insidesource", "TMhelixsource", "Outsidesource"]
+STRING_COLUMNS = ["Phage_ID", "Protein_ID", "POSSIBLENterm", "Insidesource", "TMhelixsource", "Outsidesource", "Source_DB"]
 
 # List of DataFrames
 dfs = []
@@ -39,10 +39,8 @@ for infile in inputs:
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
 
-    # Validate that the DataFrame contains all expected columns
-    if not utils.validate_columns(df, COLUMNS_LIST):
-        logging.warning(f"File {infile} is missing expected columns. Skipping.")
-        
+    # Validate and reorder columns to match expected schema
+    df = utils.validate_columns(df, COLUMNS_LIST)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

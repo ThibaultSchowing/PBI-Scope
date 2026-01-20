@@ -20,10 +20,10 @@ output = snakemake.output[0]
 # List of DataFrames
 dfs = []
 
-COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Source"]
+COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Source", "Phage_source", "Source_DB"]
 
 NUMERICAL_COLUMNS = []
-STRING_COLUMNS = ["Phage_ID", "Protein_ID", "Source"]
+STRING_COLUMNS = ["Phage_ID", "Protein_ID", "Source", "Phage_source", "Source_DB"]
 
 # For each input file (all databases - From PhageScope)
 for infile in inputs:
@@ -39,10 +39,8 @@ for infile in inputs:
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
 
-    # Validate that the DataFrame contains all expected columns
-    if not utils.validate_columns(df, COLUMNS_LIST):
-        logging.warning(f"File {infile} is missing expected columns. Skipping.")
-        continue
+    # Validate and reorder columns to match expected schema
+    df = utils.validate_columns(df, COLUMNS_LIST)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

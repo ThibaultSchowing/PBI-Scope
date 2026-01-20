@@ -28,20 +28,37 @@ def is_file_empty_or_invalid(filepath):
         return True
 
 def validate_columns(df, expected_columns):
-    """Validate that the DataFrame contains all expected columns."""
-    missing_cols = [col for col in expected_columns if col not in df.columns]
-    # add missing cols with NaN values, and place them at the correct position
-    for col in missing_cols:
-        df.insert(expected_columns.index(col), col, np.nan)
-        logging.info(f"Added missing column {col} with NaN values")
+    """Validate that the DataFrame contains all expected columns.
+    Adds missing columns with NaN values and reorders to match expected order.
     
-    # Recompute missing cols
+    Args:
+        df: Input DataFrame
+        expected_columns: List of expected column names in desired order
+    
+    Returns:
+        Modified DataFrame with columns in the expected order
+    """
+    # Create a copy to avoid modifying the original DataFrame
+    df = df.copy()
+    
     missing_cols = [col for col in expected_columns if col not in df.columns]
-
-    if missing_cols:
-        logging.warning(f"Missing columns: {missing_cols}")
-        return False
-    return True
+    
+    # Add missing columns with NaN values
+    for col in missing_cols:
+        df[col] = np.nan
+        logging.info(f"Added missing column '{col}' with NaN values")
+    
+    # Check for extra columns not in expected list
+    extra_cols = [col for col in df.columns if col not in expected_columns]
+    if extra_cols:
+        logging.warning(f"Found extra columns not in expected list: {extra_cols}")
+    
+    # Reorder to match expected columns, keeping any extra columns at the end
+    ordered_cols = [col for col in expected_columns if col in df.columns]
+    ordered_cols.extend(extra_cols)
+    
+    # Return dataframe with reordered columns
+    return df[ordered_cols]
 
 # TODO : create function that takes list of numerical colums and convert them to numeric with logging
 def convert_numerical_columns(df, cols):
@@ -102,6 +119,19 @@ def merge_dataframes_chunked(dfs, output_file):
         with open(output_file, 'w', encoding='utf-8'):
             pass
         return 0
+    
+    # Ensure all dataframes have the same column order as the first one
+    # This prevents CSV tokenization errors when reading in chunks
+    first_columns = list(dfs[0].columns)
+    logging.info(f"Ensuring all dataframes have consistent column order: {first_columns}")
+    
+    for i, df in enumerate(dfs):
+        # Use validate_columns to ensure consistent column order and add missing columns
+        # Note: validate_columns keeps extra columns at the end, so we need to filter them
+        validated_df = validate_columns(df, first_columns)
+        
+        # Keep only the columns from the first dataframe (remove any extras)
+        dfs[i] = validated_df[first_columns]
     
     total_rows = 0
     

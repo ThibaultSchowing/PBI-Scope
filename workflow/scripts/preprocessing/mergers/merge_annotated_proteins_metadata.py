@@ -48,11 +48,8 @@ for infile in inputs:
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
 
-    # Validate that the DataFrame contains all expected columns
-    # TODO: instead of skipping, we could add missing columns with NaN values
-    if not utils.validate_columns(df, COLUMNS_LIST):
-        logging.warning(f"File {infile} is missing expected columns. Skipping.")
-        continue
+    # Validate and reorder columns to match expected schema
+    df = utils.validate_columns(df, COLUMNS_LIST)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
