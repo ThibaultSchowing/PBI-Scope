@@ -43,7 +43,7 @@ def fast_sample_known_size(file_path, sample_size, total_rows):
     chunksize = 100000  # 100k lignes par chunk
 
     for chunk in pd.read_csv(file_path, chunksize=chunksize, quoting=csv.QUOTE_NONNUMERIC):
-        logging.info(f"Number of columns in chunk: {len(chunk.columns)}")
+        #logging.info(f"Number of columns in chunk: {len(chunk.columns)}")
         chunk_indices = range(current_row, current_row + len(chunk))
         rows_to_keep = list(sample_indices.intersection(chunk_indices))
         if rows_to_keep:

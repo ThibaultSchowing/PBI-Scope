@@ -39,10 +39,10 @@ for infile in inputs:
     df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
 
     # Validate and reorder columns to match expected schema
-    df = utils.validate_columns(df, COLUMNS_LIST)
+    df = utils.validate_columns(df, COLUMNS_LIST, infile)
     
     # Ensure all expected columns are named correctly
-    df = utils.rename_columns(df, infile)
+    #df = utils.rename_columns(df, infile)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

@@ -45,13 +45,14 @@ for infile in inputs:
     
     df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
 
-    logging.warning(f"We have {len(df.columns)} columns in {infile}: {df.columns.tolist()}")
+    logging.info(f"We have {len(df.columns)} columns in {infile}: {df.columns.tolist()}")
+    print(f"We have {len(df.columns)} columns in {infile}: {df.columns.tolist()}")
     
     # Validate and reorder columns to match expected schema
-    df = utils.validate_columns(df, COLUMNS_LIST)
-    
+    df = utils.validate_columns(df, COLUMNS_LIST, infile)
+
     # Ensure all expected columns are named correctly 
-    df = utils.rename_columns(df, infile)
+    #df = utils.rename_columns(df, infile)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
@@ -64,4 +65,4 @@ os.makedirs(os.path.dirname(output), exist_ok=True)
 # Use chunked merge to avoid OOM errors
 total_rows = utils.merge_dataframes_chunked(dfs, output)
 
-print(f"[INFO] Merged {len(inputs)} files into {output} with {total_rows} total rows")
+logging.info(f"Merged {len(inputs)} files into {output} with {total_rows} total rows")

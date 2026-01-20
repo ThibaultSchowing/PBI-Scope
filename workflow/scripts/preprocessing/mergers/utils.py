@@ -27,7 +27,7 @@ def is_file_empty_or_invalid(filepath):
         logging.warning(f"File {filepath} appears to be invalid: {e}")
         return True
 
-def validate_columns(df, expected_columns):
+def validate_columns(df, expected_columns, infile=""):
     """Validate that the DataFrame contains all expected columns.
     Adds missing columns with NaN values and reorders to match expected order.
     
@@ -41,17 +41,22 @@ def validate_columns(df, expected_columns):
     # Create a copy to avoid modifying the original DataFrame
     df = df.copy()
 
-    # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
-    if 'Phage_source' in df.columns:
-        df = df.rename(columns={'Phage_source': 'Phage_Source'})
-        logging.info(f"Renamed 'Phage_source' to 'Phage_Source'")
-    if 'Phage_id' in df.columns:
-        df = df.rename(columns={'Phage_id': 'Phage_ID'})
-        logging.info(f"Renamed 'Phage_id' to 'Phage_ID'")
-    if 'Protein_id' in df.columns:
-        df = df.rename(columns={'Protein_id': 'Protein_ID'})
-        logging.info(f"Renamed 'Protein_id' to 'Protein_ID'")
-
+    # Standardize column names FIRST before validation
+    column_mapping = {
+        'Phage_source': 'Phage_Source',
+        'Phage_id': 'Phage_ID',
+        'Protein_id': 'Protein_ID'
+    }
+    
+    for old_name, new_name in column_mapping.items():
+        if old_name in df.columns:
+            df = df.rename(columns={old_name: new_name})
+            logging.info(f"Renamed '{old_name}' to '{new_name}'")
+    
+    if 'Source_DB' not in df.columns:
+        source_name = os.path.basename(infile).split("_")[0]
+        df['Source_DB'] = source_name
+        logging.info(f"Added 'Source_DB' column to {infile} with value '{source_name}'")
     
     missing_cols = [col for col in expected_columns if col not in df.columns]
     
@@ -76,7 +81,7 @@ def validate_columns(df, expected_columns):
 def convert_numerical_columns(df, cols):
     """Convert specified columns to numeric, coercing errors to NaN (np.nan)."""
     for col in cols:
-        logging.info(f"Formating column {col} to numeric")
+        #logging.info(f"Formating column {col} to numeric") 
         try:
             df[col] = pd.to_numeric(df[col].replace("-", np.nan), errors='coerce')
             df[col] = df[col].replace("NaN", np.nan)

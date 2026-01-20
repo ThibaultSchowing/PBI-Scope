@@ -35,5 +35,5 @@ RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermedi
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
 
-# Default command to run the pipeline
-CMD ["snakemake", "--cores", "1", "--use-conda", "--printshellcmds", "--cache", "--conda-prefix", "/cache/conda", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]
+# Default command to run the pipeline #TODO change cores to all 
+CMD ["snakemake", "--cores", "all", "--use-conda", "--printshellcmds", "--cache", "--conda-prefix", "/cache/conda", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]
