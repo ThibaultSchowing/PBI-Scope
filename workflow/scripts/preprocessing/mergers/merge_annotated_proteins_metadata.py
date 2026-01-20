@@ -49,7 +49,7 @@ for infile in inputs:
     df = utils.validate_columns(df, COLUMNS_LIST, infile)
     
     # Ensure all expected columns are named correctly 
-    df = utils.rename_columns(df, infile)
+    #df = utils.rename_columns(df, infile)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
