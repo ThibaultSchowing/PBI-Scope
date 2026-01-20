@@ -123,29 +123,12 @@ def merge_dataframes_chunked(dfs, output_file):
     logging.info(f"Ensuring all dataframes have consistent column order: {first_columns}")
     
     for i, df in enumerate(dfs):
-        # Check if columns match (order-independent)
-        if set(df.columns) != set(first_columns):
-            logging.warning(f"Dataframe {i} has different columns than first dataframe")
-            logging.warning(f"  Expected: {set(first_columns)}")
-            logging.warning(f"  Got: {set(df.columns)}")
-            logging.warning(f"  Missing: {set(first_columns) - set(df.columns)}")
-            logging.warning(f"  Extra: {set(df.columns) - set(first_columns)}")
+        # Use validate_columns to ensure consistent column order and add missing columns
+        # Note: validate_columns keeps extra columns at the end, so we need to filter them
+        validated_df = validate_columns(df, first_columns)
         
-        # Reorder columns to match first dataframe
-        # Add missing columns with NaN values
-        for col in first_columns:
-            if col not in df.columns:
-                df[col] = np.nan
-                logging.info(f"Added missing column '{col}' with NaN values to dataframe {i}")
-        
-        # Remove extra columns not in first dataframe
-        extra_cols = set(df.columns) - set(first_columns)
-        if extra_cols:
-            logging.warning(f"Removing extra columns from dataframe {i}: {extra_cols}")
-            df.drop(columns=list(extra_cols), inplace=True)
-        
-        # Reorder to match first dataframe
-        dfs[i] = df[first_columns]
+        # Keep only the columns from the first dataframe (remove any extras)
+        dfs[i] = validated_df[first_columns]
     
     total_rows = 0
     
