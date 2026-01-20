@@ -10,28 +10,24 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/api-reference/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/development/fixes/CSV_COLUMN_CONSISTENCY_FIX/">
       
       
-        <link rel="prev" href="../developer-guide/code-structure/">
-      
-      
-        <link rel="next" href="../changelog/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>API Reference - PBI documentation</title>
+        <title>CSV Column Consistency Fix - PBI documentation</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
       
 
@@ -50,7 +46,7 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -68,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#api-reference" class="md-skip">
+        <a href="#csv-column-consistency-fix" class="md-skip">
           Skip to content
         </a>
       
@@ -84,7 +80,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="PBI documentation" class="md-header__button md-logo" aria-label="PBI documentation" data-md-component="logo">
+    <a href="../../.." title="PBI documentation" class="md-header__button md-logo" aria-label="PBI documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -104,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              API Reference
+              CSV Column Consistency Fix
             
           </span>
         </div>
@@ -194,7 +190,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="PBI documentation" class="md-nav__button md-logo" aria-label="PBI documentation" data-md-component="logo">
+    <a href="../../.." title="PBI documentation" class="md-nav__button md-logo" aria-label="PBI documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -224,7 +220,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -298,7 +294,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/overview/" class="md-nav__link">
+      <a href="../../../getting-started/overview/" class="md-nav__link">
         
   
   
@@ -326,7 +322,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/installation/" class="md-nav__link">
+      <a href="../../../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -408,7 +404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user-guide/data-preparation/" class="md-nav__link">
+      <a href="../../../user-guide/data-preparation/" class="md-nav__link">
         
   
   
@@ -436,7 +432,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user-guide/running-pbi/" class="md-nav__link">
+      <a href="../../../user-guide/running-pbi/" class="md-nav__link">
         
   
   
@@ -464,7 +460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user-guide/analyzing-results/" class="md-nav__link">
+      <a href="../../../user-guide/analyzing-results/" class="md-nav__link">
         
   
   
@@ -546,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../developer-guide/code-structure/" class="md-nav__link">
+      <a href="../../../developer-guide/code-structure/" class="md-nav__link">
         
   
   
@@ -578,37 +574,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    API Reference
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../api-reference/" class="md-nav__link">
         
   
   
@@ -624,265 +593,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#base-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Base URL
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Authentication
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#interactive-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interactive Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Endpoints
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Endpoints">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#health-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Health &amp; Status
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Health &amp; Status">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-health" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /health
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-stats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /stats
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#data-querying" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Querying
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Querying">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-query" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /query
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-phages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fasta-export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FASTA Export
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="FASTA Export">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-phagesfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteinsfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Schema
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-volume-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Volume Access
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Volume Access">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#accessing-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Reports
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -894,7 +604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../changelog/" class="md-nav__link">
+      <a href="../../../changelog/" class="md-nav__link">
         
   
   
@@ -941,67 +651,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#base-url" class="md-nav__link">
+  <a href="#problem-description" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Base URL
+        Problem Description
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#authentication" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Authentication
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#interactive-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interactive Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Endpoints
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Endpoints">
+    <nav class="md-nav" aria-label="Problem Description">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#health-status" class="md-nav__link">
+  <a href="#root-cause" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Health &amp; Status
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Health &amp; Status">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /
+        Root Cause
       
     </span>
   </a>
@@ -1009,154 +674,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#get-health" class="md-nav__link">
+  <a href="#example-of-the-problem" class="md-nav__link">
     <span class="md-ellipsis">
       
-        GET /health
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-stats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /stats
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#data-querying" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Querying
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Querying">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-query" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /query
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-phages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fasta-export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FASTA Export
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="FASTA Export">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-phagesfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteinsfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Schema
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-volume-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Volume Access
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Volume Access">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#accessing-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Reports
+        Example of the Problem
       
     </span>
   </a>
@@ -1169,10 +690,182 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
+  <a href="#solution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Support
+        Solution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Solution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-updated-all-merger-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Updated All Merger Scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-enhanced-validate_columns-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Enhanced validate_columns() Function
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-enhanced-merge_dataframes_chunked-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Enhanced merge_dataframes_chunked() Function
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-updated-all-merger-scripts-to-use-return-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Updated All Merger Scripts to Use Return Value
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unit Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Impact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-modified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Modified
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Files Modified">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-files-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Files (2)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merger-scripts-9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merger Scripts (9)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-files-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Files (2)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
       
     </span>
   </a>
@@ -1199,55 +892,162 @@
   
 
 
-<h1 id="api-reference">API Reference</h1>
-<p>The PBI API provides a REST interface for querying the phage database and retrieving sequences.</p>
-<h2 id="base-url">Base URL</h2>
-<p>When running locally with Docker:</p>
-<pre><code>http://localhost:8000
+<h1 id="csv-column-consistency-fix">CSV Column Consistency Fix</h1>
+<h2 id="problem-description">Problem Description</h2>
+<p>The report generation was failing with CSV tokenization errors:</p>
+<pre><code>ERROR:root:Error during report generation: Error tokenizing data. C error: Expected 26 fields in line 32474, saw 27
+ERROR:root:Error during report generation: Error tokenizing data. C error: Expected 10 fields in line 441639, saw 11
+ERROR:root:Error during report generation: Error tokenizing data. C error: Expected 8 fields in line 3912548, saw 9
 </code></pre>
-<h2 id="authentication">Authentication</h2>
-<p>Currently, the API does not require authentication. For production deployments, consider adding authentication.</p>
-<h2 id="interactive-documentation">Interactive Documentation</h2>
-<p>The API provides interactive Swagger UI documentation at:</p>
-<pre><code>http://localhost:8000/docs
+<h3 id="root-cause">Root Cause</h3>
+<p>The issue was caused by inconsistent column handling in merged CSV files:</p>
+<ol>
+<li>The <code>rename_columns()</code> function in <code>utils.py</code> automatically adds a <code>Source_DB</code> column to DataFrames that don't have it</li>
+<li>Not all merger scripts included <code>Source_DB</code> (or <code>Phage_source</code> where needed) in their <code>COLUMNS_LIST</code></li>
+<li>When DataFrames were merged, some rows had these columns while others didn't</li>
+<li>This created CSV files where some rows had trailing empty commas (<code>,</code> at the end)</li>
+<li>When pandas reads these files in chunks (as done in report generation), it can infer different numbers of columns for different chunks, causing tokenization errors</li>
+</ol>
+<h3 id="example-of-the-problem">Example of the Problem</h3>
+<p>From the problem statement, in <code>merged_crispr_array_metadata.csv</code>:</p>
+<pre><code class="language-csv"># Row with Source_DB column
+TemPhD_cluster_9791,0,TemPhD_cluster_9791_1,35443,35537,94,Forward,Unknown,TGGACAATCGTTGGACATCCGTTGGACAA,Unknown,0,29,1,37.0,0.0,2,1.0,100.0,100.0,100.0,100.0,66.0,0.783783783783784,0,1,TemPhD,
+
+# Row with Source_DB column populated
+SAMEA1906422_b1_ct69_vs2,0,SAMEA1906422_b1_ct69_vs2_1,19441,19514,73,Forward,Unknown,TTTGCCTAAGCAAATTGCCTAAGCAAAA,Unknown,0,28,1,18.0,0.0,1,0.5,71.4285714285714,71.4285714285714,100.0,100.0,46.0,1.55555555555556,0,1,CHVD,CHVD
 </code></pre>
-<p>Visit this URL in your browser to explore all endpoints interactively.</p>
-<h2 id="endpoints">Endpoints</h2>
-<h3 id="health-status">Health &amp; Status</h3>
-<h4 id="get"><code>GET /</code></h4>
-<p>Returns API information and list of available endpoints.</p>
-<h4 id="get-health"><code>GET /health</code></h4>
-<p>Health check endpoint. Returns 200 if the database is connected.</p>
-<h4 id="get-stats"><code>GET /stats</code></h4>
-<p>Returns database statistics including counts for all tables.</p>
-<h3 id="data-querying">Data Querying</h3>
-<h4 id="post-query"><code>POST /query</code></h4>
-<p>Execute a custom SQL query against the database.</p>
-<p><strong>⚠️ Warning:</strong> Use with caution. In production, consider limiting to read-only queries.</p>
-<h4 id="post-phages"><code>POST /phages</code></h4>
-<p>Retrieve phage sequences and metadata.</p>
-<h4 id="post-proteins"><code>POST /proteins</code></h4>
-<p>Retrieve protein sequences and metadata.</p>
-<h3 id="fasta-export">FASTA Export</h3>
-<h4 id="post-phagesfasta"><code>POST /phages/fasta</code></h4>
-<p>Export phage sequences in FASTA format.</p>
-<h4 id="post-proteinsfasta"><code>POST /proteins/fasta</code></h4>
-<p>Export protein sequences in FASTA format.</p>
-<h2 id="database-schema">Database Schema</h2>
-<p>The database uses a star schema with:
-- <code>fact_phages</code> - Main phage metadata table
-- Dimension tables for proteins, terminators, CRISPR, AMR genes, etc.
-- All tables include <code>Source_DB</code> column tracking the origin database</p>
-<p>For complete API documentation with examples, visit the interactive docs at <code>http://localhost:8000/docs</code></p>
-<h2 id="docker-volume-access">Docker Volume Access</h2>
-<p>All data is stored in the <code>pbi-data</code> Docker volume.</p>
-<h3 id="accessing-reports">Accessing Reports</h3>
-<pre><code class="language-bash"># Copy reports to host
-docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
-  cp -r /data/processed/reports /backup/
+<p>Notice the trailing comma in the first row - this indicates an empty <code>Source_DB</code> value. If a chunk starts with rows that don't have this pattern, pandas might infer 25 columns. If the next chunk has rows with the trailing comma, pandas expects 26 columns, causing the tokenization error.</p>
+<h2 id="solution">Solution</h2>
+<h3 id="1-updated-all-merger-scripts">1. Updated All Merger Scripts</h3>
+<p>Added missing columns to <code>COLUMNS_LIST</code> in each merger script to match the database schema expectations:</p>
+<ul>
+<li><strong>phage_metadata</strong>: Added <code>Source_DB</code></li>
+<li><strong>crispr_array_metadata</strong>: Added <code>Source_DB</code></li>
+<li><strong>transcription_terminator_metadata</strong>: Added <code>Source_DB</code></li>
+<li><strong>transmembrane_protein_metadata</strong>: Added <code>Source_DB</code></li>
+<li><strong>anti_crispr_metadata</strong>: Added <code>Phage_source</code> and <code>Source_DB</code></li>
+<li><strong>virulent_factor_metadata</strong>: Added <code>Phage_source</code> and <code>Source_DB</code></li>
+<li><strong>trna_tmrna_metadata</strong>: Added <code>Phage_source</code> and <code>Source_DB</code></li>
+<li><strong>antimicrobial_resistance_gene_metadata</strong>: Added <code>Source_DB</code></li>
+</ul>
+<h3 id="2-enhanced-validate_columns-function">2. Enhanced <code>validate_columns()</code> Function</h3>
+<p>Modified the function to:
+- Create a copy of the DataFrame to avoid side effects
+- Add missing columns with NaN values
+- Reorder columns to match the expected order
+- Return the modified DataFrame</p>
+<pre><code class="language-python">def validate_columns(df, expected_columns):
+    &quot;&quot;&quot;Validate that the DataFrame contains all expected columns.
+    Adds missing columns with NaN values and reorders to match expected order.
+    &quot;&quot;&quot;
+    # Create a copy to avoid modifying the original DataFrame
+    df = df.copy()
+
+    # Add missing columns with NaN values
+    for col in missing_cols:
+        df[col] = np.nan
+        logging.info(f&quot;Added missing column '{col}' with NaN values&quot;)
+
+    # Reorder to match expected columns
+    ordered_cols = [col for col in expected_columns if col in df.columns]
+    return df[ordered_cols]
 </code></pre>
-<h2 id="support">Support</h2>
-<p>For detailed endpoint documentation, examples, and database schema, visit the interactive API docs or see <a href="../DOCKER.md">DOCKER.md</a>.</p>
+<h3 id="3-enhanced-merge_dataframes_chunked-function">3. Enhanced <code>merge_dataframes_chunked()</code> Function</h3>
+<p>Modified the function to:
+- Ensure all DataFrames have the same column order as the first one
+- Use <code>validate_columns()</code> to add missing columns and reorder
+- Keep only the columns that exist in the first DataFrame</p>
+<pre><code class="language-python">def merge_dataframes_chunked(dfs, output_file):
+    # Ensure all dataframes have the same column order as the first one
+    first_columns = list(dfs[0].columns)
+
+    for i, df in enumerate(dfs):
+        # Use validate_columns to ensure consistent column order
+        validated_df = validate_columns(df, first_columns)
+        # Keep only the columns from the first dataframe
+        dfs[i] = validated_df[first_columns]
+
+    # Write to CSV with consistent column structure
+    # ...
+</code></pre>
+<h3 id="4-updated-all-merger-scripts-to-use-return-value">4. Updated All Merger Scripts to Use Return Value</h3>
+<p>Changed all merger scripts from:</p>
+<pre><code class="language-python">if not utils.validate_columns(df, COLUMNS_LIST):
+    logging.warning(f&quot;File {infile} is missing expected columns. Skipping.&quot;)
+    continue
+</code></pre>
+<p>To:</p>
+<pre><code class="language-python"># Validate and reorder columns to match expected schema
+df = utils.validate_columns(df, COLUMNS_LIST)
+</code></pre>
+<h2 id="testing">Testing</h2>
+<h3 id="unit-tests">Unit Tests</h3>
+<ol>
+<li><strong>test_column_consistency.py</strong> - Tests for:</li>
+<li>Column ordering consistency</li>
+<li>Merging with inconsistent columns</li>
+<li>CSV reading in chunks</li>
+<li>
+<p>Handling both Phage_source and Source_DB columns</p>
+</li>
+<li>
+<p><strong>test_tokenization_fix_integration.py</strong> - Integration tests for:</p>
+</li>
+<li>Exact CRISPR array metadata scenario from the problem statement</li>
+<li>Report generation simulation with chunked reading</li>
+</ol>
+<h3 id="results">Results</h3>
+<ul>
+<li>✅ All existing tests pass (test_csv_quoting.py, test_chunked_merge.py)</li>
+<li>✅ All new unit tests pass</li>
+<li>✅ All integration tests pass</li>
+<li>✅ Code review completed and feedback addressed</li>
+<li>✅ Security scan (CodeQL) completed - <strong>0 vulnerabilities found</strong></li>
+</ul>
+<h2 id="impact">Impact</h2>
+<p>This fix ensures that:</p>
+<ol>
+<li><strong>Consistent Column Structure</strong>: All merged CSV files have the same columns in the same order</li>
+<li><strong>No Missing Data</strong>: Missing columns are properly filled with NaN values</li>
+<li><strong>Chunk-Safe Reading</strong>: CSV files can be read in chunks without tokenization errors</li>
+<li><strong>Report Generation Works</strong>: The report generation script can process all merged CSV files</li>
+<li><strong>Database Compatibility</strong>: All expected columns are present for database creation</li>
+</ol>
+<h2 id="files-modified">Files Modified</h2>
+<h3 id="core-files-2">Core Files (2)</h3>
+<ul>
+<li><code>workflow/scripts/preprocessing/mergers/utils.py</code></li>
+</ul>
+<h3 id="merger-scripts-9">Merger Scripts (9)</h3>
+<ul>
+<li><code>workflow/scripts/preprocessing/mergers/merge_annotated_proteins_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_antimicrobial_resistance_gene_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_crispr_array_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_phage_anti_crispr_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_phage_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_phage_transmembrane_protein_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_phage_trna_tmrna_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_phage_virulent_factor_metadata.py</code></li>
+<li><code>workflow/scripts/preprocessing/mergers/merge_transcription_terminator_metadata.py</code></li>
+</ul>
+<h3 id="test-files-2">Test Files (2)</h3>
+<ul>
+<li><code>tests/test_column_consistency.py</code> (new)</li>
+<li><code>tests/test_tokenization_fix_integration.py</code> (new)</li>
+</ul>
+<h2 id="migration-notes">Migration Notes</h2>
+<p>For existing deployments:</p>
+<ol>
+<li><strong>Existing Merged CSV Files</strong>: Need to be regenerated with the new merger scripts to ensure column consistency</li>
+<li><strong>Database</strong>: Will work with both old and new CSV files due to <code>null_padding=true</code> in the database creation script</li>
+<li><strong>Report Generation</strong>: Will work correctly only after CSV files are regenerated</li>
+</ol>
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li>See <code>CSV_PARSING_FIX_SUMMARY.md</code> for previous CSV parsing fixes</li>
+<li>See <code>CSV_TOKENIZATION_FIX.md</code> for the initial tokenization error fix</li>
+<li>See <code>OOM_FIX_SUMMARY.md</code> for the chunked merge implementation</li>
+</ul>
 
 
 
@@ -1313,10 +1113,10 @@ docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
