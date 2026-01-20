@@ -16,11 +16,11 @@ import utils
 inputs = snakemake.input
 output = snakemake.output[0]
 
-COLUMNS_LIST = ["Protein_id", "Aligned_Protein_in_CARD", "Phage_id"	, "Phage_Source"]
+COLUMNS_LIST = ["Protein_id", "Aligned_Protein_in_CARD", "Phage_id", "Phage_Source", "Source_DB"]
 
 NUMERICAL_COLUMNS = []
 
-STRING_COLUMNS = ["Protein_id", "Aligned_Protein_in_CARD", "Phage_id"	, "Phage_Source"]
+STRING_COLUMNS = ["Protein_id", "Aligned_Protein_in_CARD", "Phage_id", "Phage_Source", "Source_DB"]
 
 # List of DataFrames
 dfs = []
@@ -39,10 +39,8 @@ for infile in inputs:
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
 
-    # Validate that the DataFrame contains all expected columns
-    if not utils.validate_columns(df, COLUMNS_LIST):
-        logging.warning(f"File {infile} is missing expected columns. Skipping.")
-        
+    # Validate and reorder columns to match expected schema
+    df = utils.validate_columns(df, COLUMNS_LIST)
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
