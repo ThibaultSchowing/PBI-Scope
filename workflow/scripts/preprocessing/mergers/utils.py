@@ -40,6 +40,18 @@ def validate_columns(df, expected_columns):
     """
     # Create a copy to avoid modifying the original DataFrame
     df = df.copy()
+
+    # Rename column Phage_Source and Phage_id to Phage_source and Phage_ID if needed
+    if 'Phage_source' in df.columns:
+        df = df.rename(columns={'Phage_source': 'Phage_Source'})
+        logging.info(f"Renamed 'Phage_source' to 'Phage_Source'")
+    if 'Phage_id' in df.columns:
+        df = df.rename(columns={'Phage_id': 'Phage_ID'})
+        logging.info(f"Renamed 'Phage_id' to 'Phage_ID'")
+    if 'Protein_id' in df.columns:
+        df = df.rename(columns={'Protein_id': 'Protein_ID'})
+        logging.info(f"Renamed 'Protein_id' to 'Protein_ID'")
+
     
     missing_cols = [col for col in expected_columns if col not in df.columns]
     
