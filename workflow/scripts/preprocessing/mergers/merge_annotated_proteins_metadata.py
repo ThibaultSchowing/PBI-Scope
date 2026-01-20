@@ -50,11 +50,6 @@ for infile in inputs:
 
     # Validate and reorder columns to match expected schema
     df = utils.validate_columns(df, COLUMNS_LIST)
-    
-    # TODO: instead of skipping, we could add missing columns with NaN values
-    # if not utils.validate_columns(df, COLUMNS_LIST):
-    #     logging.warning(f"File {infile} is missing expected columns. Skipping.")
-    #     continue
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)

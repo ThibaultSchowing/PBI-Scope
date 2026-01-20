@@ -38,6 +38,9 @@ def validate_columns(df, expected_columns):
     Returns:
         Modified DataFrame with columns in the expected order
     """
+    # Create a copy to avoid modifying the original DataFrame
+    df = df.copy()
+    
     missing_cols = [col for col in expected_columns if col not in df.columns]
     
     # Add missing columns with NaN values
