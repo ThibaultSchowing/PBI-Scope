@@ -193,6 +193,62 @@ def test_without_index_col_false():
         os.unlink(test_file)
 
 
+def test_unnamed_columns_filtered():
+    """Test that unnamed columns from malformed input files are filtered out."""
+    print("🧪 Testing unnamed column filtering...")
+    
+    # Create a CSV with trailing comma that creates an unnamed column
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as f:
+        csv_file = f.name
+        f.write('"Phage_ID","CRISPR_ID","Evidence_Level",\n')  # Trailing comma
+        f.write('"phage1","crispr1",1,\n')
+        f.write('"phage2","crispr2",1,\n')
+    
+    try:
+        # Read CSV with unnamed column
+        df1 = pd.read_csv(csv_file, quoting=csv.QUOTE_NONNUMERIC)
+        
+        # Verify it has an unnamed column
+        unnamed = [col for col in df1.columns if 'Unnamed' in str(col)]
+        assert len(unnamed) > 0, "Test setup failed: no unnamed column created"
+        print(f"  Input has unnamed column: {unnamed}")
+        
+        # Create a normal second dataframe
+        df2 = pd.DataFrame({
+            'Phage_ID': ['phage3'],
+            'CRISPR_ID': ['crispr3'],
+            'Evidence_Level': [1]
+        })
+        
+        # Merge them
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as f:
+            output_file = f.name
+        
+        total_rows = utils.merge_dataframes_chunked([df1, df2], output_file)
+        assert total_rows == 3, f"Expected 3 rows, got {total_rows}"
+        
+        # Read back and verify NO unnamed columns
+        result_df = pd.read_csv(output_file, quoting=csv.QUOTE_NONNUMERIC)
+        unnamed_result = [col for col in result_df.columns if 'Unnamed' in str(col)]
+        
+        assert len(unnamed_result) == 0, \
+            f"Merged CSV should not have unnamed columns, but has: {unnamed_result}"
+        
+        # Verify column count
+        assert len(result_df.columns) == 3, \
+            f"Expected 3 columns, got {len(result_df.columns)}: {list(result_df.columns)}"
+        
+        # Verify data integrity
+        assert result_df['Phage_ID'].iloc[0] == 'phage1', "Data corruption in row 1"
+        assert result_df['Phage_ID'].iloc[1] == 'phage2', "Data corruption in row 2"
+        assert result_df['Phage_ID'].iloc[2] == 'phage3', "Data corruption in row 3"
+        
+        os.unlink(output_file)
+        print("✅ Unnamed column filtering test PASSED")
+    finally:
+        os.unlink(csv_file)
+
+
 if __name__ == "__main__":
     print("=" * 60)
     print("Test Suite: Malformed TSV Handling")
@@ -202,6 +258,7 @@ if __name__ == "__main__":
     test_malformed_tsv_through_pipeline()
     test_multiple_malformed_rows()
     test_without_index_col_false()
+    test_unnamed_columns_filtered()
     
     print("\n" + "=" * 60)
     print("✅ All malformed TSV tests PASSED!")

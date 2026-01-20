@@ -53,7 +53,13 @@ def validate_columns(df, expected_columns):
     if extra_cols:
         logging.warning(f"Found extra columns not in expected list: {extra_cols}")
     
-    # Reorder to match expected columns, keeping any extra columns at the end
+    # Filter out unnamed columns (these come from malformed input files with trailing commas, etc.)
+    unnamed_cols = [col for col in extra_cols if 'Unnamed' in str(col)]
+    if unnamed_cols:
+        logging.warning(f"Dropping unnamed columns: {unnamed_cols}")
+        extra_cols = [col for col in extra_cols if col not in unnamed_cols]
+    
+    # Reorder to match expected columns, keeping any extra named columns at the end
     ordered_cols = [col for col in expected_columns if col in df.columns]
     ordered_cols.extend(extra_cols)
     
@@ -119,6 +125,14 @@ def merge_dataframes_chunked(dfs, output_file):
         with open(output_file, 'w', encoding='utf-8'):
             pass
         return 0
+    
+    # First, remove any unnamed columns from all dataframes
+    # These come from malformed input files (e.g., trailing commas)
+    for i, df in enumerate(dfs):
+        unnamed_cols = [col for col in df.columns if 'Unnamed' in str(col)]
+        if unnamed_cols:
+            logging.warning(f"Dropping unnamed columns from dataframe {i}: {unnamed_cols}")
+            dfs[i] = df.drop(columns=unnamed_cols)
     
     # Ensure all dataframes have the same column order as the first one
     # This prevents CSV tokenization errors when reading in chunks
