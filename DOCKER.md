@@ -136,6 +136,7 @@ The `--rm` flag automatically removes the container after completion.
 - `/data/processed/databases/phage_database_optimized.duckdb`
 - `/data/processed/sequences/all_phages.fasta` (+ `.fai` index)
 - `/data/processed/sequences/all_proteins.fasta` (+ `.fai` index)
+- `/data/processed/reports/` - HTML reports for data validation and statistics
 
 **Cache files** (stored in the `pbi-cache` volume):
 - Snakemake metadata and workflow state in `/cache/metadata/`
@@ -236,6 +237,32 @@ curl -X POST http://localhost:8000/phages/fasta \
 
 Visit `http://localhost:8000/docs` in your browser for interactive API documentation (Swagger UI).
 
+### Database Schema
+
+The PBI API provides access to a star schema database with the following tables:
+
+**Fact Table:**
+- `fact_phages` - Main phage metadata (Length, GC_content, Taxonomy, Host, Lifestyle, etc.)
+
+**Dimension Tables:**
+- `dim_proteins` - Annotated protein sequences and metadata
+- `dim_terminators` - Transcription terminator predictions
+- `dim_anti_crispr` - Anti-CRISPR protein annotations
+- `dim_virulent_factors` - Virulent factor annotations
+- `dim_transmembrane_proteins` - Transmembrane protein predictions
+- `dim_trna_tmrna` - tRNA and tmRNA annotations
+- `dim_antimicrobial_resistance_genes` - Antimicrobial resistance gene annotations
+- `dim_crispr_arrays` - CRISPR array metadata
+
+**Analytical Views:**
+- `phage_summary` - Aggregated statistics by source database
+- `phage_complete_profile` - Complete phage profiles with all annotations
+- `amr_gene_summary` - Antimicrobial resistance gene statistics
+- `crispr_array_summary` - CRISPR array statistics
+- And many more specialized views for analysis
+
+All tables include a `Source_DB` column to track the origin database (RefSeq, GenBank, PhagesDB, etc.).
+
 ## Common Operations
 
 ### View Pipeline Logs
@@ -291,12 +318,23 @@ To inspect or backup the data:
 # List database contents
 docker run --rm -v pbi-data:/data alpine ls -lah /data/processed/databases
 
+# List reports
+docker run --rm -v pbi-data:/data alpine ls -lah /data/processed/reports
+
 # List cache contents
 docker run --rm -v pbi-cache:/cache alpine ls -lah /cache
 
 # Copy database to host
 docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
   cp /data/processed/databases/phage_database_optimized.duckdb /backup/
+
+# Copy reports to host
+docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
+  cp -r /data/processed/reports /backup/
+  
+# View a specific report (copy to current directory)
+docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
+  cp /data/processed/reports/database_validation.html /backup/
 ```
 
 ### Clean Up Everything
@@ -512,6 +550,10 @@ Final, optimized outputs ready for use:
   - `all_phages.fasta` + `.fai` index - Complete phage genome sequences
   - `all_proteins.fasta` + `.fai` index - Complete protein sequences
   - Indexed for fast random access
+- **Reports**: `/data/processed/reports/`
+  - HTML reports for data validation and metadata statistics
+  - `database_validation.html` - Database structure and quality validation
+  - `*_metadata_report.html` - Reports for each data type (phage, proteins, etc.)
 
 #### Cache Volume (`pbi-cache`)
 Separate from the data volume, the cache stores Snakemake's working directory:

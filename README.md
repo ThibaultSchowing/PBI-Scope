@@ -31,7 +31,11 @@ docker compose up -d api
 
 # Access the API at http://localhost:8000
 curl http://localhost:8000/health
+
+# Access interactive API docs at http://localhost:8000/docs
 ```
+
+For detailed API documentation and available endpoints, see [DOCKER.md](DOCKER.md#api-endpoints).
 
 See [DOCKER.md](DOCKER.md) for detailed Docker instructions and API documentation.
 
