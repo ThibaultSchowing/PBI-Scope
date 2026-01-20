@@ -34,7 +34,7 @@ for infile in inputs:
         logging.warning(f"File {infile} is empty or invalid. Skipping.")
         continue
     
-    df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC)
+    df = pd.read_csv(infile, sep="\t", quoting=csv.QUOTE_NONNUMERIC, index_col=False)
     
     # Ensure all expected columns are named correctly 
     df = utils.rename_columns(df, infile)
