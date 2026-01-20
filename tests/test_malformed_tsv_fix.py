@@ -228,7 +228,7 @@ def test_unnamed_columns_filtered():
         assert total_rows == 3, f"Expected 3 rows, got {total_rows}"
         
         # Read back and verify NO unnamed columns
-        result_df = pd.read_csv(output_file, quoting=csv.QUOTE_NONNUMERIC)
+        result_df = pd.read_csv(output_file, quoting=csv.QUOTE_NONNUMERIC, index_col=False)
         unnamed_result = [col for col in result_df.columns if 'Unnamed' in str(col)]
         
         assert len(unnamed_result) == 0, \
