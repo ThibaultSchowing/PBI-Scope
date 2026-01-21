@@ -260,5 +260,4 @@ lsof -i :8000
 - Explore the [API documentation](../api/overview.md)
 - Learn about the [database schema](../database/overview.md)
 - See [API usage examples](../api/overview.md#examples)
-
-For more detailed Docker information, see the [DOCKER.md](../../DOCKER.md) file in the repository root.
+- Check the [Command Reference](../reference/commands.md) for more operations

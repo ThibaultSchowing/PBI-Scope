@@ -406,8 +406,8 @@ print(response.json())
 
 - Explore the [interactive API docs](http://localhost:8000/docs)
 - Review the [Database Schema](../database/overview.md)
-- Check out [usage examples](../database/usage-examples.md)
 - Read about [Docker deployment](../guides/docker-guide.md)
+- Check the [Command Reference](../reference/commands.md)
 
 ## Support
 

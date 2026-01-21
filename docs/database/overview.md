@@ -272,10 +272,12 @@ HTML reports are generated with:
 - ⚠️ Warning flags for data quality issues
 
 **View Reports:**
-- [Database Validation Report](../reports/database_validation.html)
-- [Phage Metadata Report](../reports/phage_metadata_report.html)
-- [Annotated Proteins Report](../reports/annotated_proteins_metadata_report.html)
-- [All Reports Directory](../reports/)
+
+Reports are generated in the `workflow/reports/` directory after running the pipeline. They include:
+- Database Validation Report
+- Phage Metadata Report
+- Annotated Proteins Report
+- And more for each data type
 
 ## Sequence Files
 
@@ -385,8 +387,8 @@ ORDER BY anti_crispr_count DESC;
 ## Next Steps
 
 - [API Reference](../api/overview.md) - Query the database via REST API
-- [Usage Examples](usage-examples.md) - More query examples
 - [Command Reference](../reference/commands.md) - Common database operations
+- [Installation Guide](../guides/installation.md) - Set up your local environment
 
 ---
 

@@ -51,4 +51,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Upcoming
 
-See the [project roadmap](index.md#project-goals--roadmap) for planned features.
+See the [project status and roadmap](index.md) for planned features.
