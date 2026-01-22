@@ -8,6 +8,59 @@ configfile: "config/config.yaml"
 
 import os
 
+# Get base data directory from environment or default to relative path
+BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+
+# Replace /data paths in config with environment-aware paths
+PATH_CONFIGS = [
+    'reports_output',
+    'all_phages_fasta',
+    'all_proteins_fasta',
+    'intermediate_csv_output',
+    'merged_csv_output',
+    'duckdb_output',
+    'optimized_duckdb_output',
+    'database_validation_report_output',
+    'phage_fasta_compressed_output',
+    'phage_fasta_extracted_output',
+    'phage_fasta_merged_output',
+    'protein_fasta_compressed_output',
+    'protein_fasta_extracted_output',
+    'protein_fasta_merged_output',
+    'phage_metadata_intermediate_output',
+    'phage_metadata_merged_output',
+    'phage_metadata_report_output',
+    'annotated_proteins_metadata_intermediate_output',
+    'annotated_proteins_metadata_merged_output',
+    'annotated_proteins_metadata_report_output',
+    'transcription_terminator_metadata_intermediate_output',
+    'transcription_terminator_metadata_merged_output',
+    'transcription_terminator_metadata_report_output',
+    'phage_trna_tmrna_metadata_intermediate_output',
+    'phage_trna_tmrna_metadata_merged_output',
+    'phage_trna_tmrna_metadata_report_output',
+    'phage_anti_crispr_metadata_intermediate_output',
+    'phage_anti_crispr_metadata_merged_output',
+    'phage_anti_crispr_metadata_report_output',
+    'phage_virulent_factor_metadata_intermediate_output',
+    'phage_virulent_factor_metadata_merged_output',
+    'phage_virulent_factor_metadata_report_output',
+    'phage_transmembrane_protein_metadata_intermediate_output',
+    'phage_transmembrane_protein_metadata_merged_output',
+    'phage_transmembrane_protein_metadata_report_output',
+    'crispr_array_metadata_intermediate_output',
+    'crispr_array_metadata_merged_output',
+    'crispr_array_metadata_report_output',
+    'antimicrobial_resistance_gene_metadata_intermediate_output',
+    'antimicrobial_resistance_gene_metadata_merged_output',
+    'antimicrobial_resistance_gene_metadata_report_output'
+]
+
+for path_key in PATH_CONFIGS:
+    if path_key in config:
+        # Replace /data with BASE_DATA_DIR
+        config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR)
+
 
 # List here the features for which reports will be generated.
 # These features correspond to the keys in the config file that contain URLs for metadata.

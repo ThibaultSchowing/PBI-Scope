@@ -14,38 +14,61 @@ Overall the Snakemake pipeline downloads and merges the metadata into a SQL data
 
 Tables and project overview available on [this page](https://thibaultschowing.github.io/PBI/getting-started/overview/). This page includes data summary on all tables as well as [a database validation report](https://thibaultschowing.github.io/PBI/reports/database_validation.html) helping visualize the database structure and elements and compare it to the data available on [PhageScope](https://phagescope.deepomics.org/database).
 
-## Quick Start Options
+## Installation & Usage
 
-### Option 1: Docker (Recommended for API users)
+### Option 1: Docker (Recommended for Production)
 
-The easiest way to run the PBI pipeline and API is using Docker:
+The easiest way to run the PBI pipeline and API:
 
 ```bash
-# Build and run the pipeline to create the database
+# Build and run the pipeline
 docker compose build pipeline
 docker compose run --rm pipeline
 
-# Build the api container and start the API service
-# option: --remove-orphans if you already have a container running
+# Build and start the API
 docker compose build api
-docker compose up -d api --remove-orphans
+docker compose up -d api
 
-# To check the API service status (takes time to load the database)
-docker compose logs -f api
-
-
-
-# Access the API at http://localhost:8000
+# Access the API
 curl http://localhost:8000/health
-
-# Access interactive API docs at http://localhost:8000/docs
+# Visit http://localhost:8000/docs for interactive API documentation
 ```
 
-For detailed API documentation and available endpoints, see [DOCKER.md](DOCKER.md#api-endpoints).
+See [DOCKER.md](DOCKER.md) for detailed Docker instructions.
 
-See [DOCKER.md](DOCKER.md) for detailed Docker instructions and API documentation.
+### Option 2: Local Development
 
-### Option 2: Local Installation
+For development, testing, and debugging:
 
-For local development and analysis, see the [installation guide](https://thibaultschowing.github.io/PBI/getting-started/installation/) in the documentation.
+```bash
+# 1. Create conda environment
+conda env create -f workflow/envs/base_environment.yaml
+conda activate snakemake_base
+
+# 2. Install PBI package
+pip install -e .
+
+# 3. Run pipeline
+./run_local.sh
+
+# 4. (Optional) Start API locally
+export DATA_PATH="data/processed"
+uvicorn api.app:app --reload
+```
+
+See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed local setup instructions.
+
+### Quick Start
+
+**Docker (Production):**
+
+```bash
+docker compose build pipeline && docker compose run --rm pipeline
+```
+
+**Local (Development):**
+
+```bash
+./run_local.sh
+```
 

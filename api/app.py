@@ -35,7 +35,7 @@ def get_data_paths():
     Returns:
         dict: Paths to data files
     """
-    base_path = Path(os.getenv('DATA_PATH', '/data/processed'))
+    base_path = Path(os.getenv('DATA_PATH', 'data/processed'))
     
     return {
         'database': str(base_path / 'databases' / 'phage_database_optimized.duckdb'),
