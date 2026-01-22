@@ -31,13 +31,19 @@ pip install -e .
 ./run_local.sh
 ```
 
+To use a different number of cores:
+
+```bash
+PBI_CORES=8 ./run_local.sh
+```
+
 **Option B: Manual execution**
 
 ```bash
 # Set environment variable
 export PBI_DATA_DIR="data"
 
-# Run Snakemake
+# Run Snakemake (adjust --cores as needed)
 snakemake --directory workflow --snakefile workflow/Snakefile \
   --cores 4 --use-conda --printshellcmds --cache
 ```

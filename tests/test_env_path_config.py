@@ -46,10 +46,9 @@ def test_snakemake_path_configuration():
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
-    # Apply transformation
-    PATH_CONFIGS = ['reports_output', 'all_phages_fasta', 'duckdb_output']
-    for path_key in PATH_CONFIGS:
-        if path_key in config and config[path_key].startswith('/data'):
+    # Apply transformation (using dynamic discovery like Snakefile)
+    for path_key in config:
+        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
             config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
     assert config['reports_output'] == 'data/processed/reports/', f"Expected 'data/processed/reports/', got {config['reports_output']}"
@@ -71,9 +70,9 @@ def test_snakemake_path_configuration():
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
-    # Apply transformation
-    for path_key in PATH_CONFIGS:
-        if path_key in config and config[path_key].startswith('/data'):
+    # Apply transformation (using dynamic discovery like Snakefile)
+    for path_key in config:
+        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
             config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
     assert config['reports_output'] == '/data/processed/reports/', f"Expected '/data/processed/reports/', got {config['reports_output']}"
@@ -95,9 +94,9 @@ def test_snakemake_path_configuration():
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
-    # Apply transformation
-    for path_key in PATH_CONFIGS:
-        if path_key in config and config[path_key].startswith('/data'):
+    # Apply transformation (using dynamic discovery like Snakefile)
+    for path_key in config:
+        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
             config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
     assert config['reports_output'] == '/custom/path/processed/reports/', f"Expected '/custom/path/processed/reports/', got {config['reports_output']}"
@@ -115,8 +114,9 @@ def test_snakemake_path_configuration():
         config = yaml.safe_load(f)
     
     BASE_DATA_DIR = 'data'
-    for path_key in PATH_CONFIGS:
-        if path_key in config and config[path_key].startswith('/data'):
+    # Apply transformation (using dynamic discovery like Snakefile)
+    for path_key in config:
+        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
             original = config[path_key]
             config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
             # Ensure /databases doesn't become databases

@@ -31,11 +31,16 @@ fi
 echo "🔄 Running Snakemake pipeline..."
 echo "================================"
 
+# Get number of cores from environment or default to 4
+CORES=${PBI_CORES:-4}
+echo "Using $CORES cores (set PBI_CORES to override)"
+echo ""
+
 # Run snakemake from project root
 snakemake \
   --directory workflow \
   --snakefile workflow/Snakefile \
-  --cores 4 \
+  --cores $CORES \
   --use-conda \
   --printshellcmds \
   --cache
