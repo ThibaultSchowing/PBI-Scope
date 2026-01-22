@@ -57,9 +57,9 @@ PATH_CONFIGS = [
 ]
 
 for path_key in PATH_CONFIGS:
-    if path_key in config:
-        # Replace /data with BASE_DATA_DIR
-        config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR)
+    if path_key in config and config[path_key].startswith('/data'):
+        # Replace /data prefix with BASE_DATA_DIR
+        config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
 
 
 # List here the features for which reports will be generated.
