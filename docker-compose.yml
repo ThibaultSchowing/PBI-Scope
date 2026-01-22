@@ -13,6 +13,7 @@ services:
     environment:
       - SNAKEMAKE_OUTPUT_CACHE=/cache
       - SNAKEMAKE_CONDA_PREFIX=/cache/conda
+      - PBI_DATA_DIR=/data
     networks:
       - pbi-network
 

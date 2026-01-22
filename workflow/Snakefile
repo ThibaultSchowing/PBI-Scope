@@ -8,6 +8,16 @@ configfile: "config/config.yaml"
 
 import os
 
+# Get base data directory from environment or default to relative path
+BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+
+# Replace /data paths in config with environment-aware paths
+# Dynamically find all config keys with paths starting with /data
+for path_key in config:
+    if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
+        # Replace /data prefix with BASE_DATA_DIR
+        config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
+
 
 # List here the features for which reports will be generated.
 # These features correspond to the keys in the config file that contain URLs for metadata.
