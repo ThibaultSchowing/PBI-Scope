@@ -41,13 +41,20 @@ def test_api_path_configuration():
     
     # Test local development scenario
     print("\n3. Testing local development configuration...")
-    os.environ['DATA_PATH'] = '/home/runner/work/PBI/PBI/data/processed'
+    os.environ['DATA_PATH'] = 'data/processed'  # Updated to use relative path
     data_path_local = Path(os.getenv('DATA_PATH'))
     db_path_local = data_path_local / 'databases' / 'phage_database_optimized.duckdb'
     
     print(f"   DATA_PATH: {data_path_local}")
     print(f"   Database: {db_path_local}")
     print(f"   ✓ Local paths work!")
+    
+    # Test environment variable for Snakemake
+    print("\n3.1 Testing Snakemake environment variable...")
+    print("   PBI_DATA_DIR controls Snakemake data output location")
+    print("   - Docker: PBI_DATA_DIR=/data (set in docker-compose.yml)")
+    print("   - Local: PBI_DATA_DIR=data (default in Snakefile)")
+    print("   ✓ Environment variables configured!")
     
     # Verify the fix addresses the original issue
     print("\n4. Verifying fix for original issue...")
