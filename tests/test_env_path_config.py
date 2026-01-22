@@ -108,8 +108,8 @@ def test_snakemake_path_configuration():
     print(f"   duckdb_output: {config['duckdb_output']}")
     print("   ✓ Custom path works correctly")
     
-    # Test 4: Verify path replacement doesn't break /databases
-    print("\n5. Testing path replacement doesn't affect /databases substring...")
+    # Test 4: Verify path replacement correctness with specific examples
+    print("\n5. Testing path replacement correctness...")
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
@@ -117,14 +117,22 @@ def test_snakemake_path_configuration():
     # Apply transformation (using dynamic discovery like Snakefile)
     for path_key in config:
         if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
-            original = config[path_key]
             config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
-            # Ensure /databases doesn't become databases
-            if 'databases' in original:
-                assert '/databases' in original or 'data/processed/databases' in config[path_key], \
-                    f"Path replacement broke /databases: {original} -> {config[path_key]}"
     
-    print("   ✓ Path replacement preserves /databases and other paths correctly")
+    # Verify specific paths are transformed correctly
+    test_cases = [
+        ('duckdb_output', 'data/processed/databases/phage_database.duckdb'),
+        ('optimized_duckdb_output', 'data/processed/databases/phage_database_optimized.duckdb'),
+        ('phage_fasta_compressed_output', 'data/raw/phage_fasta_compressed/'),
+        ('intermediate_csv_output', 'data/intermediate/csv'),
+    ]
+    
+    for key, expected in test_cases:
+        actual = config.get(key)
+        assert actual == expected, f"Path replacement for {key} failed: expected '{expected}', got '{actual}'"
+        print(f"   ✓ {key}: {actual}")
+    
+    print("   ✓ All path replacements are correct")
     
     # Summary
     print("\n" + "=" * 60)

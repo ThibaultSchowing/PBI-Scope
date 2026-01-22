@@ -39,7 +39,6 @@ echo ""
 # Run snakemake from project root
 snakemake \
   --directory workflow \
-  --snakefile workflow/Snakefile \
   --cores $CORES \
   --use-conda \
   --printshellcmds \
