@@ -15,6 +15,7 @@ nav:
       - Data Preparation: user-guide/data-preparation.md
       - Running PBI: user-guide/running-pbi.md
       - Analyzing Results: user-guide/analyzing-results.md
+      - Cheatsheet: user-guide/cheatsheet.md
   - Developer Guide:
       - Code Structure: developer-guide/code-structure.md
 #      - Contributing: developer-guide/contributing.md

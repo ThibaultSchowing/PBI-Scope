@@ -25,9 +25,15 @@ The easiest way to run the PBI pipeline and API is using Docker:
 docker compose build pipeline
 docker compose run --rm pipeline
 
-# Start the API service
+# Build the api container and start the API service
+# option: --remove-orphans if you already have a container running
 docker compose build api
-docker compose up -d api
+docker compose up -d api --remove-orphans
+
+# To check the API service status (takes time to load the database)
+docker compose logs -f api
+
+
 
 # Access the API at http://localhost:8000
 curl http://localhost:8000/health
