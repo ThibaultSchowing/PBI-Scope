@@ -582,8 +582,9 @@ class OptimizedHostGenomeDownloader:
             
             # Quick validation - check if content starts with '>'
             first_line = fasta_content.split('\n')[0].strip()
-            if not first_line.startswith('>'):
-                logging.debug(f"Invalid FASTA format for {assembly_accession}: {first_line[:100]}")
+            if not first_line or not first_line.startswith('>'):
+                content_preview = first_line[:100] if first_line else "(empty)"
+                logging.debug(f"Invalid FASTA format for {assembly_accession}: {content_preview}")
                 return False
             
             # Write to file after validation
