@@ -48,10 +48,10 @@ def normalize_species_name(host):
     # Extract first two words
     parts = host.split()
     if len(parts) >= 2:
-        if parts[0][0].isupper():
+        if len(parts[0]) > 0 and parts[0][0].isupper():
             return f"{parts[0]} {parts[1]}"
     elif len(parts) == 1:
-        if parts[0][0].isupper():
+        if len(parts[0]) > 0 and parts[0][0].isupper():
             return parts[0]
     
     return ""
@@ -209,7 +209,10 @@ def run_tests():
     print(f"Total Tests: {total_tests}")
     print(f"✅ Passed: {total_passed}")
     print(f"❌ Failed: {total_failed}")
-    print(f"Success Rate: {total_passed/total_tests*100:.1f}%")
+    if total_tests > 0:
+        print(f"Success Rate: {total_passed/total_tests*100:.1f}%")
+    else:
+        print("Success Rate: N/A (no tests run)")
     print()
     
     if total_failed == 0:
