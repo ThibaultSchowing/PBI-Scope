@@ -280,8 +280,10 @@ class NegativeExampleGenerator:
             # Get species from positive pairs
             exclude_species = set()
             for _, row in positive_pairs.iterrows():
+                # Use parameterized query to prevent SQL injection
                 host_info = self.conn.execute(
-                    f"SELECT Species_Name FROM dim_hosts WHERE Host_ID = '{row['Host_ID']}'"
+                    "SELECT Species_Name FROM dim_hosts WHERE Host_ID = ?",
+                    [row['Host_ID']]
                 ).fetchdf()
                 if len(host_info) > 0:
                     exclude_species.add(host_info.iloc[0]['Species_Name'])

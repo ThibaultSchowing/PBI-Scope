@@ -316,11 +316,19 @@ def create_star_schema_duckdb():
     
     # 10. CREATE DIM_HOSTS TABLE (if host metadata exists)
     host_metadata_path = snakemake.config.get('host_metadata_output', '')
-    if host_metadata_path and os.path.exists(host_metadata_path.replace('/data', os.getenv('PBI_DATA_DIR', 'data'))):
-        logging.info("Creating dim_hosts table")
+    if host_metadata_path:
+        # Adjust path for environment using Path operations
+        from pathlib import Path
+        base_data_dir = os.getenv('PBI_DATA_DIR', 'data')
         
-        # Adjust path for environment
-        actual_host_path = host_metadata_path.replace('/data', os.getenv('PBI_DATA_DIR', 'data'))
+        # Convert config path to actual filesystem path
+        if host_metadata_path.startswith('/data'):
+            actual_host_path = str(Path(base_data_dir) / host_metadata_path[6:])  # Remove '/data/' prefix
+        else:
+            actual_host_path = host_metadata_path
+        
+        if os.path.exists(actual_host_path):
+            logging.info("Creating dim_hosts table")
         
         conn.execute(f"""
         CREATE TABLE dim_hosts AS 

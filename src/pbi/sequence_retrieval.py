@@ -361,7 +361,8 @@ class SequenceRetriever:
                 _ = self.host_fasta
                 stats['fasta']['hosts'] = self._host_count if self._host_count else len(self.host_fasta.keys())
             except Exception as e:
-                logging.debug(f"Host stats not available: {e}")
+                logging.warning(f"Host data configured but tables not found. Run host genome workflow first. Error: {e}")
+                self._has_host_data = False  # Disable host support if tables don't exist
         
         logging.info(f"📊 Database Stats:")
         logging.info(f"   Phages: {stats['database']['phages']:,}")
@@ -395,7 +396,11 @@ class SequenceRetriever:
             df = retriever.get_host_sequences(query)
         """
         if not self._has_host_data:
-            raise ValueError("Host data not available - run host genome download workflow first")
+            raise ValueError(
+                "Host data not available. Please run the host genome download workflow first:\n"
+                "  snakemake --use-conda --cores 1 all_hosts\n"
+                "Or check that host_fasta_path was provided when creating SequenceRetriever."
+            )
         
         # Ensure host FASTA is loaded
         _ = self.host_fasta

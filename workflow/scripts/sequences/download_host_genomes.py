@@ -119,10 +119,17 @@ class HostGenomeDownloader:
             # Extract first two words as species name (Genus species)
             parts = host.strip().split()
             if len(parts) >= 2:
-                species = f"{parts[0]} {parts[1]}"
-                species_names.add(species)
+                # Check if first word is capitalized (genus name)
+                if parts[0][0].isupper():
+                    species = f"{parts[0]} {parts[1]}"
+                    species_names.add(species)
+                else:
+                    logging.warning(f"   Unexpected format (genus not capitalized): '{host}'")
             elif len(parts) == 1:
-                species_names.add(parts[0])
+                if parts[0][0].isupper():
+                    species_names.add(parts[0])
+                else:
+                    logging.warning(f"   Unexpected format (single word, not capitalized): '{host}'")
         
         species_list = sorted(list(species_names))
         logging.info(f"✅ Extracted {len(species_list)} unique species")
@@ -603,6 +610,10 @@ class HostGenomeDownloader:
 
 def main():
     """Main entry point for Snakemake"""
+    
+    # Verify snakemake is available
+    if 'snakemake' not in globals():
+        raise RuntimeError("This script must be run from Snakemake")
     
     # Get parameters from Snakemake
     db_path = snakemake.input.db
