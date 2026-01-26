@@ -571,14 +571,30 @@ class OptimizedHostGenomeDownloader:
                 retmode="text"
             )
             
-            with open(output_path, 'w') as f:
-                f.write(handle.read())
-            
+            # Read the content and close the handle
+            fasta_content = handle.read()
             handle.close()
             
-            # Verify file is not empty
-            if output_path.stat().st_size == 0:
+            # Validate content before writing
+            if not fasta_content or len(fasta_content.strip()) == 0:
+                logging.debug(f"Downloaded content is empty for {assembly_accession}")
                 return False
+            
+            # Quick validation - check if content starts with '>'
+            lines = fasta_content.splitlines()
+            if not lines:
+                logging.debug(f"Downloaded content has no lines for {assembly_accession}")
+                return False
+            
+            first_line = lines[0].strip()
+            if not first_line or not first_line.startswith('>'):
+                content_preview = first_line[:100] if first_line else "(empty)"
+                logging.debug(f"Invalid FASTA format for {assembly_accession}: {content_preview}")
+                return False
+            
+            # Write to file after validation
+            with open(output_path, 'w') as f:
+                f.write(fasta_content)
             
             return True
             
