@@ -7,3 +7,7 @@ dependencies:
   - python>=3.8,<3.11
   - pyfaidx
   - biopython
+  - pandas
+  - numpy
+  - scikit-learn
+  - ncbi-datasets-cli
