@@ -269,25 +269,32 @@ class TestProgressTracker(unittest.TestCase):
     
     def test_statistics(self):
         """Test statistics calculation"""
-        tracker = ProgressTracker(total=100)
+        SUCCESSFUL_COUNT = 50
+        CACHED_COUNT = 10
+        FAILED_COUNT = 5
+        TOTAL_COUNT = 100
+        EXPECTED_COMPLETED = SUCCESSFUL_COUNT + CACHED_COUNT + FAILED_COUNT
+        EXPECTED_PERCENTAGE = 65.0
+        
+        tracker = ProgressTracker(total=TOTAL_COUNT)
         
         # Add some progress
-        for _ in range(50):
+        for _ in range(SUCCESSFUL_COUNT):
             tracker.update('success')
-        for _ in range(10):
+        for _ in range(CACHED_COUNT):
             tracker.update('cached')
-        for _ in range(5):
+        for _ in range(FAILED_COUNT):
             tracker.update('failed', 'Download failed')
         
         stats = tracker.get_stats()
         
         # Verify
-        self.assertEqual(stats['total'], 100)
-        self.assertEqual(stats['completed'], 65)
-        self.assertEqual(stats['successful'], 50)
-        self.assertEqual(stats['cached'], 10)
-        self.assertEqual(stats['failed'], 5)
-        self.assertEqual(stats['percentage'], 65.0)
+        self.assertEqual(stats['total'], TOTAL_COUNT)
+        self.assertEqual(stats['completed'], EXPECTED_COMPLETED)
+        self.assertEqual(stats['successful'], SUCCESSFUL_COUNT)
+        self.assertEqual(stats['cached'], CACHED_COUNT)
+        self.assertEqual(stats['failed'], FAILED_COUNT)
+        self.assertEqual(stats['percentage'], EXPECTED_PERCENTAGE)
     
     def test_progress_file_saved(self):
         """Test that progress is saved to file"""

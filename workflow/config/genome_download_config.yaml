@@ -3,7 +3,8 @@
 # Download settings
 download:
   max_concurrent: 5              # Number of concurrent download workers (3-5 recommended)
-  requests_per_second: 3         # NCBI rate limit without API key (10 with key)
+  requests_per_second: 3         # NCBI rate limit without API key
+  requests_per_second_with_api_key: 10  # NCBI rate limit with API key
   timeout: 30                    # Timeout for each request in seconds
   max_retries: 3                 # Maximum retry attempts per download
   retry_backoff_factor: 2        # Exponential backoff multiplier

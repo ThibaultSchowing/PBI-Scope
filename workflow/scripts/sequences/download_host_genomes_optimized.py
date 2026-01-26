@@ -37,7 +37,7 @@ try:
     HAS_ASYNC = True
 except ImportError:
     HAS_ASYNC = False
-    logging.warning("aiohttp or yaml not available, falling back to sequential mode")
+    logging.info("aiohttp or yaml not available, using sequential mode")
 
 
 class RateLimiter:
@@ -272,7 +272,7 @@ class SpeciesValidator:
         
         # Check basic format (Genus species)
         parts = species_name.strip().split()
-        if len(parts) < 1:
+        if len(parts) < 1 or parts[0] == '':
             return False, "Empty species name"
         
         # Check if genus is capitalized
@@ -413,11 +413,12 @@ class OptimizedHostGenomeDownloader:
         ncbi_api_key = os.getenv('NCBI_API_KEY', config['ncbi'].get('api_key', ''))
         
         Entrez.email = ncbi_email
-        if ncbi_api_key and ncbi_api_key != '${NCBI_API_KEY}':
+        # Check for valid API key (not empty and not a placeholder)
+        if ncbi_api_key and not ncbi_api_key.startswith('${'):
             Entrez.api_key = ncbi_api_key
             # Higher rate limit with API key
-            self.rate_limit = 10
-            logging.info(f"✅ Using NCBI API key - rate limit: 10 req/sec")
+            self.rate_limit = config['download'].get('requests_per_second_with_api_key', 10)
+            logging.info(f"✅ Using NCBI API key - rate limit: {self.rate_limit} req/sec")
         else:
             self.rate_limit = config['download'].get('requests_per_second', 3)
             logging.info(f"⚠️  No NCBI API key - rate limit: {self.rate_limit} req/sec")
@@ -858,17 +859,13 @@ def extract_unique_hosts_from_csv(csv_path: str) -> List[str]:
 
 
 def main():
-    """Main entry point"""
+    """Main entry point for Snakemake"""
     
     # Setup logging
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
-    
-    # Verify snakemake is available
-    if 'snakemake' not in globals():
-        raise RuntimeError("This script must be run from Snakemake")
     
     # Get parameters
     phage_csv_path = snakemake.input.phage_csv
