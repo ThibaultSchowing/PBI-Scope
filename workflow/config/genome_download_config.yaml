@@ -1,0 +1,48 @@
+# Genome Download Pipeline Configuration
+
+# Download settings
+download:
+  max_concurrent: 5              # Number of concurrent download workers (3-5 recommended)
+  requests_per_second: 3         # NCBI rate limit without API key
+  requests_per_second_with_api_key: 10  # NCBI rate limit with API key
+  timeout: 30                    # Timeout for each request in seconds
+  max_retries: 3                 # Maximum retry attempts per download
+  retry_backoff_factor: 2        # Exponential backoff multiplier
+  
+# Cache settings
+cache:
+  enabled: true
+  directory: "data/cache/genomes"
+  metadata_db: "data/cache/metadata.db"
+  
+# FASTA parsing
+parsing:
+  fasta_format: "fasta-2line"    # Use fasta-2line to handle files with comments
+  
+# NCBI settings
+ncbi:
+  email: "${NCBI_EMAIL}"         # Required by NCBI (set via environment variable)
+  api_key: "${NCBI_API_KEY}"     # Optional API key for higher rate limits
+  
+# Species validation
+validation:
+  skip_gtdb_identifiers: true    # Skip GTDB-style identifiers (sp000xxxxx)
+  gtdb_pattern: "sp\\d{9}"       # Pattern to detect GTDB identifiers
+  
+# Progress reporting
+progress:
+  enabled: true
+  update_interval: 10            # Update progress every N downloads
+  show_eta: true
+  save_progress_file: "data/progress.json"
+  
+# Failure tracking
+failures:
+  log_file: "data/failed_downloads.txt"
+  categorize: true               # Categorize failures by type
+  
+# Logging
+logging:
+  level: "INFO"                  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  file: "data/logs/genome_download.log"

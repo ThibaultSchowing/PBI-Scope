@@ -448,7 +448,9 @@ class HostGenomeDownloader:
             total_length = 0
             total_gc = 0
             
-            for record in SeqIO.parse(fasta_path, "fasta"):
+            # Use fasta-2line format to handle FASTA files with comments
+            # This prevents Biopython deprecation warnings
+            for record in SeqIO.parse(fasta_path, "fasta-2line"):
                 seq_len = len(record.seq)
                 total_length += seq_len
                 total_gc += gc_fraction(record.seq) * seq_len

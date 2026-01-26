@@ -6,8 +6,11 @@ channels:
 dependencies:
   - python>=3.8,<3.11
   - pyfaidx
-  - biopython
+  - biopython>=1.80
   - pandas
   - numpy
   - scikit-learn
   - ncbi-datasets-cli
+  - pyyaml
+  - aiohttp
+  - aiofiles
