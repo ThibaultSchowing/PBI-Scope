@@ -103,16 +103,17 @@ class HostGenomeDownloader:
             logging.error(f"   Available columns: {list(df.columns)}")
             raise ValueError("Host column not found in phage metadata CSV")
         
-        # Filter for valid hosts
-        # Remove null, empty, and placeholder values
-        hosts_df = df[df['Host'].notna()]  # Not null
-        hosts_df = hosts_df[hosts_df['Host'] != '-']  # Not dash
-        hosts_df = hosts_df[hosts_df['Host'] != '']  # Not empty
-        hosts_df = hosts_df[~hosts_df['Host'].str.contains('unknown', case=False, na=False)]
-        hosts_df = hosts_df[~hosts_df['Host'].str.contains('unidentified', case=False, na=False)]
+        # Filter for valid hosts using a single boolean mask for efficiency
+        valid_mask = (
+            df['Host'].notna() &                                                    # Not null
+            (df['Host'] != '-') &                                                    # Not dash
+            (df['Host'] != '') &                                                     # Not empty
+            (~df['Host'].str.contains('unknown', case=False, na=False)) &           # Not unknown
+            (~df['Host'].str.contains('unidentified', case=False, na=False))       # Not unidentified
+        )
         
         # Get unique hosts
-        unique_hosts = hosts_df['Host'].unique()
+        unique_hosts = df.loc[valid_mask, 'Host'].unique()
         
         logging.info(f"✅ Found {len(unique_hosts)} unique hosts")
         
