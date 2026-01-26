@@ -23,6 +23,20 @@ The Snakemake pipeline downloads and merges metadata into a DuckDB database, com
 
 Tables and project overview available on [this page](https://thibaultschowing.github.io/PBI/getting-started/overview/). See also the [Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/) for ML applications.
 
+## Documentation
+
+**Getting Started**:
+- 📘 [Installation & Usage](#installation--usage) (below)
+- 🧬 [FASTA Download Guide](docs/FASTA_DOWNLOAD_GUIDE.md) - Comprehensive guide to downloading and organizing FASTA files
+- 🔧 [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) - Setting up NCBI credentials and dependencies
+- 🚀 [Genome Download Quickstart](GENOME_DOWNLOAD_QUICKSTART.md) - Quick start for host genome downloads
+
+**Advanced**:
+- ⚡ [Genome Download Optimization](docs/genome_download_optimization.md) - Technical details on optimized downloader
+- 🔄 [Migration Guide](docs/MIGRATION_GUIDE_OPTIMIZED_DOWNLOADER.md) - Switching to optimized downloader
+- 🐳 [Docker Guide](DOCKER.md) - Running with Docker
+- 💻 [Local Setup Guide](LOCAL_SETUP.md) - Development setup
+
 ## Installation & Usage
 
 ### Option 1: Docker (Recommended for Production)
