@@ -80,7 +80,10 @@ rule all:
         config["database_validation_report_output"],
         # Sequence indexing files
         config["all_phages_fasta"] + ".fai",
-        config["all_proteins_fasta"] + ".fai"
+        config["all_proteins_fasta"] + ".fai",
+        # Host genome files
+        config["all_hosts_fasta"] + ".fai",
+        config["host_metadata_output"]
 
 
 # if launched with auto discovery of snakefile (from the root directory),no need to specify the workflow directory
@@ -90,3 +93,5 @@ include: "rules/phagescope.smk"
 include: "rules/database.smk"
 
 include: "rules/sequences.smk"
+
+include: "rules/hosts.smk"

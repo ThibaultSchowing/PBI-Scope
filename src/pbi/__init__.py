@@ -38,11 +38,12 @@ def get_default_paths():
         'database': project_root / 'data' / 'processed' / 'databases' / 'phage_database_optimized.duckdb',
         'phage_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_phages.fasta',
         'protein_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_proteins.fasta',
+        'host_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_hosts.fasta',
     }
 
 def quick_connect():
     """
-    Quick connection to default database with standard paths
+    Quick connection to default database with all sequence files
     
     Returns:
         SequenceRetriever: Connected retriever instance
@@ -53,8 +54,13 @@ def quick_connect():
         >>> df = retriever.get_phage_sequences("SELECT Phage_ID FROM fact_phages LIMIT 10")
     """
     paths = get_default_paths()
+    
+    # Check if host FASTA exists
+    host_fasta = str(paths['host_fasta']) if paths['host_fasta'].exists() else None
+    
     return SequenceRetriever(
         str(paths['database']),
         str(paths['phage_fasta']),
-        str(paths['protein_fasta'])
+        str(paths['protein_fasta']),
+        host_fasta
     )
