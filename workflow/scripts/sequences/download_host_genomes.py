@@ -2,8 +2,10 @@
 """
 Download host bacterial genomes from NCBI RefSeq
 
-This script downloads reference genomes for all unique hosts found in the phage database,
+This script downloads reference genomes for all unique hosts found in the phage metadata CSV,
 using NCBI datasets CLI as primary method with Entrez API as fallback.
+
+Note: Reads from CSV instead of database to avoid circular dependency.
 """
 
 import os
@@ -15,7 +17,6 @@ import json
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
-import duckdb
 import pandas as pd
 from Bio import Entrez, SeqIO
 from Bio.SeqUtils import gc_fraction
@@ -40,7 +41,7 @@ class HostGenomeDownloader:
     """
     
     def __init__(self, 
-                 db_path: str,
+                 phage_csv_path: str,
                  output_dir: str,
                  metadata_output: str,
                  ncbi_email: str = "your.email@example.com",
@@ -51,7 +52,7 @@ class HostGenomeDownloader:
         Initialize HostGenomeDownloader
         
         Args:
-            db_path: Path to DuckDB database
+            phage_csv_path: Path to merged phage metadata CSV file
             output_dir: Directory for individual host genome files
             metadata_output: Path for host metadata CSV
             ncbi_email: Email for NCBI API (required)
@@ -59,7 +60,7 @@ class HostGenomeDownloader:
             delay: Delay between NCBI requests (seconds)
             prefer_complete: Prefer complete genome assemblies
         """
-        self.db_path = db_path
+        self.phage_csv_path = phage_csv_path
         self.output_dir = Path(output_dir)
         self.metadata_output = Path(metadata_output)
         self.ncbi_email = ncbi_email
@@ -79,45 +80,48 @@ class HostGenomeDownloader:
         self.failed_downloads = []
         
         logging.info(f"🔧 Initialized HostGenomeDownloader")
+        logging.info(f"   Phage CSV: {self.phage_csv_path}")
         logging.info(f"   Output directory: {self.output_dir}")
         logging.info(f"   Metadata output: {self.metadata_output}")
         logging.info(f"   NCBI email: {self.ncbi_email}")
     
-    def get_unique_hosts_from_db(self) -> List[str]:
+    def get_unique_hosts_from_csv(self) -> List[str]:
         """
-        Extract unique host species from fact_phages table
+        Extract unique host species from phage metadata CSV
         
         Returns:
             List of unique host species names
         """
-        logging.info(f"📊 Extracting unique hosts from database: {self.db_path}")
+        logging.info(f"📊 Extracting unique hosts from CSV: {self.phage_csv_path}")
         
-        conn = duckdb.connect(self.db_path, read_only=True)
+        # Read CSV file
+        df = pd.read_csv(self.phage_csv_path)
         
-        # Query unique hosts
-        query = """
-        SELECT DISTINCT Host
-        FROM fact_phages
-        WHERE Host IS NOT NULL 
-            AND Host != '-'
-            AND Host != ''
-            AND Host NOT LIKE '%unknown%'
-            AND Host NOT LIKE '%unidentified%'
-        ORDER BY Host
-        """
+        # Check if Host column exists
+        if 'Host' not in df.columns:
+            logging.error(f"❌ 'Host' column not found in CSV file!")
+            logging.error(f"   Available columns: {list(df.columns)}")
+            raise ValueError("Host column not found in phage metadata CSV")
         
-        result = conn.execute(query).fetchdf()
-        conn.close()
+        # Filter for valid hosts using a single boolean mask for efficiency
+        valid_mask = (
+            df['Host'].notna() &                                                    # Not null
+            (df['Host'] != '-') &                                                    # Not dash
+            (df['Host'] != '') &                                                     # Not empty
+            (~df['Host'].str.contains('unknown', case=False, na=False)) &           # Not unknown
+            (~df['Host'].str.contains('unidentified', case=False, na=False))       # Not unidentified
+        )
         
-        hosts = result['Host'].tolist()
+        # Get unique hosts
+        unique_hosts = df.loc[valid_mask, 'Host'].unique()
         
-        logging.info(f"✅ Found {len(hosts)} unique hosts")
+        logging.info(f"✅ Found {len(unique_hosts)} unique hosts")
         
         # Clean and extract species names
         species_names = set()
-        for host in hosts:
+        for host in unique_hosts:
             # Extract first two words as species name (Genus species)
-            parts = host.strip().split()
+            parts = str(host).strip().split()
             if len(parts) >= 2:
                 # Check if first word is capitalized (genus name)
                 if parts[0][0].isupper():
@@ -568,8 +572,8 @@ class HostGenomeDownloader:
         """
         logging.info("🚀 Starting host genome download pipeline")
         
-        # Get unique hosts
-        species_list = self.get_unique_hosts_from_db()
+        # Get unique hosts from CSV
+        species_list = self.get_unique_hosts_from_csv()
         
         if limit:
             logging.info(f"⚠️  Limiting to {limit} species for testing")
@@ -616,7 +620,7 @@ def main():
         raise RuntimeError("This script must be run from Snakemake")
     
     # Get parameters from Snakemake
-    db_path = snakemake.input.db
+    phage_csv_path = snakemake.input.phage_csv
     output_dir = snakemake.params.output_dir
     metadata_output = snakemake.output.metadata
     
@@ -629,7 +633,7 @@ def main():
     
     # Initialize downloader
     downloader = HostGenomeDownloader(
-        db_path=db_path,
+        phage_csv_path=phage_csv_path,
         output_dir=output_dir,
         metadata_output=metadata_output,
         ncbi_email=ncbi_email,
@@ -649,7 +653,7 @@ if __name__ == "__main__":
         import argparse
         
         parser = argparse.ArgumentParser(description='Download host bacterial genomes')
-        parser.add_argument('--db', required=True, help='Path to DuckDB database')
+        parser.add_argument('--phage-csv', required=True, help='Path to merged phage metadata CSV')
         parser.add_argument('--output-dir', required=True, help='Output directory for genomes')
         parser.add_argument('--metadata', required=True, help='Output path for metadata CSV')
         parser.add_argument('--email', default='phage.pipeline@example.com', help='NCBI email')
@@ -658,7 +662,7 @@ if __name__ == "__main__":
         args = parser.parse_args()
         
         downloader = HostGenomeDownloader(
-            db_path=args.db,
+            phage_csv_path=args.phage_csv,
             output_dir=args.output_dir,
             metadata_output=args.metadata,
             ncbi_email=args.email

@@ -51,14 +51,25 @@ def validate_database():
             'dim_crispr_arrays',
             'dim_antimicrobial_resistance_genes'  # Changed from dim_antimicrobial_resistance
         ]
+        
+        # Optional tables (may not exist on first run)
+        optional_tables = ['dim_hosts']
+        
         missing_tables = [t for t in expected_tables if t not in table_names]
+        missing_optional = [t for t in optional_tables if t not in table_names]
         
         validation_results['tables']['existing'] = table_names
         validation_results['tables']['missing'] = missing_tables
+        validation_results['tables']['missing_optional'] = missing_optional
         validation_results['tables']['all_present'] = len(missing_tables) == 0
         
+        # Log optional tables status
+        if missing_optional:
+            logging.info(f"⚠️  Optional tables not present (expected on first run): {missing_optional}")
+        
         # 2. Check table schemas and row counts
-        for table in expected_tables:
+        all_tables_to_check = expected_tables + optional_tables
+        for table in all_tables_to_check:
             if table in table_names:
                 logging.info(f"Analyzing table: {table}")
                 
@@ -456,6 +467,82 @@ def validate_database():
         else:
             logging.warning("dim_antimicrobial_resistance_genes table not found in database!")
         
+        # DIM_HOSTS validation (optional table)
+        if 'dim_hosts' in table_names:
+            logging.info("Validating dim_hosts table...")
+            
+            # Check for duplicate host IDs
+            duplicate_hosts = conn.execute("""
+                SELECT COUNT(*) FROM (
+                    SELECT Host_ID, COUNT(*) as cnt 
+                    FROM dim_hosts 
+                    WHERE Host_ID IS NOT NULL
+                    GROUP BY Host_ID 
+                    HAVING COUNT(*) > 1
+                )
+            """).fetchone()[0]
+            logging.info(f"Duplicate Host IDs: {duplicate_hosts}")
+            
+            # Check species distribution
+            species_distribution = conn.execute("""
+                SELECT Species_Name, COUNT(*) as count
+                FROM dim_hosts 
+                GROUP BY Species_Name 
+                ORDER BY count DESC
+                LIMIT 10
+            """).fetchall()
+            logging.info(f"Top 10 host species: {dict(species_distribution)}")
+            
+            # Assembly level distribution
+            assembly_levels = conn.execute("""
+                SELECT Assembly_Level, COUNT(*) as count
+                FROM dim_hosts 
+                WHERE Assembly_Level IS NOT NULL
+                GROUP BY Assembly_Level 
+                ORDER BY count DESC
+            """).fetchall()
+            logging.info(f"Assembly level distribution: {dict(assembly_levels)}")
+            
+            # RefSeq category distribution
+            refseq_categories = conn.execute("""
+                SELECT RefSeq_Category, COUNT(*) as count
+                FROM dim_hosts 
+                WHERE RefSeq_Category IS NOT NULL
+                GROUP BY RefSeq_Category 
+                ORDER BY count DESC
+            """).fetchall()
+            logging.info(f"RefSeq category distribution: {dict(refseq_categories)}")
+            
+            # Genome statistics
+            genome_stats = conn.execute("""
+                SELECT 
+                    AVG(Genome_Length) as avg_length,
+                    MIN(Genome_Length) as min_length,
+                    MAX(Genome_Length) as max_length,
+                    AVG(GC_Content) as avg_gc,
+                    MIN(GC_Content) as min_gc,
+                    MAX(GC_Content) as max_gc
+                FROM dim_hosts
+                WHERE Genome_Length IS NOT NULL AND GC_Content IS NOT NULL
+            """).fetchone()
+            
+            validation_results['data_quality']['dim_hosts'] = {
+                'duplicate_host_ids': duplicate_hosts,
+                'species_distribution': dict(species_distribution),
+                'assembly_level_distribution': dict(assembly_levels),
+                'refseq_category_distribution': dict(refseq_categories),
+                'genome_statistics': {
+                    'avg_length': genome_stats[0],
+                    'min_length': genome_stats[1],
+                    'max_length': genome_stats[2],
+                    'avg_gc_content': genome_stats[3],
+                    'min_gc_content': genome_stats[4],
+                    'max_gc_content': genome_stats[5]
+                } if genome_stats else {}
+            }
+        else:
+            logging.info("⚠️  dim_hosts table not present (expected if host genomes haven't been downloaded yet)")
+        
         # 4. Check indexes exist
         logging.info("Checking indexes...")
         indexes = conn.execute("SELECT name FROM sqlite_master WHERE type='index'").fetchall()
@@ -476,6 +563,7 @@ def validate_database():
         total_trna = validation_results['tables'].get('dim_trna_tmrna', {}).get('row_count', 0)
         total_crispr = validation_results['tables'].get('dim_crispr_arrays', {}).get('row_count', 0)
         total_amr = validation_results['tables'].get('dim_antimicrobial_resistance_genes', {}).get('row_count', 0)
+        total_hosts = validation_results['tables'].get('dim_hosts', {}).get('row_count', 0)
         
         # Debug logging
         logging.info(f"Summary - AMR count from validation_results: {total_amr}")
@@ -511,6 +599,7 @@ def validate_database():
             'total_trna_tmrna': total_trna,
             'total_crispr_arrays': total_crispr,
             'total_amr': total_amr,
+            'total_hosts': total_hosts,
             'all_tables_present': validation_results['tables']['all_present'],
             'data_quality_passed': data_quality_passed
         }

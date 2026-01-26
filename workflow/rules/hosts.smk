@@ -13,11 +13,14 @@ rule download_host_genomes:
     """
     Download host bacterial genomes from NCBI RefSeq
     
-    This rule extracts unique host species from the database and downloads
+    This rule extracts unique host species from the phage metadata CSV and downloads
     reference genomes for each using NCBI datasets CLI (primary) or Entrez API (fallback).
+    
+    Note: Reads from CSV instead of database to avoid circular dependency
+    (database is created after host downloads).
     """
     input:
-        db = config["optimized_duckdb_output"]
+        phage_csv = config["phage_metadata_merged_output"]
     output:
         metadata = config["host_metadata_output"]
     params:
