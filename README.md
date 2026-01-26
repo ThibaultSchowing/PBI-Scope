@@ -8,11 +8,20 @@ Documentation on the [github pages](https://thibaultschowing.github.io/PBI/).
 
 ## Summary
 
-This library reads and merge the data from PhageScope into a queryable SQL database, accessible from Python. The first objective is to be able to simplify the access to this data and in further steps, add others data such as bacterial genomes and more detailed interactions and tools via an API. 
+This library reads and merges data from PhageScope into a queryable SQL database, accessible from Python. It integrates phage genomic data, bacterial host genomes from NCBI RefSeq, and provides machine learning tools for phage-host interaction prediction.
 
-Overall the Snakemake pipeline downloads and merges the metadata into a SQL database and merges the protein fasta and phage genome fasta into two big files and create the corresonding fasta.fai index files using pyfaidx. 
+The Snakemake pipeline downloads and merges metadata into a DuckDB database, combines FASTA files for phages, proteins, and hosts into indexed files using pyfaidx, and creates phage-host association mappings for ML applications.
 
-Tables and project overview available on [this page](https://thibaultschowing.github.io/PBI/getting-started/overview/). This page includes data summary on all tables as well as [a database validation report](https://thibaultschowing.github.io/PBI/reports/database_validation.html) helping visualize the database structure and elements and compare it to the data available on [PhageScope](https://phagescope.deepomics.org/database).
+**Key Features:**
+- 📊 14+ phage databases integrated (RefSeq, Genbank, PhagesDB, etc.)
+- 🔬 Host bacterial genomes from NCBI RefSeq
+- ⚡ Fast indexed sequence access (phages, proteins, hosts)
+- 🤖 Machine learning tools for phage-host prediction
+- 🐍 Python `pbi` package with easy-to-use API
+- 🌐 REST API for programmatic access
+- 📚 Rich metadata: proteins, CRISPR, AMR genes, and more
+
+Tables and project overview available on [this page](https://thibaultschowing.github.io/PBI/getting-started/overview/). See also the [Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/) for ML applications.
 
 ## Installation & Usage
 
@@ -71,4 +80,39 @@ docker compose build pipeline && docker compose run --rm pipeline
 ```bash
 ./run_local.sh
 ```
+
+
+## Machine Learning Support
+
+PBI includes comprehensive machine learning support for phage-host interaction prediction:
+
+```python
+from pbi import quick_connect, NegativeExampleGenerator
+
+# Connect to database with all sequences
+retriever = quick_connect()
+
+# Get phage-host interaction pairs
+positive_pairs = retriever.get_phage_host_pairs(limit=1000)
+
+# Generate negative examples
+neg_gen = NegativeExampleGenerator(retriever)
+
+# Create balanced dataset (50% positive, 50% negative)
+dataset = neg_gen.generate_balanced_dataset(
+    positive_pairs=positive_pairs,
+    strategy='mixed',  # Combines random, GC-based, and taxonomy-based negatives
+    positive_ratio=0.5
+)
+
+# Dataset is now ready for ML training!
+print(f"Total samples: {len(dataset)}")
+print(f"Positives: {(dataset['Label'] == 1).sum()}")
+print(f"Negatives: {(dataset['Label'] == 0).sum()}")
+```
+
+**Resources:**
+- 📓 [Machine Learning Tutorial Notebook](notebooks/ml_1_phage_host_dataset.ipynb)
+- 📖 [Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/)
+- 🔬 Example use cases: host range prediction, therapeutic candidate identification, lifestyle classification
 

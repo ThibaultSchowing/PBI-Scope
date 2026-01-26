@@ -5,11 +5,13 @@ A package for interacting with phage genomics databases created by the workflow 
 
 Main classes:
     - SequenceRetriever: Retrieve sequences from indexed FASTA files using SQL queries
+    - NegativeExampleGenerator: Generate negative training examples for ML
     - DatabaseManager: (future) Database connection management utilities
 """
 
 # Import main classes for easy access
 from .sequence_retrieval import SequenceRetriever
+from .negative_examples import NegativeExampleGenerator
 # from .database import DatabaseManager  # If you have this class / later
 
 # Package metadata
@@ -19,6 +21,7 @@ __author__ = "Thibault Schowing, CI4CB"
 # Define what gets imported with "from pbi import *"
 __all__ = [
     'SequenceRetriever',
+    'NegativeExampleGenerator',
     # 'DatabaseManager',
 ]
 
