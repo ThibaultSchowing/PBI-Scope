@@ -314,6 +314,77 @@ def create_star_schema_duckdb():
     conn.execute("CREATE INDEX idx_crispr_source ON dim_crispr_arrays(Source_DB)")
     conn.execute("CREATE INDEX idx_crispr_evidence ON dim_crispr_arrays(evidence_level)")
     
+    # 10. CREATE DIM_HOSTS TABLE (if host metadata exists)
+    host_metadata_path = snakemake.config.get('host_metadata_output', '')
+    if host_metadata_path:
+        # Adjust path for environment using Path operations
+        from pathlib import Path
+        base_data_dir = os.getenv('PBI_DATA_DIR', 'data')
+        
+        # Convert config path to actual filesystem path
+        if host_metadata_path.startswith('/data'):
+            actual_host_path = str(Path(base_data_dir) / host_metadata_path[6:])  # Remove '/data/' prefix
+        else:
+            actual_host_path = host_metadata_path
+        
+        if os.path.exists(actual_host_path):
+            logging.info("Creating dim_hosts table")
+        
+        conn.execute(f"""
+        CREATE TABLE dim_hosts AS 
+        SELECT 
+            Host_ID,
+            Species_Name,
+            Strain_Name,
+            Assembly_Accession,
+            Assembly_Name,
+            Assembly_Level,
+            TRY_CAST(NULLIF(Genome_Length, '-') AS INTEGER) as Genome_Length,
+            TRY_CAST(NULLIF(GC_Content, '-') AS DOUBLE) as GC_Content,
+            RefSeq_Category,
+            Download_Date,
+            Source
+        FROM read_csv('{actual_host_path}', 
+                      header=true, 
+                      all_varchar=true)
+        WHERE Host_ID IS NOT NULL
+        """)
+        
+        host_count = conn.execute("SELECT COUNT(*) FROM dim_hosts").fetchone()[0]
+        logging.info(f"✅ Created dim_hosts: {host_count:,} rows")
+        
+        # Create indexes for hosts
+        conn.execute("CREATE INDEX idx_hosts_id ON dim_hosts(Host_ID)")
+        conn.execute("CREATE INDEX idx_hosts_species ON dim_hosts(Species_Name)")
+        conn.execute("CREATE INDEX idx_hosts_assembly ON dim_hosts(Assembly_Accession)")
+        
+        # 11. CREATE PHAGE_HOST_ASSOCIATIONS TABLE
+        logging.info("Creating phage_host_associations table")
+        
+        conn.execute("""
+        CREATE TABLE phage_host_associations AS
+        SELECT DISTINCT
+            f.Phage_ID,
+            h.Host_ID,
+            f.Host as Original_Host_String
+        FROM fact_phages f
+        CROSS JOIN dim_hosts h
+        WHERE f.Host LIKE '%' || h.Species_Name || '%'
+            AND f.Host IS NOT NULL
+            AND f.Host != '-'
+        """)
+        
+        assoc_count = conn.execute("SELECT COUNT(*) FROM phage_host_associations").fetchone()[0]
+        logging.info(f"✅ Created phage_host_associations: {assoc_count:,} rows")
+        
+        # Create indexes for associations
+        conn.execute("CREATE INDEX idx_phage_host_phage ON phage_host_associations(Phage_ID)")
+        conn.execute("CREATE INDEX idx_phage_host_host ON phage_host_associations(Host_ID)")
+    else:
+        logging.info("⚠️  Skipping host tables - metadata file not found")
+        host_count = 0
+        assoc_count = 0
+    
     # CREATE ANALYTICAL VIEWS
     logging.info("Creating analytical views")
     conn.execute("""
@@ -516,6 +587,9 @@ def create_star_schema_duckdb():
     logging.info(f"   • tRNA/tmRNA: {trna_count:,}")
     logging.info(f"   • AMR Genes: {amr_count:,}")
     logging.info(f"   • CRISPR Arrays: {crispr_count:,}")
+    if host_count > 0:
+        logging.info(f"   • Hosts: {host_count:,}")
+        logging.info(f"   • Phage-Host Associations: {assoc_count:,}")
 
 if __name__ == "__main__":
     create_star_schema_duckdb()

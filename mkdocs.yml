@@ -37,6 +37,7 @@ nav:
       - Overview: guides/overview.md
       - Docker Guide: guides/docker-guide.md
       - Local Installation: guides/installation.md
+      - Machine Learning: guides/machine-learning.md
   - Database:
       - Overview: database/overview.md
   - API:

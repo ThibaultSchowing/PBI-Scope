@@ -9,6 +9,7 @@ from pathlib import Path
 import threading
 import time
 from typing import Optional
+from Bio.SeqUtils import gc_fraction
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,7 +29,8 @@ class SequenceRetriever:
     - Memory-efficient streaming
     """
     
-    def __init__(self, db_path: str, phage_fasta_path: str, protein_fasta_path: str, preload: bool = True):
+    def __init__(self, db_path: str, phage_fasta_path: str, protein_fasta_path: str, 
+                 host_fasta_path: Optional[str] = None, preload: bool = True):
         """
         Initialize SequenceRetriever with lazy FASTA loading
         
@@ -36,6 +38,7 @@ class SequenceRetriever:
             db_path: Path to DuckDB database
             phage_fasta_path: Path to indexed phage FASTA file
             protein_fasta_path: Path to indexed protein FASTA file
+            host_fasta_path: Path to indexed host FASTA file (optional)
             preload: If True, load FASTA files in background thread (default: True)
         """
         # Validate paths
@@ -58,6 +61,24 @@ class SequenceRetriever:
             raise FileNotFoundError(f"Phage FASTA index not found: {phage_index}")
         if not protein_index.exists():
             raise FileNotFoundError(f"Protein FASTA index not found: {protein_index}")
+        
+        # Validate host FASTA if provided
+        self._host_fasta_path = host_fasta_path
+        self._host_fasta = None
+        self._host_lock = threading.Lock()
+        self._host_count = None
+        self._has_host_data = False
+        
+        if host_fasta_path:
+            if Path(host_fasta_path).exists():
+                host_index = Path(str(host_fasta_path) + '.fai')
+                if host_index.exists():
+                    logging.info(f"   Host index: {host_index.exists()} ({host_index.stat().st_size / 1024:.1f} KB)")
+                    self._has_host_data = True
+                else:
+                    logging.warning(f"⚠️  Host FASTA index not found: {host_index}")
+            else:
+                logging.warning(f"⚠️  Host FASTA not found: {host_fasta_path}")
         
         # Initialize database connection (fast)
         logging.info(f"📂 Connecting to database: {db_path}")
@@ -126,6 +147,23 @@ class SequenceRetriever:
             elapsed = time.time() - start
             logging.info(f"   ✅ Protein FASTA loaded in {elapsed:.2f}s ({self._protein_count:,} sequences)")
             
+            # Load host FASTA if available
+            if self._has_host_data and self._host_fasta_path:
+                logging.info(f"🔄 [Background] Loading host FASTA: {self._host_fasta_path}")
+                start = time.time()
+                
+                with self._host_lock:
+                    self._host_fasta = Fasta(
+                        self._host_fasta_path,
+                        rebuild=False,
+                        split_char='\x00',
+                        read_long_names=True
+                    )
+                    self._host_count = len(self._host_fasta.keys())
+                
+                elapsed = time.time() - start
+                logging.info(f"   ✅ Host FASTA loaded in {elapsed:.2f}s ({self._host_count:,} sequences)")
+            
             # Mark as complete
             self._loading_complete.set()
             
@@ -143,6 +181,12 @@ class SequenceRetriever:
             logging.info(f"🔍 Sample protein keys:")
             for key in sample_protein:
                 logging.info(f"   - '{key[:80]}...'")
+            
+            if self._host_fasta:
+                sample_host = list(self._host_fasta.keys())[:3]
+                logging.info(f"🔍 Sample host keys:")
+                for key in sample_host:
+                    logging.info(f"   - '{key[:80]}...'")
                 
         except Exception as e:
             logging.error(f"❌ Error loading FASTA files: {e}")
@@ -184,6 +228,27 @@ class SequenceRetriever:
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
         return self._protein_fasta
+    
+    @property
+    def host_fasta(self):
+        """Get host FASTA, loading if necessary"""
+        if not self._has_host_data:
+            raise ValueError("Host FASTA not configured - pass host_fasta_path to __init__")
+        
+        if self._host_fasta is None:
+            with self._host_lock:
+                if self._host_fasta is None:  # Double-check locking
+                    logging.info(f"📂 Loading host FASTA on-demand: {self._host_fasta_path}")
+                    start = time.time()
+                    self._host_fasta = Fasta(
+                        self._host_fasta_path,
+                        rebuild=False,
+                        split_char='\x00',
+                        read_long_names=True
+                    )
+                    elapsed = time.time() - start
+                    logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
+        return self._host_fasta
     
     def wait_until_ready(self, timeout: Optional[float] = None):
         """
@@ -285,16 +350,234 @@ class SequenceRetriever:
             }
         }
         
+        # Add host stats if available
+        if self._has_host_data:
+            try:
+                stats['database']['hosts'] = self.conn.execute("SELECT COUNT(*) FROM dim_hosts").fetchone()[0]
+                stats['database']['phage_host_associations'] = self.conn.execute(
+                    "SELECT COUNT(*) FROM phage_host_associations"
+                ).fetchone()[0]
+                
+                _ = self.host_fasta
+                stats['fasta']['hosts'] = self._host_count if self._host_count else len(self.host_fasta.keys())
+            except Exception as e:
+                logging.warning(f"Host data configured but tables not found. Run host genome workflow first. Error: {e}")
+                self._has_host_data = False  # Disable host support if tables don't exist
+        
         logging.info(f"📊 Database Stats:")
         logging.info(f"   Phages: {stats['database']['phages']:,}")
         logging.info(f"   Proteins: {stats['database']['proteins']:,}")
+        if 'hosts' in stats['database']:
+            logging.info(f"   Hosts: {stats['database']['hosts']:,}")
+            logging.info(f"   Phage-Host Associations: {stats['database']['phage_host_associations']:,}")
+        
         logging.info(f"📊 FASTA Stats:")
         logging.info(f"   Phages: {stats['fasta']['phages']:,}")
         logging.info(f"   Proteins: {stats['fasta']['proteins']:,}")
+        if 'hosts' in stats['fasta']:
+            logging.info(f"   Hosts: {stats['fasta']['hosts']:,}")
         
         return stats
 
     
+    def get_host_sequences(self, query: str, limit: Optional[int] = None) -> pd.DataFrame:
+        """
+        Get host sequences based on SQL query
+        
+        Args:
+            query: SQL query that returns Host_ID column
+            limit: Optional limit on number of sequences
+        
+        Returns:
+            DataFrame with columns: Host_ID, Species_Name, Sequence, Length, GC_Content
+        
+        Example:
+            query = "SELECT Host_ID FROM dim_hosts WHERE Species_Name LIKE '%Escherichia%'"
+            df = retriever.get_host_sequences(query)
+        """
+        if not self._has_host_data:
+            raise ValueError(
+                "Host data not available. Please run the host genome download workflow first:\n"
+                "  snakemake --use-conda --cores 1 all_hosts\n"
+                "Or check that host_fasta_path was provided when creating SequenceRetriever."
+            )
+        
+        # Ensure host FASTA is loaded
+        _ = self.host_fasta
+        
+        logging.info(f"🔍 Executing query: {query[:100]}...")
+        
+        if limit:
+            query = f"{query} LIMIT {limit}"
+        
+        result = self.conn.execute(query).fetchdf()
+        
+        if 'Host_ID' not in result.columns:
+            raise ValueError("Query must return 'Host_ID' column")
+        
+        host_ids = result['Host_ID'].tolist()
+        logging.info(f"📊 Retrieved {len(host_ids):,} Host IDs from query")
+        
+        return self._fetch_host_sequences(host_ids)
+    
+    def get_host_by_phage(self, phage_id: str) -> pd.DataFrame:
+        """
+        Get host genome(s) for a given phage
+        
+        Args:
+            phage_id: Phage ID
+        
+        Returns:
+            DataFrame with host sequences associated with the phage
+        
+        Example:
+            df = retriever.get_host_by_phage("NC_000866")
+        """
+        if not self._has_host_data:
+            raise ValueError("Host data not available - run host genome download workflow first")
+        
+        query = f"""
+        SELECT h.Host_ID
+        FROM phage_host_associations pha
+        JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
+        WHERE pha.Phage_ID = '{phage_id}'
+        """
+        
+        return self.get_host_sequences(query)
+    
+    def get_phage_host_pairs(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
+        """
+        Get phage-host interaction pairs with sequences
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
+            limit: Optional limit on number of pairs
+        
+        Returns:
+            DataFrame with columns: Phage_ID, Host_ID, Phage_Sequence, Host_Sequence,
+                                    Phage_Length, Host_Length, Phage_GC, Host_GC
+        
+        Example:
+            # Get all pairs
+            pairs = retriever.get_phage_host_pairs()
+            
+            # Get pairs for specific lifestyle
+            pairs = retriever.get_phage_host_pairs("p.Lifestyle = 'Lytic'", limit=1000)
+        """
+        if not self._has_host_data:
+            raise ValueError("Host data not available - run host genome download workflow first")
+        
+        # Ensure FASTA files are loaded
+        _ = self.phage_fasta
+        _ = self.host_fasta
+        
+        # Build query
+        query = """
+        SELECT DISTINCT
+            pha.Phage_ID,
+            pha.Host_ID,
+            p.Length as Phage_Length,
+            p.GC_content as Phage_GC,
+            h.Genome_Length as Host_Length,
+            h.GC_Content as Host_GC,
+            p.Lifestyle,
+            h.Species_Name
+        FROM phage_host_associations pha
+        JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
+        JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
+        """
+        
+        if where_clause:
+            query += f" WHERE {where_clause}"
+        
+        if limit:
+            query += f" LIMIT {limit}"
+        
+        logging.info(f"🔍 Querying phage-host pairs...")
+        result = self.conn.execute(query).fetchdf()
+        
+        logging.info(f"📊 Found {len(result):,} phage-host pairs")
+        
+        # Fetch sequences
+        phage_ids = result['Phage_ID'].tolist()
+        host_ids = result['Host_ID'].tolist()
+        
+        logging.info(f"📥 Fetching sequences for {len(phage_ids):,} phages and {len(set(host_ids)):,} unique hosts")
+        
+        phage_seqs = {}
+        host_seqs = {}
+        
+        # Fetch phage sequences
+        for phage_id in phage_ids:
+            try:
+                seq = self.phage_fasta[phage_id][:].seq
+                phage_seqs[phage_id] = str(seq)
+            except KeyError:
+                phage_seqs[phage_id] = None
+        
+        # Fetch host sequences (unique only)
+        for host_id in set(host_ids):
+            try:
+                seq = self.host_fasta[host_id][:].seq
+                host_seqs[host_id] = str(seq)
+            except KeyError:
+                host_seqs[host_id] = None
+        
+        # Add sequences to result
+        result['Phage_Sequence'] = result['Phage_ID'].map(phage_seqs)
+        result['Host_Sequence'] = result['Host_ID'].map(host_seqs)
+        
+        # Filter out rows with missing sequences
+        before_count = len(result)
+        result = result.dropna(subset=['Phage_Sequence', 'Host_Sequence'])
+        after_count = len(result)
+        
+        if before_count > after_count:
+            logging.warning(f"⚠️  Removed {before_count - after_count} pairs with missing sequences")
+        
+        logging.info(f"✅ Retrieved {len(result):,} complete phage-host pairs with sequences")
+        
+        return result
+    
+    def _fetch_host_sequences(self, host_ids: list) -> pd.DataFrame:
+        """
+        Fetch host sequences for given Host IDs
+        
+        Args:
+            host_ids: List of Host IDs to retrieve sequences for
+        
+        Returns:
+            DataFrame with Host_ID and Sequence columns
+        """
+        if not host_ids:
+            logging.warning("No Host IDs provided")
+            return pd.DataFrame(columns=['Host_ID', 'Sequence', 'Length', 'GC_Content'])
+        
+        logging.info(f"🔍 Fetching sequences for {len(host_ids):,} hosts")
+        
+        sequences = []
+        missing_ids = []
+        
+        for host_id in host_ids:
+            try:
+                seq = self.host_fasta[host_id][:].seq
+                sequences.append({
+                    'Host_ID': host_id,
+                    'Sequence': str(seq),
+                    'Length': len(seq),
+                    'GC_Content': round(gc_fraction(seq) * 100, 2) if len(seq) > 0 else 0.0
+                })
+            except KeyError:
+                missing_ids.append(host_id)
+                logging.warning(f"⚠️  Host ID '{host_id}' not found in FASTA")
+        
+        if missing_ids:
+            logging.warning(f"⚠️  {len(missing_ids):,} host IDs not found in FASTA file")
+        
+        df = pd.DataFrame(sequences)
+        logging.info(f"✅ Retrieved {len(df):,} sequences")
+        
+        return df
     
     def help(self):
         """Print help information"""
