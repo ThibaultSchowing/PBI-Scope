@@ -82,7 +82,8 @@ rule all:
         config["all_phages_fasta"] + ".fai",
         config["all_proteins_fasta"] + ".fai",
         # Host genome files
-        config["all_hosts_fasta"] + ".fai",
+        config["host_index_complete_flag"],
+        config["host_fasta_mapping"],
         config["host_metadata_output"]
 
 
