@@ -148,7 +148,7 @@ def test_metadata_reconstruction_logic():
         output_dir = Path(temp_dir) / "genomes"
         output_dir.mkdir()
         
-        # Create some genome files
+        # Create some genome files with various formats
         files = [
             "Escherichia_coli_GCF_000005845.2.fna",
             "Staphylococcus_aureus_GCF_000013425.1.fna",
@@ -175,9 +175,12 @@ def test_metadata_reconstruction_logic():
         
         assert host_id == "Escherichia_coli_GCF_000005845.2"
         
-        # Extract accession
-        parts = host_id.split('_')
-        accession = '_'.join(parts[-2:])
+        # Extract accession using regex (same as in actual code)
+        import re
+        accession_match = re.search(r'(GC[AF]_\d+\.\d+)', host_id)
+        assert accession_match is not None, "Should match accession pattern"
+        
+        accession = accession_match.group(1)
         
         assert accession == "GCF_000005845.2"
         

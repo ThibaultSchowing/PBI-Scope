@@ -14,6 +14,7 @@ import time
 import logging
 import subprocess
 import json
+import re
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
@@ -128,6 +129,12 @@ class HostGenomeDownloader:
             temp_file.replace(self.status_file)
         except (IOError, OSError) as e:
             logging.warning(f"Could not save status file: {e}")
+            # Clean up temp file if it exists
+            if temp_file.exists():
+                try:
+                    temp_file.unlink()
+                except Exception:
+                    pass  # Ignore cleanup errors
     
     def _update_status(self, species_name: str, status: str):
         """
@@ -166,13 +173,13 @@ class HostGenomeDownloader:
         # Extract Host_ID from filename
         host_id = fasta_path.stem
         
-        # Extract accession from Host_ID
-        parts = host_id.split('_')
-        if len(parts) < 3:
+        # Extract accession using regex for GenBank/RefSeq format (GCF_ or GCA_ followed by digits and version)
+        accession_match = re.search(r'(GC[AF]_\d+\.\d+)', host_id)
+        if not accession_match:
+            logging.warning(f"Could not extract accession from filename: {host_id}")
             return None
         
-        # Accession is typically the last part (e.g., GCF_000005845.2)
-        accession = '_'.join(parts[-2:])
+        accession = accession_match.group(1)
         
         # Calculate statistics from file
         genome_length, gc_content = self.calculate_genome_stats(fasta_path)
