@@ -6,6 +6,8 @@ reports_output: "/data/processed/reports/"
 # Final outputs
 all_phages_fasta: "/data/processed/sequences/all_phages.fasta"
 all_proteins_fasta: "/data/processed/sequences/all_proteins.fasta"
+# DEPRECATED: all_hosts_fasta is no longer used. Use host_fasta_mapping instead.
+# Kept for backward compatibility with older scripts.
 all_hosts_fasta: "/data/processed/sequences/all_hosts.fasta"
 
 # Metadata
@@ -33,7 +35,8 @@ protein_fasta_merged_output: "/data/intermediate/fasta/proteins/" # Used in sequ
 
 # Host genomes
 host_genomes_intermediate: "/data/intermediate/fasta/hosts"
-host_genomes_merged: "/data/processed/sequences/all_hosts.fasta"
+host_fasta_mapping: "/data/processed/sequences/host_fasta_mapping.json"
+host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
 host_download_log: "/data/logs/host_download.log"
 host_failure_log: "/data/logs/host_download_failures.log"

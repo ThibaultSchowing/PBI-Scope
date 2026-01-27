@@ -41,6 +41,8 @@ def get_default_paths():
         'database': project_root / 'data' / 'processed' / 'databases' / 'phage_database_optimized.duckdb',
         'phage_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_phages.fasta',
         'protein_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_proteins.fasta',
+        'host_mapping': project_root / 'data' / 'processed' / 'sequences' / 'host_fasta_mapping.json',
+        # Legacy path for backward compatibility
         'host_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_hosts.fasta',
     }
 
@@ -58,12 +60,14 @@ def quick_connect():
     """
     paths = get_default_paths()
     
-    # Check if host FASTA exists
+    # Prefer host mapping file (new approach), fallback to single file (legacy)
+    host_mapping = str(paths['host_mapping']) if paths['host_mapping'].exists() else None
     host_fasta = str(paths['host_fasta']) if paths['host_fasta'].exists() else None
     
     return SequenceRetriever(
         str(paths['database']),
         str(paths['phage_fasta']),
         str(paths['protein_fasta']),
-        host_fasta
+        host_fasta_path=host_fasta,
+        host_mapping_path=host_mapping
     )
