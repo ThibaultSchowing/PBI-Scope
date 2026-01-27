@@ -10,27 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/archive/development/fixes/OOM_FIX_SUMMARY/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/archive/DOCKER_ARCHITECTURE/">
       
       
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../GENOME_DOWNLOAD_QUICKSTART/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>OOM Fix and Data Storage Clarification - Summary - PBI Documentation</title>
+        <title>Docker Architecture - PBI Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oom-fix-and-data-storage-clarification-summary" class="md-skip">
+        <a href="#docker-architecture-before-and-after" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +96,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+    <a href="../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OOM Fix and Data Storage Clarification - Summary
+              Docker Architecture
             
           </span>
         </div>
@@ -225,7 +229,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -246,7 +250,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../guides/overview/" class="md-tabs__link">
+        <a href="../../guides/overview/" class="md-tabs__link">
           
   
   
@@ -266,7 +270,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../database/overview/" class="md-tabs__link">
+        <a href="../../database/overview/" class="md-tabs__link">
           
   
   
@@ -286,7 +290,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../api/overview/" class="md-tabs__link">
+        <a href="../../api/overview/" class="md-tabs__link">
           
   
   
@@ -306,7 +310,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../reference/commands/" class="md-tabs__link">
+        <a href="../../reference/commands/" class="md-tabs__link">
           
   
   
@@ -326,7 +330,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../developer/code-structure/" class="md-tabs__link">
+        <a href="../../developer/code-structure/" class="md-tabs__link">
           
   
   
@@ -344,7 +348,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../changelog/" class="md-tabs__link">
+      <a href="../../changelog/" class="md-tabs__link">
         
   
   
@@ -361,11 +365,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -399,7 +405,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+    <a href="../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -429,7 +435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -510,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/overview/" class="md-nav__link">
+      <a href="../../guides/overview/" class="md-nav__link">
         
   
   
@@ -538,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/docker-guide/" class="md-nav__link">
+      <a href="../../guides/docker-guide/" class="md-nav__link">
         
   
   
@@ -566,7 +572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/installation/" class="md-nav__link">
+      <a href="../../guides/installation/" class="md-nav__link">
         
   
   
@@ -594,7 +600,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/machine-learning/" class="md-nav__link">
+      <a href="../../guides/machine-learning/" class="md-nav__link">
         
   
   
@@ -683,7 +689,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../database/overview/" class="md-nav__link">
+      <a href="../../database/overview/" class="md-nav__link">
         
   
   
@@ -772,7 +778,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../api/overview/" class="md-nav__link">
+      <a href="../../api/overview/" class="md-nav__link">
         
   
   
@@ -861,7 +867,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../reference/commands/" class="md-nav__link">
+      <a href="../../reference/commands/" class="md-nav__link">
         
   
   
@@ -950,7 +956,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../developer/code-structure/" class="md-nav__link">
+      <a href="../../developer/code-structure/" class="md-nav__link">
         
   
   
@@ -985,7 +991,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../changelog/" class="md-nav__link">
+      <a href="../../changelog/" class="md-nav__link">
         
   
   
@@ -1009,28 +1015,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
-        
-          
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -1048,7 +1057,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1066,7 +1075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -1091,10 +1100,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../DOCKER_ARCHITECTURE/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1110,6 +1146,131 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#before-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before (Problem)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#after-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After (Solution)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#path-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Path Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-service-writer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Service (Writer)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-service-reader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Service (Reader)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#result" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Endpoints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1122,7 +1283,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../GENOME_DOWNLOAD_QUICKSTART/" class="md-nav__link">
+      <a href="../GENOME_DOWNLOAD_QUICKSTART/" class="md-nav__link">
         
   
   
@@ -1150,7 +1311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../IMPLEMENTATION_SUMMARY/" class="md-nav__link">
+      <a href="../IMPLEMENTATION_SUMMARY/" class="md-nav__link">
         
   
   
@@ -1178,7 +1339,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../LOCAL_SETUP/" class="md-nav__link">
+      <a href="../LOCAL_SETUP/" class="md-nav__link">
         
   
   
@@ -1206,7 +1367,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../DOCKER/" class="md-nav__link">
+      <a href="../DOCKER/" class="md-nav__link">
         
   
   
@@ -1261,10 +1422,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#problem-statement" class="md-nav__link">
+  <a href="#before-problem" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Problem Statement
+        Before (Problem)
       
     </span>
   </a>
@@ -1272,34 +1433,33 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#solution-overview" class="md-nav__link">
+  <a href="#after-solution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Solution Overview
+        After (Solution)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Solution Overview">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-chunked-merging-to-prevent-oom-errors" class="md-nav__link">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#path-resolution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Chunked Merging to Prevent OOM Errors
+        Path Resolution
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="1. Chunked Merging to Prevent OOM Errors">
+    <nav class="md-nav" aria-label="Path Resolution">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#changes-made" class="md-nav__link">
+  <a href="#pipeline-service-writer" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Changes Made:
+        Pipeline Service (Writer)
       
     </span>
   </a>
@@ -1307,10 +1467,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#before-oom-prone" class="md-nav__link">
+  <a href="#api-service-reader" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Before (OOM-prone):
+        API Service (Reader)
       
     </span>
   </a>
@@ -1318,10 +1478,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#after-memory-efficient" class="md-nav__link">
+  <a href="#result" class="md-nav__link">
     <span class="md-ellipsis">
       
-        After (Memory-efficient):
+        Result
       
     </span>
   </a>
@@ -1332,56 +1492,12 @@
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#2-data-storage-clarification" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Data Storage Clarification
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Data Storage Clarification">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#data-organization-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Organization Structure:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation-updates" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Updates:
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
+  <a href="#api-endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Testing
+        API Endpoints
       
     </span>
   </a>
@@ -1389,10 +1505,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#benefits" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Benefits
+        Usage Example
       
     </span>
   </a>
@@ -1400,21 +1516,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#performance-implications" class="md-nav__link">
+  <a href="#documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Performance Implications
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migration-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migration Notes
+        Documentation
       
     </span>
   </a>
@@ -1441,110 +1546,116 @@
   
 
 
-<h1 id="oom-fix-and-data-storage-clarification-summary">OOM Fix and Data Storage Clarification - Summary<a class="headerlink" href="#oom-fix-and-data-storage-clarification-summary" title="Permanent link">&para;</a></h1>
-<h2 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h2>
-<p>The PBI pipeline was experiencing two main issues:</p>
-<ol>
-<li><strong>Out-of-Memory (OOM) Errors</strong>: The merge scripts for protein metadata were generating OOM errors when processing large datasets</li>
-<li><strong>Cache/Data Storage Confusion</strong>: It was unclear where different data types (raw, intermediate, processed) were stored, and Snakemake metadata warnings suggested cache issues</li>
-</ol>
-<h2 id="solution-overview">Solution Overview<a class="headerlink" href="#solution-overview" title="Permanent link">&para;</a></h2>
-<h3 id="1-chunked-merging-to-prevent-oom-errors">1. Chunked Merging to Prevent OOM Errors<a class="headerlink" href="#1-chunked-merging-to-prevent-oom-errors" title="Permanent link">&para;</a></h3>
-<p><strong>Root Cause</strong>: All merge scripts were using <code>pd.concat(dfs, ignore_index=True)</code> which loads all dataframes into memory simultaneously before concatenating them. With large metadata files from 14+ databases, this could easily exceed available memory.</p>
-<p><strong>Solution</strong>: Implemented a chunked merge strategy that writes dataframes to the output CSV file sequentially using append mode.</p>
-<h4 id="changes-made">Changes Made:<a class="headerlink" href="#changes-made" title="Permanent link">&para;</a></h4>
-<ol>
-<li><strong>New utility function</strong> in <code>workflow/scripts/preprocessing/mergers/utils.py</code>:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">merge_dataframes_chunked</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Merge multiple DataFrames by writing them in chunks to avoid OOM errors.&#39;&#39;&#39;</span>
-</code></pre></div></li>
-</ol>
-<p>This function:
-   - Writes the first dataframe with headers
-   - Appends subsequent dataframes without headers
-   - Never loads all data into memory at once
-   - Provides logging for progress tracking</p>
-<ol>
-<li><strong>Updated all 9 metadata merge scripts</strong> to use the new chunked merge:</li>
-<li><code>merge_annotated_proteins_metadata.py</code></li>
-<li><code>merge_phage_metadata.py</code></li>
-<li><code>merge_antimicrobial_resistance_gene_metadata.py</code></li>
-<li><code>merge_crispr_array_metadata.py</code></li>
-<li><code>merge_phage_anti_crispr_metadata.py</code></li>
-<li><code>merge_phage_transmembrane_protein_metadata.py</code></li>
-<li><code>merge_phage_trna_tmrna_metadata.py</code></li>
-<li><code>merge_phage_virulent_factor_metadata.py</code></li>
-<li><code>merge_transcription_terminator_metadata.py</code></li>
-</ol>
-<h4 id="before-oom-prone">Before (OOM-prone):<a class="headerlink" href="#before-oom-prone" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Loads all dataframes into memory</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">merged_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<h1 id="docker-architecture-before-and-after">Docker Architecture - Before and After<a class="headerlink" href="#docker-architecture-before-and-after" title="Permanent link">&para;</a></h1>
+<h2 id="before-problem">Before (Problem)<a class="headerlink" href="#before-problem" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>❌ No Docker infrastructure existed
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>❌ User manually created docker files
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>❌ Path mismatch between services
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Pipeline Container               API Container
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├─ Writes to: ???               ├─ Reads from: /data/processed/databases/
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>└─ No volume mount              └─ ERROR: Database not found!
 </code></pre></div>
-<h4 id="after-memory-efficient">After (Memory-efficient):<a class="headerlink" href="#after-memory-efficient" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Writes dataframes sequentially to disk</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">total_rows</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">merge_dataframes_chunked</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+<h2 id="after-solution">After (Solution)<a class="headerlink" href="#after-solution" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>✅ Complete Docker infrastructure
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>✅ Shared volume ensures path consistency
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>✅ API successfully finds database
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>┌─────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│                     Docker Compose                          │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│                                                             │
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│  ┌───────────────────┐         ┌──────────────────┐       │
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│  │ Pipeline Service  │         │   API Service     │       │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│  │  (Snakemake)      │         │   (FastAPI)       │       │
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│  │                   │         │                   │       │
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│  │  Builds database  │         │  Serves queries   │       │
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│  │  Processes data   │         │  Read-only access │       │
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│  └─────────┬─────────┘         └────────┬──────────┘       │
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│            │                            │                   │
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│            │     ┌──────────────────┐   │                   │
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│            └────▶│  Shared Volume   │◀──┘                   │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│                  │   pbi-data:/data │                       │
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│                  │                  │                       │
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│                  │  /data/processed/│                       │
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│                  │    ├─ databases/ │                       │
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│                  │    │  └─ phage_  │                       │
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│                  │    │     database_│                       │
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│                  │    │     optimized│                       │
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│                  │    │     .duckdb  │                       │
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│                  │    └─ sequences/ │                       │
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│                  │       ├─ all_    │                       │
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│                  │       │  phages. │                       │
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│                  │       │  fasta   │                       │
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│                  │       └─ all_    │                       │
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│                  │          proteins│                       │
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│                  │          .fasta  │                       │
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│                  └──────────────────┘                       │
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│                                                             │
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>└─────────────────────────────────────────────────────────────┘
 </code></pre></div>
-<h3 id="2-data-storage-clarification">2. Data Storage Clarification<a class="headerlink" href="#2-data-storage-clarification" title="Permanent link">&para;</a></h3>
-<p><strong>Issue</strong>: The problem statement showed corrupted Snakemake metadata warnings, indicating confusion about what data is cached and where.</p>
-<p><strong>Solution</strong>: Added comprehensive documentation to <code>DOCKER.md</code> explaining the data organization.</p>
-<h4 id="data-organization-structure">Data Organization Structure:<a class="headerlink" href="#data-organization-structure" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Docker Volumes:
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>├─ pbi-data (main data volume, ~60-80 GB)
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>│  ├─ /data/raw/              # Downloaded archives and extracted files
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>│  ├─ /data/intermediate/     # Processing artifacts and merged files
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>│  └─ /data/processed/        # Final database and sequences (API uses this)
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>│
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>└─ pbi-cache (Snakemake cache, ~2-3 GB)
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>   └─ /app/workflow/.snakemake/  # Conda envs, metadata, logs
+<h2 id="path-resolution">Path Resolution<a class="headerlink" href="#path-resolution" title="Permanent link">&para;</a></h2>
+<h3 id="pipeline-service-writer">Pipeline Service (Writer)<a class="headerlink" href="#pipeline-service-writer" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pbi-data:/data</span>
 </code></pre></div>
-<h4 id="documentation-updates">Documentation Updates:<a class="headerlink" href="#documentation-updates" title="Permanent link">&para;</a></h4>
-<ol>
-<li><strong>Added "Data Storage Organization" section</strong> explaining:</li>
-<li><strong>Raw Data</strong>: Downloaded files from external sources</li>
-<li><strong>Intermediate Data</strong>: Temporary processing files (CSVs, merged FASTA by source)</li>
-<li><strong>Processed Data</strong>: Final optimized outputs (database, indexed sequences)</li>
-<li>
-<p><strong>Cache Volume</strong>: Snakemake metadata and conda environments</p>
-</li>
-<li>
-<p><strong>Explained corrupted metadata warnings</strong>: These occur when the pipeline is interrupted and are harmless - Snakemake will rebuild affected files.</p>
-</li>
-<li>
-<p><strong>Updated pipeline execution description</strong> to mention:</p>
-</li>
-<li>Chunked processing to avoid OOM errors</li>
-<li>Specific paths where data is stored</li>
-<li>Cache persistence across runs</li>
-</ol>
-<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<p>Created comprehensive test suite in <code>tests/test_chunked_merge.py</code>:</p>
+Writes to: <code>/data/processed/databases/phage_database_optimized.duckdb</code></p>
+<h3 id="api-service-reader">API Service (Reader)<a class="headerlink" href="#api-service-reader" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pbi-data:/data:ro</span><span class="w">  </span><span class="c1"># Read-only for safety</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nt">environment</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATA_PATH=/data/processed</span>
+</code></pre></div>
+Reads from: <code>${DATA_PATH}/databases/phage_database_optimized.duckdb</code>
+           = <code>/data/processed/databases/phage_database_optimized.duckdb</code></p>
+<h3 id="result">Result<a class="headerlink" href="#result" title="Permanent link">&para;</a></h3>
+<p>✅ Both paths resolve to the same file on the shared volume
+✅ API can successfully access database built by pipeline
+✅ Original error "Database not found" is resolved</p>
+<h2 id="api-endpoints">API Endpoints<a class="headerlink" href="#api-endpoints" title="Permanent link">&para;</a></h2>
+<p>The API provides comprehensive access to the database:</p>
 <ul>
-<li>✅ Basic chunked merge with multiple dataframes</li>
-<li>✅ Empty dataframe list handling</li>
-<li>✅ Large dataframes (5000 rows total)</li>
-<li>✅ Column order preservation</li>
+<li><code>GET /health</code> - Health check</li>
+<li><code>GET /stats</code> - Database statistics</li>
+<li><code>POST /query</code> - Custom SQL queries</li>
+<li><code>POST /phages</code> - Get phage sequences</li>
+<li><code>POST /proteins</code> - Get protein sequences</li>
+<li><code>POST /phages/fasta</code> - Export phages to FASTA</li>
+<li><code>POST /proteins/fasta</code> - Export proteins to FASTA</li>
 </ul>
-<p>All tests pass successfully.</p>
-<h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Memory Efficiency</strong>: The pipeline can now handle datasets of any size without OOM errors</li>
-<li><strong>Better Understanding</strong>: Clear documentation about where data is stored helps with debugging and maintenance</li>
-<li><strong>Maintained Functionality</strong>: The output files are identical to before, just generated more efficiently</li>
-<li><strong>Minimal Changes</strong>: Only the merging mechanism changed; all validation, column conversion, and other logic remains the same</li>
-</ol>
-<h2 id="performance-implications">Performance Implications<a class="headerlink" href="#performance-implications" title="Permanent link">&para;</a></h2>
+<h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Build and run pipeline</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Start API</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>api
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>api
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Test API</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>curl<span class="w"> </span>http://localhost:8000/health
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1"># {&quot;status&quot;:&quot;healthy&quot;,&quot;database&quot;:&quot;connected&quot;}</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>curl<span class="w"> </span>http://localhost:8000/stats
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="c1"># {&quot;database&quot;:{&quot;phages&quot;:X,&quot;proteins&quot;:Y},&quot;fasta&quot;:{&quot;phages&quot;:X,&quot;proteins&quot;:Y}}</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="c1"># Query database</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/query<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;query&quot;:&quot;SELECT * FROM fact_phages LIMIT 5&quot;}&#39;</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="c1"># Get sequences in FASTA format</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/phages/fasta<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;query&quot;:&quot;SELECT Phage_ID FROM fact_phages WHERE Length &gt; 100000 LIMIT 10&quot;}&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">  </span>&gt;<span class="w"> </span>large_phages.fasta
+</code></pre></div>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Memory Usage</strong>: Reduced from O(n) where n = total data size to O(k) where k = largest individual file</li>
-<li><strong>Disk I/O</strong>: Slightly increased due to sequential writes, but this is negligible compared to memory savings</li>
-<li><strong>Speed</strong>: Marginal difference in processing time; the bottleneck was never concatenation speed but memory availability</li>
-</ul>
-<h2 id="migration-notes">Migration Notes<a class="headerlink" href="#migration-notes" title="Permanent link">&para;</a></h2>
-<ul>
-<li>No action required for existing users</li>
-<li>The chunked merge is backward compatible</li>
-<li>Output files have identical format and content</li>
-<li>Existing workflows and downstream processing are unaffected</li>
+<li><code>DOCKER.md</code> - Comprehensive Docker guide</li>
+<li><code>README.md</code> - Quick start with Docker option</li>
+<li><code>SOLUTION_SUMMARY.md</code> - Detailed solution explanation</li>
+<li><code>test_docker_setup.sh</code> - Integration test script</li>
+<li><code>tests/test_docker_paths.py</code> - Path verification</li>
 </ul>
 
 
@@ -1617,10 +1728,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

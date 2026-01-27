@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/developer/code-structure/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/archive/GENOME_DOWNLOAD_QUICKSTART/">
       
       
-        <link rel="prev" href="../../reference/commands/">
+        <link rel="prev" href="../DOCKER_ARCHITECTURE/">
       
       
-        <link rel="next" href="../../changelog/">
+        <link rel="next" href="../IMPLEMENTATION_SUMMARY/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Code Structure - PBI Documentation</title>
+        <title>Genome Download Quickstart - PBI Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#code-structure" class="md-skip">
+        <a href="#genome-download-pipeline-quick-start-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Code Structure
+              Genome Download Quickstart
             
           </span>
         </div>
@@ -326,13 +326,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../developer/code-structure/" class="md-tabs__link">
           
   
   
@@ -367,11 +365,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../archive/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -899,31 +899,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -941,7 +938,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -956,37 +953,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Code Structure
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../developer/code-structure/" class="md-nav__link">
         
   
   
@@ -1002,214 +972,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#project-layout" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Project Layout
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Components
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Components">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#snakemake-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Snakemake Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-package" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python Package
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rest-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        REST API
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Flow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#module-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Module Dependencies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development Workflow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration Files
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adding Features
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding Features">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#new-data-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        New Data Source
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#new-api-endpoint" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        New API Endpoint
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#new-utility-function" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        New Utility Function
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best Practices
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resources" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resources
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1253,28 +1015,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
-        
-          
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -1292,7 +1057,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1310,7 +1075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../archive/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -1338,7 +1103,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../archive/DOCKER_ARCHITECTURE/" class="md-nav__link">
+      <a href="../DOCKER_ARCHITECTURE/" class="md-nav__link">
         
   
   
@@ -1363,10 +1128,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../archive/GENOME_DOWNLOAD_QUICKSTART/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Genome Download Quickstart
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1382,6 +1174,359 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Changed
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Changed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Critical Fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚡ Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#estimated-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Estimated Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-set-environment-variables-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Set Environment Variables (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-the-optimized-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Use the Optimized Script
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Use the Optimized Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standalone-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standalone Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#via-snakemake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Snakemake
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-monitor-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Monitor Progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-check-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Check Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resume-after-interruption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resume After Interruption
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-too-many-requests-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "Too many requests" error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-gtdb-identifier-detected-in-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "GTDB identifier detected" in logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-cache-taking-too-much-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Cache taking too much space
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-with-small-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example with Small Dataset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-different-from-original" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Different from Original?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What&#39;s Different from Original?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#original-script-download_host_genomespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Original Script (download_host_genomes.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimized-script-download_host_genomes_optimizedpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimized Script (download_host_genomes_optimized.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1394,7 +1539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../archive/IMPLEMENTATION_SUMMARY/" class="md-nav__link">
+      <a href="../IMPLEMENTATION_SUMMARY/" class="md-nav__link">
         
   
   
@@ -1422,7 +1567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../archive/LOCAL_SETUP/" class="md-nav__link">
+      <a href="../LOCAL_SETUP/" class="md-nav__link">
         
   
   
@@ -1450,7 +1595,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../archive/DOCKER/" class="md-nav__link">
+      <a href="../DOCKER/" class="md-nav__link">
         
   
   
@@ -1505,33 +1650,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#project-layout" class="md-nav__link">
+  <a href="#what-changed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Project Layout
+        What Changed
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Components
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Components">
+    <nav class="md-nav" aria-label="What Changed">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#snakemake-pipeline" class="md-nav__link">
+  <a href="#critical-fixes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Snakemake Pipeline
+        🔧 Critical Fixes
       
     </span>
   </a>
@@ -1539,10 +1673,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#python-package" class="md-nav__link">
+  <a href="#performance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Python Package
+        ⚡ Performance
       
     </span>
   </a>
@@ -1550,21 +1684,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rest-api" class="md-nav__link">
+  <a href="#estimated-performance" class="md-nav__link">
     <span class="md-ellipsis">
       
-        REST API
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation
+        📊 Estimated Performance
       
     </span>
   </a>
@@ -1577,66 +1700,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#data-flow" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data Flow
+        Quick Start
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#module-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Module Dependencies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development Workflow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration Files
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adding Features
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Adding Features">
+    <nav class="md-nav" aria-label="Quick Start">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#new-data-source" class="md-nav__link">
+  <a href="#1-set-environment-variables-recommended" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New Data Source
+        1. Set Environment Variables (Recommended)
       
     </span>
   </a>
@@ -1644,10 +1723,22 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#new-api-endpoint" class="md-nav__link">
+  <a href="#2-use-the-optimized-script" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New API Endpoint
+        2. Use the Optimized Script
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Use the Optimized Script">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standalone-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Standalone Usage
       
     </span>
   </a>
@@ -1655,10 +1746,37 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#new-utility-function" class="md-nav__link">
+  <a href="#via-snakemake" class="md-nav__link">
     <span class="md-ellipsis">
       
-        New Utility Function
+        Via Snakemake
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-monitor-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Monitor Progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-check-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Check Results
       
     </span>
   </a>
@@ -1671,10 +1789,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Best Practices
+        Configuration
       
     </span>
   </a>
@@ -1682,10 +1800,182 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#resources" class="md-nav__link">
+  <a href="#resume-after-interruption" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Resources
+        Resume After Interruption
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-too-many-requests-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "Too many requests" error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-gtdb-identifier-detected-in-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "GTDB identifier detected" in logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-cache-taking-too-much-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Cache taking too much space
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-with-small-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example with Small Dataset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-different-from-original" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What's Different from Original?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What&#39;s Different from Original?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#original-script-download_host_genomespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Original Script (download_host_genomes.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimized-script-download_host_genomes_optimizedpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimized Script (download_host_genomes_optimized.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
       
     </span>
   </a>
@@ -1712,175 +2002,169 @@
   
 
 
-<h1 id="code-structure">Code Structure<a class="headerlink" href="#code-structure" title="Permanent link">&para;</a></h1>
-<p>Overview of the PBI project architecture and code organization.</p>
-<h2 id="project-layout">Project Layout<a class="headerlink" href="#project-layout" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>PBI/
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── workflow/              # Snakemake pipeline
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── Snakefile         # Main pipeline definition
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   ├── rules/            # Modular pipeline rules
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   ├── scripts/          # Processing scripts
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ├── config/           # Configuration files
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   ├── envs/             # Conda environments
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   ├── notebooks/        # Analysis notebooks
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   └── reports/          # Generated reports
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>├── src/pbi/              # Python package
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   ├── __init__.py       # Package initialization
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│   ├── database.py       # Database utilities
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│   ├── sequence_retrieval.py  # FASTA retrieval API
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│   └── utils.py          # Helper functions
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>├── api/                  # REST API
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   ├── app.py            # FastAPI application
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│   └── models.py         # Data models
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>├── docs/                 # Documentation (MkDocs)
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│   ├── index.md          # Homepage
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│   ├── guides/           # Installation and usage guides
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│   ├── database/         # Database documentation
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│   ├── api/              # API documentation
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│   ├── reference/        # Command reference
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│   └── archive/          # Archived documentation
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>├── data/                 # Data directory (gitignored)
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│   ├── raw/              # Downloaded data
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│   ├── intermediate/     # Processing intermediates
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>│   └── processed/        # Final outputs
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>├── tests/                # Unit tests (in development)
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>├── notebooks/            # User-facing notebooks
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>├── docker-compose.yml    # Docker orchestration
-<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>├── Dockerfile.api        # API container
-<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>├── setup.py              # Package configuration
-<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>└── mkdocs.yml            # Documentation configuration
+<h1 id="genome-download-pipeline-quick-start-guide">Genome Download Pipeline - Quick Start Guide<a class="headerlink" href="#genome-download-pipeline-quick-start-guide" title="Permanent link">&para;</a></h1>
+<h2 id="what-changed">What Changed<a class="headerlink" href="#what-changed" title="Permanent link">&para;</a></h2>
+<p>The genome download pipeline has been significantly optimized to address critical issues:</p>
+<h3 id="critical-fixes">🔧 Critical Fixes<a class="headerlink" href="#critical-fixes" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Biopython Deprecation</strong> - Fixed to use <code>fasta-2line</code> format (no more warnings)</li>
+<li><strong>GTDB Filtering</strong> - Automatically skips invalid GTDB identifiers (80%+ failure reduction)</li>
+</ol>
+<h3 id="performance">⚡ Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Intelligent Caching</strong> - Never re-download the same genome twice</li>
+<li><strong>Rate Limiting</strong> - NCBI-compliant with API key support</li>
+<li><strong>Progress Tracking</strong> - See real-time ETA and statistics</li>
+</ol>
+<h3 id="estimated-performance">📊 Estimated Performance<a class="headerlink" href="#estimated-performance" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Before</strong>: ~9.5 hours for full dataset (9,765 genomes)</li>
+<li><strong>After</strong>: ~2-4 hours (with caching and rate limiting)</li>
+<li><strong>Cache hit rate</strong>: &gt;95% on subsequent runs</li>
+</ul>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="1-set-environment-variables-recommended">1. Set Environment Variables (Recommended)<a class="headerlink" href="#1-set-environment-variables-recommended" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_EMAIL</span><span class="o">=</span><span class="s2">&quot;your.email@example.com&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_API_KEY</span><span class="o">=</span><span class="s2">&quot;your_api_key_here&quot;</span><span class="w">  </span><span class="c1"># Optional but recommended for 10 req/s</span>
 </code></pre></div>
-<h2 id="key-components">Key Components<a class="headerlink" href="#key-components" title="Permanent link">&para;</a></h2>
-<h3 id="snakemake-pipeline">Snakemake Pipeline<a class="headerlink" href="#snakemake-pipeline" title="Permanent link">&para;</a></h3>
-<p><strong>Location</strong>: <code>workflow/</code></p>
-<p>The pipeline orchestrates data download, processing, and database creation:</p>
-<ul>
-<li><strong><code>Snakefile</code></strong>: Main workflow definition</li>
-<li><strong><code>rules/</code></strong>: Modular rules for different pipeline stages</li>
-<li><code>phagescope.smk</code>: Data download and preprocessing</li>
-<li><code>database.smk</code>: Database creation and validation</li>
-<li><code>sequences.smk</code>: FASTA processing and indexing</li>
-<li><strong><code>scripts/</code></strong>: Python scripts for data processing</li>
-<li><code>database/</code>: Database creation and optimization</li>
-<li><code>preprocessing/mergers/</code>: Data integration scripts</li>
-<li><code>sequences/</code>: FASTA handling</li>
-<li><code>utils/</code>: Shared utilities</li>
-</ul>
-<h3 id="python-package">Python Package<a class="headerlink" href="#python-package" title="Permanent link">&para;</a></h3>
-<p><strong>Location</strong>: <code>src/pbi/</code></p>
-<p>The PBI package provides utilities for working with the database:</p>
-<ul>
-<li><strong><code>database.py</code></strong>: Database connection and query utilities</li>
-<li><strong><code>sequence_retrieval.py</code></strong>: FASTA sequence retrieval API</li>
-<li><strong><code>utils.py</code></strong>: Helper functions and utilities</li>
-</ul>
-<h3 id="rest-api">REST API<a class="headerlink" href="#rest-api" title="Permanent link">&para;</a></h3>
-<p><strong>Location</strong>: <code>api/</code></p>
-<p>FastAPI-based REST interface for database queries:</p>
-<ul>
-<li><strong><code>app.py</code></strong>: Main API application with endpoints</li>
-<li><strong><code>models.py</code></strong>: Pydantic data models (if applicable)</li>
-</ul>
-<h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
-<p><strong>Location</strong>: <code>docs/</code></p>
-<p>MkDocs-based documentation:</p>
-<ul>
-<li><strong><code>guides/</code></strong>: Installation and usage guides</li>
-<li><strong><code>database/</code></strong>: Database schema and documentation</li>
-<li><strong><code>api/</code></strong>: API reference and examples</li>
-<li><strong><code>reference/</code></strong>: Command reference and cheatsheet</li>
-<li><strong><code>archive/</code></strong>: Historical documentation</li>
-</ul>
-<h2 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>PhageScope APIs
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>      ↓
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  Download (Snakemake rules)
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>      ↓
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>Raw Data (TSV, FASTA)
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      ↓
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a> Merge &amp; Process (Python scripts)
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>      ↓
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>Intermediate Data (Merged CSV/FASTA)
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>      ↓
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>Database Creation (DuckDB)
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>      ↓
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>Validation &amp; Optimization
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>      ↓
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>Final Database + Sequences
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>      ↓
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>      ├─→ Python Package (local access)
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>      └─→ REST API (remote access)
+<p>Get your API key from: https://www.ncbi.nlm.nih.gov/account/settings/</p>
+<h3 id="2-use-the-optimized-script">2. Use the Optimized Script<a class="headerlink" href="#2-use-the-optimized-script" title="Permanent link">&para;</a></h3>
+<p>The optimized script is at: <code>workflow/scripts/sequences/download_host_genomes_optimized.py</code></p>
+<p>It can be used standalone or via Snakemake.</p>
+<h4 id="standalone-usage">Standalone Usage<a class="headerlink" href="#standalone-usage" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>workflow/scripts/sequences/download_host_genomes_optimized.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--phage-csv<span class="w"> </span>data/intermediate/csv/merged/merged_phage_metadata.csv<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--output-dir<span class="w"> </span>data/intermediate/fasta/hosts<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--metadata<span class="w"> </span>data/intermediate/csv/merged/host_metadata.csv<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>--config<span class="w"> </span>workflow/config/genome_download_config.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>--limit<span class="w"> </span><span class="m">10</span><span class="w">  </span><span class="c1"># Optional: test with 10 species first</span>
 </code></pre></div>
-<h2 id="module-dependencies">Module Dependencies<a class="headerlink" href="#module-dependencies" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>workflow/
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    ↓ uses
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>src/pbi/
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    ↑ provides utilities
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>api/
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    ↓ uses
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>src/pbi/ + data/
+<h4 id="via-snakemake">Via Snakemake<a class="headerlink" href="#via-snakemake" title="Permanent link">&para;</a></h4>
+<p>Update your Snakefile to use the optimized script:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">rule</span> <span class="n">download_host_genomes_optimized</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="nb">input</span><span class="p">:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="n">phage_csv</span> <span class="o">=</span> <span class="s2">&quot;data/intermediate/csv/merged/merged_phage_metadata.csv&quot;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">output</span><span class="p">:</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="n">metadata</span> <span class="o">=</span> <span class="s2">&quot;data/intermediate/csv/merged/host_metadata.csv&quot;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">params</span><span class="p">:</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="n">output_dir</span> <span class="o">=</span> <span class="s2">&quot;data/intermediate/fasta/hosts&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">config</span> <span class="o">=</span> <span class="s2">&quot;workflow/config/genome_download_config.yaml&quot;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">script</span><span class="p">:</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="s2">&quot;scripts/sequences/download_host_genomes_optimized.py&quot;</span>
 </code></pre></div>
-<h2 id="development-workflow">Development Workflow<a class="headerlink" href="#development-workflow" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Data Pipeline</strong>: Modify <code>workflow/</code> for data processing changes</li>
-<li><strong>Python Package</strong>: Update <code>src/pbi/</code> for new utilities</li>
-<li><strong>API</strong>: Extend <code>api/app.py</code> for new endpoints</li>
-<li><strong>Documentation</strong>: Update <code>docs/</code> for user-facing changes</li>
-<li><strong>Testing</strong>: Add tests to <code>tests/</code> (in development)</li>
-</ol>
-<h2 id="configuration-files">Configuration Files<a class="headerlink" href="#configuration-files" title="Permanent link">&para;</a></h2>
+<h3 id="3-monitor-progress">3. Monitor Progress<a class="headerlink" href="#3-monitor-progress" title="Permanent link">&para;</a></h3>
+<p>The script will display real-time progress:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>🔬 Genome Download Progress
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>━━━━━━━━━━━━━━━━━━━━━━━━━━ 1,234/9,765 (12.6%)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>✅ Successful: 1,100 | 📦 Cached: 89 | ❌ Failed: 45 | ⏭️ Skipped: 56
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>⏱️  Elapsed: 15m 23s | ETA: 1h 45m | Rate: 1.34 genomes/sec
+</code></pre></div>
+<h3 id="4-check-results">4. Check Results<a class="headerlink" href="#4-check-results" title="Permanent link">&para;</a></h3>
+<p>After completion:
+- <strong>Genomes</strong>: <code>data/cache/genomes/</code> (or configured directory)
+- <strong>Metadata</strong>: <code>data/intermediate/csv/merged/host_metadata.csv</code>
+- <strong>Progress</strong>: <code>data/progress.json</code>
+- <strong>Failures</strong>: <code>data/failed_downloads.txt</code></p>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<p>Edit <code>workflow/config/genome_download_config.yaml</code> to customize:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">download</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">max_concurrent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">              </span><span class="c1"># Parallel downloads (future)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">requests_per_second</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">         </span><span class="c1"># Rate limit without API key</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">requests_per_second_with_api_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">  </span><span class="c1"># With API key</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nt">cache</span><span class="p">:</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">directory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;data/cache/genomes&quot;</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="nt">parsing</span><span class="p">:</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">  </span><span class="nt">fasta_format</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;fasta-2line&quot;</span><span class="w">    </span><span class="c1"># Handles comments</span>
+</code></pre></div>
+<h2 id="resume-after-interruption">Resume After Interruption<a class="headerlink" href="#resume-after-interruption" title="Permanent link">&para;</a></h2>
+<p>If the download is interrupted, simply run it again. The cache will prevent re-downloading:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># First run (interrupted at 50%)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>python<span class="w"> </span>workflow/scripts/sequences/download_host_genomes_optimized.py<span class="w"> </span>...
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Second run (resumes from 50%)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>python<span class="w"> </span>workflow/scripts/sequences/download_host_genomes_optimized.py<span class="w"> </span>...
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Cache hits for already downloaded genomes</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="issue-too-many-requests-error">Issue: "Too many requests" error<a class="headerlink" href="#issue-too-many-requests-error" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: The rate limiter should prevent this. If it occurs:
+1. Verify NCBI_API_KEY is set correctly
+2. Check rate limit in config file
+3. Increase delay between requests</p>
+<h3 id="issue-gtdb-identifier-detected-in-logs">Issue: "GTDB identifier detected" in logs<a class="headerlink" href="#issue-gtdb-identifier-detected-in-logs" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: This is expected and correct. GTDB identifiers like "sp000302535" are not valid NCBI species names and are automatically skipped.</p>
+<h3 id="issue-cache-taking-too-much-space">Issue: Cache taking too much space<a class="headerlink" href="#issue-cache-taking-too-much-space" title="Permanent link">&para;</a></h3>
+<p><strong>Solution</strong>: 
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Check cache size</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>du<span class="w"> </span>-sh<span class="w"> </span>data/cache/genomes/
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Clear cache if needed</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>rm<span class="w"> </span>-rf<span class="w"> </span>data/cache/genomes/*
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>rm<span class="w"> </span>-f<span class="w"> </span>data/cache/metadata.db
+</code></pre></div></p>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<h3 id="integration-test">Integration Test<a class="headerlink" href="#integration-test" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Run all integration tests</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>python<span class="w"> </span>tests/test_integration_genome_download.py
+</code></pre></div>
+<h3 id="example-with-small-dataset">Example with Small Dataset<a class="headerlink" href="#example-with-small-dataset" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Run example (dry run mode without dependencies)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>python<span class="w"> </span>examples/example_genome_download.py
+</code></pre></div>
+<h2 id="whats-different-from-original">What's Different from Original?<a class="headerlink" href="#whats-different-from-original" title="Permanent link">&para;</a></h2>
+<h3 id="original-script-download_host_genomespy">Original Script (<code>download_host_genomes.py</code>)<a class="headerlink" href="#original-script-download_host_genomespy" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong><code>workflow/config/config.yaml</code></strong>: Pipeline configuration</li>
-<li><strong><code>workflow/envs/*.yaml</code></strong>: Conda environment specifications</li>
-<li><strong><code>setup.py</code></strong>: Python package metadata</li>
-<li><strong><code>mkdocs.yml</code></strong>: Documentation configuration</li>
-<li><strong><code>docker-compose.yml</code></strong>: Container orchestration</li>
-<li><strong><code>.gitignore</code></strong>: Version control exclusions</li>
+<li>✅ Fixed to use <code>fasta-2line</code> format</li>
+<li>Sequential only</li>
+<li>No caching</li>
+<li>No progress tracking</li>
+<li>Basic error handling</li>
 </ul>
-<h2 id="adding-features">Adding Features<a class="headerlink" href="#adding-features" title="Permanent link">&para;</a></h2>
-<h3 id="new-data-source">New Data Source<a class="headerlink" href="#new-data-source" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Add download rules to <code>workflow/rules/phagescope.smk</code></li>
-<li>Create merger script in <code>workflow/scripts/preprocessing/mergers/</code></li>
-<li>Update database schema in <code>workflow/scripts/database/create_duckdb.py</code></li>
-<li>Add validation in <code>workflow/scripts/database/validate_db.py</code></li>
-</ol>
-<h3 id="new-api-endpoint">New API Endpoint<a class="headerlink" href="#new-api-endpoint" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Add endpoint to <code>api/app.py</code></li>
-<li>Update <code>docs/api/overview.md</code></li>
-<li>Test with <code>curl</code> or Swagger UI</li>
-</ol>
-<h3 id="new-utility-function">New Utility Function<a class="headerlink" href="#new-utility-function" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Add function to <code>src/pbi/utils.py</code> or create new module</li>
-<li>Update <code>src/pbi/__init__.py</code> if needed</li>
-<li>Document in docstrings</li>
-<li>Add tests to <code>tests/</code></li>
-</ol>
-<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="optimized-script-download_host_genomes_optimizedpy">Optimized Script (<code>download_host_genomes_optimized.py</code>)<a class="headerlink" href="#optimized-script-download_host_genomes_optimizedpy" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Code Style</strong>: Follow PEP 8 for Python code</li>
-<li><strong>Documentation</strong>: Update docs for user-facing changes</li>
-<li><strong>Testing</strong>: Add tests for new features (when test framework is ready)</li>
-<li><strong>Git</strong>: Use descriptive commit messages</li>
-<li><strong>Snakemake</strong>: Keep rules modular and well-documented</li>
-<li><strong>Configuration</strong>: Use config files instead of hardcoded values</li>
+<li>✅ Uses <code>fasta-2line</code> format</li>
+<li>Infrastructure for parallel downloads</li>
+<li>SQLite-based caching</li>
+<li>Real-time progress with ETA</li>
+<li>GTDB identifier filtering</li>
+<li>Rate limiting with API key support</li>
+<li>Categorized failure reporting</li>
+<li>Resume capability</li>
 </ul>
-<h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
+<h2 id="migration-path">Migration Path<a class="headerlink" href="#migration-path" title="Permanent link">&para;</a></h2>
+<p>You can use both scripts:</p>
+<ol>
+<li><strong>Keep using original</strong> - Now has <code>fasta-2line</code> fix, works as before</li>
+<li><strong>Switch to optimized</strong> - Full features, better performance</li>
+</ol>
+<p>No data migration needed. Both scripts produce compatible output.</p>
+<h2 id="performance-tips">Performance Tips<a class="headerlink" href="#performance-tips" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Get NCBI API Key</strong> - Increases rate limit from 3 to 10 req/s</li>
+<li><strong>Use Caching</strong> - Enable in config (default: enabled)</li>
+<li><strong>Monitor Progress</strong> - Check <code>data/progress.json</code> for detailed stats</li>
+<li><strong>Review Failures</strong> - Check <code>data/failed_downloads.txt</code> for patterns</li>
+</ol>
+<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://snakemake.readthedocs.io/">Snakemake Documentation</a></li>
-<li><a href="https://duckdb.org/docs/">DuckDB Documentation</a></li>
-<li><a href="https://fastapi.tiangolo.com/">FastAPI Documentation</a></li>
-<li><a href="https://www.mkdocs.org/">MkDocs Documentation</a></li>
+<li><strong>Documentation</strong>: <code>docs/genome_download_optimization.md</code></li>
+<li><strong>Configuration</strong>: <code>workflow/config/genome_download_config.yaml</code></li>
+<li><strong>Tests</strong>: <code>tests/test_integration_genome_download.py</code></li>
+<li><strong>Example</strong>: <code>examples/example_genome_download.py</code></li>
 </ul>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>✅ <strong>Biopython deprecation fixed</strong> - No more warnings<br />
+✅ <strong>GTDB filtering</strong> - Skip invalid identifiers automatically<br />
+✅ <strong>Intelligent caching</strong> - Never re-download<br />
+✅ <strong>Rate limiting</strong> - NCBI compliant<br />
+✅ <strong>Progress tracking</strong> - See what's happening<br />
+✅ <strong>Resume support</strong> - Interruption-safe<br />
+✅ <strong>2-4 hours runtime</strong> - Down from ~9.5 hours  </p>
 <hr />
-<p>For contributing guidelines, see the project README or open an issue on GitHub.</p>
+<p>For detailed information, see: <code>docs/genome_download_optimization.md</code></p>
 
 
 
