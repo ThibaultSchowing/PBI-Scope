@@ -258,16 +258,17 @@ class SequenceRetriever:
         Get host FASTA, loading if necessary
         
         DEPRECATED: This property is maintained for backward compatibility
-        but is not recommended when using host_mapping_path. Use 
+        but is not available when using host_mapping_path. Use 
         get_host_sequence() method instead for individual host access.
         """
         if not self._has_host_data:
             raise ValueError("Host FASTA not configured - pass host_fasta_path or host_mapping_path to __init__")
         
-        # If using mapping mode, raise a deprecation warning
+        # If using mapping mode, this operation is not supported
         if self._use_host_mapping:
             raise ValueError(
                 "Direct access to host_fasta is not available when using host_mapping_path. "
+                "The host genomes are stored as individual files for efficiency. "
                 "Use get_host_sequence(host_id) method instead to load individual host files on-demand."
             )
         
