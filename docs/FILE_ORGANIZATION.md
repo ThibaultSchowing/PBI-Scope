@@ -418,4 +418,4 @@ ls data/processed/sequences/*.fai
 
 - [FASTA Download Guide](FASTA_DOWNLOAD_GUIDE.md) - Comprehensive download documentation
 - [Environment Setup](ENVIRONMENT_SETUP.md) - Setting up for downloads
-- [Genome Download Quickstart](../GENOME_DOWNLOAD_QUICKSTART.md) - Quick start guide
+- [Genome Download Quickstart](archive/GENOME_DOWNLOAD_QUICKSTART.md) - Quick start guide (archived)

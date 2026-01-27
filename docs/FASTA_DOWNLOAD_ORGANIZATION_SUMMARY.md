@@ -364,10 +364,9 @@ While not required by the original issue, the following improvements are documen
 
 ## References
 
-- [FASTA Download Guide](../docs/FASTA_DOWNLOAD_GUIDE.md)
-- [Environment Setup Guide](../docs/ENVIRONMENT_SETUP.md)
-- [File Organization](../docs/FILE_ORGANIZATION.md)
-- [Migration Guide](../docs/MIGRATION_GUIDE_OPTIMIZED_DOWNLOADER.md)
-- [Validation Script](../scripts/validate_fasta_workflow.py)
-- [Genome Download Quickstart](../GENOME_DOWNLOAD_QUICKSTART.md)
-- [Genome Download Optimization](../docs/genome_download_optimization.md)
+- [FASTA Download Guide](FASTA_DOWNLOAD_GUIDE.md)
+- [Environment Setup Guide](ENVIRONMENT_SETUP.md)
+- [File Organization](FILE_ORGANIZATION.md)
+- [Migration Guide](MIGRATION_GUIDE_OPTIMIZED_DOWNLOADER.md)
+- [Genome Download Quickstart](archive/GENOME_DOWNLOAD_QUICKSTART.md) (archived)
+- [Genome Download Optimization](genome_download_optimization.md)

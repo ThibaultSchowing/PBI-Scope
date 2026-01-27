@@ -511,6 +511,5 @@ newgrp docker
 ## Related Documentation
 
 - [FASTA Download Guide](FASTA_DOWNLOAD_GUIDE.md)
-- [Genome Download Quickstart](../GENOME_DOWNLOAD_QUICKSTART.md)
-- [Local Setup Guide](../LOCAL_SETUP.md)
-- [Docker Documentation](../DOCKER.md)
+- [Installation Guide](guides/installation.md)
+- [Docker Guide](guides/docker-guide.md)
