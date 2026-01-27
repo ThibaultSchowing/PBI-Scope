@@ -1653,20 +1653,24 @@
 <li>Requires NCBI email and API key</li>
 </ol>
 <p><strong>File Locations</strong>:
-- Individual genomes: <code>/data/intermediate/fasta/hosts/{Species_Name}_{Assembly_Accession}.fna</code>
-- Merged file: <code>/data/processed/sequences/all_hosts.fasta</code>
-- Index: <code>/data/processed/sequences/all_hosts.fasta.fai</code>
+- Individual genomes: <code>/data/intermediate/fasta/hosts/{Host_ID}.fna</code>
+- Host mapping: <code>/data/processed/sequences/host_fasta_mapping.json</code>
+- Index complete flag: <code>/data/processed/sequences/.host_indexes_complete</code>
+- Individual indexes: <code>/data/intermediate/fasta/hosts/{Host_ID}.fna.fai</code>
 - Metadata: <code>/data/intermediate/csv/merged/host_metadata.csv</code>
 - Cache (optimized): <code>/data/cache/genomes/</code>
 - Cache database: <code>/data/cache/metadata.db</code></p>
 <p><strong>File Naming Convention</strong>:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>{Genus}_{species}_{Assembly_Accession}.fna
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>{Host_ID}.fna
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Examples:
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>- Escherichia_coli_GCF_000005845.2.fna
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>- Staphylococcus_aureus_GCF_000013425.1.fna
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- Pseudomonas_aeruginosa_GCF_000006765.1.fna
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>- GCF_000005845.2.fna (Escherichia coli)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>- GCF_000013425.1.fna (Staphylococcus aureus)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- GCF_000006765.1.fna (Pseudomonas aeruginosa)
 </code></pre></div></p>
+<p><strong>Note</strong>: Host genomes are <strong>not merged</strong> into a single file. Instead, each host genome 
+is kept as a separate indexed file for better performance and efficiency. The mapping 
+file provides quick lookup from Host_ID to file path.</p>
 <h2 id="file-organization">File Organization<a class="headerlink" href="#file-organization" title="Permanent link">&para;</a></h2>
 <h3 id="complete-directory-structure">Complete Directory Structure<a class="headerlink" href="#complete-directory-structure" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>data/
@@ -1679,43 +1683,45 @@
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>├── intermediate/                             # Intermediate processing files
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   ├── fasta/
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   │   ├── hosts/                            # Individual host genome files
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   │   │   ├── Escherichia_coli_GCF_000005845.2.fna
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   │   │   ├── Staphylococcus_aureus_GCF_000013425.1.fna
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   │   │   └── ...
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   │   ├── phages/                           # Phage FASTA by source
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│   │   │   ├── GenBank.fasta
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   │   │   ├── RefSeq.fasta
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   │   │   └── ...
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│   │   └── proteins/                         # Protein FASTA by source
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   │       ├── GenBank.fasta
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   │       ├── RefSeq.fasta
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│   │       └── ...
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│   └── csv/
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│       └── merged/
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│           ├── merged_phage_metadata.csv     # Source for host extraction
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│           └── host_metadata.csv             # Generated host information
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>├── processed/                                # Final processed files
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│   ├── sequences/
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│   │   ├── all_phages.fasta                  # All phages merged
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│   │   ├── all_phages.fasta.fai              # Index for phages
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│   │   ├── all_proteins.fasta                # All proteins merged
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   │   ├── all_proteins.fasta.fai            # Index for proteins
-<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   │   ├── all_hosts.fasta                   # All hosts merged
-<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   │   └── all_hosts.fasta.fai               # Index for hosts
-<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   └── databases/
-<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│       └── phage_database.duckdb             # Complete database
-<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│
-<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>├── cache/                                    # Cache for optimized downloader
-<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│   ├── genomes/                              # Cached genome files
-<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│   │   ├── Escherichia_coli_GCF_000005845.2.fna
-<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│   │   └── ...
-<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│   └── metadata.db                           # SQLite cache database
-<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│
-<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>└── logs/                                     # Download and processing logs
-<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>    ├── host_download.log
-<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>    ├── host_download_failures.log
-<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    └── ...
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   │   │   ├── GCF_000005845.2.fna          # Individual host genome
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   │   │   ├── GCF_000005845.2.fna.fai      # Index for that genome
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   │   │   ├── GCF_000013425.1.fna
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   │   │   ├── GCF_000013425.1.fna.fai
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│   │   │   └── ...
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   │   ├── phages/                           # Phage FASTA by source
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   │   │   ├── GenBank.fasta
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│   │   │   ├── RefSeq.fasta
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   │   │   └── ...
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   │   └── proteins/                         # Protein FASTA by source
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│   │       ├── GenBank.fasta
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│   │       ├── RefSeq.fasta
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│   │       └── ...
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│   └── csv/
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│       └── merged/
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│           ├── merged_phage_metadata.csv     # Source for host extraction
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│           └── host_metadata.csv             # Generated host information
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>├── processed/                                # Final processed files
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│   ├── sequences/
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│   │   ├── all_phages.fasta                  # All phages merged
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   │   ├── all_phages.fasta.fai              # Index for phages
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   │   ├── all_proteins.fasta                # All proteins merged
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   │   ├── all_proteins.fasta.fai            # Index for proteins
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   │   ├── host_fasta_mapping.json           # Host ID to file path mapping
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   │   └── .host_indexes_complete            # Flag indicating indexing complete
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│   └── databases/
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│       └── phage_database.duckdb             # Complete database
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>├── cache/                                    # Cache for optimized downloader
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│   ├── genomes/                              # Cached genome files
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│   │   ├── Escherichia_coli_GCF_000005845.2.fna
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│   │   └── ...
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>│   └── metadata.db                           # SQLite cache database
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>│
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>└── logs/                                     # Download and processing logs
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>    ├── host_download.log
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>    ├── host_download_failures.log
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>    └── ...
 </code></pre></div>
 <h3 id="file-size-estimates">File Size Estimates<a class="headerlink" href="#file-size-estimates" title="Permanent link">&para;</a></h3>
 <table>

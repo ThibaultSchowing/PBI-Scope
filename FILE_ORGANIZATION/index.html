@@ -1608,8 +1608,8 @@
 <a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>│   │   │   ├── all_phages.fasta.fai            # pyfaidx index
 <a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>│   │   │   ├── all_proteins.fasta              # All proteins merged (20-30 GB)
 <a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>│   │   │   ├── all_proteins.fasta.fai          # pyfaidx index
-<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>│   │   │   ├── all_hosts.fasta                 # All hosts merged (50-100 GB)
-<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>│   │   │   └── all_hosts.fasta.fai             # pyfaidx index
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>│   │   │   ├── host_fasta_mapping.json         # Host ID to file mapping
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>│   │   │   └── .host_indexes_complete          # Flag for indexing complete
 <a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>│   │   │
 <a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a>│   │   └── databases/
 <a id="__codelineno-0-80" name="__codelineno-0-80" href="#__codelineno-0-80"></a>│   │       └── phage_database.duckdb           # Complete queryable DB
@@ -1838,22 +1838,22 @@
 <a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>│    (Host_ID, Species, Strain, Accession, Stats, ...)      │
 <a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>└─────────────────────────────────────────────────────────────┘
 <a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>                         │
-<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>                         │ Merge all host genomes
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>                         │ Create host mapping &amp; index files
 <a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a>                         ↓
 <a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>┌─────────────────────────────────────────────────────────────┐
 <a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a>│         data/processed/sequences/                           │
 <a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a>│                                                             │
-<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>│  • all_hosts.fasta (50-100 GB)                             │
-<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>└─────────────────────────────────────────────────────────────┘
-<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>                         │
-<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a>                         │ Create pyfaidx index
-<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a>                         ↓
-<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>┌─────────────────────────────────────────────────────────────┐
-<a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a>│         data/processed/sequences/                           │
-<a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a>│                                                             │
-<a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a>│  • all_hosts.fasta.fai                                     │
-<a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a>└─────────────────────────────────────────────────────────────┘
+<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>│  • host_fasta_mapping.json                                 │
+<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>│  • .host_indexes_complete                                  │
+<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>│                                                             │
+<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a>│  Individual host files with indexes:                       │
+<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a>│  • data/intermediate/fasta/hosts/{Host_ID}.fna            │
+<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>│  • data/intermediate/fasta/hosts/{Host_ID}.fna.fai        │
+<a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a>└─────────────────────────────────────────────────────────────┘
 </code></pre></div>
+<p><strong>Note</strong>: Host genomes are kept as separate indexed files for efficiency
+with 5000-9000 files. The mapping file provides O(1) lookup from Host_ID
+to file path.</p>
 <h2 id="file-naming-conventions">File Naming Conventions<a class="headerlink" href="#file-naming-conventions" title="Permanent link">&para;</a></h2>
 <h3 id="host-genomes">Host Genomes<a class="headerlink" href="#host-genomes" title="Permanent link">&para;</a></h3>
 <p><strong>Pattern</strong>: <code>{Genus}_{species}_{Assembly_Accession}.fna</code></p>
@@ -1879,7 +1879,7 @@
 <p><strong>Examples</strong>:
 - <code>all_phages.fasta.fai</code>
 - <code>all_proteins.fasta.fai</code>
-- <code>all_hosts.fasta.fai</code></p>
+- <code>{Host_ID}.fna.fai</code> (individual host indexes)</p>
 <h2 id="storage-requirements">Storage Requirements<a class="headerlink" href="#storage-requirements" title="Permanent link">&para;</a></h2>
 <h3 id="by-pipeline-stage">By Pipeline Stage<a class="headerlink" href="#by-pipeline-stage" title="Permanent link">&para;</a></h3>
 <table>
@@ -1955,22 +1955,29 @@
 <h2 id="access-patterns">Access Patterns<a class="headerlink" href="#access-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="direct-file-access">Direct File Access<a class="headerlink" href="#direct-file-access" title="Permanent link">&para;</a></h3>
 <p><strong>Individual host genome</strong>:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>cat<span class="w"> </span>data/intermediate/fasta/hosts/Escherichia_coli_GCF_000005845.2.fna
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>cat<span class="w"> </span>data/intermediate/fasta/hosts/GCF_000005845.2.fna
 </code></pre></div></p>
-<p><strong>Merged files</strong>:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Too large for cat, use samtools or pyfaidx</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>samtools<span class="w"> </span>faidx<span class="w"> </span>data/processed/sequences/all_hosts.fasta<span class="w"> </span><span class="s2">&quot;NC_000913.3&quot;</span>
+<p><strong>Access host sequences</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Use samtools with individual files</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>samtools<span class="w"> </span>faidx<span class="w"> </span>data/intermediate/fasta/hosts/GCF_000005845.2.fna
 </code></pre></div></p>
 <h3 id="via-python-pyfaidx">Via Python (pyfaidx)<a class="headerlink" href="#via-python-pyfaidx" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pyfaidx</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fasta</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># Open indexed file</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">hosts</span> <span class="o">=</span> <span class="n">Fasta</span><span class="p">(</span><span class="s1">&#39;data/processed/sequences/all_hosts.fasta&#39;</span><span class="p">)</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1"># Get sequence by ID</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">seq</span> <span class="o">=</span> <span class="n">hosts</span><span class="p">[</span><span class="s1">&#39;NC_000913.3&#39;</span><span class="p">]</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sequence: </span><span class="si">{</span><span class="n">seq</span><span class="p">[:</span><span class="mi">100</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># Load host mapping</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;data/processed/sequences/host_fasta_mapping.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">host_mapping</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="c1"># Get file path for a specific host</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="n">host_id</span> <span class="o">=</span> <span class="s1">&#39;GCF_000005845.2&#39;</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="n">fasta_path</span> <span class="o">=</span> <span class="n">host_mapping</span><span class="p">[</span><span class="n">host_id</span><span class="p">]</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="c1"># Open and read the individual host file</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="n">host_fasta</span> <span class="o">=</span> <span class="n">Fasta</span><span class="p">(</span><span class="n">fasta_path</span><span class="p">)</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="n">seq</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">host_fasta</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Get first sequence ID in file</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">host_fasta</span><span class="p">[</span><span class="n">seq</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sequence: </span><span class="si">{</span><span class="n">host_fasta</span><span class="p">[</span><span class="n">seq</span><span class="p">][:</span><span class="mi">100</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="via-pbi-api">Via PBI API<a class="headerlink" href="#via-pbi-api" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">quick_connect</span>
@@ -1978,8 +1985,10 @@
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1"># Connect to database and sequences</span>
 <a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">retriever</span> <span class="o">=</span> <span class="n">quick_connect</span><span class="p">()</span>
 <a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># Get host genome</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">host_genome</span> <span class="o">=</span> <span class="n">retriever</span><span class="o">.</span><span class="n">get_host_genome</span><span class="p">(</span><span class="s1">&#39;Escherichia_coli_GCF_000005845.2&#39;</span><span class="p">)</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># Get host sequence (on-demand loading from individual files)</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">host_id</span> <span class="o">=</span> <span class="s1">&#39;GCF_000005845.2&#39;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="n">host_sequence</span> <span class="o">=</span> <span class="n">retriever</span><span class="o">.</span><span class="n">get_host_sequence</span><span class="p">(</span><span class="n">host_id</span><span class="p">)</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Host sequence length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">host_sequence</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h2>
 <h3 id="regular-cleanup">Regular Cleanup<a class="headerlink" href="#regular-cleanup" title="Permanent link">&para;</a></h3>
