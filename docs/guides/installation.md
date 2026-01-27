@@ -12,6 +12,63 @@ Get started with PBI for local development and analysis.
 - **RAM**: >32 GB recommended for smooth execution without swapping
 - **Time**: Building the full database takes 2-4 hours on first run
 
+## ⚙️ Environment Variables and Data Paths
+
+**Before you start**, understand where PBI will store data:
+
+### Default Behavior
+
+By default, PBI stores all data in the `./data/` directory relative to your project root:
+
+```bash
+PBI/
+├── data/                          # ~150+ GB total
+│   ├── raw/                       # ~50 GB (downloaded archives)
+│   ├── intermediate/              # ~50 GB (processing files)
+│   └── processed/                 # ~50 GB (final database & sequences)
+│       ├── databases/
+│       ├── sequences/
+│       └── reports/
+```
+
+**⚠️ Important**: Make sure you have at least **150 GB of free disk space** in your project directory, or configure a custom location (see below).
+
+### Custom Data Directory (Recommended)
+
+To store data in a different location (e.g., on a larger disk), set the `PBI_DATA_DIR` environment variable **before** running the pipeline:
+
+```bash
+# Set custom data directory (replace with your desired path)
+export PBI_DATA_DIR="/mnt/large-disk/pbi-data"
+
+# Make it persistent (add to ~/.bashrc or ~/.zshrc)
+echo 'export PBI_DATA_DIR="/mnt/large-disk/pbi-data"' >> ~/.bashrc
+```
+
+The pipeline will then use:
+- `/mnt/large-disk/pbi-data/raw/`
+- `/mnt/large-disk/pbi-data/intermediate/`
+- `/mnt/large-disk/pbi-data/processed/`
+
+### Environment Variables Reference
+
+| Variable | Purpose | Default | Required |
+|----------|---------|---------|----------|
+| `PBI_DATA_DIR` | Base directory for all pipeline data | `./data` | No |
+| `DATA_PATH` | Path for API to find processed data | `data/processed` | Only for API |
+| `NCBI_EMAIL` | Your email for NCBI API | - | For genome downloads |
+| `NCBI_API_KEY` | NCBI API key (increases rate limit) | - | Optional but recommended |
+
+**For API usage**, set `DATA_PATH` to point to the processed data:
+
+```bash
+# If using default location
+export DATA_PATH="data/processed"
+
+# If using custom PBI_DATA_DIR
+export DATA_PATH="/mnt/large-disk/pbi-data/processed"
+```
+
 ## Step-by-Step Installation
 
 ### 1. Clone the Repository

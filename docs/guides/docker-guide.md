@@ -1,8 +1,8 @@
-# Docker Guide
+# Docker Guide for PBI
 
-This guide explains how to run the PBI pipeline and API using Docker.
+This guide explains how to build and run the PBI (Phage Bioinformatics Interface) pipeline and API using Docker.
 
-## 🐳 Overview
+## Overview
 
 The PBI Docker setup consists of two main services:
 
@@ -19,49 +19,157 @@ Both services share a common data volume to ensure the API can access the databa
 - At least 16 GB of RAM (32 GB recommended)
 - Stable internet connection (for initial data download)
 
-## Quick Start
+## Migration Guide for Existing Users
 
-### 1. Build and Run the Pipeline
+If you're upgrading from a previous version of PBI that used relative paths and the old cache configuration, follow these steps to migrate:
 
-First, build the Docker image and run the pipeline to create the database:
+### Step 1: Stop All Containers
 
 ```bash
-# Build the pipeline image
-docker compose build pipeline
+docker compose down
+```
 
-# Run the pipeline (takes 2-4 hours on first run)
+### Step 2: Clear Corrupted Metadata (Optional but Recommended)
+
+The cache structure has changed, so it's best to clear the old metadata while preserving your downloaded data:
+
+```bash
+# Clear the cache volume (preserves data files in pbi-data volume)
+docker run --rm -v pbi-cache:/cache alpine rm -rf /cache/*
+```
+
+**Note**: This only removes Snakemake metadata and conda environments (~2 GB), not your downloaded data files (~50 GB).
+
+### Step 3: Pull Latest Changes
+
+```bash
+git pull origin main
+```
+
+### Step 4: Rebuild Images
+
+Due to changes in the Dockerfile and workflow configuration, you must rebuild with the `--no-cache` flag:
+
+```bash
+docker compose build --no-cache pipeline
+```
+
+### Step 5: Verify Volume Mounts
+
+The new configuration uses:
+- `/data` for all data files (raw, intermediate, processed)
+- `/cache` for Snakemake metadata and conda environments
+
+Check your `docker-compose.yml` to ensure it matches the new structure (see Quick Start section).
+
+### Step 6: Run the Pipeline
+
+```bash
 docker compose run --rm pipeline
 ```
 
+**Expected behavior**:
+- First run: Downloads data to `/data/raw/*_compressed/` (will take 2-4 hours)
+- Extracted files in `/data/raw/*_extracted/` are temporary and removed after merging
+- Downloaded archives persist and won't be re-downloaded on subsequent runs
+- Subsequent runs: "Nothing to be done (all requested files are present and up to date)"
+
+### Step 7: Verify Data Persistence
+
+After the pipeline completes, verify downloaded files persist in the volume:
+
+```bash
+# Check compressed archives (should persist)
+docker run --rm -v pbi-data:/data alpine ls -lh /data/raw/protein_fasta_compressed/
+
+# Check cache (should contain conda environments)
+docker run --rm -v pbi-cache:/cache alpine ls -lh /cache/conda/
+```
+
+### Troubleshooting Migration Issues
+
+**Issue**: "Missing output files" warnings during first run after migration
+
+**Solution**: This is expected if you cleared the cache. Snakemake will detect existing files and skip re-downloading them.
+
+**Issue**: Pipeline re-downloads all data despite existing files
+
+**Solution**: 
+1. Verify paths in `workflow/config/config.yaml` use absolute paths (e.g., `/data/raw/...`)
+2. Ensure `temp()` is removed from download rules in `workflow/rules/phagescope.smk`
+3. Check that volumes are mounted correctly in `docker-compose.yml`
+
+## Quick Start
+
+### 1. Build the Pipeline Image
+
+First, build the Docker image for the pipeline:
+
+```bash
+docker compose build pipeline
+```
+
+This will:
+- Install Snakemake and conda dependencies
+- Set up the workflow environment
+- Prepare the workflow directory
+
+### 2. Run the Pipeline to Build the Database
+
+Run the pipeline to download data and build the database. This process can take 2-4 hours:
+
+```bash
+docker compose run --rm pipeline
+```
+
+The `--rm` flag automatically removes the container after completion.
+
 **What happens during this step:**
-- Downloads ~50 GB of phage genomic data from PhageScope
-- Extracts and processes data from 14+ databases
-- Merges data using chunked processing to avoid memory issues
-- Creates optimized DuckDB database (~15 GB)
-- Generates indexed FASTA files (~100 GB)
-- Produces HTML validation reports
+- Downloads ~50 GB of phage genomic data from multiple sources to `/data/raw/`
+- Extracts and processes data to `/data/intermediate/`
+- Merges data from 14+ databases using chunked processing to avoid out-of-memory errors
+- Creates optimized DuckDB database in `/data/processed/databases/`
+- Generates indexed FASTA files for sequences in `/data/processed/sequences/`
+- Produces validation reports in `workflow/reports/`
 
 **Output files** (stored in the `pbi-data` volume):
 - `/data/processed/databases/phage_database_optimized.duckdb`
 - `/data/processed/sequences/all_phages.fasta` (+ `.fai` index)
 - `/data/processed/sequences/all_proteins.fasta` (+ `.fai` index)
-- `/data/processed/reports/*.html` - Validation and statistics reports
+- `/data/processed/reports/` - HTML reports for data validation and statistics
 
-### 2. Build and Start the API
+**Cache files** (stored in the `pbi-cache` volume):
+- Snakemake metadata and workflow state in `/cache/metadata/`
+- Conda environments (~2 GB) in `/cache/conda/`
+- This volume persists across runs, so failed pipeline runs don't require re-downloading dependencies
 
-Once the pipeline completes, build and start the API service:
+### 3. Build the API Image
+
+Once the pipeline completes successfully, build the API image:
 
 ```bash
-# Build the API image
 docker compose build api
+```
 
-# Start the API service (detached mode)
+### 4. Start the API Service
+
+Start the API service to query the database:
+
+```bash
+docker compose up api
+```
+
+Or run in detached mode:
+
+```bash
 docker compose up -d api
 ```
 
 The API will be available at `http://localhost:8000`
 
-### 3. Test the API
+### 5. Test the API
+
+Once the API is running, test it:
 
 ```bash
 # Check API health
@@ -70,33 +178,124 @@ curl http://localhost:8000/health
 # Get database statistics
 curl http://localhost:8000/stats
 
-# Open interactive API documentation in browser
-# http://localhost:8000/docs
+# Get API documentation (OpenAPI/Swagger)
+# Open in browser: http://localhost:8000/docs
 ```
+
+## API Endpoints
+
+The PBI API provides the following endpoints:
+
+### Health & Status
+
+- `GET /` - API information and available endpoints
+- `GET /health` - Health check (returns 200 if database is connected)
+- `GET /stats` - Database statistics (phage count, protein count, etc.)
+
+### Querying Data
+
+- `POST /query` - Execute custom SQL query
+  ```bash
+  curl -X POST http://localhost:8000/query \
+    -H "Content-Type: application/json" \
+    -d '{"query": "SELECT * FROM fact_phages LIMIT 10"}'
+  ```
+
+- `POST /phages` - Retrieve phage sequences
+  ```bash
+  # By SQL query
+  curl -X POST http://localhost:8000/phages \
+    -H "Content-Type: application/json" \
+    -d '{"query": "SELECT Phage_ID FROM fact_phages WHERE Length > 100000", "limit": 10}'
+  
+  # By IDs
+  curl -X POST http://localhost:8000/phages \
+    -H "Content-Type: application/json" \
+    -d '{"phage_ids": ["NC_000866", "NC_001895"]}'
+  ```
+
+- `POST /proteins` - Retrieve protein sequences
+  ```bash
+  curl -X POST http://localhost:8000/proteins \
+    -H "Content-Type: application/json" \
+    -d '{"query": "SELECT Protein_ID FROM dim_proteins LIMIT 5"}'
+  ```
+
+### FASTA Export
+
+- `POST /phages/fasta` - Get phage sequences in FASTA format
+- `POST /proteins/fasta` - Get protein sequences in FASTA format
+
+```bash
+curl -X POST http://localhost:8000/phages/fasta \
+  -H "Content-Type: application/json" \
+  -d '{"query": "SELECT Phage_ID FROM fact_phages LIMIT 5"}' \
+  > phages.fasta
+```
+
+### Interactive API Documentation
+
+Visit `http://localhost:8000/docs` in your browser for interactive API documentation (Swagger UI).
+
+### Database Schema
+
+The PBI API provides access to a star schema database with the following tables:
+
+**Fact Table:**
+- `fact_phages` - Main phage metadata (Length, GC_content, Taxonomy, Host, Lifestyle, etc.)
+
+**Dimension Tables:**
+- `dim_proteins` - Annotated protein sequences and metadata
+- `dim_terminators` - Transcription terminator predictions
+- `dim_anti_crispr` - Anti-CRISPR protein annotations
+- `dim_virulent_factors` - Virulent factor annotations
+- `dim_transmembrane_proteins` - Transmembrane protein predictions
+- `dim_trna_tmrna` - tRNA and tmRNA annotations
+- `dim_antimicrobial_resistance_genes` - Antimicrobial resistance gene annotations
+- `dim_crispr_arrays` - CRISPR array metadata
+
+**Analytical Views:**
+- `phage_summary` - Aggregated statistics by source database
+- `phage_complete_profile` - Complete phage profiles with all annotations
+- `amr_gene_summary` - Antimicrobial resistance gene statistics
+- `crispr_array_summary` - CRISPR array statistics
+- And many more specialized views for analysis
+
+All tables include a `Source_DB` column to track the origin database (RefSeq, GenBank, PhagesDB, etc.).
 
 ## Common Operations
 
-### View Logs
+### View Pipeline Logs
 
 ```bash
-# Pipeline logs
 docker compose logs pipeline
+```
 
-# API logs (follow in real-time)
+### View API Logs
+
+```bash
+docker compose logs api
+```
+
+### Follow API Logs in Real-time
+
+```bash
 docker compose logs -f api
 ```
 
-### Stop/Restart Services
+### Stop the API
 
 ```bash
-# Stop API
 docker compose down
+```
 
-# Restart API
+### Restart the API
+
+```bash
 docker compose restart api
 ```
 
-### Update the Database
+### Re-run the Pipeline (Update Database)
 
 To rebuild the database with updated data:
 
@@ -111,62 +310,94 @@ docker compose run --rm pipeline
 docker compose up -d api
 ```
 
-### Access Data and Reports
+### Access the Data Volume
+
+To inspect or backup the data:
 
 ```bash
+# List database contents
+docker run --rm -v pbi-data:/data alpine ls -lah /data/processed/databases
+
+# List reports
+docker run --rm -v pbi-data:/data alpine ls -lah /data/processed/reports
+
+# List cache contents
+docker run --rm -v pbi-cache:/cache alpine ls -lah /cache
+
 # Copy database to host
 docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
   cp /data/processed/databases/phage_database_optimized.duckdb /backup/
 
-# Copy all reports to host
+# Copy reports to host
 docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
   cp -r /data/processed/reports /backup/
-
-# List available data
-docker run --rm -v pbi-data:/data alpine ls -lah /data/processed/
+  
+# View a specific report (copy to current directory)
+docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
+  cp /data/processed/reports/database_validation.html /backup/
 ```
 
-## Volume Management
+### Clean Up Everything
 
-The setup uses two Docker volumes:
-
-### `pbi-data` Volume (~60-80 GB)
-Stores all pipeline data:
-- **Raw data**: `/data/raw/` - Downloaded archives and extracted files
-- **Intermediate**: `/data/intermediate/` - Merged CSV and FASTA files
-- **Processed**: `/data/processed/` - Final database, sequences, and reports
-
-### `pbi-cache` Volume (~2-3 GB)
-Stores Snakemake working directory:
-- Conda environments (persists to avoid re-downloading)
-- Workflow metadata
-- Execution logs
-
-**Important**: Both volumes persist even after containers are removed. This speeds up development and prevents data loss.
-
-### Clean Up
+To remove containers, volumes, and images:
 
 ```bash
-# Remove everything (containers + volumes)
+# Stop all services
+docker compose down
+
+# Remove volumes (WARNING: deletes all data!)
 docker compose down -v
 
-# Remove only cache (keeps database)
-docker compose down
-docker volume rm pbi-cache
+# Remove images
+docker rmi pbi-pipeline pbi-api
+```
 
-# Clean up cache using the provided script
+### Clean Cache Only
+
+To remove only the cache volume (Snakemake metadata and conda environments) while keeping the database:
+
+**Option 1: Using the cleanup script (recommended)**
+
+```bash
 ./cleanup_cache.sh
 ```
 
+The script will:
+- Check if the cache volume exists
+- Warn you if containers are using it
+- Prompt for confirmation before deletion
+- Provide next steps after cleanup
+
+**Option 2: Manual cleanup**
+
+```bash
+# Stop all services
+docker compose down
+
+# Remove only the cache volume
+docker volume rm pbi-cache
+
+# Next run will rebuild conda environments but reuse existing data
+docker compose run --rm pipeline
+```
+
+This is useful when you want to:
+- Free up disk space (~2 GB)
+- Force a clean rebuild of conda environments
+- Troubleshoot environment-related issues
+
+**Note**: The cache volume persists across container runs to speed up development. After a failed pipeline run, the cache remains intact, so the next run doesn't need to re-download conda packages or rebuild environments.
+
 ## Customization
 
-### Adjust Resources
+### Adjust Pipeline Resources
 
-Edit `docker-compose.yml`:
+Edit the `docker-compose.yml` file to limit resources:
 
 ```yaml
 services:
   pipeline:
+    # ... existing config ...
     cpus: '4'
     mem_limit: 16g
 ```
@@ -182,9 +413,9 @@ services:
       - "8080:8000"  # Change 8080 to your desired port
 ```
 
-### Use Local Data Directory
+### Mount Local Data Directory
 
-Instead of Docker volumes, mount a local directory:
+To use a local directory instead of a Docker volume:
 
 ```yaml
 services:
@@ -199,15 +430,16 @@ services:
 
 - Check available disk space: `df -h`
 - Clean up Docker: `docker system prune -a --volumes`
+- Clean up cache volume only: `docker volume rm pbi-cache`
 - Ensure at least 60 GB free space
 
 ### API Can't Connect to Database
 
-**Error**: `Database not found`
+**Error**: `Database not found: /data/processed/databases/phage_database_optimized.duckdb`
 
 **Solution**:
 1. Ensure pipeline completed successfully
-2. Check if database exists:
+2. Check if database file exists in volume:
    ```bash
    docker run --rm -v pbi-data:/data alpine ls -lh /data/processed/databases/
    ```
@@ -215,20 +447,33 @@ services:
 
 ### Pipeline Takes Too Long
 
-- First run takes 2-4 hours (downloading ~50 GB)
-- Subsequent runs only process changed data
-- Use fewer cores if I/O bound: `docker compose run --rm pipeline snakemake --cores 2`
+- First run typically takes 2-4 hours due to data download
+- Subsequent runs are faster (only processes changed data)
+- Use `--cores` flag to adjust parallelism:
+  ```bash
+  docker compose run --rm pipeline snakemake --cores 2 --use-conda --printshellcmds
+  ```
+
+### API Startup is Slow
+
+- FASTA file indexing may take 30-60 seconds on first startup
+- This is normal for large files
+- Check logs: `docker compose logs api`
 
 ### Port Already in Use
 
+If port 8000 is already in use:
+
 ```bash
-# Find process using port 8000
+# Find process using port
 lsof -i :8000
 
 # Or change the port in docker-compose.yml
 ```
 
-## Architecture
+## Architecture Details
+
+### Data Flow
 
 ```
 ┌──────────────┐
@@ -244,8 +489,10 @@ lsof -i :8000
 │                             │
 │  /data/processed/           │
 │    ├─ databases/            │
-│    ├─ sequences/            │
-│    └─ reports/              │
+│    │   └─ phage_database... │
+│    └─ sequences/            │
+│        ├─ all_phages.fasta  │
+│        └─ all_proteins...   │
 └──────────┬──────────────────┘
            │ (read-only)
            ▼
@@ -255,9 +502,126 @@ lsof -i :8000
      └─────────┘
 ```
 
+### Volume Management
+
+The `pbi-data` volume is created automatically and persists data between container restarts. This ensures:
+- Database is built once and reused
+- No need to rebuild when restarting API
+- Data survives container removal
+
+The `pbi-cache` volume is also created automatically and persists Snakemake's working directory. This ensures:
+- Conda environments are preserved across runs (~2 GB)
+- Failed pipeline runs don't require re-downloading dependencies
+- Workflow metadata and logs are retained
+- Faster iteration during development and debugging
+
+**Important**: Both volumes persist even when containers are removed with `--rm`. This is intentional to speed up development. Clean them manually when needed (see "Clean Up" sections).
+
+### Data Storage Organization
+
+The pipeline organizes data into three distinct categories, all stored in the `pbi-data` volume:
+
+#### 1. Raw Data (`/data/raw/`)
+Downloaded directly from external sources without modification. This includes:
+- **Compressed FASTA files**: `/data/raw/protein_fasta_compressed/` and `/data/raw/phage_fasta_compressed/`
+  - Downloaded `.tar.gz` archives from PhageScope API
+  - ~50 GB of compressed genomic data
+- **Extracted FASTA files**: `/data/raw/protein_fasta_extracted/` and `/data/raw/phage_fasta_extracted/`
+  - Individual FASTA files extracted from archives
+  - Used as input for merging operations
+
+#### 2. Intermediate Data (`/data/intermediate/`)
+Temporary processing files that are used to build the final outputs:
+- **CSV metadata files**: `/data/intermediate/csv/`
+  - Downloaded TSV files for each feature (phage metadata, protein annotations, etc.)
+  - Individual files per database source
+- **Merged CSV files**: `/data/intermediate/csv/merged/`
+  - Consolidated metadata from all sources
+  - Used to populate the DuckDB database
+- **Merged FASTA files by source**: `/data/intermediate/fasta/phages/` and `/data/intermediate/fasta/proteins/`
+  - One FASTA file per database (RefSeq, GenBank, MGV, etc.)
+  - Intermediate step before final concatenation
+
+#### 3. Processed Data (`/data/processed/`)
+Final, optimized outputs ready for use:
+- **Databases**: `/data/processed/databases/`
+  - `phage_database_optimized.duckdb` - Main queryable database (~10-20 GB)
+- **Sequences**: `/data/processed/sequences/`
+  - `all_phages.fasta` + `.fai` index - Complete phage genome sequences
+  - `all_proteins.fasta` + `.fai` index - Complete protein sequences
+  - Indexed for fast random access
+- **Reports**: `/data/processed/reports/`
+  - HTML reports for data validation and metadata statistics
+  - `database_validation.html` - Database structure and quality validation
+  - `*_metadata_report.html` - Reports for each data type (phage, proteins, etc.)
+
+#### Cache Volume (`pbi-cache`)
+Separate from the data volume, the cache stores Snakemake's working directory:
+- **Location**: `/cache` (inside container)
+- **Contents**:
+  - Conda environments (~2 GB) - Persist across runs to avoid re-downloading packages
+  - Workflow metadata - Tracks which steps completed successfully
+  - Log files - Detailed execution logs
+  
+**Note**: The corrupted metadata warnings shown in the problem statement occur when:
+- Pipeline is interrupted mid-execution
+- Snakemake metadata becomes inconsistent
+- Solution: These warnings are harmless and can be ignored. Snakemake will rebuild affected files.
+
+#### Volume Storage Summary
+
+```
+Docker Volumes:
+├─ pbi-data (main data volume, ~60-80 GB)
+│  ├─ /data/raw/              # Downloaded archives and extracted files
+│  ├─ /data/intermediate/     # Processing artifacts and merged files
+│  └─ /data/processed/        # Final database and sequences (API uses this)
+│
+└─ pbi-cache (Snakemake cache, ~2-3 GB)
+   └─ /cache/  # Conda envs, metadata, logs
+```
+
+## Development
+
+### Mount Source Code for Development
+
+For live code updates without rebuilding:
+
+```yaml
+services:
+  api:
+    volumes:
+      - pbi-data:/data:ro
+      - ./api:/app/api  # Mount API source
+      - ./src:/app/src  # Mount PBI package
+    command: uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Run Pipeline with Custom Snakefile
+
+```bash
+docker compose run --rm pipeline snakemake --cores 4 --use-conda --snakefile /app/workflow/Snakefile
+```
+
+## Performance Considerations
+
+- **Pipeline**: Use 2-4 cores for first run (I/O bound), more cores for subsequent runs
+- **API**: Stateless and lightweight, can handle multiple concurrent requests
+- **Database**: DuckDB is optimized for analytical queries, reads are fast
+- **FASTA**: Indexed with pyfaidx for O(1) random access
+
+## Security Notes
+
+- API runs in read-only mode for data safety
+- Consider adding authentication for production use
+- Limit SQL query capabilities in production
+- Use environment variables for sensitive configuration
+
 ## Next Steps
 
-- Explore the [API documentation](../api/overview.md)
-- Learn about the [database schema](../database/overview.md)
-- See [API usage examples](../api/overview.md#examples)
-- Check the [Command Reference](../reference/commands.md) for more operations
+- Explore the interactive API documentation at `/docs`
+- Query the database using the `/query` endpoint
+- Export sequences in FASTA format
+- Integrate API calls into your bioinformatics workflows
+
+For more information about the PBI project, see the main README.md.

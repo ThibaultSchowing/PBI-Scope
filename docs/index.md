@@ -2,83 +2,165 @@
 
 **Phage-Bacteria Interaction Database Pipeline**
 
-PBI is a comprehensive bioinformatics pipeline and API for aggregating, processing, and querying phage genomic data from multiple public databases. It creates a unified, optimized database from diverse phage data sources including GenBank, RefSeq, PhagesDB, and many more via [PhageScope](https://phagescope.deepomics.org/workspace/).
+PBI is a comprehensive bioinformatics pipeline that integrates phage genomic data from 14+ public databases into a unified, queryable format. Built with Snakemake and powered by DuckDB, it provides fast access to phage genomes, proteins, and metadata for research and analysis.
 
 ## 🚀 Quick Start
 
-Choose your preferred method:
+New to PBI? Get started in minutes:
 
-- **🐳 Docker (Recommended)**: Get started quickly → [Docker Guide](guides/docker-guide.md)
-- **💻 Local Installation**: For development and customization → [Installation Guide](guides/installation.md)
-- **📊 Database Overview**: Explore the data structure → [Database Documentation](database/overview.md)
+<div class="grid cards" markdown>
 
-## 📋 Development Status
+-   :fontawesome-brands-docker: **Docker Setup**
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| **Database Integration** | ✅ Complete | All 9 PhageScope tables integrated into DuckDB |
-| **Database Optimization** | ✅ Complete | Star schema with indexes and materialized views |
-| **Sequence Processing** | ✅ Complete | FASTA indexing with pyfaidx for fast retrieval |
-| **Data Validation** | ✅ Complete | Comprehensive quality checks and HTML reports |
-| **Docker Support** | ✅ Complete | Pipeline and API containers with volume management |
-| **API Development** | 🔄 In Progress | Basic endpoints functional, expanding features |
-| **Python Package** | 🔄 In Progress | Core functionality available, adding features |
-| **Documentation** | 🔄 In Progress | Improving clarity and completeness |
-| **Testing Suite** | 🔄 In Progress | Adding unit and integration tests |
-| **Pipeline Review** | 📆 Planned | Code review and optimization |
-| **Host Genome Retrieval** | 📆 Planned | Bacterial genome fetching from species names |
-| **External Data Integration** | 📆 Planned | Additional databases beyond PhageScope |
+    ---
 
-## 🎯 Project Goals & Roadmap
+    Fastest way to get started. Just build and run!
 
-### Current Focus
-The PhageScope data integration is complete. Current efforts focus on:
-- **API Enhancement**: Expanding endpoints and adding authentication
-- **Python Package**: Developing user-friendly functions for data retrieval and analysis
-- **Documentation**: Creating comprehensive guides and examples
-- **Testing**: Ensuring reliability and correctness
+    ```bash
+    docker compose build pipeline
+    docker compose run --rm pipeline
+    ```
 
-### Future Directions
-From this solid foundation, we plan to:
-1. **Expand Data Sources**: Integrate additional specialized databases
-2. **Host Genome Integration**: Automated retrieval of bacterial genomes matching phages
-3. **Custom Database Schema**: Optimized structure inspired by projects like [INPHINITY](https://www.ingenierie-sante.ch/fr/projects/84/INPHINITY)
-4. **Advanced Analytics**: Built-in analysis tools and machine learning integration
+    [:octicons-arrow-right-24: Docker Guide](guides/docker-guide.md)
 
-## 📊 Current Database
+-   :fontawesome-solid-laptop-code: **Local Installation**
 
-The pipeline has successfully integrated data from **14 major phage databases**:
+    ---
+
+    For development and customization.
+
+    ```bash
+    conda env create -f workflow/envs/base_environment.yaml
+    pip install -e .
+    ./run_local.sh
+    ```
+
+    [:octicons-arrow-right-24: Installation Guide](guides/installation.md)
+
+</div>
+
+## 📊 What You Get
 
 - **~873,000 phage genomes** with complete metadata
 - **~43 million protein annotations** with functional predictions
-- **~6.5 million transcription terminators**
-- **~702,000 tRNA/tmRNA features**
-- **~4 million transmembrane protein predictions**
-- Plus CRISPR systems, virulence factors, and antimicrobial resistance genes
+- **Optimized DuckDB database** (~15 GB) for fast queries
+- **Indexed FASTA files** (~100 GB) with pyfaidx for rapid sequence retrieval
+- **REST API** for programmatic access
+- **Python package** for data analysis and machine learning
 
-**Database Size**: ~15 GB optimized DuckDB  
-**Sequence Files**: ~100 GB indexed FASTA files  
-**Reports**: Comprehensive HTML validation and metadata reports
+## 🔄 Pipeline Overview
 
-📊 [View Database Validation Report](reports/database_validation.html)
+The PBI pipeline follows a systematic data flow from download to analysis-ready outputs:
 
-## 📚 Documentation Structure
+![Pipeline Overview](img/rulegraph.svg)
 
-- **[Guides](guides/overview.md)**: Installation, Docker, and usage guides
-- **[Database](database/overview.md)**: Schema, tables, and data sources
-- **[API Reference](api/overview.md)**: REST API endpoints and examples  
-- **[Command Reference](reference/commands.md)**: Useful commands and snippets
-- **[Developer Guide](developer/code-structure.md)**: Architecture and contributing
+The pipeline:
 
-## 🆘 Support & Contributing
+1. **Downloads** data from PhageScope and other sources
+2. **Extracts & merges** FASTA files and metadata from 14+ databases
+3. **Optimizes** data into a star schema DuckDB database
+4. **Indexes** sequences for fast random access
+5. **Validates** data quality with comprehensive reports
 
-- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/ThibaultSchowing/PBI/issues)
-- **Documentation**: Browse these docs or check inline code comments
-- **Contributing**: See the [Developer Guide](developer/code-structure.md)
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   PBI Pipeline Architecture                  │
+│                                                              │
+│  ┌──────────────┐         ┌──────────────┐                 │
+│  │  Data Sources│         │   Pipeline    │                 │
+│  │  PhageScope  │────────▶│  (Snakemake)  │                 │
+│  │  NCBI RefSeq │         │               │                 │
+│  │  + 12 more   │         └───────┬───────┘                 │
+│  └──────────────┘                 │                         │
+│                                   ▼                         │
+│                        ┌────────────────────┐               │
+│                        │  Data Processing   │               │
+│                        │  - Extract FASTA   │               │
+│                        │  - Merge metadata  │               │
+│                        │  - Optimize schema │               │
+│                        └─────────┬──────────┘               │
+│                                  │                          │
+│                                  ▼                          │
+│                   ┌──────────────────────────┐              │
+│                   │   Final Outputs          │              │
+│                   │  ├─ DuckDB Database      │              │
+│                   │  ├─ Indexed FASTA files  │              │
+│                   │  └─ HTML Reports         │              │
+│                   └──────────┬───────────────┘              │
+│                              │                              │
+│              ┌───────────────┴───────────────┐              │
+│              ▼                               ▼              │
+│     ┌─────────────────┐           ┌──────────────────┐     │
+│     │   REST API      │           │  Python Package  │     │
+│     │   (FastAPI)     │           │  (pbi)           │     │
+│     └─────────────────┘           └──────────────────┘     │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+## 📚 Documentation
+
+<div class="grid cards" markdown>
+
+-   :material-compass: **[Guides](guides/overview.md)**
+
+    ---
+
+    Step-by-step instructions for installation, Docker, and usage
+
+-   :material-database: **[Database](database/overview.md)**
+
+    ---
+
+    Schema documentation, tables, and data sources
+
+-   :material-api: **[API Reference](api/overview.md)**
+
+    ---
+
+    REST API endpoints and examples
+
+-   :material-developer-board: **[Developer Guide](developer/code-structure.md)**
+
+    ---
+
+    Architecture, contributing, and code structure
+
+</div>
+
+## 🎯 Use Cases
+
+PBI is designed for:
+
+- **🔬 Phage Research**: Access comprehensive phage genomic data
+- **🤖 Machine Learning**: Build phage-host interaction prediction models
+- **🧬 Comparative Genomics**: Analyze phage diversity and evolution
+- **💊 Therapeutic Development**: Identify phage candidates for therapy
+- **📊 Meta-analysis**: Aggregate data from multiple databases
+
+## 📈 Current Status
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| **Pipeline** | ✅ Complete | Snakemake workflow with 14+ data sources |
+| **Database** | ✅ Complete | Optimized DuckDB with star schema |
+| **Sequences** | ✅ Complete | Indexed FASTA files (phages, proteins, hosts) |
+| **Docker** | ✅ Complete | Production-ready containers |
+| **Python API** | 🔄 Active | Core functionality available |
+| **REST API** | 🔄 Active | Basic endpoints functional |
+| **Documentation** | 🔄 Active | Continuously improving |
+
+## 🆘 Need Help?
+
+- 📖 Browse the [guides](guides/overview.md) for detailed instructions
+- 🐛 Report issues on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)
+- 💬 Check the [troubleshooting sections](guides/installation.md#troubleshooting) in our guides
 
 ---
 
-**Note**: This project is under active development. Some features are still being refined and tested.
+**Ready to start?** Choose your installation method: [Docker](guides/docker-guide.md) or [Local](guides/installation.md)
 
-_Built with assistance from GitHub Copilot and Claude Sonnet 4.5_
+_This project is under active development. Built with Snakemake, DuckDB, and FastAPI._
 

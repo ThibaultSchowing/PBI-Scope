@@ -25,17 +25,17 @@ Tables and project overview available on [this page](https://thibaultschowing.gi
 
 ## Documentation
 
+**📚 Full Documentation**: https://thibaultschowing.github.io/PBI/
+
 **Getting Started**:
 - 📘 [Installation & Usage](#installation--usage) (below)
-- 🧬 [FASTA Download Guide](docs/FASTA_DOWNLOAD_GUIDE.md) - Comprehensive guide to downloading and organizing FASTA files
-- 🔧 [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) - Setting up NCBI credentials and dependencies
-- 🚀 [Genome Download Quickstart](GENOME_DOWNLOAD_QUICKSTART.md) - Quick start for host genome downloads
+- 🐳 [Docker Guide](https://thibaultschowing.github.io/PBI/guides/docker-guide/) - Running with Docker (recommended)
+- 💻 [Local Installation Guide](https://thibaultschowing.github.io/PBI/guides/installation/) - Development setup
 
-**Advanced**:
+**Advanced Topics**:
+- 🧬 [FASTA Download Guide](docs/FASTA_DOWNLOAD_GUIDE.md) - Downloading and organizing FASTA files
+- 🔧 [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) - Setting up NCBI credentials and dependencies
 - ⚡ [Genome Download Optimization](docs/genome_download_optimization.md) - Technical details on optimized downloader
-- 🔄 [Migration Guide](docs/MIGRATION_GUIDE_OPTIMIZED_DOWNLOADER.md) - Switching to optimized downloader
-- 🐳 [Docker Guide](DOCKER.md) - Running with Docker
-- 💻 [Local Setup Guide](LOCAL_SETUP.md) - Development setup
 
 ## Installation & Usage
 
@@ -57,7 +57,9 @@ curl http://localhost:8000/health
 # Visit http://localhost:8000/docs for interactive API documentation
 ```
 
-See [DOCKER.md](DOCKER.md) for detailed Docker instructions.
+**📁 Data Storage**: Docker uses volumes mounted at `/data` inside containers. All pipeline outputs (database, sequences, reports) are stored in the `pbi-data` Docker volume and persist across container restarts.
+
+See the [Docker Guide](https://thibaultschowing.github.io/PBI/guides/docker-guide/) for detailed instructions.
 
 ### Option 2: Local Development
 
@@ -79,7 +81,17 @@ export DATA_PATH="data/processed"
 uvicorn api.app:app --reload
 ```
 
-See [LOCAL_SETUP.md](LOCAL_SETUP.md) for detailed local setup instructions.
+**📁 Data Storage**: By default, local runs store data in `./data/` directory relative to the project root. You can customize this location by setting the `PBI_DATA_DIR` environment variable before running the pipeline:
+
+```bash
+# Optional: Set custom data directory
+export PBI_DATA_DIR="/path/to/your/data"
+./run_local.sh
+```
+
+**⚠️ Important**: If you don't set `PBI_DATA_DIR`, data will be stored in `./data/` by default (approximately 150+ GB). Make sure you have sufficient disk space in the project directory or set a custom path to a location with adequate storage.
+
+See the [Installation Guide](https://thibaultschowing.github.io/PBI/guides/installation/) for detailed local setup instructions.
 
 ### Quick Start
 
