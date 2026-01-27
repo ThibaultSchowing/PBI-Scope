@@ -80,8 +80,8 @@ PBI/
 │   │   │   ├── all_phages.fasta.fai            # pyfaidx index
 │   │   │   ├── all_proteins.fasta              # All proteins merged (20-30 GB)
 │   │   │   ├── all_proteins.fasta.fai          # pyfaidx index
-│   │   │   ├── all_hosts.fasta                 # All hosts merged (50-100 GB)
-│   │   │   └── all_hosts.fasta.fai             # pyfaidx index
+│   │   │   ├── host_fasta_mapping.json         # Host ID to file mapping
+│   │   │   └── .host_indexes_complete          # Flag for indexing complete
 │   │   │
 │   │   └── databases/
 │   │       └── phage_database.duckdb           # Complete queryable DB
@@ -248,22 +248,23 @@ PBI/
 │    (Host_ID, Species, Strain, Accession, Stats, ...)      │
 └─────────────────────────────────────────────────────────────┘
                          │
-                         │ Merge all host genomes
+                         │ Create host mapping & index files
                          ↓
 ┌─────────────────────────────────────────────────────────────┐
 │         data/processed/sequences/                           │
 │                                                             │
-│  • all_hosts.fasta (50-100 GB)                             │
-└─────────────────────────────────────────────────────────────┘
-                         │
-                         │ Create pyfaidx index
-                         ↓
-┌─────────────────────────────────────────────────────────────┐
-│         data/processed/sequences/                           │
+│  • host_fasta_mapping.json                                 │
+│  • .host_indexes_complete                                  │
 │                                                             │
-│  • all_hosts.fasta.fai                                     │
+│  Individual host files with indexes:                       │
+│  • data/intermediate/fasta/hosts/{Host_ID}.fna            │
+│  • data/intermediate/fasta/hosts/{Host_ID}.fna.fai        │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**Note**: Host genomes are kept as separate indexed files for efficiency
+with 5000-9000 files. The mapping file provides O(1) lookup from Host_ID
+to file path.
 
 ## File Naming Conventions
 
@@ -300,7 +301,7 @@ PBI/
 **Examples**:
 - `all_phages.fasta.fai`
 - `all_proteins.fasta.fai`
-- `all_hosts.fasta.fai`
+- `{Host_ID}.fna.fai` (individual host indexes)
 
 ## Storage Requirements
 
@@ -348,27 +349,34 @@ PBI/
 
 **Individual host genome**:
 ```bash
-cat data/intermediate/fasta/hosts/Escherichia_coli_GCF_000005845.2.fna
+cat data/intermediate/fasta/hosts/GCF_000005845.2.fna
 ```
 
-**Merged files**:
+**Access host sequences**:
 ```bash
-# Too large for cat, use samtools or pyfaidx
-samtools faidx data/processed/sequences/all_hosts.fasta "NC_000913.3"
+# Use samtools with individual files
+samtools faidx data/intermediate/fasta/hosts/GCF_000005845.2.fna
 ```
 
 ### Via Python (pyfaidx)
 
 ```python
 from pyfaidx import Fasta
+import json
 
-# Open indexed file
-hosts = Fasta('data/processed/sequences/all_hosts.fasta')
+# Load host mapping
+with open('data/processed/sequences/host_fasta_mapping.json', 'r') as f:
+    host_mapping = json.load(f)
 
-# Get sequence by ID
-seq = hosts['NC_000913.3']
-print(f"Length: {len(seq)}")
-print(f"Sequence: {seq[:100]}")
+# Get file path for a specific host
+host_id = 'GCF_000005845.2'
+fasta_path = host_mapping[host_id]
+
+# Open and read the individual host file
+host_fasta = Fasta(fasta_path)
+seq = list(host_fasta.keys())[0]  # Get first sequence ID in file
+print(f"Length: {len(host_fasta[seq])}")
+print(f"Sequence: {host_fasta[seq][:100]}")
 ```
 
 ### Via PBI API
@@ -379,8 +387,10 @@ from pbi import quick_connect
 # Connect to database and sequences
 retriever = quick_connect()
 
-# Get host genome
-host_genome = retriever.get_host_genome('Escherichia_coli_GCF_000005845.2')
+# Get host sequence (on-demand loading from individual files)
+host_id = 'GCF_000005845.2'
+host_sequence = retriever.get_host_sequence(host_id)
+print(f"Host sequence length: {len(host_sequence)}")
 ```
 
 ## Maintenance

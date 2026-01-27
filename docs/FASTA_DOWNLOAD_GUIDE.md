@@ -70,22 +70,27 @@ All downloaded files are organized, validated, and indexed for efficient access 
    - Requires NCBI email and API key
 
 **File Locations**:
-- Individual genomes: `/data/intermediate/fasta/hosts/{Species_Name}_{Assembly_Accession}.fna`
-- Merged file: `/data/processed/sequences/all_hosts.fasta`
-- Index: `/data/processed/sequences/all_hosts.fasta.fai`
+- Individual genomes: `/data/intermediate/fasta/hosts/{Host_ID}.fna`
+- Host mapping: `/data/processed/sequences/host_fasta_mapping.json`
+- Index complete flag: `/data/processed/sequences/.host_indexes_complete`
+- Individual indexes: `/data/intermediate/fasta/hosts/{Host_ID}.fna.fai`
 - Metadata: `/data/intermediate/csv/merged/host_metadata.csv`
 - Cache (optimized): `/data/cache/genomes/`
 - Cache database: `/data/cache/metadata.db`
 
 **File Naming Convention**:
 ```
-{Genus}_{species}_{Assembly_Accession}.fna
+{Host_ID}.fna
 
 Examples:
-- Escherichia_coli_GCF_000005845.2.fna
-- Staphylococcus_aureus_GCF_000013425.1.fna
-- Pseudomonas_aeruginosa_GCF_000006765.1.fna
+- GCF_000005845.2.fna (Escherichia coli)
+- GCF_000013425.1.fna (Staphylococcus aureus)
+- GCF_000006765.1.fna (Pseudomonas aeruginosa)
 ```
+
+**Note**: Host genomes are **not merged** into a single file. Instead, each host genome 
+is kept as a separate indexed file for better performance and efficiency. The mapping 
+file provides quick lookup from Host_ID to file path.
 
 ## File Organization
 
@@ -102,8 +107,10 @@ data/
 ├── intermediate/                             # Intermediate processing files
 │   ├── fasta/
 │   │   ├── hosts/                            # Individual host genome files
-│   │   │   ├── Escherichia_coli_GCF_000005845.2.fna
-│   │   │   ├── Staphylococcus_aureus_GCF_000013425.1.fna
+│   │   │   ├── GCF_000005845.2.fna          # Individual host genome
+│   │   │   ├── GCF_000005845.2.fna.fai      # Index for that genome
+│   │   │   ├── GCF_000013425.1.fna
+│   │   │   ├── GCF_000013425.1.fna.fai
 │   │   │   └── ...
 │   │   ├── phages/                           # Phage FASTA by source
 │   │   │   ├── GenBank.fasta
@@ -124,8 +131,8 @@ data/
 │   │   ├── all_phages.fasta.fai              # Index for phages
 │   │   ├── all_proteins.fasta                # All proteins merged
 │   │   ├── all_proteins.fasta.fai            # Index for proteins
-│   │   ├── all_hosts.fasta                   # All hosts merged
-│   │   └── all_hosts.fasta.fai               # Index for hosts
+│   │   ├── host_fasta_mapping.json           # Host ID to file path mapping
+│   │   └── .host_indexes_complete            # Flag indicating indexing complete
 │   └── databases/
 │       └── phage_database.duckdb             # Complete database
 │
