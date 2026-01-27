@@ -30,7 +30,8 @@ class SequenceRetriever:
     """
     
     def __init__(self, db_path: str, phage_fasta_path: str, protein_fasta_path: str, 
-                 host_fasta_path: Optional[str] = None, preload: bool = True):
+                 host_fasta_path: Optional[str] = None, host_mapping_path: Optional[str] = None,
+                 preload: bool = True):
         """
         Initialize SequenceRetriever with lazy FASTA loading
         
@@ -38,7 +39,8 @@ class SequenceRetriever:
             db_path: Path to DuckDB database
             phage_fasta_path: Path to indexed phage FASTA file
             protein_fasta_path: Path to indexed protein FASTA file
-            host_fasta_path: Path to indexed host FASTA file (optional)
+            host_fasta_path: Path to indexed host FASTA file (DEPRECATED - use host_mapping_path)
+            host_mapping_path: Path to JSON mapping file for individual host FASTA files
             preload: If True, load FASTA files in background thread (default: True)
         """
         # Validate paths
@@ -62,14 +64,33 @@ class SequenceRetriever:
         if not protein_index.exists():
             raise FileNotFoundError(f"Protein FASTA index not found: {protein_index}")
         
-        # Validate host FASTA if provided
-        self._host_fasta_path = host_fasta_path
-        self._host_fasta = None
+        # Initialize host data handling
+        self._host_fasta_path = host_fasta_path  # Legacy single-file mode
+        self._host_mapping_path = host_mapping_path  # New mapping mode
+        self._host_mapping = None  # Mapping from Host_ID to file path
+        self._host_fasta_cache = {}  # Cache of loaded Fasta objects per host
+        self._host_fasta = None  # For legacy single-file mode
         self._host_lock = threading.Lock()
         self._host_count = None
         self._has_host_data = False
+        self._use_host_mapping = False
         
-        if host_fasta_path:
+        # Check if using new mapping-based approach
+        if host_mapping_path:
+            if Path(host_mapping_path).exists():
+                logging.info(f"📂 Using host mapping file: {host_mapping_path}")
+                self._has_host_data = True
+                self._use_host_mapping = True
+                # Load mapping file
+                import json
+                with open(host_mapping_path, 'r') as f:
+                    self._host_mapping = json.load(f)
+                self._host_count = len(self._host_mapping)
+                logging.info(f"   Loaded mapping for {self._host_count} hosts")
+            else:
+                logging.warning(f"⚠️  Host mapping file not found: {host_mapping_path}")
+        # Fallback to legacy single-file mode
+        elif host_fasta_path:
             if Path(host_fasta_path).exists():
                 host_index = Path(str(host_fasta_path) + '.fai')
                 if host_index.exists():
@@ -147,8 +168,8 @@ class SequenceRetriever:
             elapsed = time.time() - start
             logging.info(f"   ✅ Protein FASTA loaded in {elapsed:.2f}s ({self._protein_count:,} sequences)")
             
-            # Load host FASTA if available
-            if self._has_host_data and self._host_fasta_path:
+            # Load host FASTA if available (only for legacy single-file mode)
+            if self._has_host_data and self._host_fasta_path and not self._use_host_mapping:
                 logging.info(f"🔄 [Background] Loading host FASTA: {self._host_fasta_path}")
                 start = time.time()
                 
@@ -163,6 +184,8 @@ class SequenceRetriever:
                 
                 elapsed = time.time() - start
                 logging.info(f"   ✅ Host FASTA loaded in {elapsed:.2f}s ({self._host_count:,} sequences)")
+            elif self._use_host_mapping:
+                logging.info(f"   ℹ️  Using on-demand loading for {self._host_count:,} individual host files")
             
             # Mark as complete
             self._loading_complete.set()
@@ -231,10 +254,24 @@ class SequenceRetriever:
     
     @property
     def host_fasta(self):
-        """Get host FASTA, loading if necessary"""
-        if not self._has_host_data:
-            raise ValueError("Host FASTA not configured - pass host_fasta_path to __init__")
+        """
+        Get host FASTA, loading if necessary
         
+        DEPRECATED: This property is maintained for backward compatibility
+        but is not recommended when using host_mapping_path. Use 
+        get_host_sequence() method instead for individual host access.
+        """
+        if not self._has_host_data:
+            raise ValueError("Host FASTA not configured - pass host_fasta_path or host_mapping_path to __init__")
+        
+        # If using mapping mode, raise a deprecation warning
+        if self._use_host_mapping:
+            raise ValueError(
+                "Direct access to host_fasta is not available when using host_mapping_path. "
+                "Use get_host_sequence(host_id) method instead to load individual host files on-demand."
+            )
+        
+        # Legacy single-file mode
         if self._host_fasta is None:
             with self._host_lock:
                 if self._host_fasta is None:  # Double-check locking
@@ -249,6 +286,81 @@ class SequenceRetriever:
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
         return self._host_fasta
+    
+    def _get_host_fasta_for_id(self, host_id: str) -> Fasta:
+        """
+        Get Fasta object for a specific host ID (used in mapping mode)
+        
+        Args:
+            host_id: Host identifier
+            
+        Returns:
+            Fasta object for the host genome
+            
+        Raises:
+            KeyError: If host_id not found in mapping
+            FileNotFoundError: If host file doesn't exist
+        """
+        if not self._use_host_mapping:
+            # Should not be called in legacy mode
+            raise RuntimeError("This method is only for host mapping mode")
+        
+        # Check if already cached
+        if host_id in self._host_fasta_cache:
+            return self._host_fasta_cache[host_id]
+        
+        # Get file path from mapping
+        if host_id not in self._host_mapping:
+            raise KeyError(f"Host ID '{host_id}' not found in mapping")
+        
+        fasta_path = self._host_mapping[host_id]
+        
+        # Load the fasta file
+        with self._host_lock:
+            if host_id not in self._host_fasta_cache:  # Double-check locking
+                logging.debug(f"Loading host FASTA for {host_id}: {fasta_path}")
+                fasta_obj = Fasta(
+                    fasta_path,
+                    rebuild=False,
+                    split_char='\x00',
+                    read_long_names=True
+                )
+                self._host_fasta_cache[host_id] = fasta_obj
+        
+        return self._host_fasta_cache[host_id]
+    
+    def get_host_sequence(self, host_id: str) -> str:
+        """
+        Get sequence for a specific host ID
+        
+        Works with both legacy single-file mode and new mapping mode.
+        In mapping mode, loads individual host files on-demand.
+        
+        Args:
+            host_id: Host identifier
+            
+        Returns:
+            Host sequence as string
+            
+        Raises:
+            KeyError: If host_id not found
+        """
+        if not self._has_host_data:
+            raise ValueError("Host FASTA not configured")
+        
+        if self._use_host_mapping:
+            # New mapping mode - load individual file
+            fasta_obj = self._get_host_fasta_for_id(host_id)
+            # The fasta file should contain the host genome
+            # Get the first (and typically only) sequence
+            keys = list(fasta_obj.keys())
+            if not keys:
+                raise KeyError(f"No sequences found in host file for {host_id}")
+            # Return the sequence from the file
+            return str(fasta_obj[keys[0]][:].seq)
+        else:
+            # Legacy mode - use single merged file
+            return str(self.host_fasta[host_id][:].seq)
     
     def wait_until_ready(self, timeout: Optional[float] = None):
         """
@@ -358,8 +470,13 @@ class SequenceRetriever:
                     "SELECT COUNT(*) FROM phage_host_associations"
                 ).fetchone()[0]
                 
-                _ = self.host_fasta
-                stats['fasta']['hosts'] = self._host_count if self._host_count else len(self.host_fasta.keys())
+                # For mapping mode, use the count from the mapping
+                if self._use_host_mapping:
+                    stats['fasta']['hosts'] = self._host_count
+                else:
+                    # Legacy mode - access the merged file
+                    _ = self.host_fasta
+                    stats['fasta']['hosts'] = self._host_count if self._host_count else len(self.host_fasta.keys())
             except Exception as e:
                 logging.warning(f"Host data configured but tables not found. Run host genome workflow first. Error: {e}")
                 self._has_host_data = False  # Disable host support if tables don't exist
@@ -399,11 +516,12 @@ class SequenceRetriever:
             raise ValueError(
                 "Host data not available. Please run the host genome download workflow first:\n"
                 "  snakemake --use-conda --cores 1 all_hosts\n"
-                "Or check that host_fasta_path was provided when creating SequenceRetriever."
+                "Or check that host_fasta_path or host_mapping_path was provided when creating SequenceRetriever."
             )
         
-        # Ensure host FASTA is loaded
-        _ = self.host_fasta
+        # In legacy mode, ensure host FASTA is loaded
+        if not self._use_host_mapping:
+            _ = self.host_fasta
         
         logging.info(f"🔍 Executing query: {query[:100]}...")
         
@@ -467,9 +585,11 @@ class SequenceRetriever:
         if not self._has_host_data:
             raise ValueError("Host data not available - run host genome download workflow first")
         
-        # Ensure FASTA files are loaded
+        # Ensure FASTA files are loaded (phage always needs to be loaded)
         _ = self.phage_fasta
-        _ = self.host_fasta
+        # For legacy mode, ensure host FASTA is loaded
+        if not self._use_host_mapping:
+            _ = self.host_fasta
         
         # Build query
         query = """
@@ -518,8 +638,8 @@ class SequenceRetriever:
         # Fetch host sequences (unique only)
         for host_id in set(host_ids):
             try:
-                seq = self.host_fasta[host_id][:].seq
-                host_seqs[host_id] = str(seq)
+                seq = self.get_host_sequence(host_id)
+                host_seqs[host_id] = seq
             except KeyError:
                 host_seqs[host_id] = None
         
@@ -560,12 +680,12 @@ class SequenceRetriever:
         
         for host_id in host_ids:
             try:
-                seq = self.host_fasta[host_id][:].seq
+                seq_str = self.get_host_sequence(host_id)
                 sequences.append({
                     'Host_ID': host_id,
-                    'Sequence': str(seq),
-                    'Length': len(seq),
-                    'GC_Content': round(gc_fraction(seq) * 100, 2) if len(seq) > 0 else 0.0
+                    'Sequence': seq_str,
+                    'Length': len(seq_str),
+                    'GC_Content': round(gc_fraction(seq_str) * 100, 2) if len(seq_str) > 0 else 0.0
                 })
             except KeyError:
                 missing_ids.append(host_id)

@@ -34,77 +34,79 @@ rule download_host_genomes:
         "../scripts/sequences/download_host_genomes.py"
 
 
-rule merge_host_fasta:
+rule create_host_mapping:
     """
-    Merge all individual host genome FASTA files into single file
+    Create mapping file from Host_ID to individual FASTA file paths
     
-    Similar to phage and protein FASTA merging, combines all downloaded
-    host genomes into one indexed file for efficient retrieval.
+    Instead of merging all host genomes, this creates a JSON mapping that allows
+    on-demand loading of individual host genome files for efficient memory usage.
     """
     input:
         metadata = config["host_metadata_output"]
     output:
-        fasta = config["all_hosts_fasta"]
+        mapping = config["host_fasta_mapping"]
     params:
         input_dir = config["host_genomes_intermediate"]
     log:
-        "logs/merge_host_fasta.log"
+        "logs/create_host_mapping.log"
     run:
-        import os
+        import json
         from pathlib import Path
         import pandas as pd
         
         # Read metadata to get list of Host_IDs
         metadata_df = pd.read_csv(input.metadata)
         
-        output_path = Path(output.fasta)
+        output_path = Path(output.mapping)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
         input_dir = Path(params.input_dir)
         
-        # Find all FASTA files based on Host_IDs in metadata
-        valid_files = []
+        # Create mapping from Host_ID to file path
+        host_mapping = {}
+        valid_count = 0
+        missing_count = 0
+        
         for _, row in metadata_df.iterrows():
             host_id = row['Host_ID']
             fasta_file = input_dir / f"{host_id}.fna"
             
             if fasta_file.exists() and fasta_file.stat().st_size > 0:
-                valid_files.append(fasta_file)
+                host_mapping[host_id] = str(fasta_file)
+                valid_count += 1
             else:
+                missing_count += 1
                 print(f"⚠️ Missing or empty file: {fasta_file}", file=open(log[0], 'a'))
         
-        if not valid_files:
+        if not host_mapping:
             raise ValueError("❌ No valid host FASTA files found!")
         
-        # Merge files
-        with open(output.fasta, 'w') as outfile:
-            for fasta_file in valid_files:
-                with open(fasta_file, 'r') as infile:
-                    content = infile.read()
-                    if content.strip():
-                        outfile.write(content)
-                        if not content.endswith('\n'):
-                            outfile.write('\n')
+        # Write mapping to JSON file
+        with open(output.mapping, 'w') as f:
+            json.dump(host_mapping, f, indent=2)
         
-        print(f"✅ Merged {len(valid_files)} host FASTA files", file=open(log[0], 'a'))
+        print(f"✅ Created mapping for {valid_count} host FASTA files", file=open(log[0], 'a'))
+        if missing_count > 0:
+            print(f"⚠️ {missing_count} host files were missing or empty", file=open(log[0], 'a'))
 
 
-rule index_host_sequences:
+rule index_individual_host_sequences:
     """
-    Create pyfaidx index for host genome FASTA file
+    Create pyfaidx indexes for individual host genome FASTA files
     
-    Generates .fai index file for fast random access to host sequences.
+    Generates .fai index files for each host genome to enable fast random access
+    without needing to merge all files into one large file.
     """
     input:
-        config["all_hosts_fasta"]
+        mapping = config["host_fasta_mapping"]
     output:
-        config["all_hosts_fasta"] + ".fai"
+        touch(config["host_index_complete_flag"])
     log:
-        "logs/index_host_sequences.log"
+        "logs/index_individual_host_sequences.log"
     conda:
         "../envs/sequences.yaml"
     script:
-        "../scripts/sequences/index_sequences.py"
+        "../scripts/sequences/index_individual_hosts.py"
 
 
 rule all_hosts:
@@ -112,5 +114,6 @@ rule all_hosts:
     Target rule for all host genome processing
     """
     input:
-        config["all_hosts_fasta"] + ".fai",
+        config["host_index_complete_flag"],
+        config["host_fasta_mapping"],
         config["host_metadata_output"]
