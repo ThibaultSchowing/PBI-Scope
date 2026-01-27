@@ -416,8 +416,6 @@ cat workflow/config/genome_download_config.yaml
 
 ## Related Documentation
 
-- **Quick Start**: [GENOME_DOWNLOAD_QUICKSTART.md](../GENOME_DOWNLOAD_QUICKSTART.md)
 - **Optimization Details**: [genome_download_optimization.md](genome_download_optimization.md)
-- **Main README**: [README.md](../README.md)
-- **Docker Setup**: [DOCKER.md](../DOCKER.md)
-- **Local Setup**: [LOCAL_SETUP.md](../LOCAL_SETUP.md)
+- **Installation Guide**: [Installation Guide](guides/installation.md)
+- **Docker Setup**: [Docker Guide](guides/docker-guide.md)

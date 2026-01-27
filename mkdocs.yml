@@ -49,6 +49,11 @@ nav:
   - Changelog: changelog.md
   - Archive:
       - README: archive/README.md
+      - Docker Architecture: archive/DOCKER_ARCHITECTURE.md
+      - Genome Download Quickstart: archive/GENOME_DOWNLOAD_QUICKSTART.md
+      - Implementation Summary: archive/IMPLEMENTATION_SUMMARY.md
+      - Local Setup: archive/LOCAL_SETUP.md
+      - Old Docker Guide: archive/DOCKER.md
 
 markdown_extensions:
   - admonition
