@@ -14,6 +14,7 @@ import time
 import logging
 import subprocess
 import json
+import re
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
@@ -75,6 +76,10 @@ class HostGenomeDownloader:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_output.parent.mkdir(parents=True, exist_ok=True)
         
+        # Status tracking file for resume capability
+        self.status_file = self.metadata_output.parent / "host_download_status.json"
+        self.download_status = self._load_download_status()
+        
         # Track download status
         self.successful_downloads = []
         self.failed_downloads = []
@@ -83,7 +88,120 @@ class HostGenomeDownloader:
         logging.info(f"   Phage CSV: {self.phage_csv_path}")
         logging.info(f"   Output directory: {self.output_dir}")
         logging.info(f"   Metadata output: {self.metadata_output}")
+        logging.info(f"   Status file: {self.status_file}")
         logging.info(f"   NCBI email: {self.ncbi_email}")
+        
+        # Log resume information
+        if self.download_status:
+            success_count = sum(1 for s in self.download_status.values() if s == 'success')
+            fail_count = sum(1 for s in self.download_status.values() if s == 'failed')
+            logging.info(f"   Resuming: {success_count} successful, {fail_count} failed from previous run")
+    
+    def _load_download_status(self) -> Dict[str, str]:
+        """
+        Load download status from JSON file
+        
+        Returns:
+            Dictionary mapping species_name -> status ('success', 'failed', or 'not_attempted')
+        """
+        if self.status_file.exists():
+            try:
+                with open(self.status_file, 'r') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, IOError) as e:
+                logging.warning(f"Could not load status file: {e}. Starting fresh.")
+                return {}
+        return {}
+    
+    def _save_download_status(self):
+        """
+        Save download status to JSON file atomically
+        
+        Uses atomic write (write to temp file, then rename) to prevent corruption
+        """
+        try:
+            # Write to temporary file first
+            temp_file = self.status_file.with_suffix('.json.tmp')
+            with open(temp_file, 'w') as f:
+                json.dump(self.download_status, f, indent=2)
+            
+            # Atomic rename
+            temp_file.replace(self.status_file)
+        except (IOError, OSError) as e:
+            logging.warning(f"Could not save status file: {e}")
+            # Clean up temp file if it exists
+            if temp_file.exists():
+                try:
+                    temp_file.unlink()
+                except Exception:
+                    pass  # Ignore cleanup errors
+    
+    def _update_status(self, species_name: str, status: str):
+        """
+        Update status for a species and save to file
+        
+        Args:
+            species_name: Species name
+            status: One of 'success', 'failed', 'not_attempted'
+        """
+        self.download_status[species_name] = status
+        self._save_download_status()
+    
+    def _reconstruct_metadata_from_file(self, species_name: str) -> Optional[Dict]:
+        """
+        Reconstruct metadata from existing genome file
+        
+        This is used when resuming and the genome file exists but metadata wasn't saved.
+        Scans output directory for files matching the species name.
+        
+        Args:
+            species_name: Species name (e.g., "Escherichia coli")
+        
+        Returns:
+            Dictionary with host metadata or None if file not found
+        """
+        # Search for files matching this species
+        species_clean = species_name.replace(' ', '_')
+        matching_files = list(self.output_dir.glob(f"{species_clean}_*.fna"))
+        
+        if not matching_files:
+            return None
+        
+        # Use the first matching file (should only be one per species)
+        fasta_path = matching_files[0]
+        
+        # Extract Host_ID from filename
+        host_id = fasta_path.stem
+        
+        # Extract accession using regex for GenBank/RefSeq format (GCF_ or GCA_ followed by digits and version)
+        accession_match = re.search(r'(GC[AF]_\d+\.\d+)', host_id)
+        if not accession_match:
+            logging.warning(f"Could not extract accession from filename: {host_id}")
+            return None
+        
+        accession = accession_match.group(1)
+        
+        # Calculate statistics from file
+        genome_length, gc_content = self.calculate_genome_stats(fasta_path)
+        
+        # Create minimal metadata record
+        metadata = {
+            'Host_ID': host_id,
+            'Species_Name': species_name,
+            'Strain_Name': '-',
+            'Assembly_Accession': accession,
+            'Assembly_Name': '-',
+            'Assembly_Level': '-',
+            'Genome_Length': genome_length,
+            'GC_Content': gc_content,
+            'RefSeq_Category': '-',
+            'Download_Date': datetime.fromtimestamp(fasta_path.stat().st_mtime).strftime('%Y-%m-%d'),
+            'Source': 'reconstructed'
+        }
+        
+        logging.info(f"   📄 Reconstructed metadata from existing file: {host_id}")
+        
+        return metadata
     
     def get_unique_hosts_from_csv(self) -> List[str]:
         """
@@ -491,6 +609,19 @@ class HostGenomeDownloader:
         """
         logging.info(f"🔍 Processing: {species_name}")
         
+        # Check if already successfully downloaded
+        if self.download_status.get(species_name) == 'success':
+            logging.info(f"   ✅ Already downloaded successfully (skipping)")
+            
+            # Try to reconstruct metadata from existing file
+            metadata = self._reconstruct_metadata_from_file(species_name)
+            if metadata:
+                return metadata
+            else:
+                # If reconstruction fails, mark for re-download
+                logging.warning(f"   ⚠️  Could not reconstruct metadata, will re-download")
+                self._update_status(species_name, 'not_attempted')
+        
         # Search for assembly (try datasets CLI first, then Entrez)
         assembly_info = self.search_refseq_assembly_datasets(species_name)
         
@@ -500,6 +631,7 @@ class HostGenomeDownloader:
         
         if not assembly_info:
             logging.warning(f"   ❌ No assembly found for {species_name}")
+            self._update_status(species_name, 'failed')
             return None
         
         # Create Host_ID
@@ -534,6 +666,7 @@ class HostGenomeDownloader:
             
             if not success:
                 logging.warning(f"   ❌ Download failed after {self.max_retries} attempts")
+                self._update_status(species_name, 'failed')
                 return None
             
             # Calculate statistics
@@ -554,6 +687,9 @@ class HostGenomeDownloader:
             'Download_Date': datetime.now().strftime('%Y-%m-%d'),
             'Source': assembly_info.get('source', 'unknown')
         }
+        
+        # Mark as successful
+        self._update_status(species_name, 'success')
         
         return metadata
     
@@ -596,6 +732,20 @@ class HostGenomeDownloader:
         if limit:
             logging.info(f"⚠️  Limiting to {limit} species for testing")
             species_list = species_list[:limit]
+        
+        # Count how many need to be downloaded vs skipped
+        to_process = []
+        skipped = []
+        for species in species_list:
+            if self.download_status.get(species) == 'success':
+                skipped.append(species)
+            else:
+                to_process.append(species)
+        
+        logging.info(f"📊 Resume Summary:")
+        logging.info(f"   Total species: {len(species_list)}")
+        logging.info(f"   Already completed: {len(skipped)}")
+        logging.info(f"   To process: {len(to_process)}")
         
         # Download genomes
         host_records = []

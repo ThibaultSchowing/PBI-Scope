@@ -189,8 +189,9 @@ Keep using the original script but have the optimized version available for spec
 - ✅ Simple, well-tested
 - ✅ No external config needed
 - ✅ Works with existing Snakefile
-- ⚠️ No caching
-- ⚠️ No progress tracking
+- ✅ Resume capability via status file (since v0.2)
+- ⚠️ No advanced caching
+- ⚠️ Basic progress tracking
 - ⚠️ Downloads GTDB identifiers (wasteful)
 
 **Optimized (`download_host_genomes_optimized.py`)**:
