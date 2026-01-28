@@ -186,6 +186,10 @@ class TestAssemblyResolver(unittest.TestCase):
             self.assertTrue(assembly.is_refseq())
             self.assertIn("Bacillus", assembly.organism_name)
     
+    @unittest.skipIf(
+        not os.environ.get('NCBI_EMAIL'),
+        "Skipping NCBI API test (set NCBI_EMAIL to run)"
+    )
     def test_ambiguity_handling(self):
         """Test that ambiguous species names are handled"""
         # This test just ensures no exceptions are raised
@@ -200,6 +204,10 @@ class TestAssemblyResolver(unittest.TestCase):
         except Exception as e:
             self.fail(f"Ambiguous name handling failed: {e}")
     
+    @unittest.skipIf(
+        not os.environ.get('NCBI_EMAIL'),
+        "Skipping NCBI API test (set NCBI_EMAIL to run)"
+    )
     def test_invalid_identifier(self):
         """Test handling of invalid identifiers"""
         assemblies = self.resolver.resolve("INVALID_ID_12345")

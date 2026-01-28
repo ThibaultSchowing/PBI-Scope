@@ -686,6 +686,10 @@ def create_star_schema_duckdb():
     logging.info(f"   • CRISPR Arrays: {crispr_count:,}")
     if host_count > 0:
         logging.info(f"   • Host Genomes: {host_count:,}")
+    if assembly_metadata_count > 0:
+        logging.info(f"   • Assembly Metadata: {assembly_metadata_count:,}")
+    if phage_host_links_count > 0:
+        logging.info(f"   • Phage-Host Links: {phage_host_links_count:,}")
 
 if __name__ == "__main__":
     create_star_schema_duckdb()
