@@ -292,7 +292,7 @@ def create_star_schema_duckdb():
                 Assembly_Accession,
                 Assembly_Name,
                 Assembly_Level,
-                TRY_CAST(NULLIF(Genome_Length, '-') AS INTEGER) as Genome_Length,
+                TRY_CAST(NULLIF(Genome_Length, '-') AS BIGINT) as Genome_Length,
                 TRY_CAST(NULLIF(GC_Content, '-') AS DOUBLE) as GC_Content,
                 RefSeq_Category,
                 Download_Date,
@@ -313,6 +313,76 @@ def create_star_schema_duckdb():
     else:
         logging.info("⚠️  Skipping dim_hosts table (host metadata not available yet)")
         logging.info("   Host genomes can be downloaded after database creation")
+    
+    # 10a. CREATE DIM_ASSEMBLY_METADATA TABLE (NEW - comprehensive assembly info)
+    # This table contains detailed assembly metadata from the robust downloader
+    assembly_metadata_count = 0
+    assembly_metadata_path = snakemake.config.get('assembly_metadata_output', None)
+    if assembly_metadata_path and os.path.exists(assembly_metadata_path):
+        logging.info("Creating dim_assembly_metadata table")
+        try:
+            conn.execute(f"""
+            CREATE TABLE dim_assembly_metadata AS
+            SELECT
+                Assembly_Accession,
+                Assembly_Name,
+                Organism_Name,
+                TRY_CAST(NULLIF(Species_TaxID, '-') AS INTEGER) as Species_TaxID,
+                Strain,
+                Assembly_Level,
+                RefSeq_Category,
+                BioSample,
+                BioProject,
+                FTP_Path,
+                Submission_Date,
+                TRY_CAST(Is_Latest AS BOOLEAN) as Is_Latest,
+                TRY_CAST(Quality_Score AS INTEGER) as Quality_Score,
+                TRY_CAST(Is_RefSeq AS BOOLEAN) as Is_RefSeq,
+                Download_Status,
+                Download_Date,
+                TRY_CAST(Metadata_Only AS BOOLEAN) as Metadata_Only
+            FROM read_csv('{assembly_metadata_path}',
+                          header=true,
+                          all_varchar=true,
+                          ignore_errors=true,
+                          null_padding=true)
+            WHERE Assembly_Accession IS NOT NULL
+            """)
+            
+            assembly_metadata_count = conn.execute("SELECT COUNT(*) FROM dim_assembly_metadata").fetchone()[0]
+            logging.info(f"✅ Created dim_assembly_metadata: {assembly_metadata_count:,} rows")
+        except Exception as e:
+            logging.warning(f"⚠️  Could not create dim_assembly_metadata table: {e}")
+    
+    # 10b. CREATE DIM_PHAGE_HOST_LINKS TABLE (NEW - phage to host assembly links)
+    # This table links phages to their host assembly accessions
+    phage_host_links_count = 0
+    phage_host_links_path = snakemake.config.get('phage_host_links_output', None)
+    if phage_host_links_path and os.path.exists(phage_host_links_path):
+        logging.info("Creating dim_phage_host_links table")
+        try:
+            conn.execute(f"""
+            CREATE TABLE dim_phage_host_links AS
+            SELECT
+                Phage_ID,
+                Host_Species,
+                Host_Full_Name,
+                Assembly_Accession,
+                Assembly_Level,
+                RefSeq_Category,
+                Link_Quality
+            FROM read_csv('{phage_host_links_path}',
+                          header=true,
+                          all_varchar=true,
+                          ignore_errors=true,
+                          null_padding=true)
+            WHERE Phage_ID IS NOT NULL AND Assembly_Accession IS NOT NULL
+            """)
+            
+            phage_host_links_count = conn.execute("SELECT COUNT(*) FROM dim_phage_host_links").fetchone()[0]
+            logging.info(f"✅ Created dim_phage_host_links: {phage_host_links_count:,} rows")
+        except Exception as e:
+            logging.warning(f"⚠️  Could not create dim_phage_host_links table: {e}")
 
     # CREATE PERFORMANCE INDEXES
     logging.info("Creating indexes")
@@ -361,6 +431,17 @@ def create_star_schema_duckdb():
         conn.execute("CREATE INDEX idx_hosts_id ON dim_hosts(Host_ID)")
         conn.execute("CREATE INDEX idx_hosts_species ON dim_hosts(Species_Name)")
         conn.execute("CREATE INDEX idx_hosts_accession ON dim_hosts(Assembly_Accession)")
+    
+    # Indexes for assembly metadata table (if it exists)
+    if assembly_metadata_count > 0:
+        conn.execute("CREATE INDEX idx_assembly_accession ON dim_assembly_metadata(Assembly_Accession)")
+        conn.execute("CREATE INDEX idx_assembly_organism ON dim_assembly_metadata(Organism_Name)")
+        conn.execute("CREATE INDEX idx_assembly_taxid ON dim_assembly_metadata(Species_TaxID)")
+    
+    # Indexes for phage-host links table (if it exists)
+    if phage_host_links_count > 0:
+        conn.execute("CREATE INDEX idx_phage_host_phage ON dim_phage_host_links(Phage_ID)")
+        conn.execute("CREATE INDEX idx_phage_host_assembly ON dim_phage_host_links(Assembly_Accession)")
     
     # CREATE ANALYTICAL VIEWS
     logging.info("Creating analytical views")
