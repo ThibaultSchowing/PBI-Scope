@@ -2,7 +2,7 @@
 
 **Phage-Bacteria Interaction Database Pipeline**
 
-PBI is a comprehensive bioinformatics pipeline that integrates phage genomic data from 14+ public databases into a unified, queryable format. Built with Snakemake and powered by DuckDB, it provides fast access to phage genomes, proteins, and metadata for research and analysis.
+PBI is a comprehensive bioinformatics pipeline that integrates phage genomic data from the [PhageScope databases](https://phagescope.deepomics.org/database) into a unified, queryable format. Built with Snakemake and powered by DuckDB, it provides fast access to phage genomes, proteins, and metadata for research and analysis. It also includes available host reference genomes obtained from the RefSeq database. Further developpment will aim to provide the precise strain of the host when available.
 
 ## 🚀 Quick Start
 

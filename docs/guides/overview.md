@@ -13,7 +13,12 @@ The fastest way to get PBI up and running. Ideal for:
 - Production deployments
 - Users who prefer containers
 
-**Time to first query**: ~2-4 hours (mostly downloading data)
+**Time to first query**: 
+- ~2-4 hours for the PhageScope phages data (mostly downloading data)
+- ~ 18 hours for the download of bacterial hosts 
+   - 9000 genomes attempts
+   - Use Entrez API key to maximize the request rate
+   
 
 ### 💻 [Local Installation](installation.md)
 For development and customization. Best for:

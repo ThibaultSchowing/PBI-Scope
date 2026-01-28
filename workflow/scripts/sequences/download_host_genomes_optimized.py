@@ -28,7 +28,7 @@ from typing import List, Dict, Optional, Tuple, Set
 from datetime import datetime
 from collections import defaultdict
 import pandas as pd
-from Bio import Entrez, SeqIO
+from Bio import Entrez, SeqIO 
 from Bio.SeqUtils import gc_fraction
 
 try:
