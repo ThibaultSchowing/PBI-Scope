@@ -14,7 +14,17 @@ rule download_host_genomes:
     Download host bacterial genomes from NCBI RefSeq
     
     This rule extracts unique host species from the phage metadata CSV and downloads
-    reference genomes for each using NCBI datasets CLI (primary) or Entrez API (fallback).
+    reference genomes for each using either:
+    - Robust downloader (recommended): assembly_resolver.py + download_host_genomes_robust.py
+    - Legacy downloader: download_host_genomes.py or download_host_genomes_optimized.py
+    
+    The robust downloader:
+    - Uses NCBI Assembly database as authoritative source
+    - Normalizes all identifiers to assembly accessions (GCF_ preferred)
+    - Handles ambiguity in species names explicitly
+    - Supports metadata-only mode (no downloads)
+    - Preserves existing downloads with validation
+    - Creates phage-host assembly links
     
     Note: Reads from CSV instead of database to avoid circular dependency
     (database is created after host downloads).
@@ -22,16 +32,25 @@ rule download_host_genomes:
     input:
         phage_csv = config["phage_metadata_merged_output"]
     output:
-        metadata = config["host_metadata_output"]
+        metadata = config["host_metadata_output"],
+        assembly_metadata = config.get("assembly_metadata_output", 
+                                       config["host_metadata_output"].replace('.csv', '_assemblies.csv')),
+        phage_host_links = config.get("phage_host_links_output",
+                                      config["host_metadata_output"].replace('.csv', '_phage_host_links.csv'))
     params:
         output_dir = config["host_genomes_intermediate"],
-        limit = None  # Set to integer for testing with subset of hosts
+        limit = None,  # Set to integer for testing with subset of hosts
+        metadata_only = config.get("metadata_only_mode", False),
+        skip_existing = config.get("skip_existing_downloads", True),
+        validate_checksums = config.get("validate_file_checksums", True),
+        use_robust_downloader = config.get("use_robust_downloader", True)  # Use new robust downloader by default
     log:
         config["host_download_log"]
     conda:
         "../envs/sequences.yaml"
     script:
-        "../scripts/sequences/download_host_genomes.py"
+        # Use robust downloader if enabled, otherwise use legacy downloader
+        "../scripts/sequences/download_host_genomes_robust.py" if params.use_robust_downloader else "../scripts/sequences/download_host_genomes.py"
 
 
 rule create_host_mapping:

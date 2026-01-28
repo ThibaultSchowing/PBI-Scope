@@ -38,6 +38,8 @@ host_genomes_intermediate: "/data/intermediate/fasta/hosts"
 host_fasta_mapping: "/data/processed/sequences/host_fasta_mapping.json"
 host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
+assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"
+phage_host_links_output: "/data/intermediate/csv/merged/phage_host_links.csv"
 host_download_log: "/data/logs/host_download.log"
 host_failure_log: "/data/logs/host_download_failures.log"
 
@@ -47,6 +49,9 @@ max_host_download_retries: 3
 host_download_delay: 0.5  # seconds between requests
 prefer_complete_genomes: true
 assembly_levels: ["Complete Genome", "Chromosome", "Scaffold"]  # Priority order
+metadata_only_mode: false  # Set to true to skip downloads and only gather metadata
+skip_existing_downloads: true  # Skip already downloaded genomes
+validate_file_checksums: true  # Validate downloaded file integrity
 
 
 protein_fasta_urls:
