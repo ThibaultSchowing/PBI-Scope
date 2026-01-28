@@ -525,16 +525,21 @@ class AssemblyResolver:
             elif 'FtpPath_GenBank' in doc_sum and doc_sum['FtpPath_GenBank']:
                 ftp_path = doc_sum['FtpPath_GenBank']
             
+            # Extract strain field with proper None handling
+            strain = doc_sum.get('Biosource', {}).get('InfraspecificNames', {}).get('Strain', '')
+            if not strain or strain.strip() == '':
+                strain = None
+            
             return AssemblyMetadata(
                 assembly_accession=doc_sum.get('AssemblyAccession', ''),
                 assembly_name=doc_sum.get('AssemblyName', ''),
                 organism_name=doc_sum.get('SpeciesName', ''),
                 species_taxid=int(doc_sum['SpeciesTaxid']) if 'SpeciesTaxid' in doc_sum else None,
-                strain=doc_sum.get('Biosource', {}).get('InfraspecificNames', {}).get('Strain', ''),
+                strain=strain,
                 assembly_level=doc_sum.get('AssemblyStatus', 'Contig'),
                 refseq_category=doc_sum.get('RefSeq_category', 'na'),
-                biosample=doc_sum.get('BioSampleAccn', ''),
-                bioproject=doc_sum.get('BioprojectAccn', ''),
+                biosample=doc_sum.get('BioSampleAccn', '') or None,
+                bioproject=doc_sum.get('BioprojectAccn', '') or None,
                 ftp_path=ftp_path,
                 submission_date=doc_sum.get('SubmissionDate', ''),
                 is_latest='latest' in doc_sum.get('PropertyList', [])

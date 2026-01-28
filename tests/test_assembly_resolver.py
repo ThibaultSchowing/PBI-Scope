@@ -33,8 +33,8 @@ class TestAssemblyResolver(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up test fixtures"""
-        # Use environment variables or mock email
-        cls.ncbi_email = os.environ.get('NCBI_EMAIL', 'test@example.com')
+        # Use environment variables or clearly marked test email
+        cls.ncbi_email = os.environ.get('NCBI_EMAIL', 'pbi-test@example.org')
         cls.ncbi_api_key = os.environ.get('NCBI_API_KEY', None)
         
         # Initialize resolver

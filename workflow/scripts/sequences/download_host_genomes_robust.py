@@ -363,8 +363,12 @@ class RobustHostGenomeDownloader:
         """
         Validate file integrity
         
-        For now, just checks if file exists and has non-zero size.
-        Could be enhanced with MD5 checksums from NCBI.
+        Checks:
+        1. File exists and has non-zero size
+        2. For FASTA files, validates basic structure
+        
+        Note: Could be enhanced with MD5 checksum validation using NCBI's
+        checksum files for more rigorous validation.
         """
         if not file_path.exists():
             return False
@@ -372,16 +376,33 @@ class RobustHostGenomeDownloader:
         if file_path.stat().st_size == 0:
             return False
         
-        # For FASTA files, try to parse first record
+        # For FASTA files, validate structure more thoroughly
         if file_path.suffix == '.gz' and '.fna' in file_path.name:
             try:
                 with gzip.open(file_path, 'rt') as f:
-                    # Try to read first 100 lines
-                    for i, line in enumerate(f):
-                        if i > 100:
+                    # Read file in chunks to detect corruption throughout
+                    chunk_size = 1024 * 1024  # 1MB chunks
+                    has_header = False
+                    has_sequence = False
+                    
+                    while True:
+                        chunk = f.read(chunk_size)
+                        if not chunk:
                             break
-                return True
-            except Exception:
+                        
+                        # Check for FASTA headers
+                        if '>' in chunk:
+                            has_header = True
+                        
+                        # Check for sequence content
+                        if any(c in chunk for c in 'ACGTN'):
+                            has_sequence = True
+                    
+                    # Valid FASTA must have both headers and sequences
+                    return has_header and has_sequence
+                    
+            except Exception as e:
+                logging.debug(f"FASTA validation failed for {file_path}: {e}")
                 return False
         
         return True
@@ -407,9 +428,13 @@ class RobustHostGenomeDownloader:
         # Create output filename: {Assembly_Accession}.fna
         output_file = self.output_dir / f"{assembly.assembly_accession.replace('.', '_')}.fna"
         
-        # Skip if exists
+        # Skip if exists and validated
         if self.skip_existing and output_file.exists():
-            return output_file
+            if self._validate_file(output_file):
+                return output_file
+            else:
+                # Remove corrupted file
+                output_file.unlink()
         
         # Decompress and write
         try:
@@ -422,6 +447,8 @@ class RobustHostGenomeDownloader:
             
         except Exception as e:
             logging.error(f"   ❌ Failed to create host FASTA: {e}")
+            if output_file.exists():
+                output_file.unlink()  # Clean up partial file
             return None
     
     def process_all_hosts(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -463,6 +490,14 @@ class RobustHostGenomeDownloader:
                     host_fasta = self.create_host_fasta(assembly, downloaded_files)
                 else:
                     logging.warning(f"   ⚠️  Download failed for {assembly.assembly_accession}")
+                    # Clean up partial downloads
+                    if assembly_subdir.exists():
+                        import shutil
+                        try:
+                            shutil.rmtree(assembly_subdir)
+                            logging.info(f"   🧹 Cleaned up partial download directory")
+                        except Exception as e:
+                            logging.warning(f"   ⚠️  Could not clean up directory: {e}")
             
             # Create assembly metadata record
             assembly_record = {
@@ -642,8 +677,12 @@ def main():
         parser.add_argument('--ncbi-email', default=os.environ.get('NCBI_EMAIL'), help='NCBI email')
         parser.add_argument('--ncbi-api-key', default=os.environ.get('NCBI_API_KEY'), help='NCBI API key')
         parser.add_argument('--metadata-only', action='store_true', help='Metadata only mode')
-        parser.add_argument('--skip-existing', action='store_true', default=True, help='Skip existing files')
-        parser.add_argument('--validate-checksums', action='store_true', default=True, help='Validate checksums')
+        parser.add_argument('--skip-existing', action='store_true', help='Skip existing files')
+        parser.add_argument('--no-skip-existing', dest='skip_existing', action='store_false', help='Re-download existing files')
+        parser.set_defaults(skip_existing=True)
+        parser.add_argument('--validate-checksums', action='store_true', help='Validate checksums')
+        parser.add_argument('--no-validate-checksums', dest='validate_checksums', action='store_false', help='Skip checksum validation')
+        parser.set_defaults(validate_checksums=True)
         parser.add_argument('--download-optional', action='store_true', help='Download optional files')
         
         args = parser.parse_args()

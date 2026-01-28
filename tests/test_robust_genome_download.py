@@ -34,8 +34,8 @@ class TestRobustHostGenomeDownloader(unittest.TestCase):
         self.phage_csv = self.temp_path / "phages.csv"
         self._create_test_phage_csv()
         
-        # Test email
-        self.ncbi_email = os.environ.get('NCBI_EMAIL', 'test@example.com')
+        # Test email - require environment variable or use clearly marked test email
+        self.ncbi_email = os.environ.get('NCBI_EMAIL', 'pbi-test@example.org')
     
     def tearDown(self):
         """Clean up test files"""
