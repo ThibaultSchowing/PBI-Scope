@@ -53,7 +53,7 @@ def validate_database():
         ]
         
         # Optional tables (may not exist on first run)
-        optional_tables = ['dim_hosts']
+        optional_tables = ['dim_hosts', 'dim_assembly_metadata', 'dim_phage_host_links']
         
         missing_tables = [t for t in expected_tables if t not in table_names]
         missing_optional = [t for t in optional_tables if t not in table_names]

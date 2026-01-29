@@ -123,6 +123,7 @@ async def root():
         "endpoints": {
             "health": "/health",
             "stats": "/stats",
+            "tables": "/tables",
             "query": "/query (POST)",
             "phages": "/phages (POST)",
             "proteins": "/proteins (POST)",
@@ -155,6 +156,38 @@ async def get_statistics():
         return stats
     except Exception as e:
         logger.error(f"Error getting statistics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/tables")
+async def list_tables():
+    """List all tables and views in the database."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        # Get all tables
+        tables_result = retriever.conn.execute("SHOW TABLES").fetchdf()
+        tables = tables_result['name'].tolist() if 'name' in tables_result.columns else []
+        
+        # Get all views (DuckDB shows views in SHOW TABLES, but we can also query information_schema)
+        views_result = retriever.conn.execute(
+            "SELECT table_name FROM information_schema.tables WHERE table_type = 'VIEW'"
+        ).fetchdf()
+        views = views_result['table_name'].tolist() if 'table_name' in views_result.columns else []
+        
+        # Separate tables and views
+        table_names = [t for t in tables if t not in views]
+        
+        return {
+            "success": True,
+            "rows": len(tables),
+            "tables": len(table_names),
+            "views": len(views),
+            "data": [{"name": name, "type": "view" if name in views else "table"} for name in tables]
+        }
+    except Exception as e:
+        logger.error(f"Error listing tables: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
