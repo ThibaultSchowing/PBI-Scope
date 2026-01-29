@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
+import numpy as np
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -208,6 +209,10 @@ async def execute_query(request: QueryRequest):
         # Apply limit if specified
         if request.limit:
             result = result.head(request.limit)
+        
+        # Replace NaN and Infinity with None for JSON serialization
+        result = result.replace([np.inf, -np.inf], None)
+        result = result.replace({np.nan: None})
         
         return {
             "success": True,

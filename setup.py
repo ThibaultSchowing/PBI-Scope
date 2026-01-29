@@ -27,6 +27,7 @@ setup(
         "duckdb>=0.9.0",
         "pyfaidx>=0.7.0",
         "pandas>=2.0.0",
+        "numpy>=1.24.0",
         "biopython>=1.80",
     ],
     
@@ -41,6 +42,7 @@ setup(
             "matplotlib>=3.5",
             "seaborn>=0.12",
             "biopython>=1.80",
+            "numpy>=1.24.0",
         ],
     },
     
