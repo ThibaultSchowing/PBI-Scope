@@ -27,6 +27,7 @@ setup(
         "duckdb>=0.9.0",
         "pyfaidx>=0.7.0",
         "pandas>=2.0.0",
+        "biopython>=1.80",
     ],
     
     # Optional dependencies for development
