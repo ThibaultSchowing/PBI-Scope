@@ -14,10 +14,8 @@ rule create_duckdb:
         crispr_array_data=config["crispr_array_metadata_merged_output"],
         # Host metadata files (ensure database is created after host downloads)
         host_metadata=config["host_metadata_output"],
-        assembly_metadata=config.get("assembly_metadata_output", 
-                                     config["host_metadata_output"].replace('.csv', '_assemblies.csv')),
-        phage_host_links=config.get("phage_host_links_output",
-                                    config["host_metadata_output"].replace('.csv', '_phage_host_links.csv'))
+        assembly_metadata=config["assembly_metadata_output"],
+        phage_host_links=config["phage_host_links_output"]
     output:
         db=config["duckdb_output"]
     conda:
