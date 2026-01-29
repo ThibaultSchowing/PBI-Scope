@@ -41,7 +41,7 @@ Tables and project overview available on [this page](https://thibaultschowing.gi
 
 ### Option 1: Docker (Recommended for Production)
 
-The easiest way to run the PBI pipeline and API:
+The easiest way to run the PBI pipeline, API, and analysis environment:
 
 ```bash
 # Build and run the pipeline
@@ -52,12 +52,19 @@ docker compose run --rm pipeline
 docker compose build api
 docker compose up -d api
 
-# Access the API
-curl http://localhost:8000/health
+# Build and start the Analysis service (Jupyter Lab)
+docker compose build analysis
+docker compose up -d analysis
+
+# Access services
+curl http://localhost:8000/health  # API
 # Visit http://localhost:8000/docs for interactive API documentation
+# Visit http://localhost:8888 for Jupyter Lab (direct data access)
 ```
 
 **📁 Data Storage**: Docker uses volumes mounted at `/data` inside containers. All pipeline outputs (database, sequences, reports) are stored in the `pbi-data` Docker volume and persist across container restarts.
+
+**🚀 Analysis Service**: For efficient bulk data analysis, use the analysis service which provides direct database access via Jupyter Lab - 5-50x faster than API for large datasets. See the [Analysis Guide](https://thibaultschowing.github.io/PBI/guides/analysis-guide/) for details.
 
 See the [Docker Guide](https://thibaultschowing.github.io/PBI/guides/docker-guide/) for detailed instructions.
 

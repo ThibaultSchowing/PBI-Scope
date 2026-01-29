@@ -36,6 +36,25 @@ services:
       - pbi-network
     restart: unless-stopped
 
+  # Analysis service for direct data access and Jupyter notebooks
+  analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile.analysis
+    container_name: pbi-analysis
+    ports:
+      - "8888:8888"
+    volumes:
+      # Mount data directory (read-only for safety)
+      - pbi-data:/data:ro
+      # Mount notebooks directory for persistent work
+      - ./notebooks:/workspace
+    environment:
+      - DATA_PATH=/data/processed
+    networks:
+      - pbi-network
+    restart: unless-stopped
+
 volumes:
   # Named volume for persistent data storage
   pbi-data:
