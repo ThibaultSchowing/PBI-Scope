@@ -455,6 +455,16 @@ Retrieving sequences takes several minutes
    index_file = Path(str(fasta_file) + ".fai")
    print(f"Index exists: {index_file.exists()}")
    ```
+   
+   **If index files are missing**: Re-run the pipeline as it should create them automatically:
+   ```bash
+   docker compose run --rm pipeline
+   ```
+   
+   **Alternative**: Manually create indexes (requires pyfaidx installed):
+   ```bash
+   docker compose exec analysis python -c "from pyfaidx import Fasta; Fasta('/data/processed/sequences/all_phages.fasta')"
+   ```
 
 2. Retrieve sequences in batches, not individually:
    ```python
@@ -544,13 +554,28 @@ FileNotFoundError: /data/processed/databases/phage_database_optimized.duckdb
 
 ### Parallel Processing
 
-For CPU-intensive tasks, use multiprocessing:
+For CPU-intensive tasks, use multiprocessing with caution:
 
 ```python
 from multiprocessing import Pool
-from functools import partial
 
-def process_batch(batch_ids, retriever):
+def process_batch(batch_ids):
+    """
+    Create a new retriever instance in each worker process.
+    
+    Note: SequenceRetriever contains database connections and file handles
+    that cannot be pickled across processes. Always create a new instance
+    in the worker function.
+    """
+    from pbi import SequenceRetriever
+    
+    # Create new retriever in worker process
+    retriever = SequenceRetriever(
+        db_path="/data/processed/databases/phage_database_optimized.duckdb",
+        phage_fasta_path="/data/processed/sequences/all_phages.fasta",
+        protein_fasta_path="/data/processed/sequences/all_proteins.fasta"
+    )
+    
     sequences = retriever.get_sequences_by_ids(batch_ids, sequence_type='phage')
     # Process sequences...
     return results
@@ -558,12 +583,16 @@ def process_batch(batch_ids, retriever):
 # Split IDs into batches
 batches = [phage_ids[i:i+1000] for i in range(0, len(phage_ids), 1000)]
 
-# Process in parallel (careful with memory!)
+# Process in parallel
 with Pool(processes=4) as pool:
-    results = pool.map(partial(process_batch, retriever=retriever), batches)
+    results = pool.map(process_batch, batches)
 ```
 
-**⚠️ Note**: Be careful with memory when using parallel processing. Monitor usage closely.
+**⚠️ Important Notes:**
+- Always create new SequenceRetriever instances in worker processes
+- Database connections and file handles are not pickle-able
+- Monitor memory usage closely - each process will load its own FASTA indexes
+- For large-scale parallel processing, consider using Dask or Ray instead
 
 ### Caching Results
 

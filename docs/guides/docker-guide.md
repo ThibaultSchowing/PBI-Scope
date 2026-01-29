@@ -203,6 +203,21 @@ docker compose up -d analysis
 
 The Jupyter Lab interface will be available at `http://localhost:8888`
 
+**⚠️ Security Warning**: Jupyter Lab runs **without authentication** for local development convenience. This configuration is **not suitable for production** or network-exposed deployments.
+
+**Security Recommendations:**
+- **Local Development**: Only access via `http://localhost:8888` on the host machine
+- **Remote Access**: Use SSH tunneling instead of exposing the port:
+  ```bash
+  # On your local machine
+  ssh -L 8888:localhost:8888 user@remote-server
+  # Then access http://localhost:8888 in your local browser
+  ```
+- **Production Use**: Either:
+  - Set `restart: "no"` in docker-compose.yml and only start manually when needed
+  - Configure Jupyter authentication by modifying the Dockerfile
+  - Use a reverse proxy with authentication (e.g., nginx with basic auth)
+
 **Key Features:**
 - **Direct database access** - 5-50x faster than API for bulk operations
 - **Read-only access** - Safe access to production data
@@ -820,12 +835,16 @@ docker compose restart analysis
 
 ### Performance Comparison: API vs Analysis
 
+The following table shows **representative performance metrics** based on typical operations. Actual performance may vary depending on hardware, data size, and query complexity:
+
 | Operation | API | Analysis | Speedup |
 |-----------|-----|----------|---------|
 | Query 10K records | ~2s | ~0.1s | 20x |
 | Export 100K records | ~30s | ~1s | 30x |
 | Complex join | Not feasible | ~0.5s | N/A |
 | Sequence retrieval (1000) | ~10s | ~1s | 10x |
+
+**Note**: These are estimates to illustrate the order-of-magnitude improvements. For your specific use case, run the performance comparison section in `analysis_direct_access_guide.ipynb` to measure actual performance.
 
 For detailed usage, examples, and best practices, see the [Analysis Guide](analysis-guide.md).
 

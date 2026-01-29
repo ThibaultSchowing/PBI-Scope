@@ -16,9 +16,12 @@ RUN apt-get update && apt-get install -y \
 COPY src /app/src
 COPY setup.py /app/
 
-# NOTE: SSL verification is temporarily disabled due to self-signed certificates in
-# the GitHub Actions CI environment. In production, ensure proper CA certificates are
-# configured. This matches the approach in workflow/Dockerfile.
+# NOTE: SSL verification workaround for GitHub Actions CI environment
+# This Dockerfile uses --trusted-host flags to work around self-signed certificates
+# in the CI environment. In production, these flags can be removed if you have
+# proper CA certificates configured. To use without these flags, remove the
+# --trusted-host options from the pip install commands below.
+
 # Install PBI package with analysis extras
 RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -e /app/
 
@@ -35,9 +38,14 @@ RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pyth
     pyarrow>=14.0.0
 
 # Configure Jupyter Lab
-# - Disable authentication for local development
-# - Allow root (for Docker container)
-# - Set notebook directory
+# WARNING: This configuration disables authentication for LOCAL DEVELOPMENT ONLY.
+# For production or shared environments:
+# 1. Set a token: c.ServerApp.token = 'your-secure-token'
+# 2. Set a password: use `jupyter lab password` to hash a password
+# 3. Use SSL/TLS certificates for encrypted connections
+# 4. Or use a reverse proxy with authentication (e.g., nginx)
+# 
+# NEVER expose port 8888 to untrusted networks with this configuration.
 RUN jupyter lab --generate-config && \
     echo "c.ServerApp.token = ''" >> ~/.jupyter/jupyter_lab_config.py && \
     echo "c.ServerApp.password = ''" >> ~/.jupyter/jupyter_lab_config.py && \

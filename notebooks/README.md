@@ -63,6 +63,17 @@ Introduction to:
 
 ### Using the Analysis Service (Recommended)
 
+**⚠️ Security Note**: The analysis service runs Jupyter Lab without authentication for local development convenience. **Do not expose port 8888 to untrusted networks.** For remote access, use SSH tunneling:
+
+```bash
+# On remote server
+docker compose up -d analysis
+
+# On local machine
+ssh -L 8888:localhost:8888 user@remote-server
+# Then access http://localhost:8888 locally
+```
+
 1. **Start the Analysis container:**
    ```bash
    docker compose up -d analysis
