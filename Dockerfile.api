@@ -14,9 +14,8 @@ RUN pip install --no-cache-dir -e . && \
     pip install --no-cache-dir -r api/requirements.txt
 
 # Expose API port
-#EXPOSE 8000
-ports:
-- "8000:8000"
+EXPOSE 8000
+
 
 # Set environment variable for data path
 ENV DATA_PATH=/data/processed
