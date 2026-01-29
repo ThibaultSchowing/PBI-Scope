@@ -8,6 +8,8 @@ data/
 *.csv
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+notebooks/exports/
+notebooks/.cache/
 
 # C extensions
 *.so

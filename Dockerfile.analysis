@@ -16,11 +16,14 @@ RUN apt-get update && apt-get install -y \
 COPY src /app/src
 COPY setup.py /app/
 
+# NOTE: SSL verification is temporarily disabled due to self-signed certificates in
+# the GitHub Actions CI environment. In production, ensure proper CA certificates are
+# configured. This matches the approach in workflow/Dockerfile.
 # Install PBI package with analysis extras
-RUN pip install --no-cache-dir -e /app/
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -e /app/
 
 # Install Jupyter and scientific computing stack
-RUN pip install --no-cache-dir \
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org \
     jupyterlab==4.0.9 \
     duckdb>=0.9.0 \
     pyfaidx>=0.7.0 \
