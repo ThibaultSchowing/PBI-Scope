@@ -22,8 +22,10 @@ def create_star_schema_duckdb():
     crispr_array_data = snakemake.input.crispr_array_data
     db_path = snakemake.output.db
     
-    # Optional: host metadata (may not exist on first database creation)
-    host_metadata_path = snakemake.config.get('host_metadata_output', None)
+    # Host metadata files (now provided as inputs from Snakemake rule)
+    host_metadata_path = snakemake.input.get('host_metadata', None)
+    assembly_metadata_path = snakemake.input.get('assembly_metadata', None)
+    phage_host_links_path = snakemake.input.get('phage_host_links', None)
     
     # Create output directory
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
@@ -317,7 +319,6 @@ def create_star_schema_duckdb():
     # 10a. CREATE DIM_ASSEMBLY_METADATA TABLE (NEW - comprehensive assembly info)
     # This table contains detailed assembly metadata from the robust downloader
     assembly_metadata_count = 0
-    assembly_metadata_path = snakemake.config.get('assembly_metadata_output', None)
     if assembly_metadata_path and os.path.exists(assembly_metadata_path):
         logging.info("Creating dim_assembly_metadata table")
         try:
@@ -357,7 +358,6 @@ def create_star_schema_duckdb():
     # 10b. CREATE DIM_PHAGE_HOST_LINKS TABLE (NEW - phage to host assembly links)
     # This table links phages to their host assembly accessions
     phage_host_links_count = 0
-    phage_host_links_path = snakemake.config.get('phage_host_links_output', None)
     if phage_host_links_path and os.path.exists(phage_host_links_path):
         logging.info("Creating dim_phage_host_links table")
         try:

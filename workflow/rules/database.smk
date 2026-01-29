@@ -11,7 +11,13 @@ rule create_duckdb:
         transmembrane_data=config["phage_transmembrane_protein_metadata_merged_output"],
         trna_tmrna_data=config["phage_trna_tmrna_metadata_merged_output"],
         antimicrobial_resistance_data=config["antimicrobial_resistance_gene_metadata_merged_output"],
-        crispr_array_data=config["crispr_array_metadata_merged_output"]
+        crispr_array_data=config["crispr_array_metadata_merged_output"],
+        # Host metadata files (ensure database is created after host downloads)
+        host_metadata=config["host_metadata_output"],
+        assembly_metadata=config.get("assembly_metadata_output", 
+                                     config["host_metadata_output"].replace('.csv', '_assemblies.csv')),
+        phage_host_links=config.get("phage_host_links_output",
+                                    config["host_metadata_output"].replace('.csv', '_phage_host_links.csv'))
     output:
         db=config["duckdb_output"]
     conda:
