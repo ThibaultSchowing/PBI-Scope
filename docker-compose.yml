@@ -30,8 +30,8 @@ services:
       - pbi-data:/data:ro
     environment:
       - DATA_PATH=/data/processed
-    depends_on:
-      - pipeline
+    #depends_on:
+    #  - pipeline
     networks:
       - pbi-network
     restart: unless-stopped
