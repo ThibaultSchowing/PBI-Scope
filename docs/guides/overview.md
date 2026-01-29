@@ -78,9 +78,10 @@ Regardless of installation method, you'll have:
 | Docker | ✅ Required | ❌ Not needed |
 | Python | ❌ Not needed | ✅ Required (3.8+) |
 | Conda | ❌ Not needed | ✅ Required |
-| Disk Space | 60+ GB | 60+ GB |
+| Disk Space | 250+ GB | 250+ GB |
 | RAM | 16+ GB | 32+ GB recommended |
-| Time to First Run | 2-4 hours | 2-4 hours + setup |
+| Time to First Run (Phages only) | 2-4 hours | 2-4 hours + setup |
+| Time to First Run (With Hosts)| ~24 hours | ~24 hours + setup |
 
 ## Next Steps
 

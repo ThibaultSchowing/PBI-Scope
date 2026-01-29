@@ -167,6 +167,12 @@ docker compose up -d api
 
 The API will be available at `http://localhost:8000`
 
+**IMPORTANT**: The API needs time to load the big amount of files. Check the status with
+
+```bash
+docker compose logs api
+```
+
 ### 5. Test the API
 
 Once the API is running, test it:
