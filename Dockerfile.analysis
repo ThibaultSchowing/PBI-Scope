@@ -1,0 +1,71 @@
+# Dockerfile for PBI Analysis Service
+# Provides direct database and FASTA file access for efficient bulk data retrieval
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /workspace
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy source code and setup files
+COPY src /app/src
+COPY setup.py /app/
+
+# NOTE: SSL verification workaround for GitHub Actions CI environment
+# This Dockerfile uses --trusted-host flags to work around self-signed certificates
+# in the CI environment. In production, these flags can be removed if you have
+# proper CA certificates configured. To use without these flags, remove the
+# --trusted-host options from the pip install commands below.
+
+# Install PBI package with analysis extras
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -e /app/
+
+# Install Jupyter and scientific computing stack
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org \
+    jupyterlab==4.0.9 \
+    duckdb>=0.9.0 \
+    pyfaidx>=0.7.0 \
+    pandas>=2.0.0 \
+    numpy>=1.24.0 \
+    matplotlib>=3.5.0 \
+    seaborn>=0.12.0 \
+    biopython>=1.80 \
+    pyarrow>=14.0.0
+
+# Configure Jupyter Lab
+# WARNING: This configuration disables authentication for LOCAL DEVELOPMENT ONLY.
+# For production or shared environments:
+# 1. Set a token: c.ServerApp.token = 'your-secure-token'
+# 2. Set a password: use `jupyter lab password` to hash a password
+# 3. Use SSL/TLS certificates for encrypted connections
+# 4. Or use a reverse proxy with authentication (e.g., nginx)
+# 
+# NEVER expose port 8888 to untrusted networks with this configuration.
+RUN jupyter lab --generate-config && \
+    echo "c.ServerApp.token = ''" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.password = ''" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_root = True" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.port = 8888" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.open_browser = False" >> ~/.jupyter/jupyter_lab_config.py
+
+# Expose Jupyter Lab port
+EXPOSE 8888
+
+# Set environment variable for data path
+ENV DATA_PATH=/data/processed
+
+# Create workspace directory for notebooks
+RUN mkdir -p /workspace
+
+# Health check - verify Jupyter is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8888/api || exit 1
+
+# Start Jupyter Lab
+CMD ["jupyter", "lab", "--allow-root", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace"]
