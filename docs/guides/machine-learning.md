@@ -80,8 +80,8 @@ The PBI database uses a star schema:
 - `dim_antimicrobial_resistance_genes` - AMR genes
 - `dim_crispr_arrays` - CRISPR arrays
 
-**Association Tables:**
-- `phage_host_associations` - Links phages to their hosts
+**Association Tables/Views:**
+- `phage_host_associations` - View linking phages to their hosts (joins `dim_phage_host_links` and `dim_hosts` via Assembly_Accession)
 
 ### Key Fields for ML
 

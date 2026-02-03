@@ -636,6 +636,20 @@ def create_star_schema_duckdb():
     if host_count > 0:
         logging.info("Creating host-related analytical views")
         
+        # Create phage_host_associations view for backward compatibility
+        # This view provides the expected interface for sequence_retrieval.py
+        if phage_host_links_count > 0:
+            conn.execute("""
+            CREATE VIEW phage_host_associations AS
+            SELECT DISTINCT
+                phl.Phage_ID,
+                h.Host_ID
+            FROM dim_phage_host_links phl
+            JOIN dim_hosts h ON phl.Assembly_Accession = h.Assembly_Accession
+            WHERE phl.Phage_ID IS NOT NULL AND h.Host_ID IS NOT NULL
+            """)
+            logging.info("✅ Created phage_host_associations view")
+        
         # View linking phages to their downloaded host genomes
         conn.execute("""
         CREATE VIEW phage_host_genomes AS
