@@ -49,8 +49,14 @@ services:
       - pbi-data:/data:ro
       # Mount notebooks directory for persistent work
       - ./notebooks:/workspace
+      # Mount workflow directory (read-only) for script imports
+      - ./workflow:/app/workflow:ro
+      # Mount src directory (read-only) for package imports
+      - ./src:/app/src:ro
     environment:
       - DATA_PATH=/data/processed
+      # Set PYTHONPATH for proper module imports
+      - PYTHONPATH=/app
     networks:
       - pbi-network
     restart: unless-stopped

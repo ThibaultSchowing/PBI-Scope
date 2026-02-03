@@ -12,9 +12,11 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy source code and setup files
-COPY src /app/src
-COPY setup.py /app/
+# Copy entire project to get workflow scripts and all dependencies
+COPY . /app/
+
+# Set PYTHONPATH to include /app for proper module imports
+ENV PYTHONPATH=/app:$PYTHONPATH
 
 # NOTE: SSL verification workaround for GitHub Actions CI environment
 # This Dockerfile uses --trusted-host flags to work around self-signed certificates
