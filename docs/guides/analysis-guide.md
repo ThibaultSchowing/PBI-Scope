@@ -120,10 +120,6 @@ sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
 conn.close()
 ```
 
-# Cleanup
-conn.close()
-```
-
 ## 🗄️ Accessing the Database
 
 ### Understanding the PBI Package
