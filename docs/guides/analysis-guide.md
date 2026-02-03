@@ -58,6 +58,33 @@ Navigate to `notebooks/analysis_direct_access_guide.ipynb` in Jupyter Lab to see
 
 Create a new notebook in Jupyter Lab:
 
+**Option A: Using `quick_connect()` (Recommended)**
+
+The easiest way to get started - automatically handles all paths:
+
+```python
+from pbi import quick_connect
+
+# Connect to database with all sequence files
+# This automatically uses DATA_PATH environment variable in Docker
+retriever = quick_connect()
+
+# Get database statistics
+stats = retriever.get_stats()
+print(f"Phages: {stats['database']['phages']:,}")
+print(f"Proteins: {stats['database']['proteins']:,}")
+print(f"Hosts: {stats['database']['hosts']:,}")
+
+# Query and retrieve sequences
+df = retriever.query_phages("SELECT * FROM fact_phages WHERE Length > 100000 LIMIT 10")
+phage_ids = df['Phage_ID'].tolist()
+sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
+```
+
+**Option B: Manual Connection (Advanced)**
+
+For more control over connection parameters:
+
 ```python
 import duckdb
 from pathlib import Path
@@ -90,6 +117,199 @@ phage_ids = df['Phage_ID'].tolist()
 sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
 
 # Cleanup
+conn.close()
+```
+
+## 🗄️ Accessing the Database
+
+### Understanding the PBI Package
+
+The `pbi` Python package provides a high-level interface to the PBI database and sequence files:
+
+**Main Components:**
+
+1. **`quick_connect()`** - Convenience function for instant database access
+2. **`SequenceRetriever`** - Core class for querying metadata and retrieving sequences
+3. **`NegativeExampleGenerator`** - ML utility for generating negative training examples
+
+**How it works in Docker:**
+
+The `pbi` package automatically detects the `DATA_PATH` environment variable set in the Docker container (`/data/processed`) and uses it to locate the database and FASTA files. This means you don't need to specify paths manually.
+
+### Retrieving Genomes and Metadata
+
+**1. Get Phage Genomes**
+
+```python
+from pbi import quick_connect
+
+retriever = quick_connect()
+
+# Method 1: Query-based retrieval
+df = retriever.query_phages("""
+    SELECT Phage_ID, Accession, Length, GC_Content, Completeness
+    FROM fact_phages 
+    WHERE Length > 50000 AND Completeness = 'complete'
+    LIMIT 100
+""")
+
+# Get sequences for these phages
+sequences = retriever.get_sequences_by_ids(
+    df['Phage_ID'].tolist(), 
+    sequence_type='phage'
+)
+
+# Method 2: Direct ID-based retrieval
+phage_ids = ['phage_001', 'phage_002', 'phage_003']
+sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
+
+# sequences is a dict: {phage_id: sequence_string}
+for phage_id, seq in sequences.items():
+    print(f"{phage_id}: {len(seq)} bp")
+```
+
+**2. Get Host Genomes**
+
+```python
+from pbi import quick_connect
+
+retriever = quick_connect()
+
+# Query hosts
+hosts_df = retriever.query_hosts("""
+    SELECT Host_ID, Host_Name, Host_Genus, Host_Family
+    FROM dim_hosts
+    WHERE Host_Genus = 'Escherichia'
+    LIMIT 10
+""")
+
+# Get host sequences
+host_sequences = retriever.get_sequences_by_ids(
+    hosts_df['Host_ID'].tolist(),
+    sequence_type='host'
+)
+```
+
+**3. Get Protein Sequences**
+
+```python
+from pbi import quick_connect
+
+retriever = quick_connect()
+
+# Query proteins from a specific phage
+proteins_df = retriever.query_proteins("""
+    SELECT Protein_ID, Phage_ID, Annotation, Length
+    FROM fact_proteins
+    WHERE Phage_ID = 'NC_000001'
+    AND Annotation LIKE '%terminase%'
+""")
+
+# Get protein sequences
+protein_sequences = retriever.get_sequences_by_ids(
+    proteins_df['Protein_ID'].tolist(),
+    sequence_type='protein'
+)
+```
+
+**4. Get Metadata Without Sequences**
+
+If you only need metadata (no sequences), use direct database queries:
+
+```python
+from pbi import quick_connect
+
+retriever = quick_connect()
+
+# Use the underlying database connection
+stats = retriever.get_stats()
+print(f"Total phages: {stats['database']['phages']:,}")
+
+# Or query directly
+import duckdb
+conn = duckdb.connect("/data/processed/databases/phage_database_optimized.duckdb", read_only=True)
+
+# Get phage metadata
+metadata = conn.execute("""
+    SELECT p.*, ph.Host_Name, ph.Host_Genus
+    FROM fact_phages p
+    LEFT JOIN fact_phage_host ph ON p.Phage_ID = ph.Phage_ID
+    WHERE p.GC_Content > 0.5
+""").fetchdf()
+
+conn.close()
+```
+
+**5. Get Phage-Host Interaction Pairs**
+
+```python
+from pbi import quick_connect
+
+retriever = quick_connect()
+
+# Get known phage-host interactions
+pairs = retriever.get_phage_host_pairs(limit=1000)
+
+# Returns DataFrame with columns:
+# - Phage_ID
+# - Host_ID  
+# - Phage_Length
+# - Phage_GC
+# - Host_Name
+# - Host_Genus
+```
+
+### Common Query Patterns
+
+**Filter by taxonomy:**
+
+```python
+# E. coli phages
+ecoli_phages = retriever.query_phages("""
+    SELECT DISTINCT p.*
+    FROM fact_phages p
+    INNER JOIN fact_phage_host ph ON p.Phage_ID = ph.Phage_ID
+    WHERE ph.Host_Genus LIKE '%Escherichia%'
+    OR ph.Host_Name LIKE '%coli%'
+""")
+```
+
+**Filter by genome characteristics:**
+
+```python
+# Large, complete phages with high GC content
+large_phages = retriever.query_phages("""
+    SELECT * FROM fact_phages
+    WHERE Length > 100000
+    AND Completeness = 'complete'
+    AND GC_Content > 0.55
+    ORDER BY Length DESC
+""")
+```
+
+**Join multiple tables:**
+
+```python
+import duckdb
+
+conn = duckdb.connect("/data/processed/databases/phage_database_optimized.duckdb", read_only=True)
+
+# Get phages with their proteins and hosts
+complex_query = conn.execute("""
+    SELECT 
+        p.Phage_ID,
+        p.Accession,
+        p.Length,
+        COUNT(DISTINCT pr.Protein_ID) as Protein_Count,
+        ph.Host_Name,
+        ph.Host_Genus
+    FROM fact_phages p
+    LEFT JOIN fact_proteins pr ON p.Phage_ID = pr.Phage_ID
+    LEFT JOIN fact_phage_host ph ON p.Phage_ID = ph.Phage_ID
+    GROUP BY p.Phage_ID, p.Accession, p.Length, ph.Host_Name, ph.Host_Genus
+    HAVING COUNT(DISTINCT pr.Protein_ID) > 10
+""").fetchdf()
+
 conn.close()
 ```
 
@@ -217,51 +437,36 @@ plt.show()
 
 ### Use Case 4: Machine Learning Dataset Preparation
 
-Prepare datasets for ML models:
+Prepare datasets for ML models using the convenience `quick_connect()` function:
 
 ```python
-from pbi import SequenceRetriever, NegativeExampleGenerator
-import duckdb
+from pbi import quick_connect, NegativeExampleGenerator
 
-# Connect to database
-conn = duckdb.connect("/data/processed/databases/phage_database_optimized.duckdb",
-                      read_only=True)
+# Connect using quick_connect (automatically uses correct paths)
+retriever = quick_connect()
 
 # Get positive examples (known phage-host pairs)
-positive_query = """
-SELECT 
-    p.Phage_ID,
-    ph.Host_ID,
-    p.Length as Phage_Length,
-    p.GC_Content as Phage_GC,
-    ph.Host_Name
-FROM fact_phages p
-INNER JOIN fact_phage_host ph ON p.Phage_ID = ph.Phage_ID
-WHERE p.GC_Content IS NOT NULL
-  AND p.Length > 10000
-"""
-positive_pairs = conn.execute(positive_query).fetchdf()
-conn.close()
+positive_pairs = retriever.get_phage_host_pairs(limit=5000)
 
-# Initialize retriever
-retriever = SequenceRetriever(
-    db_path="/data/processed/databases/phage_database_optimized.duckdb",
-    phage_fasta_path="/data/processed/sequences/all_phages.fasta",
-    protein_fasta_path="/data/processed/sequences/all_proteins.fasta",
-    host_mapping_path="/data/processed/sequences/host_fasta_mapping.json"
-)
+# Filter for quality
+positive_pairs = positive_pairs[
+    (positive_pairs['Phage_Length'] > 10000) &
+    (positive_pairs['Phage_GC'].notna())
+]
 
 # Generate negative examples
 neg_gen = NegativeExampleGenerator(retriever)
 dataset = neg_gen.generate_balanced_dataset(
     positive_pairs=positive_pairs,
-    strategy='mixed',
+    strategy='mixed',  # Combines random, GC-based, and taxonomy-based negatives
     positive_ratio=0.5
 )
 
 # Export for training
 dataset.to_parquet('/workspace/exports/phage_host_ml_dataset.parquet')
 print(f"Dataset created: {len(dataset)} samples")
+print(f"Positive: {(dataset['Label'] == 1).sum()}")
+print(f"Negative: {(dataset['Label'] == 0).sum()}")
 ```
 
 ## ⚙️ Configuration
@@ -298,6 +503,216 @@ analysis:
 
 - `pbi-data:/data:ro` - **Read-only** access to database and FASTA files
 - `./notebooks:/workspace` - Persistent storage for notebooks and exports
+
+## 🔧 Package Management & Custom Environments
+
+### Installing Additional Packages
+
+The analysis container comes with a comprehensive scientific computing stack. To install additional packages:
+
+**1. Install packages temporarily (current session only)**
+
+From a Jupyter notebook or terminal:
+
+```python
+# Install Python package
+!pip install scikit-learn xgboost lightgbm
+
+# Install from conda-forge (if conda is available)
+!conda install -c conda-forge package_name
+```
+
+**2. Install packages persistently**
+
+To make packages available across container restarts, modify `Dockerfile.analysis`:
+
+```dockerfile
+# Add your packages to the RUN pip install command
+RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org \
+    jupyterlab==4.0.9 \
+    duckdb>=0.9.0 \
+    # ... existing packages ...
+    scikit-learn>=1.3.0 \
+    xgboost>=2.0.0 \
+    lightgbm>=4.0.0 \
+    plotly>=5.0.0
+```
+
+Then rebuild the container:
+
+```bash
+docker compose build analysis
+docker compose up -d analysis
+```
+
+### Creating Custom Analysis Environments
+
+You can create specialized analysis environments for different projects:
+
+**Option 1: Use Conda environments inside the container**
+
+```python
+# Create a new conda environment
+!conda create -n my_analysis python=3.10 -y
+
+# Activate and install packages
+!conda activate my_analysis && conda install pandas numpy scikit-learn -y
+
+# Use in Jupyter by installing ipykernel
+!conda activate my_analysis && pip install ipykernel
+!conda activate my_analysis && python -m ipykernel install --user --name my_analysis
+```
+
+Then select the "my_analysis" kernel from Jupyter's kernel menu.
+
+**Option 2: Create a separate Docker service**
+
+Add a new service to `docker-compose.yml` for specialized analysis:
+
+```yaml
+analysis-ml:
+  build:
+    context: .
+    dockerfile: Dockerfile.analysis-ml  # Your custom Dockerfile
+  container_name: pbi-analysis-ml
+  ports:
+    - "8889:8888"  # Different port
+  volumes:
+    - pbi-data:/data:ro
+    - ./notebooks:/workspace
+    - ./workflow:/app/workflow:ro
+    - ./src:/app/src:ro
+  environment:
+    - DATA_PATH=/data/processed
+    - PYTHONPATH=/app
+  networks:
+    - pbi-network
+  restart: unless-stopped
+```
+
+Create `Dockerfile.analysis-ml` with your custom package set:
+
+```dockerfile
+FROM python:3.10-slim
+
+WORKDIR /workspace
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git curl build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project
+COPY . /app/
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Install PBI package
+RUN pip install -e /app/
+
+# Install ML-specific packages
+RUN pip install \
+    jupyterlab \
+    duckdb pyfaidx pandas numpy \
+    scikit-learn xgboost lightgbm \
+    torch torchvision \
+    transformers \
+    optuna \
+    mlflow
+
+# Configure Jupyter
+RUN jupyter lab --generate-config && \
+    echo "c.ServerApp.token = ''" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.password = ''" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.allow_root = True" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_lab_config.py && \
+    echo "c.ServerApp.port = 8888" >> ~/.jupyter/jupyter_lab_config.py
+
+EXPOSE 8888
+ENV DATA_PATH=/data/processed
+
+CMD ["jupyter", "lab", "--allow-root", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace"]
+```
+
+Start your custom environment:
+
+```bash
+docker compose build analysis-ml
+docker compose up -d analysis-ml
+# Access at http://localhost:8889
+```
+
+**Option 3: Use Python virtual environments**
+
+From a Jupyter terminal:
+
+```bash
+# Create virtual environment
+python -m venv /workspace/.venvs/my_project
+source /workspace/.venvs/my_project/bin/activate
+pip install specific-packages
+
+# Install kernel for Jupyter
+pip install ipykernel
+python -m ipykernel install --user --name=my_project --display-name="My Project"
+```
+
+### Writing Custom Functions
+
+**Where to write reusable functions:**
+
+**1. In the PBI package** (for general-purpose functionality)
+
+Add functions to `/app/src/pbi/` and they'll be available via `from pbi import ...`
+
+Example - add to `src/pbi/utils.py`:
+
+```python
+def calculate_phage_metrics(retriever, phage_ids):
+    """Calculate comprehensive metrics for phage genomes."""
+    # Your implementation
+    pass
+```
+
+Use in notebooks:
+
+```python
+from pbi.utils import calculate_phage_metrics
+metrics = calculate_phage_metrics(retriever, phage_ids)
+```
+
+**2. In a shared notebook utilities module**
+
+Create `notebooks/utils.py`:
+
+```python
+# Custom analysis functions
+def plot_gc_distribution(df, output_path):
+    import matplotlib.pyplot as plt
+    plt.hist(df['GC_Content'])
+    plt.savefig(output_path)
+```
+
+Use in any notebook:
+
+```python
+import sys
+sys.path.insert(0, '/workspace')
+from utils import plot_gc_distribution
+
+plot_gc_distribution(df, '/workspace/exports/gc_plot.png')
+```
+
+**3. In individual notebooks** (for one-off analyses)
+
+Define functions directly in notebook cells for exploratory work.
+
+### Best Practices for Custom Environments
+
+1. **Document your dependencies**: Keep a `requirements.txt` or `environment.yml` file
+2. **Version control**: Track your custom Dockerfiles and conda environments
+3. **Test in isolation**: Use separate containers to avoid dependency conflicts
+4. **Share configurations**: Use Docker Compose profiles for different team members
+5. **Resource limits**: Set memory/CPU limits for resource-intensive ML environments
 
 ## 🎓 Best Practices
 
