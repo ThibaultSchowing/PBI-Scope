@@ -407,6 +407,50 @@ class RobustHostGenomeDownloader:
         
         return True
     
+    def calculate_genome_stats(self, fasta_path: Path) -> Tuple[Optional[int], Optional[float]]:
+        """
+        Calculate genome length and GC content from FASTA file
+        
+        Args:
+            fasta_path: Path to FASTA file (can be gzipped)
+            
+        Returns:
+            Tuple of (genome_length, gc_content_percentage)
+        """
+        try:
+            # Determine if file is gzipped
+            is_gzipped = str(fasta_path).endswith('.gz')
+            
+            total_length = 0
+            gc_count = 0
+            
+            # Open file appropriately
+            if is_gzipped:
+                handle = gzip.open(fasta_path, 'rt')
+            else:
+                handle = open(fasta_path, 'r')
+            
+            try:
+                # Parse sequences and calculate stats
+                for record in SeqIO.parse(handle, 'fasta'):
+                    seq_str = str(record.seq).upper()
+                    total_length += len(seq_str)
+                    gc_count += seq_str.count('G') + seq_str.count('C')
+                
+                # Calculate GC percentage
+                if total_length > 0:
+                    gc_content = round((gc_count / total_length) * 100, 2)
+                    return total_length, gc_content
+                else:
+                    return None, None
+                    
+            finally:
+                handle.close()
+                
+        except Exception as e:
+            logging.warning(f"   ⚠️  Could not calculate genome stats: {e}")
+            return None, None
+    
     def create_host_fasta(self, assembly: AssemblyMetadata, downloaded_files: Dict[str, Path]) -> Optional[Path]:
         """
         Create individual host FASTA file from downloaded genomic FASTA
@@ -480,6 +524,9 @@ class RobustHostGenomeDownloader:
             # Download files (unless metadata-only mode)
             downloaded_files = {}
             download_success = True
+            host_fasta = None
+            genome_length = None
+            gc_content = None
             
             if not self.metadata_only:
                 assembly_subdir = self.output_dir / "assemblies" / assembly.assembly_accession
@@ -488,6 +535,13 @@ class RobustHostGenomeDownloader:
                 if download_success:
                     # Create individual host FASTA
                     host_fasta = self.create_host_fasta(assembly, downloaded_files)
+                    
+                    # Calculate genome statistics from the FASTA file
+                    if host_fasta and host_fasta.exists():
+                        logging.info(f"   📊 Calculating genome statistics...")
+                        genome_length, gc_content = self.calculate_genome_stats(host_fasta)
+                        if genome_length is not None:
+                            logging.info(f"   ✅ Length: {genome_length:,} bp, GC: {gc_content}%")
                 else:
                     logging.warning(f"   ⚠️  Download failed for {assembly.assembly_accession}")
                     # Clean up partial downloads
@@ -521,7 +575,7 @@ class RobustHostGenomeDownloader:
             }
             assembly_records.append(assembly_record)
             
-            # Create backward-compatible host record
+            # Create backward-compatible host record with calculated genome stats
             host_record = {
                 'Host_ID': assembly.assembly_accession.replace('.', '_'),
                 'Species_Name': species,
@@ -529,8 +583,8 @@ class RobustHostGenomeDownloader:
                 'Assembly_Accession': assembly.assembly_accession,
                 'Assembly_Name': assembly.assembly_name,
                 'Assembly_Level': assembly.assembly_level,
-                'Genome_Length': '-',  # Will be calculated later if needed
-                'GC_Content': '-',     # Will be calculated later if needed
+                'Genome_Length': str(genome_length) if genome_length is not None else '-',
+                'GC_Content': str(gc_content) if gc_content is not None else '-',
                 'RefSeq_Category': assembly.refseq_category,
                 'Download_Date': datetime.now().strftime('%Y-%m-%d'),
                 'Source': 'assembly_resolver'

@@ -40,7 +40,9 @@ docker compose run --rm pipeline
 docker compose build analysis
 docker compose up -d analysis
 
-# 3. Access Jupyter Lab at http://localhost:8888
+# 3. Access Jupyter Lab
+# Browser: http://localhost:8888
+# VSCode: See analysis guide for remote kernel connection
 # Open notebooks/ml_1_phage_host_dataset.ipynb to get started
 ```
 
