@@ -1,5 +1,7 @@
 # Archive
 
+> **Note**: This archive has been removed from the main documentation navigation to maintain clarity and focus. The content here represents historical documentation and development notes. For current information, please refer to the [main documentation](https://thibaultschowing.github.io/PBI/).
+
 This directory contains older documentation files that have been replaced or reorganized. These files are kept for reference and will be reviewed for potential removal.
 
 ## Archived Documentation

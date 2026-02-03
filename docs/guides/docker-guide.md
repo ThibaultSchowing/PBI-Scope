@@ -4,13 +4,36 @@ This guide explains how to build and run the PBI (Phage Bioinformatics Interface
 
 ## Overview
 
-The PBI Docker setup consists of three main services:
+The PBI Docker setup provides a containerized environment with three specialized services that work together:
 
-1. **Pipeline Service**: Runs the Snakemake workflow to build the phage database
-2. **API Service**: Provides a REST API for querying the database and retrieving sequences
-3. **Analysis Service**: Provides direct database access via Jupyter Lab for efficient bulk analysis
+### Services
 
-All services share a common data volume to ensure consistent access to the database built by the pipeline.
+1. **Pipeline Service** (`pbi-pipeline`)
+   - Executes the Snakemake workflow to download and process data
+   - Builds the DuckDB database from 14+ phage data sources
+   - Generates indexed FASTA files and validation reports
+   - Runs once to create the database, then can be rerun for updates
+
+2. **API Service** (`pbi-api`)
+   - Provides REST API endpoints for database queries
+   - Returns data in JSON and FASTA formats
+   - Suitable for external integrations and programmatic access
+   - Interactive API documentation at `/docs`
+
+3. **Analysis Service** (`pbi-analysis`)
+   - Jupyter Lab environment for direct data access
+   - Pre-installed `pbi` Python package and scientific libraries
+   - 5-50x faster than API for bulk operations
+   - Ideal for data exploration and machine learning
+
+### Data Persistence
+
+Two Docker volumes ensure data persistence:
+
+- **`pbi-data`**: Stores all pipeline outputs (database, sequences, reports) - ~150 GB
+- **`pbi-cache`**: Stores Snakemake metadata and conda environments - ~2-3 GB
+
+All services share read-only access to the `pbi-data` volume, while only the pipeline can write to it.
 
 ## Prerequisites
 
@@ -285,31 +308,7 @@ curl -X POST http://localhost:8000/phages/fasta \
 
 Visit `http://localhost:8000/docs` in your browser for interactive API documentation (Swagger UI).
 
-### Database Schema
-
-The PBI API provides access to a star schema database with the following tables:
-
-**Fact Table:**
-- `fact_phages` - Main phage metadata (Length, GC_content, Taxonomy, Host, Lifestyle, etc.)
-
-**Dimension Tables:**
-- `dim_proteins` - Annotated protein sequences and metadata
-- `dim_terminators` - Transcription terminator predictions
-- `dim_anti_crispr` - Anti-CRISPR protein annotations
-- `dim_virulent_factors` - Virulent factor annotations
-- `dim_transmembrane_proteins` - Transmembrane protein predictions
-- `dim_trna_tmrna` - tRNA and tmRNA annotations
-- `dim_antimicrobial_resistance_genes` - Antimicrobial resistance gene annotations
-- `dim_crispr_arrays` - CRISPR array metadata
-
-**Analytical Views:**
-- `phage_summary` - Aggregated statistics by source database
-- `phage_complete_profile` - Complete phage profiles with all annotations
-- `amr_gene_summary` - Antimicrobial resistance gene statistics
-- `crispr_array_summary` - CRISPR array statistics
-- And many more specialized views for analysis
-
-All tables include a `Source_DB` column to track the origin database (RefSeq, GenBank, PhagesDB, etc.).
+For detailed information about the database schema, tables, and relationships, see the [Database Overview](../database/overview.md) and [API Reference](../api/overview.md).
 
 ## Common Operations
 
