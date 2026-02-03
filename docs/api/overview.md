@@ -8,17 +8,17 @@ The PBI API provides a REST interface for querying the phage database and retrie
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Database Connection | ✅ Working | Connects to DuckDB database |
-| Health Endpoints | ✅ Working | `/health` and `/stats` functional |
-| SQL Query Endpoint | ✅ Working | `/query` with basic safety checks |
-| Phage Retrieval | ✅ Working | Query and ID-based retrieval |
-| Protein Retrieval | ✅ Working | Query and ID-based retrieval |
-| FASTA Export | ✅ Working | Export sequences to FASTA format |
-| Authentication | 📆 Planned | No auth currently - use with caution |
-| Rate Limiting | 📆 Planned | Not yet implemented |
-| Async Support | 🔄 In Testing | Being validated |
-| Advanced Filters | 🔄 In Testing | Complex query builders |
-| Batch Operations | 📆 Planned | Bulk data operations |
+| Database Connection | Working | Connects to DuckDB database |
+| Health Endpoints | Working | `/health` and `/stats` functional |
+| SQL Query Endpoint | Working | `/query` with basic safety checks |
+| Phage Retrieval | Working | Query and ID-based retrieval |
+| Protein Retrieval | Working | Query and ID-based retrieval |
+| FASTA Export | Working | Export sequences to FASTA format |
+| Authentication | Planned | No auth currently - use with caution |
+| Rate Limiting | Planned | Not yet implemented |
+| Async Support | In Testing | Being validated |
+| Advanced Filters | In Testing | Complex query builders |
+| Batch Operations | Planned | Bulk data operations |
 
 ## Quick Start
 
@@ -317,7 +317,7 @@ The API returns standard HTTP status codes:
 
 ## Limitations & Known Issues
 
-🚧 **Current Limitations:**
+**Current Limitations:**
 
 1. **No Authentication**: API is open - not suitable for public deployment
 2. **No Rate Limiting**: Can be overwhelmed by many requests
@@ -325,15 +325,9 @@ The API returns standard HTTP status codes:
 4. **No Pagination**: Large result sets may cause timeouts
 5. **Limited Filtering**: Complex filters require custom SQL
 
-📆 **Planned Improvements:**
+**Planned Improvements:**
 
-- Add JWT authentication
-- Implement rate limiting
-- Add query result pagination
-- Expand pre-built query endpoints
-- Add query validation and safety checks
-- WebSocket support for real-time updates
-- GraphQL endpoint as alternative to REST
+See the [Future Steps](../future-steps.md) page for planned enhancements including authentication, rate limiting, pagination, and more advanced features.
 
 ## Development
 

@@ -265,11 +265,11 @@ The pipeline performs comprehensive quality control:
 ### Validation Reports
 
 HTML reports are generated with:
-- ✅ Visual database schema diagram
-- 📊 Row count statistics for all tables
-- 🔍 Data quality metrics with pass/fail indicators
-- 📈 Distribution charts for key metrics
-- ⚠️ Warning flags for data quality issues
+- Visual database schema diagram
+- Row count statistics for all tables
+- Data quality metrics with pass/fail indicators
+- Distribution charts for key metrics
+- Warning flags for data quality issues
 
 **View Reports:**
 

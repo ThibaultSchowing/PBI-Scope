@@ -104,10 +104,10 @@ dataset = neg_gen.generate_balanced_dataset(
 - 🐛 **[Issue Tracker](https://github.com/ThibaultSchowing/PBI/issues)**
 - 📧 **[Contact](https://github.com/ThibaultSchowing)**
 
-## 📄 License
+## License
 
 See LICENSE file for details.
 
 ---
 
-**Note**: Archived documentation files have been moved to `docs/archive/`. Please refer to the [online documentation](https://thibaultschowing.github.io/PBI/) for the most up-to-date information.
+**Note**: For the most up-to-date information, please refer to the [online documentation](https://thibaultschowing.github.io/PBI/). Archived documentation has been removed from the navigation to maintain clarity and focus on current best practices.

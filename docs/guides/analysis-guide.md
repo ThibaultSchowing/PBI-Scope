@@ -1,8 +1,8 @@
 # Direct Data Access Guide
 
-This guide explains how to efficiently access and analyze the PBI database using the dedicated analysis container, bypassing the REST API overhead for bulk operations.
+This guide explains how to efficiently access and analyze the PBI database using the dedicated analysis container and the `pbi` Python package.
 
-## 🎯 Overview
+## Overview
 
 The PBI analysis container provides **direct access** to the DuckDB database and FASTA files, enabling:
 
@@ -12,7 +12,48 @@ The PBI analysis container provides **direct access** to the DuckDB database and
 - **Interactive analysis** with Jupyter Lab
 - **Zero network overhead** - direct file system access
 
-## 🏗️ Architecture
+## Python Package Usage
+
+### Using the `pbi` Package
+
+The `pbi` Python package provides convenient classes for database and sequence access. It is designed to work seamlessly within the Docker analysis container.
+
+**Recommended Approach: Docker Container**
+
+The `pbi` package is pre-installed in the analysis container with all dependencies configured correctly. This is the **recommended way** to use the package:
+
+```bash
+# Start the analysis container
+docker compose up -d analysis
+# Access Jupyter Lab at http://localhost:8888
+```
+
+**Local Installation (Not Recommended)**
+
+While it's possible to install the package locally, this approach has several limitations:
+
+- Requires manual management of large data files (~150 GB)
+- Potential path configuration issues
+- Missing the containerized environment benefits
+- Difficult to maintain consistency with production setup
+
+If you still want to use it locally for development:
+
+```bash
+# Install the package
+pip install -e .
+
+# Set environment variables
+export DATA_PATH=/path/to/your/data/processed
+
+# Use in Python
+from pbi import quick_connect
+retriever = quick_connect()
+```
+
+**Note**: For production use and analysis, always prefer the Docker container approach.
+
+## Architecture
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -35,7 +76,7 @@ The PBI analysis container provides **direct access** to the DuckDB database and
 - **Batch Processing**: Process large datasets in chunks to avoid OOM errors
 - **Hybrid Approach**: DuckDB for metadata + SequenceRetriever for sequences
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Build and Start the Analysis Service
 
@@ -313,7 +354,7 @@ complex_query = conn.execute("""
 conn.close()
 ```
 
-## 📊 Common Use Cases
+## Common Use Cases
 
 ### Use Case 1: Bulk Metadata Export
 
@@ -504,7 +545,7 @@ analysis:
 - `pbi-data:/data:ro` - **Read-only** access to database and FASTA files
 - `./notebooks:/workspace` - Persistent storage for notebooks and exports
 
-## 🔧 Package Management & Custom Environments
+## Package Management & Custom Environments
 
 ### Installing Additional Packages
 
@@ -808,7 +849,7 @@ memory_mb = process.memory_info().rss / 1024 / 1024
 print(f"Current memory usage: {memory_mb:.2f} MB")
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Issue 1: "Database is locked" Error
 
@@ -941,7 +982,7 @@ FileNotFoundError: /data/processed/databases/phage_database_optimized.duckdb
 
 4. Ensure paths use `/data/processed` (Docker) not `./data/processed` (local)
 
-## 📈 Performance Tips
+## Performance Tips
 
 ### Optimize SQL Queries
 
