@@ -33,13 +33,13 @@ For development and customization. Best for:
 
 Once installed, learn how to use PBI:
 
-### 📊 [Database Overview](../database/overview.md)
+### [Database Overview](../database/overview.md)
 Understand the database schema, tables, and data sources.
 
-### 🔌 [API Reference](../api/overview.md)
+### [API Reference](../api/overview.md)
 Learn to query data via the REST API (work in progress).
 
-### 📝 [Command Reference](../reference/commands.md)
+### [Command Reference](../reference/commands.md)
 Quick reference for common operations and commands.
 
 ## Choosing Your Path
@@ -99,4 +99,4 @@ Regardless of installation method, you'll have:
 
 ---
 
-Ready? Pick a guide above and get started! 🚀
+Ready? Pick a guide above and get started!

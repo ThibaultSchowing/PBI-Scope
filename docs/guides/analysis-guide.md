@@ -354,7 +354,7 @@ complex_query = conn.execute("""
 conn.close()
 ```
 
-## 📊 Common Use Cases
+## Common Use Cases
 
 ### Use Case 1: Bulk Metadata Export
 
@@ -545,7 +545,7 @@ analysis:
 - `pbi-data:/data:ro` - **Read-only** access to database and FASTA files
 - `./notebooks:/workspace` - Persistent storage for notebooks and exports
 
-## 🔧 Package Management & Custom Environments
+## Package Management & Custom Environments
 
 ### Installing Additional Packages
 
@@ -849,7 +849,7 @@ memory_mb = process.memory_info().rss / 1024 / 1024
 print(f"Current memory usage: {memory_mb:.2f} MB")
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Issue 1: "Database is locked" Error
 
@@ -982,7 +982,7 @@ FileNotFoundError: /data/processed/databases/phage_database_optimized.duckdb
 
 4. Ensure paths use `/data/processed` (Docker) not `./data/processed` (local)
 
-## 📈 Performance Tips
+## Performance Tips
 
 ### Optimize SQL Queries
 
