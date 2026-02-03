@@ -1,151 +1,111 @@
-# PBI Scraper
+# PBI - Phage Bioinformatics Interface
 
-Phages Bacteria Interaction data scraping from [PhageScope](https://phagescope.deepomics.org).
+> Comprehensive phage genomics database with integrated host genomes, protein annotations, and machine learning tools for phage-host interaction prediction.
 
-WORK IN PROGRESS 
+[![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI/)
 
-Documentation on the [github pages](https://thibaultschowing.github.io/PBI/).
+## 🎯 What is PBI?
 
-## Summary
+PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) and NCBI RefSeq bacterial genomes into a queryable DuckDB database with indexed FASTA files. It provides:
 
-This library reads and merges data from PhageScope into a queryable SQL database, accessible from Python. It integrates phage genomic data, bacterial host genomes from NCBI RefSeq, and provides machine learning tools for phage-host interaction prediction.
+- **📊 Unified Database**: 800K+ phages, proteins, and host genomes in one place
+- **⚡ Fast Access**: Indexed sequences with pyfaidx for instant retrieval
+- **🐍 Python Package**: Easy-to-use `pbi` package for data access
+- **🌐 REST API**: HTTP API for external integrations
+- **🔬 Direct Analysis**: Jupyter Lab environment for bulk data analysis (5-50x faster than API)
+- **🤖 ML Ready**: Built-in tools for phage-host interaction prediction
 
-The Snakemake pipeline downloads and merges metadata into a DuckDB database, combines FASTA files for phages, proteins, and hosts into indexed files using pyfaidx, and creates phage-host association mappings for ML applications.
+## 📚 Documentation
 
-**Key Features:**
-- 📊 14+ phage databases integrated (RefSeq, Genbank, PhagesDB, etc.)
-- 🔬 Host bacterial genomes from NCBI RefSeq
-- ⚡ Fast indexed sequence access (phages, proteins, hosts)
-- 🤖 Machine learning tools for phage-host prediction
-- 🐍 Python `pbi` package with easy-to-use API
-- 🌐 REST API for programmatic access
-- 📚 Rich metadata: proteins, CRISPR, AMR genes, and more
+**Full documentation available at: https://thibaultschowing.github.io/PBI/**
 
-Tables and project overview available on [this page](https://thibaultschowing.github.io/PBI/getting-started/overview/). See also the [Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/) for ML applications.
+### Quick Links
 
-## Documentation
+- 🚀 **[Getting Started](https://thibaultschowing.github.io/PBI/guides/docker-guide/)** - Installation and basic usage
+- 📖 **[Analysis Guide](https://thibaultschowing.github.io/PBI/guides/analysis-guide/)** - Database access and data retrieval
+- 🤖 **[Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/)** - ML dataset preparation
+- 🔧 **[API Reference](https://thibaultschowing.github.io/PBI/api/)** - REST API endpoints
+- 📊 **[Database Schema](https://thibaultschowing.github.io/PBI/getting-started/overview/)** - Tables and relationships
 
-**📚 Full Documentation**: https://thibaultschowing.github.io/PBI/
+## 🚀 Quick Start
 
-**Getting Started**:
-- 📘 [Installation & Usage](#installation--usage) (below)
-- 🐳 [Docker Guide](https://thibaultschowing.github.io/PBI/guides/docker-guide/) - Running with Docker (recommended)
-- 💻 [Local Installation Guide](https://thibaultschowing.github.io/PBI/guides/installation/) - Development setup
-
-**Advanced Topics**:
-- 🧬 [FASTA Download Guide](docs/FASTA_DOWNLOAD_GUIDE.md) - Downloading and organizing FASTA files
-- 🔧 [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md) - Setting up NCBI credentials and dependencies
-- ⚡ [Genome Download Optimization](docs/genome_download_optimization.md) - Technical details on optimized downloader
-
-## Installation & Usage
-
-### Option 1: Docker (Recommended for Production)
-
-The easiest way to run the PBI pipeline, API, and analysis environment:
+### Docker (Recommended)
 
 ```bash
-# Build and run the pipeline
+# 1. Build and run the pipeline to create the database
 docker compose build pipeline
 docker compose run --rm pipeline
 
-# Build and start the API
-docker compose build api
-docker compose up -d api
-
-# Build and start the Analysis service (Jupyter Lab)
+# 2. Start the analysis service (Jupyter Lab)
 docker compose build analysis
 docker compose up -d analysis
 
-# Access services
-curl http://localhost:8000/health  # API
-# Visit http://localhost:8000/docs for interactive API documentation
-# Visit http://localhost:8888 for Jupyter Lab (direct data access)
+# 3. Access Jupyter Lab at http://localhost:8888
+# Open notebooks/ml_1_phage_host_dataset.ipynb to get started
 ```
 
-**📁 Data Storage**: Docker uses volumes mounted at `/data` inside containers. All pipeline outputs (database, sequences, reports) are stored in the `pbi-data` Docker volume and persist across container restarts.
-
-**🚀 Analysis Service**: For efficient bulk data analysis, use the analysis service which provides direct database access via Jupyter Lab - 5-50x faster than API for large datasets. See the [Analysis Guide](https://thibaultschowing.github.io/PBI/guides/analysis-guide/) for details.
-
-See the [Docker Guide](https://thibaultschowing.github.io/PBI/guides/docker-guide/) for detailed instructions.
-
-### Option 2: Local Development
-
-For development, testing, and debugging:
-
-```bash
-# 1. Create conda environment
-conda env create -f workflow/envs/base_environment.yaml
-conda activate snakemake_base
-
-# 2. Install PBI package
-pip install -e .
-
-# 3. Run pipeline
-./run_local.sh
-
-# 4. (Optional) Start API locally
-export DATA_PATH="data/processed"
-uvicorn api.app:app --reload
-```
-
-**📁 Data Storage**: By default, local runs store data in `./data/` directory relative to the project root. You can customize this location by setting the `PBI_DATA_DIR` environment variable before running the pipeline:
-
-```bash
-# Optional: Set custom data directory
-export PBI_DATA_DIR="/path/to/your/data"
-./run_local.sh
-```
-
-**⚠️ Important**: If you don't set `PBI_DATA_DIR`, data will be stored in `./data/` by default (approximately 150+ GB). Make sure you have sufficient disk space in the project directory or set a custom path to a location with adequate storage.
-
-See the [Installation Guide](https://thibaultschowing.github.io/PBI/guides/installation/) for detailed local setup instructions.
-
-### Quick Start
-
-**Docker (Production):**
-
-```bash
-docker compose build pipeline && docker compose run --rm pipeline
-```
-
-**Local (Development):**
-
-```bash
-./run_local.sh
-```
-
-
-## Machine Learning Support
-
-PBI includes comprehensive machine learning support for phage-host interaction prediction:
+### Using the Python Package
 
 ```python
 from pbi import quick_connect, NegativeExampleGenerator
 
-# Connect to database with all sequences
+# Connect to database (automatically uses correct paths in Docker)
 retriever = quick_connect()
 
-# Get phage-host interaction pairs
-positive_pairs = retriever.get_phage_host_pairs(limit=1000)
+# Get database statistics
+stats = retriever.get_stats()
+print(f"Total phages: {stats['database']['phages']:,}")
 
-# Generate negative examples
+# Query phage-host interaction pairs
+pairs = retriever.get_phage_host_pairs(limit=1000)
+
+# Retrieve sequences
+phage_ids = pairs['Phage_ID'].tolist()
+sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
+
+# Generate ML datasets
 neg_gen = NegativeExampleGenerator(retriever)
-
-# Create balanced dataset (50% positive, 50% negative)
 dataset = neg_gen.generate_balanced_dataset(
-    positive_pairs=positive_pairs,
-    strategy='mixed',  # Combines random, GC-based, and taxonomy-based negatives
+    positive_pairs=pairs,
+    strategy='mixed',
     positive_ratio=0.5
 )
-
-# Dataset is now ready for ML training!
-print(f"Total samples: {len(dataset)}")
-print(f"Positives: {(dataset['Label'] == 1).sum()}")
-print(f"Negatives: {(dataset['Label'] == 0).sum()}")
 ```
 
-**Resources:**
-- 📓 [Machine Learning Tutorial Notebook](notebooks/ml_1_phage_host_dataset.ipynb)
-- 📖 [Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/)
-- 🔬 Example use cases: host range prediction, therapeutic candidate identification, lifestyle classification
+## 🏗️ Architecture
 
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  Pipeline   │────▶│   pbi-data   │◀────│  Analysis   │
+│ (Snakemake) │     │    volume    │     │(Jupyter Lab)│
+└─────────────┘     └──────────────┘     └─────────────┘
+                           │
+                           ├────▶ DuckDB database
+                           ├────▶ Indexed FASTA files
+                           └────▶ Metadata & reports
+```
+
+**Services:**
+- **Pipeline**: Snakemake workflow to build the database (~150GB data)
+- **Analysis**: Jupyter Lab with direct database access (port 8888)
+- **API**: REST API for external integrations (port 8000)
+
+## 📊 Data Sources
+
+- **Phage Databases**: RefSeq, Genbank, PhagesDB, MillardLab, INPHARED, and 9+ more
+- **Host Genomes**: NCBI RefSeq bacterial reference genomes
+- **Annotations**: Proteins, CRISPR spacers, AMR genes, lifestyle predictions
+
+## 🔗 Links
+
+- 📚 **[Full Documentation](https://thibaultschowing.github.io/PBI/)**
+- 🐛 **[Issue Tracker](https://github.com/ThibaultSchowing/PBI/issues)**
+- 📧 **[Contact](https://github.com/ThibaultSchowing)**
+
+## 📄 License
+
+See LICENSE file for details.
+
+---
+
+**Note**: Archived documentation files have been moved to `docs/archive/`. Please refer to the [online documentation](https://thibaultschowing.github.io/PBI/) for the most up-to-date information.

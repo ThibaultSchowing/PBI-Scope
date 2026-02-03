@@ -30,20 +30,33 @@ def get_default_paths():
     """
     Get default paths for database and FASTA files
     
+    Checks DATA_PATH environment variable first (for Docker containers),
+    then falls back to project-relative paths (for local development).
+    
     Returns:
-        dict: Default paths relative to project root
+        dict: Paths to database and FASTA files
     """
+    import os
     from pathlib import Path
     
-    project_root = Path(__file__).parent.parent.parent
+    # Check if DATA_PATH environment variable is set (Docker/container mode)
+    data_path = os.environ.get('DATA_PATH')
+    
+    if data_path:
+        # Container mode: use DATA_PATH directly
+        base_path = Path(data_path)
+    else:
+        # Local mode: use project-relative path
+        project_root = Path(__file__).parent.parent.parent
+        base_path = project_root / 'data' / 'processed'
     
     return {
-        'database': project_root / 'data' / 'processed' / 'databases' / 'phage_database_optimized.duckdb',
-        'phage_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_phages.fasta',
-        'protein_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_proteins.fasta',
-        'host_mapping': project_root / 'data' / 'processed' / 'sequences' / 'host_fasta_mapping.json',
+        'database': base_path / 'databases' / 'phage_database_optimized.duckdb',
+        'phage_fasta': base_path / 'sequences' / 'all_phages.fasta',
+        'protein_fasta': base_path / 'sequences' / 'all_proteins.fasta',
+        'host_mapping': base_path / 'sequences' / 'host_fasta_mapping.json',
         # Legacy path for backward compatibility
-        'host_fasta': project_root / 'data' / 'processed' / 'sequences' / 'all_hosts.fasta',
+        'host_fasta': base_path / 'sequences' / 'all_hosts.fasta',
     }
 
 def quick_connect():
