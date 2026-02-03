@@ -2,15 +2,15 @@
 
 **Phage-Bacteria Interaction Database Pipeline**
 
-PBI is a comprehensive bioinformatics pipeline that integrates phage genomic data from the [PhageScope databases](https://phagescope.deepomics.org/database) into a unified, queryable format. Built with Snakemake and powered by DuckDB, it provides fast access to phage genomes, proteins, and metadata for research and analysis. It also includes available host reference genomes obtained from the RefSeq database. Further developpment will aim to provide the precise strain of the host when available.
+PBI is a comprehensive bioinformatics pipeline that integrates phage genomic data from the [PhageScope databases](https://phagescope.deepomics.org/database) into a unified, queryable format. Built with Snakemake and powered by DuckDB, it provides fast access to phage genomes, proteins, and metadata for research and analysis. It also includes available host reference genomes obtained from the RefSeq database. Future development will aim to provide the precise strain of the host when available.
 
-## 🚀 Quick Start
+## Quick Start
 
 New to PBI? Get started in minutes:
 
 <div class="grid cards" markdown>
 
--   :fontawesome-brands-docker: **Docker Setup**
+-   **Docker Setup** (Recommended)
 
     ---
 
@@ -21,9 +21,9 @@ New to PBI? Get started in minutes:
     docker compose run --rm pipeline
     ```
 
-    [:octicons-arrow-right-24: Docker Guide](guides/docker-guide.md)
+    [Docker Guide →](guides/docker-guide.md)
 
--   :fontawesome-solid-laptop-code: **Local Installation**
+-   **Local Installation**
 
     ---
 
@@ -35,20 +35,20 @@ New to PBI? Get started in minutes:
     ./run_local.sh
     ```
 
-    [:octicons-arrow-right-24: Installation Guide](guides/installation.md)
+    [Installation Guide →](guides/installation.md)
 
 </div>
 
-## 📊 What You Get
+## What You Get
 
-- **~873,000 phage genomes** with complete metadata
-- **~43 million protein annotations** with functional predictions
-- **Optimized DuckDB database** (~15 GB) for fast queries
-- **Indexed FASTA files** (~100 GB) with pyfaidx for rapid sequence retrieval
-- **REST API** for programmatic access
-- **Python package** for data analysis and machine learning
+- ~873,000 phage genomes with complete metadata
+- ~43 million protein annotations with functional predictions
+- Optimized DuckDB database (~15 GB) for fast queries
+- Indexed FASTA files (~100 GB) with pyfaidx for rapid sequence retrieval
+- REST API for programmatic access
+- Python package for data analysis and machine learning
 
-## 🔄 Pipeline Overview
+## Pipeline Overview
 
 The PBI pipeline follows a systematic data flow from download to analysis-ready outputs:
 
@@ -100,29 +100,29 @@ The pipeline:
 └──────────────────────────────────────────────────────────────┘
 ```
 
-## 📚 Documentation
+## Documentation
 
 <div class="grid cards" markdown>
 
--   :material-compass: **[Guides](guides/overview.md)**
+-   **[Guides](guides/overview.md)**
 
     ---
 
     Step-by-step instructions for installation, Docker, and usage
 
--   :material-database: **[Database](database/overview.md)**
+-   **[Database](database/overview.md)**
 
     ---
 
     Schema documentation, tables, and data sources
 
--   :material-api: **[API Reference](api/overview.md)**
+-   **[API Reference](api/overview.md)**
 
     ---
 
     REST API endpoints and examples
 
--   :material-developer-board: **[Developer Guide](developer/code-structure.md)**
+-   **[Developer Guide](developer/code-structure.md)**
 
     ---
 
@@ -130,33 +130,33 @@ The pipeline:
 
 </div>
 
-## 🎯 Use Cases
+## Use Cases
 
 PBI is designed for:
 
-- **🔬 Phage Research**: Access comprehensive phage genomic data
-- **🤖 Machine Learning**: Build phage-host interaction prediction models
-- **🧬 Comparative Genomics**: Analyze phage diversity and evolution
-- **💊 Therapeutic Development**: Identify phage candidates for therapy
-- **📊 Meta-analysis**: Aggregate data from multiple databases
+- **Phage Research**: Access comprehensive phage genomic data
+- **Machine Learning**: Build phage-host interaction prediction models
+- **Comparative Genomics**: Analyze phage diversity and evolution
+- **Therapeutic Development**: Identify phage candidates for therapy
+- **Meta-analysis**: Aggregate data from multiple databases
 
-## 📈 Current Status
+## Current Status
 
 | Component | Status | Description |
 |-----------|--------|-------------|
-| **Pipeline** | ✅ Complete | Snakemake workflow with 14+ data sources |
-| **Database** | ✅ Complete | Optimized DuckDB with star schema |
-| **Sequences** | ✅ Complete | Indexed FASTA files (phages, proteins, hosts) |
-| **Docker** | ✅ Complete | Production-ready containers |
-| **Python API** | 🔄 Active | Core functionality available |
-| **REST API** | 🔄 Active | Basic endpoints functional |
-| **Documentation** | 🔄 Active | Continuously improving |
+| **Pipeline** | Complete | Snakemake workflow with 14+ data sources |
+| **Database** | Complete | Optimized DuckDB with star schema |
+| **Sequences** | Complete | Indexed FASTA files (phages, proteins, hosts) |
+| **Docker** | Complete | Production-ready containers |
+| **Python Package** | Active Development | Core functionality available |
+| **REST API** | Active Development | Basic endpoints functional |
+| **Documentation** | Active Development | Continuously improving |
 
-## 🆘 Need Help?
+## Need Help?
 
-- 📖 Browse the [guides](guides/overview.md) for detailed instructions
-- 🐛 Report issues on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)
-- 💬 Check the [troubleshooting sections](guides/installation.md#troubleshooting) in our guides
+- Browse the [guides](guides/overview.md) for detailed instructions
+- Report issues on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)
+- Check the [troubleshooting sections](guides/installation.md#troubleshooting) in our guides
 
 ---
 
