@@ -9,6 +9,7 @@ This test validates the robust genome download functionality:
 - Phage-host link creation
 """
 
+import gzip
 import os
 import sys
 import tempfile
@@ -225,7 +226,6 @@ class TestRobustHostGenomeDownloader(unittest.TestCase):
         self.assertEqual(gc_multi, 50.0, "Average GC content should be 50%")
         
         # Test with gzipped file
-        import gzip
         test_fasta_gz = self.temp_path / "test_genome.fna.gz"
         with gzip.open(test_fasta_gz, 'wt') as f:
             f.write(fasta_content)

@@ -424,28 +424,28 @@ class RobustHostGenomeDownloader:
             total_length = 0
             gc_count = 0
             
-            # Open file appropriately
+            # Open file appropriately using context manager
             if is_gzipped:
-                handle = gzip.open(fasta_path, 'rt')
+                with gzip.open(fasta_path, 'rt') as handle:
+                    # Parse sequences and calculate stats
+                    for record in SeqIO.parse(handle, 'fasta'):
+                        seq_str = str(record.seq).upper()
+                        total_length += len(seq_str)
+                        gc_count += seq_str.count('G') + seq_str.count('C')
             else:
-                handle = open(fasta_path, 'r')
+                with open(fasta_path, 'r') as handle:
+                    # Parse sequences and calculate stats
+                    for record in SeqIO.parse(handle, 'fasta'):
+                        seq_str = str(record.seq).upper()
+                        total_length += len(seq_str)
+                        gc_count += seq_str.count('G') + seq_str.count('C')
             
-            try:
-                # Parse sequences and calculate stats
-                for record in SeqIO.parse(handle, 'fasta'):
-                    seq_str = str(record.seq).upper()
-                    total_length += len(seq_str)
-                    gc_count += seq_str.count('G') + seq_str.count('C')
-                
-                # Calculate GC percentage
-                if total_length > 0:
-                    gc_content = round((gc_count / total_length) * 100, 2)
-                    return total_length, gc_content
-                else:
-                    return None, None
-                    
-            finally:
-                handle.close()
+            # Calculate GC percentage
+            if total_length > 0:
+                gc_content = round((gc_count / total_length) * 100, 2)
+                return total_length, gc_content
+            else:
+                return None, None
                 
         except Exception as e:
             logging.warning(f"   ⚠️  Could not calculate genome stats: {e}")
