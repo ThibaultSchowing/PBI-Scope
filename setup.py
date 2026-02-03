@@ -29,6 +29,10 @@ setup(
         "pandas>=2.0.0",
         "numpy>=1.24.0",
         "biopython>=1.80",
+        # Added for workflow scripts compatibility
+        "pyyaml>=6.0",
+        "aiohttp>=3.8.0",
+        "aiofiles>=23.0.0",
     ],
     
     # Optional dependencies for development
