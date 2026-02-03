@@ -1117,6 +1117,99 @@ print(f"   Analyzed: {len(results)} phages")
 print(f"   Outputs: /workspace/exports/")
 ```
 
+## 💻 Connecting with VSCode
+
+While Jupyter Lab in the browser is convenient, you can also connect to the remote Jupyter server using **VSCode** for a more integrated development experience.
+
+### Prerequisites
+
+1. **VSCode** installed on your local machine
+2. **Jupyter extension** for VSCode installed (from Microsoft)
+3. PBI analysis service running: `docker compose up -d analysis`
+
+### Connection Steps
+
+#### Method 1: Direct Kernel Connection (Recommended)
+
+1. **Get the Jupyter Server URL with Token**
+
+   ```bash
+   # Get the Jupyter server URL with authentication token
+   docker logs pbi-analysis 2>&1 | grep "http://127.0.0.1:8888/lab?token="
+   ```
+
+   This will output something like:
+   ```
+   http://127.0.0.1:8888/lab?token=abc123def456...
+   ```
+
+2. **Open VSCode and Create/Open a Notebook**
+
+   - Create a new `.ipynb` file or open an existing one
+   - Click on "Select Kernel" in the top-right corner
+   - Choose "Existing Jupyter Server"
+
+3. **Enter the Jupyter Server URL**
+
+   - Paste the complete URL with token from step 1
+   - VSCode will connect to the remote Jupyter server
+   - You can now run cells directly in VSCode!
+
+4. **Test the Connection**
+
+   Create a new notebook and run:
+
+   ```python
+   from pbi import quick_connect
+   
+   # This should work if connected to the Docker container
+   retriever = quick_connect()
+   stats = retriever.get_stats()
+   print(f"Connected! Database has {stats['database']['phages']:,} phages")
+   ```
+
+#### Method 2: Port Forwarding (Alternative)
+
+If you're running the Docker container on a remote server, you may need port forwarding:
+
+1. **SSH Port Forward** (if on remote server)
+
+   ```bash
+   ssh -L 8888:localhost:8888 user@remote-server
+   ```
+
+2. **Follow Method 1** steps above with `http://localhost:8888/lab?token=...`
+
+### Advantages of VSCode
+
+- **Integrated Development**: Edit code, notebooks, and documentation in one place
+- **Git Integration**: Easy version control for your analysis notebooks
+- **IntelliSense**: Better code completion and suggestions
+- **Debugging**: Advanced debugging capabilities
+- **Extensions**: Use other VSCode extensions alongside Jupyter
+- **Multi-file Editing**: Work with multiple notebooks and Python files simultaneously
+
+### Tips for VSCode + Jupyter
+
+1. **Save Your Server URL**: VSCode remembers the server URL, so you only need to enter it once
+2. **Restart Kernel**: Use the "Restart Kernel" button in the top menu if needed
+3. **Variable Inspector**: Enable the variable inspector in VSCode for easier debugging
+4. **Keyboard Shortcuts**: VSCode uses standard Jupyter keyboard shortcuts (Shift+Enter, etc.)
+
+### Troubleshooting VSCode Connection
+
+**Issue**: "Failed to connect to Jupyter server"
+- **Solution**: Verify the analysis service is running: `docker ps | grep pbi-analysis`
+- **Solution**: Check the token is correct: `docker logs pbi-analysis | grep token`
+
+**Issue**: "Cannot import pbi module"
+- **Solution**: Make sure you're connected to the Docker container's kernel, not your local Python
+- **Solution**: Verify kernel name shows "Python 3 (ipykernel)" from the remote server
+
+**Issue**: "Connection timeout"
+- **Solution**: If on remote server, ensure SSH port forwarding is active
+- **Solution**: Check firewall settings allow port 8888
+
 ## 🆚 API vs Direct Access Comparison
 
 | Aspect | REST API | Direct Access |
