@@ -183,6 +183,66 @@ class TestRobustHostGenomeDownloader(unittest.TestCase):
         empty_file = self.temp_path / "empty.txt"
         empty_file.touch()
         self.assertFalse(downloader._validate_file(empty_file))
+    
+    def test_calculate_genome_stats(self):
+        """Test genome statistics calculation from FASTA file"""
+        downloader = RobustHostGenomeDownloader(
+            phage_csv_path=str(self.phage_csv),
+            output_dir=str(self.temp_path / "genomes"),
+            metadata_output=str(self.temp_path / "host_metadata.csv"),
+            assembly_metadata_output=str(self.temp_path / "assembly_metadata.csv"),
+            phage_host_links_output=str(self.temp_path / "phage_host_links.csv"),
+            ncbi_email=self.ncbi_email,
+            metadata_only=True
+        )
+        
+        # Create a test FASTA file
+        test_fasta = self.temp_path / "test_genome.fna"
+        # Create a sequence with known length and GC content
+        # Sequence: 100 bp, 50 G/C = 50% GC content
+        sequence = "ATGC" * 25  # 100 bp, 25 A, 25 T, 25 G, 25 C = 50% GC
+        fasta_content = f">test_contig_1\n{sequence}\n"
+        test_fasta.write_text(fasta_content)
+        
+        # Calculate stats
+        length, gc_content = downloader.calculate_genome_stats(test_fasta)
+        
+        # Verify results
+        self.assertEqual(length, 100, "Genome length should be 100 bp")
+        self.assertEqual(gc_content, 50.0, "GC content should be 50%")
+        
+        # Test with multiple contigs
+        test_fasta_multi = self.temp_path / "test_genome_multi.fna"
+        seq1 = "GGGGCCCC"  # 8 bp, 100% GC
+        seq2 = "AAAATTTT"  # 8 bp, 0% GC
+        fasta_multi = f">contig1\n{seq1}\n>contig2\n{seq2}\n"
+        test_fasta_multi.write_text(fasta_multi)
+        
+        length_multi, gc_multi = downloader.calculate_genome_stats(test_fasta_multi)
+        
+        # Total: 16 bp, 8 GC = 50% GC
+        self.assertEqual(length_multi, 16, "Total genome length should be 16 bp")
+        self.assertEqual(gc_multi, 50.0, "Average GC content should be 50%")
+        
+        # Test with gzipped file
+        import gzip
+        test_fasta_gz = self.temp_path / "test_genome.fna.gz"
+        with gzip.open(test_fasta_gz, 'wt') as f:
+            f.write(fasta_content)
+        
+        length_gz, gc_gz = downloader.calculate_genome_stats(test_fasta_gz)
+        
+        self.assertEqual(length_gz, 100, "Should handle gzipped FASTA")
+        self.assertEqual(gc_gz, 50.0, "GC calculation should work for gzipped FASTA")
+        
+        # Test with empty file
+        empty_fasta = self.temp_path / "empty.fna"
+        empty_fasta.write_text("")
+        
+        length_empty, gc_empty = downloader.calculate_genome_stats(empty_fasta)
+        
+        self.assertIsNone(length_empty, "Empty file should return None for length")
+        self.assertIsNone(gc_empty, "Empty file should return None for GC content")
 
 
 def main():
