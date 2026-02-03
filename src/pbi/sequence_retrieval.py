@@ -487,7 +487,8 @@ class SequenceRetriever:
         logging.info(f"   Proteins: {stats['database']['proteins']:,}")
         if 'hosts' in stats['database']:
             logging.info(f"   Hosts: {stats['database']['hosts']:,}")
-            logging.info(f"   Phage-Host Associations: {stats['database']['phage_host_associations']:,}")
+            if 'phage_host_associations' in stats['database']:
+                logging.info(f"   Phage-Host Associations: {stats['database']['phage_host_associations']:,}")
         
         logging.info(f"📊 FASTA Stats:")
         logging.info(f"   Phages: {stats['fasta']['phages']:,}")
