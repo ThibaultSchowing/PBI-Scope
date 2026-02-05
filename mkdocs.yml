@@ -38,9 +38,11 @@ nav:
       - Docker Guide: guides/docker-guide.md
       - Local Installation: guides/installation.md
       - Analysis Guide: guides/analysis-guide.md
+      - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md
   - Database:
       - Overview: database/overview.md
+      - Validation Report: reports/database_validation.html
   - API:
       - Overview: api/overview.md
   - Reference:
