@@ -32,6 +32,11 @@ from pyfaidx import Fasta
 
 logger = logging.getLogger(__name__)
 
+# FASTA file configuration constants
+# The null character split is used to handle FASTA headers with spaces
+FASTA_SPLIT_CHAR = '\x00'
+FASTA_DUPLICATE_ACTION = 'first'  # Use first occurrence when duplicates exist
+
 
 class PhageHostStreamingDataset(IterableDataset):
     """
@@ -113,29 +118,35 @@ class PhageHostStreamingDataset(IterableDataset):
         self.host_fasta = None
         self.host_fasta_cache = {}
     
+    def _load_fasta_file(self, fasta_path: str) -> Fasta:
+        """
+        Load a FASTA file with standard configuration.
+        
+        Args:
+            fasta_path: Path to FASTA file
+            
+        Returns:
+            Loaded Fasta object
+        """
+        return Fasta(
+            fasta_path,
+            rebuild=False,
+            split_char=FASTA_SPLIT_CHAR,
+            read_long_names=True,
+            duplicate_action=FASTA_DUPLICATE_ACTION
+        )
+    
     def _init_worker(self):
         """Initialize database connection and FASTA files for the current worker."""
         # Create a new connection for this worker
         self.conn = duckdb.connect(self.db_path, read_only=True)
         
         # Load phage FASTA
-        self.phage_fasta = Fasta(
-            self.phage_fasta_path,
-            rebuild=False,
-            split_char='\x00',
-            read_long_names=True,
-            duplicate_action='first'
-        )
+        self.phage_fasta = self._load_fasta_file(self.phage_fasta_path)
         
         # Load host FASTA (legacy mode only)
         if not self.use_host_mapping and self.host_fasta_path:
-            self.host_fasta = Fasta(
-                self.host_fasta_path,
-                rebuild=False,
-                split_char='\x00',
-                read_long_names=True,
-                duplicate_action='first'
-            )
+            self.host_fasta = self._load_fasta_file(self.host_fasta_path)
         
         # Reset cache for host mapping mode
         self.host_fasta_cache = {}
@@ -163,13 +174,8 @@ class PhageHostStreamingDataset(IterableDataset):
                         logger.warning(f"Host FASTA file not found: {fasta_path}")
                         return ""
                     
-                    self.host_fasta_cache[host_id] = Fasta(
-                        fasta_path,
-                        rebuild=False,
-                        split_char='\x00',
-                        read_long_names=True,
-                        duplicate_action='first'
-                    )
+                    # Load FASTA file using helper method
+                    self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]
                 keys = list(fasta_obj.keys())
@@ -401,25 +407,31 @@ class PhageHostIndexedDataset(Dataset):
         self.metadata = result.to_dict('records')
         logger.info(f"Loaded metadata for {len(self.metadata)} phage-host pairs")
     
+    def _load_fasta_file(self, fasta_path: str) -> Fasta:
+        """
+        Load a FASTA file with standard configuration.
+        
+        Args:
+            fasta_path: Path to FASTA file
+            
+        Returns:
+            Loaded Fasta object
+        """
+        return Fasta(
+            fasta_path,
+            rebuild=False,
+            split_char=FASTA_SPLIT_CHAR,
+            read_long_names=True,
+            duplicate_action=FASTA_DUPLICATE_ACTION
+        )
+    
     def _ensure_fasta_loaded(self):
         """Ensure FASTA files are loaded."""
         if self.phage_fasta is None:
-            self.phage_fasta = Fasta(
-                self.phage_fasta_path,
-                rebuild=False,
-                split_char='\x00',
-                read_long_names=True,
-                duplicate_action='first'
-            )
+            self.phage_fasta = self._load_fasta_file(self.phage_fasta_path)
         
         if not self.use_host_mapping and self.host_fasta is None and self.host_fasta_path:
-            self.host_fasta = Fasta(
-                self.host_fasta_path,
-                rebuild=False,
-                split_char='\x00',
-                read_long_names=True,
-                duplicate_action='first'
-            )
+            self.host_fasta = self._load_fasta_file(self.host_fasta_path)
     
     def _get_host_sequence_safe(self, host_id: str) -> str:
         """
@@ -444,13 +456,7 @@ class PhageHostIndexedDataset(Dataset):
                         logger.warning(f"Host FASTA file not found: {fasta_path}")
                         return ""
                     
-                    self.host_fasta_cache[host_id] = Fasta(
-                        fasta_path,
-                        rebuild=False,
-                        split_char='\x00',
-                        read_long_names=True,
-                        duplicate_action='first'
-                    )
+                    self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]
                 keys = list(fasta_obj.keys())

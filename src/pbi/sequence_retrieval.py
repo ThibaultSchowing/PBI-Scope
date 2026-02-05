@@ -956,8 +956,12 @@ class SequenceRetriever:
         """
         from .streaming_dataset import PhageHostStreamingDataset
         
+        # Get database path from connection
+        # PRAGMA database_list returns (seq, name, file) - index 2 is the file path
+        db_path = str(self.conn.execute("PRAGMA database_list").fetchone()[2])
+        
         return PhageHostStreamingDataset(
-            db_path=str(self.conn.execute("PRAGMA database_list").fetchone()[2]),
+            db_path=db_path,
             phage_fasta_path=self._phage_fasta_path,
             host_fasta_path=self._host_fasta_path,
             host_mapping_path=self._host_mapping_path,
@@ -997,8 +1001,12 @@ class SequenceRetriever:
         """
         from .streaming_dataset import PhageHostIndexedDataset
         
+        # Get database path from connection
+        # PRAGMA database_list returns (seq, name, file) - index 2 is the file path
+        db_path = str(self.conn.execute("PRAGMA database_list").fetchone()[2])
+        
         return PhageHostIndexedDataset(
-            db_path=str(self.conn.execute("PRAGMA database_list").fetchone()[2]),
+            db_path=db_path,
             phage_fasta_path=self._phage_fasta_path,
             host_fasta_path=self._host_fasta_path,
             host_mapping_path=self._host_mapping_path,
