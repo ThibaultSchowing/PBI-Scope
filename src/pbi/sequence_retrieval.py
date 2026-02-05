@@ -567,15 +567,17 @@ class SequenceRetriever:
     
     def get_phage_host_pairs(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
         """
-        Get phage-host interaction pairs with sequences
+        Get phage-host interaction pairs with sequences and metadata
         
         Args:
             where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
             limit: Optional limit on number of pairs
         
         Returns:
-            DataFrame with columns: Phage_ID, Host_ID, Phage_Sequence, Host_Sequence,
-                                    Phage_Length, Host_Length, Phage_GC, Host_GC
+            DataFrame with columns: Phage_ID, Host_ID, Phage_Source, Phage_Length, Phage_GC,
+                                    Phage_Taxonomy, Phage_Completeness, Phage_Lifestyle, Phage_Cluster,
+                                    Phage_Subcluster, Species_Name, Host_Assembly_Level, Host_Length,
+                                    Host_GC, Host_RefSeq_Category, Phage_Sequence, Host_Sequence
         
         Example:
             # Get all pairs
@@ -583,6 +585,12 @@ class SequenceRetriever:
             
             # Get pairs for specific lifestyle
             pairs = retriever.get_phage_host_pairs("p.Lifestyle = 'Lytic'", limit=1000)
+            
+            # Get pairs from specific source
+            pairs = retriever.get_phage_host_pairs("p.Source_DB = 'PhagesDB'")
+            
+            # Get pairs with complete host genomes
+            pairs = retriever.get_phage_host_pairs("h.Assembly_Level = 'Complete Genome'")
         """
         if not self._has_host_data:
             raise ValueError("Host data not available - run host genome download workflow first")
@@ -598,12 +606,19 @@ class SequenceRetriever:
         SELECT DISTINCT
             pha.Phage_ID,
             pha.Host_ID,
+            p.Source_DB as Phage_Source,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
+            p.Taxonomy as Phage_Taxonomy,
+            p.Completeness as Phage_Completeness,
+            p.Lifestyle as Phage_Lifestyle,
+            p.Cluster as Phage_Cluster,
+            p.Subcluster as Phage_Subcluster,
+            h.Species_Name,
+            h.Assembly_Level as Host_Assembly_Level,
             h.Genome_Length as Host_Length,
             h.GC_Content as Host_GC,
-            p.Lifestyle,
-            h.Species_Name
+            h.RefSeq_Category as Host_RefSeq_Category
         FROM phage_host_associations pha
         JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
@@ -701,6 +716,173 @@ class SequenceRetriever:
         
         return df
     
+    def get_phage_metadata(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
+        """
+        Get phage metadata from the database
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter phages (without WHERE keyword)
+            limit: Optional limit on number of phages
+        
+        Returns:
+            DataFrame with phage metadata including: Phage_ID, Source_DB, Length, GC_content,
+            Taxonomy, Completeness, Host, Lifestyle, Cluster, Subcluster
+        
+        Example:
+            # Get all phages metadata
+            metadata = retriever.get_phage_metadata()
+            
+            # Get phages from specific source
+            metadata = retriever.get_phage_metadata("Source_DB = 'PhagesDB'", limit=1000)
+            
+            # Get lytic phages
+            metadata = retriever.get_phage_metadata("Lifestyle = 'Lytic'")
+        """
+        query = """
+        SELECT 
+            Phage_ID,
+            Source_DB,
+            Length,
+            GC_content,
+            Taxonomy,
+            Completeness,
+            Host,
+            Lifestyle,
+            Cluster,
+            Subcluster
+        FROM fact_phages
+        """
+        
+        if where_clause:
+            query += f" WHERE {where_clause}"
+        
+        if limit:
+            query += f" LIMIT {limit}"
+        
+        logging.info(f"🔍 Querying phage metadata...")
+        result = self.conn.execute(query).fetchdf()
+        
+        logging.info(f"✅ Retrieved metadata for {len(result):,} phages")
+        
+        return result
+    
+    def get_host_metadata(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
+        """
+        Get host metadata from the database
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter hosts (without WHERE keyword)
+            limit: Optional limit on number of hosts
+        
+        Returns:
+            DataFrame with host metadata including: Host_ID, Species_Name, Strain_Name,
+            Assembly_Accession, Assembly_Name, Assembly_Level, Genome_Length, GC_Content,
+            RefSeq_Category, Download_Date, Source
+        
+        Example:
+            # Get all hosts metadata
+            metadata = retriever.get_host_metadata()
+            
+            # Get hosts of specific species
+            metadata = retriever.get_host_metadata("Species_Name LIKE '%Escherichia%'")
+            
+            # Get complete genomes only
+            metadata = retriever.get_host_metadata("Assembly_Level = 'Complete Genome'")
+        """
+        if not self._has_host_data:
+            raise ValueError("Host data not available - run host genome download workflow first")
+        
+        query = """
+        SELECT 
+            Host_ID,
+            Species_Name,
+            Strain_Name,
+            Assembly_Accession,
+            Assembly_Name,
+            Assembly_Level,
+            Genome_Length,
+            GC_Content,
+            RefSeq_Category,
+            Download_Date,
+            Source
+        FROM dim_hosts
+        """
+        
+        if where_clause:
+            query += f" WHERE {where_clause}"
+        
+        if limit:
+            query += f" LIMIT {limit}"
+        
+        logging.info(f"🔍 Querying host metadata...")
+        result = self.conn.execute(query).fetchdf()
+        
+        logging.info(f"✅ Retrieved metadata for {len(result):,} hosts")
+        
+        return result
+    
+    def get_phage_host_metadata(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
+        """
+        Get combined phage-host metadata for interaction pairs
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
+            limit: Optional limit on number of pairs
+        
+        Returns:
+            DataFrame with combined phage and host metadata
+        
+        Example:
+            # Get all pairs metadata
+            metadata = retriever.get_phage_host_metadata()
+            
+            # Get pairs from specific phage source
+            metadata = retriever.get_phage_host_metadata("p.Source_DB = 'PhagesDB'")
+            
+            # Get pairs with lytic phages only
+            metadata = retriever.get_phage_host_metadata("p.Lifestyle = 'Lytic'", limit=1000)
+        """
+        if not self._has_host_data:
+            raise ValueError("Host data not available - run host genome download workflow first")
+        
+        query = """
+        SELECT DISTINCT
+            pha.Phage_ID,
+            pha.Host_ID,
+            p.Source_DB as Phage_Source,
+            p.Length as Phage_Length,
+            p.GC_content as Phage_GC,
+            p.Taxonomy as Phage_Taxonomy,
+            p.Completeness as Phage_Completeness,
+            p.Lifestyle as Phage_Lifestyle,
+            p.Cluster as Phage_Cluster,
+            p.Subcluster as Phage_Subcluster,
+            h.Species_Name as Host_Species,
+            h.Strain_Name as Host_Strain,
+            h.Assembly_Accession as Host_Assembly,
+            h.Assembly_Level as Host_Assembly_Level,
+            h.Genome_Length as Host_Length,
+            h.GC_Content as Host_GC,
+            h.RefSeq_Category as Host_RefSeq_Category,
+            h.Source as Host_Source
+        FROM phage_host_associations pha
+        JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
+        JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
+        """
+        
+        if where_clause:
+            query += f" WHERE {where_clause}"
+        
+        if limit:
+            query += f" LIMIT {limit}"
+        
+        logging.info(f"🔍 Querying phage-host metadata...")
+        result = self.conn.execute(query).fetchdf()
+        
+        logging.info(f"✅ Retrieved metadata for {len(result):,} phage-host pairs")
+        
+        return result
+    
     def help(self):
         """Print help information"""
         help_text = """
@@ -709,16 +891,32 @@ class SequenceRetriever:
         Methods:
             - get_phage_sequences(query: str, limit: Optional[int] = None) -> pd.DataFrame
             - get_protein_sequences(query: str, limit: Optional[int] = None) -> pd.DataFrame
+            - get_host_sequences(query: str, limit: Optional[int] = None) -> pd.DataFrame
+            - get_phage_host_pairs(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
             - get_sequences_by_ids(phage_ids: Optional[List[str]] = None, protein_ids: Optional[List[str]] = None) -> Dict
             - get_protein_sequences_by_phage(phage_id: str) -> pd.DataFrame
+            - get_phage_metadata(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
+            - get_host_metadata(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
+            - get_phage_host_metadata(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
             - export_fasta(df: pd.DataFrame, output_path: str, id_col: str = 'Phage_ID')
             - get_stats() -> Dict
             - close()
         
         Usage Examples:
+            # Sequences
             retriever = SequenceRetriever(db_path, phage_fasta_path, protein_fasta_path)
             phage_df = retriever.get_phage_sequences("SELECT Phage_ID FROM fact_phages WHERE Length > 50000", limit=100)
             protein_df = retriever.get_protein_sequences("SELECT Protein_ID FROM dim_proteins WHERE Molecular_weight > 50000", limit=100)
+            
+            # Metadata
+            phage_meta = retriever.get_phage_metadata("Source_DB = 'PhagesDB'", limit=100)
+            host_meta = retriever.get_host_metadata("Species_Name LIKE '%Escherichia%'")
+            pairs_meta = retriever.get_phage_host_metadata("p.Lifestyle = 'Lytic'")
+            
+            # Phage-host pairs with sequences and metadata
+            pairs = retriever.get_phage_host_pairs("p.Source_DB = 'PhagesDB'", limit=100)
+            
+            # Export
             retriever.export_fasta(phage_df, "output_phages.fasta", id_col='Phage_ID')
             stats = retriever.get_stats()
             retriever.close()
