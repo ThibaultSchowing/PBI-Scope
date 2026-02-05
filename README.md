@@ -1,4 +1,4 @@
-# PBI - Phage Bioinformatics Interface
+# PBI - Phage Bacteria Interaction
 
 > Comprehensive phage genomics database with integrated host genomes, protein annotations, and machine learning tools for phage-host interaction prediction.
 
