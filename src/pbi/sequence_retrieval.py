@@ -575,7 +575,7 @@ class SequenceRetriever:
         
         Returns:
             DataFrame with columns: Phage_ID, Host_ID, Phage_Source, Phage_Length, Phage_GC,
-                                    Phage_Taxonomy, Phage_Completeness, Lifestyle, Phage_Cluster,
+                                    Phage_Taxonomy, Phage_Completeness, Phage_Lifestyle, Phage_Cluster,
                                     Phage_Subcluster, Species_Name, Host_Assembly_Level, Host_Length,
                                     Host_GC, Host_RefSeq_Category, Phage_Sequence, Host_Sequence
         
@@ -611,7 +611,7 @@ class SequenceRetriever:
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
             p.Completeness as Phage_Completeness,
-            p.Lifestyle,
+            p.Lifestyle as Phage_Lifestyle,
             p.Cluster as Phage_Cluster,
             p.Subcluster as Phage_Subcluster,
             h.Species_Name,

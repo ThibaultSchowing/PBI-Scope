@@ -232,7 +232,7 @@ pairs = retriever.get_phage_host_pairs(
 
 **Returned DataFrame includes:**
 - Sequences: `Phage_Sequence`, `Host_Sequence`
-- Metadata: `Phage_Source`, `Phage_Taxonomy`, `Phage_Completeness`, `Lifestyle`, 
+- Metadata: `Phage_Source`, `Phage_Taxonomy`, `Phage_Completeness`, `Phage_Lifestyle`, 
   `Phage_Cluster`, `Phage_Subcluster`, `Species_Name`, `Host_Assembly_Level`, 
   `Host_RefSeq_Category`
 - Metrics: `Phage_Length`, `Phage_GC`, `Host_Length`, `Host_GC`
