@@ -12,6 +12,7 @@ Main classes:
 # Import main classes for easy access
 from .sequence_retrieval import SequenceRetriever
 from .negative_examples import NegativeExampleGenerator
+from .streaming_dataset import PhageHostStreamingDataset, PhageHostIndexedDataset
 # from .database import DatabaseManager  # If you have this class / later
 
 # Package metadata
@@ -22,6 +23,8 @@ __author__ = "Thibault Schowing, CI4CB"
 __all__ = [
     'SequenceRetriever',
     'NegativeExampleGenerator',
+    'PhageHostStreamingDataset',
+    'PhageHostIndexedDataset',
     # 'DatabaseManager',
 ]
 

@@ -923,6 +923,218 @@ class SequenceRetriever:
         """
         print(help_text)
     
+    def create_streaming_dataset(
+        self,
+        where_clause: Optional[str] = None,
+        batch_size: int = 1000,
+        transform: Optional[object] = None
+    ):
+        """
+        Create a PhageHostStreamingDataset for memory-efficient iteration.
+        
+        This factory method creates a streaming dataset that fetches data in batches
+        from DuckDB and loads sequences on-demand. Ideal for large datasets.
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
+            batch_size: Number of records to fetch per database query (default: 1000)
+            transform: Optional transform function to apply to each sample
+            
+        Returns:
+            PhageHostStreamingDataset instance
+            
+        Example:
+            >>> dataset = retriever.create_streaming_dataset(
+            ...     where_clause="Confidence > 0.8",
+            ...     batch_size=1000
+            ... )
+            >>> from torch.utils.data import DataLoader
+            >>> dataloader = DataLoader(dataset, batch_size=32)
+            >>> for batch in dataloader:
+            ...     # Process batch
+            ...     pass
+        """
+        from .streaming_dataset import PhageHostStreamingDataset
+        
+        return PhageHostStreamingDataset(
+            db_path=str(self.conn.execute("PRAGMA database_list").fetchone()[2]),
+            phage_fasta_path=self._phage_fasta_path,
+            host_fasta_path=self._host_fasta_path,
+            host_mapping_path=self._host_mapping_path,
+            where_clause=where_clause,
+            batch_size=batch_size,
+            transform=transform
+        )
+    
+    def create_indexed_dataset(
+        self,
+        where_clause: Optional[str] = None,
+        transform: Optional[object] = None
+    ):
+        """
+        Create a PhageHostIndexedDataset for random access with caching.
+        
+        This factory method creates an indexed dataset that caches metadata in memory
+        and provides random access. Suitable for medium-sized datasets.
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
+            transform: Optional transform function to apply to each sample
+            
+        Returns:
+            PhageHostIndexedDataset instance
+            
+        Example:
+            >>> dataset = retriever.create_indexed_dataset(
+            ...     where_clause="Confidence > 0.8"
+            ... )
+            >>> from torch.utils.data import DataLoader
+            >>> # Supports shuffling and multi-worker loading
+            >>> dataloader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
+            >>> for batch in dataloader:
+            ...     # Process batch
+            ...     pass
+        """
+        from .streaming_dataset import PhageHostIndexedDataset
+        
+        return PhageHostIndexedDataset(
+            db_path=str(self.conn.execute("PRAGMA database_list").fetchone()[2]),
+            phage_fasta_path=self._phage_fasta_path,
+            host_fasta_path=self._host_fasta_path,
+            host_mapping_path=self._host_mapping_path,
+            where_clause=where_clause,
+            transform=transform
+        )
+    
+    def get_phage_host_pairs_iterator(
+        self,
+        where_clause: Optional[str] = None,
+        batch_size: int = 1000
+    ):
+        """
+        Get an iterator that yields batches of phage-host pairs as DataFrames.
+        
+        This provides a simple memory-efficient way to process large datasets
+        in batches without loading everything into memory at once.
+        Alternative for non-PyTorch workflows.
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
+            batch_size: Number of pairs to fetch per batch (default: 1000)
+            
+        Yields:
+            DataFrame batches containing phage-host pairs with sequences and metadata
+            
+        Example:
+            >>> for batch_df in retriever.get_phage_host_pairs_iterator(
+            ...     where_clause="Confidence > 0.8",
+            ...     batch_size=1000
+            ... ):
+            ...     # Process batch DataFrame
+            ...     print(f"Processing {len(batch_df)} pairs")
+            ...     # Do feature extraction, analysis, etc.
+        """
+        if not self._has_host_data:
+            raise ValueError("Host data not available - run host genome download workflow first")
+        
+        # Ensure FASTA files are loaded
+        _ = self.phage_fasta
+        if not self._use_host_mapping:
+            _ = self.host_fasta
+        
+        # Build query
+        query = """
+        SELECT DISTINCT
+            pha.Phage_ID,
+            pha.Host_ID,
+            p.Source_DB as Phage_Source,
+            p.Length as Phage_Length,
+            p.GC_content as Phage_GC,
+            p.Taxonomy as Phage_Taxonomy,
+            p.Completeness as Phage_Completeness,
+            p.Lifestyle as Phage_Lifestyle,
+            p.Cluster as Phage_Cluster,
+            p.Subcluster as Phage_Subcluster,
+            h.Species_Name,
+            h.Assembly_Level as Host_Assembly_Level,
+            h.Genome_Length as Host_Length,
+            h.GC_Content as Host_GC,
+            h.RefSeq_Category as Host_RefSeq_Category
+        FROM phage_host_associations pha
+        JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
+        JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
+        """
+        
+        if where_clause:
+            query += f" WHERE {where_clause}"
+        
+        logging.info(f"🔍 Starting batch iteration with batch_size={batch_size}")
+        
+        # Execute query and fetch in batches
+        cursor = self.conn.execute(query)
+        batch_num = 0
+        
+        while True:
+            # Fetch a batch
+            batch_df = cursor.fetch_df_chunk(batch_size)
+            if batch_df is None or len(batch_df) == 0:
+                break
+            
+            batch_num += 1
+            logging.info(f"📦 Processing batch {batch_num} ({len(batch_df)} pairs)")
+            
+            # Fetch sequences for this batch
+            phage_seqs = {}
+            host_seqs = {}
+            
+            for phage_id in batch_df['Phage_ID'].unique():
+                phage_seqs[phage_id] = self._get_sequence_safe(phage_id, 'phage')
+            
+            for host_id in batch_df['Host_ID'].unique():
+                host_seqs[host_id] = self._get_sequence_safe(host_id, 'host')
+            
+            # Add sequences to batch
+            batch_df['Phage_Sequence'] = batch_df['Phage_ID'].map(phage_seqs)
+            batch_df['Host_Sequence'] = batch_df['Host_ID'].map(host_seqs)
+            
+            # Filter out rows with missing sequences
+            before_count = len(batch_df)
+            batch_df = batch_df.dropna(subset=['Phage_Sequence', 'Host_Sequence'])
+            after_count = len(batch_df)
+            
+            if before_count > after_count:
+                logging.warning(f"⚠️  Removed {before_count - after_count} pairs with missing sequences from batch")
+            
+            if len(batch_df) > 0:
+                yield batch_df
+        
+        logging.info(f"✅ Completed iteration over {batch_num} batches")
+    
+    def _get_sequence_safe(self, seq_id: str, seq_type: str) -> str:
+        """
+        Helper method for safe sequence retrieval with error handling.
+        
+        Args:
+            seq_id: Sequence identifier (Phage_ID or Host_ID)
+            seq_type: Type of sequence ('phage' or 'host')
+            
+        Returns:
+            Sequence as string, or empty string if not found
+        """
+        try:
+            if seq_type == 'phage':
+                return str(self.phage_fasta[seq_id][:].seq)
+            elif seq_type == 'host':
+                return self.get_host_sequence(seq_id)
+            else:
+                raise ValueError(f"Invalid seq_type: {seq_type}")
+        except KeyError:
+            logging.warning(f"⚠️  {seq_type.capitalize()} sequence not found for ID: {seq_id}")
+            return ""
+        except Exception as e:
+            logging.warning(f"⚠️  Error retrieving {seq_type} sequence for {seq_id}: {e}")
+            return ""
+    
     def close(self):
         """Close database connection"""
         self.conn.close()
