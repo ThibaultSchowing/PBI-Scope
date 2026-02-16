@@ -47,6 +47,34 @@ Demonstrates:
 - Creating negative examples using multiple strategies
 - Building balanced datasets for ML training
 - Dataset validation and statistics
+- Exporting datasets to `/workspace/ml_datasets/` (writable in container)
+
+**Important:** Files are saved to `/workspace/ml_datasets/` which is local to the analysis container. To access exported files from your host machine:
+```bash
+# Copy files from container to host
+docker cp pbi-analysis:/workspace/ml_datasets/phage_host_features.csv ./
+
+# Or mount /workspace as a volume in docker-compose.yml
+```
+
+### example_streaming_ml.ipynb
+**PyTorch-compatible streaming datasets for memory-efficient ML workflows**
+
+Demonstrates:
+- **Streaming datasets** for large-scale data (memory-efficient iteration)
+- **Indexed datasets** with shuffling and random access
+- **Simple batch iterators** for non-PyTorch workflows
+- **Custom transforms** for data preprocessing
+- **Performance comparison** of different approaches
+- **Train/test splitting** using SQL WHERE clauses
+
+**Features:**
+- Compatible with PyTorch DataLoader
+- Works without PyTorch for pandas-based workflows
+- Handles missing sequences gracefully
+- Provides helpful warnings for empty datasets
+
+**Note:** Uses case-insensitive filters (`LOWER()`) to handle database variations.
 
 ## Usage Examples
 
