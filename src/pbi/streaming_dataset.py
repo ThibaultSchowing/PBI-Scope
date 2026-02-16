@@ -134,9 +134,16 @@ class PhageHostStreamingDataset(IterableDataset):
         Returns:
             Loaded Fasta object
         """
+        # Check if index file exists, if not allow pyfaidx to create it
+        index_path = Path(str(fasta_path) + '.fai')
+        rebuild = not index_path.exists()
+        
+        if rebuild:
+            logger.info(f"Creating index for {fasta_path}")
+        
         return Fasta(
             fasta_path,
-            rebuild=False,
+            rebuild=rebuild,
             split_char=FASTA_SPLIT_CHAR,
             read_long_names=True,
             duplicate_action=FASTA_DUPLICATE_ACTION
@@ -473,9 +480,16 @@ class PhageHostIndexedDataset(Dataset):
         Returns:
             Loaded Fasta object
         """
+        # Check if index file exists, if not allow pyfaidx to create it
+        index_path = Path(str(fasta_path) + '.fai')
+        rebuild = not index_path.exists()
+        
+        if rebuild:
+            logger.info(f"Creating index for {fasta_path}")
+        
         return Fasta(
             fasta_path,
-            rebuild=False,
+            rebuild=rebuild,
             split_char=FASTA_SPLIT_CHAR,
             read_long_names=True,
             duplicate_action=FASTA_DUPLICATE_ACTION
