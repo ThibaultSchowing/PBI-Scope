@@ -548,8 +548,6 @@ class PhageHostIndexedDataset(Dataset):
         except Exception as e:
             logger.warning(f"⚠️  Error retrieving host sequence for {host_id}: {e}")
             return ""
-            logger.warning(f"⚠️  Error retrieving host sequence for {host_id}: {e}")
-            return ""
     
     def _get_phage_sequence_safe(self, phage_id: str) -> str:
         """
