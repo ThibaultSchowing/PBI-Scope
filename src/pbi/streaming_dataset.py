@@ -43,6 +43,36 @@ FASTA_DUPLICATE_ACTION = 'first'  # Use first occurrence when duplicates exist
 MAX_HOST_FASTA_CACHE_SIZE = 100
 
 
+def load_fasta_file(fasta_path: str) -> Fasta:
+    """
+    Load a FASTA file with standard configuration.
+    
+    This helper function automatically creates .fai index files if they don't exist.
+    
+    Args:
+        fasta_path: Path to FASTA file (string or Path object)
+        
+    Returns:
+        Loaded Fasta object
+    """
+    # Check if index file exists, if not allow pyfaidx to create it
+    fasta_path_obj = Path(fasta_path)
+    # .fai index is appended to the full filename (e.g., file.fasta -> file.fasta.fai)
+    index_path = Path(str(fasta_path_obj) + '.fai')
+    rebuild = not index_path.exists()
+    
+    if rebuild:
+        logger.info(f"Creating index for {fasta_path}")
+    
+    return Fasta(
+        fasta_path,
+        rebuild=rebuild,
+        split_char=FASTA_SPLIT_CHAR,
+        read_long_names=True,
+        duplicate_action=FASTA_DUPLICATE_ACTION
+    )
+
+
 class PhageHostStreamingDataset(IterableDataset):
     """
     Streaming dataset for phage-host interactions that fetches data in batches from DuckDB.
@@ -134,13 +164,7 @@ class PhageHostStreamingDataset(IterableDataset):
         Returns:
             Loaded Fasta object
         """
-        return Fasta(
-            fasta_path,
-            rebuild=False,
-            split_char=FASTA_SPLIT_CHAR,
-            read_long_names=True,
-            duplicate_action=FASTA_DUPLICATE_ACTION
-        )
+        return load_fasta_file(fasta_path)
     
     def _init_worker(self):
         """Initialize database connection and FASTA files for the current worker."""
@@ -183,12 +207,6 @@ class PhageHostStreamingDataset(IterableDataset):
                         logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
                         return ""
                     
-                    # Check if .fai index file exists
-                    index_path = Path(str(fasta_path) + '.fai')
-                    if not index_path.exists():
-                        logger.warning(f"⚠️  Host FASTA index not found: {index_path}")
-                        return ""
-                    
                     # Check cache size and evict oldest if needed
                     if len(self.host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
                         # Remove oldest (first) item
@@ -199,7 +217,7 @@ class PhageHostStreamingDataset(IterableDataset):
                             except Exception:
                                 pass
                     
-                    # Load FASTA file using helper method
+                    # Load FASTA file using helper method (will create .fai if missing)
                     self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]
@@ -473,13 +491,7 @@ class PhageHostIndexedDataset(Dataset):
         Returns:
             Loaded Fasta object
         """
-        return Fasta(
-            fasta_path,
-            rebuild=False,
-            split_char=FASTA_SPLIT_CHAR,
-            read_long_names=True,
-            duplicate_action=FASTA_DUPLICATE_ACTION
-        )
+        return load_fasta_file(fasta_path)
     
     def _ensure_fasta_loaded(self):
         """Ensure FASTA files are loaded."""
@@ -515,12 +527,6 @@ class PhageHostIndexedDataset(Dataset):
                         logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
                         return ""
                     
-                    # Check if .fai index file exists
-                    index_path = Path(str(fasta_path) + '.fai')
-                    if not index_path.exists():
-                        logger.warning(f"⚠️  Host FASTA index not found: {index_path}")
-                        return ""
-                    
                     # Check cache size and evict oldest if needed
                     if len(self.host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
                         # Remove oldest (first) item
@@ -531,6 +537,7 @@ class PhageHostIndexedDataset(Dataset):
                             except Exception:
                                 pass
                     
+                    # Load FASTA file using helper method (will create .fai if missing)
                     self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]

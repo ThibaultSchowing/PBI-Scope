@@ -37,7 +37,8 @@ RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pyth
     matplotlib>=3.5.0 \
     seaborn>=0.12.0 \
     biopython>=1.80 \
-    pyarrow>=14.0.0
+    pyarrow>=14.0.0 \
+    torch>=2.0.0
 
 # Configure Jupyter Lab
 # WARNING: This configuration disables authentication for LOCAL DEVELOPMENT ONLY.

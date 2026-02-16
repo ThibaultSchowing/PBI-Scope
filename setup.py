@@ -48,6 +48,9 @@ setup(
             "biopython>=1.80",
             "numpy>=1.24.0",
         ],
+        "ml": [
+            "torch>=2.0.0",
+        ],
     },
     
     # Command-line scripts (optional)
