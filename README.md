@@ -74,6 +74,36 @@ dataset = neg_gen.generate_balanced_dataset(
 )
 ```
 
+### Machine Learning with PyTorch (Optional)
+
+For ML workflows using PyTorch DataLoader and streaming datasets:
+
+```bash
+# Install PBI with PyTorch support
+pip install -e ".[ml]"
+
+# Or install PyTorch separately
+pip install torch
+```
+
+```python
+from pbi import quick_connect
+
+retriever = quick_connect()
+
+# Create PyTorch-compatible streaming dataset
+dataset = retriever.create_streaming_dataset(
+    where_clause="p.Completeness = 'complete'"
+)
+
+# Use with PyTorch DataLoader
+from torch.utils.data import DataLoader
+loader = DataLoader(dataset, batch_size=32)
+for batch in loader:
+    # Train your model
+    pass
+```
+
 ## 🏗️ Architecture
 
 ```
