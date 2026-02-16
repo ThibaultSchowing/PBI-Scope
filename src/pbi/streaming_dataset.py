@@ -57,8 +57,8 @@ def load_fasta_file(fasta_path: str) -> Fasta:
     """
     # Check if index file exists, if not allow pyfaidx to create it
     fasta_path_obj = Path(fasta_path)
-    # .fai is appended to full filename, not replacing extension
-    index_path = fasta_path_obj.with_suffix(fasta_path_obj.suffix + '.fai')
+    # .fai index is appended to the full filename (e.g., file.fasta -> file.fasta.fai)
+    index_path = Path(str(fasta_path_obj) + '.fai')
     rebuild = not index_path.exists()
     
     if rebuild:
