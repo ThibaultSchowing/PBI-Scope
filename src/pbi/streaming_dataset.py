@@ -59,7 +59,8 @@ def phage_host_collate_fn(batch):
     keys = batch[0].keys()
     
     # Create a dictionary with lists for each key
-    collated = {key: [sample[key] for sample in batch] for key in keys}
+    # Use .get() to handle missing keys gracefully (defaults to None)
+    collated = {key: [sample.get(key, None) for sample in batch] for key in keys}
     
     return collated
 

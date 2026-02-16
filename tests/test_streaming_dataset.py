@@ -183,6 +183,16 @@ def test_collate_function():
         assert collated_none['Cluster'] == ['A', None], "Should preserve None values"
         print("✓ Collate function handles None values correctly")
         
+        # Test with inconsistent keys (missing keys should become None)
+        batch_inconsistent = [
+            {'Phage_ID': 'phage1', 'Cluster': 'A'},
+            {'Phage_ID': 'phage2'},  # Missing 'Cluster' key
+        ]
+        collated_inconsistent = phage_host_collate_fn(batch_inconsistent)
+        assert collated_inconsistent['Phage_ID'] == ['phage1', 'phage2'], "Should preserve all Phage_IDs"
+        assert collated_inconsistent['Cluster'] == ['A', None], "Missing key should become None"
+        print("✓ Collate function handles inconsistent keys gracefully")
+        
         return True
     except Exception as e:
         print(f"✗ Test failed: {e}")
