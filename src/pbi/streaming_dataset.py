@@ -33,6 +33,36 @@ from pyfaidx import Fasta
 
 logger = logging.getLogger(__name__)
 
+
+def phage_host_collate_fn(batch):
+    """
+    Custom collate function for phage-host datasets.
+    
+    PyTorch's default collate function cannot handle dictionaries with mixed types
+    (strings, numbers, None values). This function keeps the batch as a list of
+    dictionaries instead of trying to stack values into tensors.
+    
+    Args:
+        batch: List of sample dictionaries from the dataset
+        
+    Returns:
+        Dictionary where each key maps to a list of values from all samples
+        
+    Example:
+        Input: [{'Phage_ID': 'p1', 'Length': 100}, {'Phage_ID': 'p2', 'Length': 200}]
+        Output: {'Phage_ID': ['p1', 'p2'], 'Length': [100, 200]}
+    """
+    if not batch:
+        return {}
+    
+    # Get all keys from the first sample
+    keys = batch[0].keys()
+    
+    # Create a dictionary with lists for each key
+    collated = {key: [sample[key] for sample in batch] for key in keys}
+    
+    return collated
+
 # FASTA file configuration constants
 # The null character split is used to handle FASTA headers with spaces
 FASTA_SPLIT_CHAR = '\x00'
