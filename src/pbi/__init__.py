@@ -12,7 +12,7 @@ Main classes:
 # Import main classes for easy access
 from .sequence_retrieval import SequenceRetriever
 from .negative_examples import NegativeExampleGenerator
-from .streaming_dataset import PhageHostStreamingDataset, PhageHostIndexedDataset
+from .streaming_dataset import PhageHostStreamingDataset, PhageHostIndexedDataset, phage_host_collate_fn
 # from .database import DatabaseManager  # If you have this class / later
 
 # Package metadata
@@ -25,6 +25,7 @@ __all__ = [
     'NegativeExampleGenerator',
     'PhageHostStreamingDataset',
     'PhageHostIndexedDataset',
+    'phage_host_collate_fn',
     # 'DatabaseManager',
 ]
 
