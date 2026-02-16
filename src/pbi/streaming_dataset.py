@@ -339,11 +339,11 @@ class PhageHostStreamingDataset(IterableDataset):
             logger.warning("⚠️  Streaming dataset yielded 0 samples")
             if self.where_clause:
                 logger.warning(f"   WHERE clause: {self.where_clause}")
-                logger.warning(f"   Consider:")
-                logger.warning(f"   - Using LOWER() for case-insensitive string matching")
-                logger.warning(f"   - Relaxing filter conditions")
-                logger.warning(f"   - Verifying the database has phage-host associations")
-                logger.warning(f"   - Checking that FASTA files contain required sequences")
+                logger.warning("   Consider:")
+                logger.warning("   - Using LOWER() for case-insensitive string matching")
+                logger.warning("   - Relaxing filter conditions")
+                logger.warning("   - Verifying the database has phage-host associations")
+                logger.warning("   - Checking that FASTA files contain required sequences")
         
         # Clean up resources
         self._cleanup()
@@ -496,13 +496,13 @@ class PhageHostIndexedDataset(Dataset):
         self.metadata = result.to_dict('records')
         
         if len(self.metadata) == 0:
-            logger.warning(f"⚠️  Dataset is empty (0 phage-host pairs loaded)")
+            logger.warning("⚠️  Dataset is empty (0 phage-host pairs loaded)")
             if where_clause:
                 logger.warning(f"   WHERE clause: {where_clause}")
-                logger.warning(f"   Consider:")
-                logger.warning(f"   - Using LOWER() for case-insensitive string matching")
-                logger.warning(f"   - Relaxing filter conditions")
-                logger.warning(f"   - Verifying the database has phage-host associations")
+                logger.warning("   Consider:")
+                logger.warning("   - Using LOWER() for case-insensitive string matching")
+                logger.warning("   - Relaxing filter conditions")
+                logger.warning("   - Verifying the database has phage-host associations")
         else:
             logger.info(f"Loaded metadata for {len(self.metadata)} phage-host pairs")
     
