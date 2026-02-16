@@ -334,16 +334,71 @@ class PhageHostStreamingDataset(IterableDataset):
                 sample_count += 1
                 yield sample
         
-        # Warn if no samples were yielded
+        # Warn if no samples were yielded - diagnose the issue
         if sample_count == 0:
             logger.warning("⚠️  Streaming dataset yielded 0 samples")
             if self.where_clause:
                 logger.warning(f"   WHERE clause: {self.where_clause}")
-                logger.warning("   Consider:")
-                logger.warning("   - Using LOWER() for case-insensitive string matching")
-                logger.warning("   - Relaxing filter conditions")
-                logger.warning("   - Verifying the database has phage-host associations")
-                logger.warning("   - Checking that FASTA files contain required sequences")
+            
+            # Diagnose the issue
+            logger.warning("   Diagnosing issue...")
+            
+            # Check if there are ANY phage-host associations
+            total_assoc = self.conn.execute("""
+                SELECT COUNT(*) as count 
+                FROM phage_host_associations
+            """).fetchdf()['count'].iloc[0]
+            
+            logger.warning(f"   Total phage-host associations in database: {total_assoc}")
+            
+            if total_assoc == 0:
+                logger.warning("   ❌ Database has no phage-host associations!")
+            elif self.where_clause:
+                # Check how many rows the query returns (before sequence filtering)
+                test_query = """
+                SELECT COUNT(*) as count
+                FROM phage_host_associations pha
+                JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
+                JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
+                """
+                test_query += f" WHERE {self.where_clause}"
+                
+                rows_before_seq_filter = self.conn.execute(test_query).fetchdf()['count'].iloc[0]
+                logger.warning(f"   Rows matching WHERE clause: {rows_before_seq_filter}")
+                
+                if rows_before_seq_filter == 0:
+                    # WHERE clause is the problem
+                    logger.warning("   ❌ WHERE clause filters out all data!")
+                    
+                    # Check what values actually exist
+                    if 'Completeness' in self.where_clause or 'completeness' in self.where_clause.lower():
+                        completeness_values = self.conn.execute("""
+                            SELECT DISTINCT Completeness, COUNT(*) as count
+                            FROM fact_phages
+                            WHERE Completeness IS NOT NULL
+                            GROUP BY Completeness
+                            ORDER BY count DESC
+                        """).fetchdf()
+                        logger.warning(f"   Available Completeness values:")
+                        for _, row in completeness_values.iterrows():
+                            logger.warning(f"     - '{row['Completeness']}': {row['count']} phages")
+                    
+                    if 'Assembly_Level' in self.where_clause or 'assembly_level' in self.where_clause.lower():
+                        assembly_values = self.conn.execute("""
+                            SELECT DISTINCT Assembly_Level, COUNT(*) as count
+                            FROM dim_hosts
+                            WHERE Assembly_Level IS NOT NULL
+                            GROUP BY Assembly_Level
+                            ORDER BY count DESC
+                        """).fetchdf()
+                        logger.warning(f"   Available Assembly_Level values:")
+                        for _, row in assembly_values.iterrows():
+                            logger.warning(f"     - '{row['Assembly_Level']}': {row['count']} hosts")
+                else:
+                    # Sequence files are the problem
+                    logger.warning(f"   ⚠️  {rows_before_seq_filter} rows matched WHERE clause but all were filtered due to missing sequences")
+                    logger.warning("   Check that FASTA files contain the required phage/host sequences")
+        
         
         # Clean up resources
         self._cleanup()
@@ -490,7 +545,6 @@ class PhageHostIndexedDataset(Dataset):
             query += f" WHERE {where_clause}"
         
         result = conn.execute(query).fetchdf()
-        conn.close()
         
         # Store metadata
         self.metadata = result.to_dict('records')
@@ -499,12 +553,80 @@ class PhageHostIndexedDataset(Dataset):
             logger.warning("⚠️  Dataset is empty (0 phage-host pairs loaded)")
             if where_clause:
                 logger.warning(f"   WHERE clause: {where_clause}")
-                logger.warning("   Consider:")
-                logger.warning("   - Using LOWER() for case-insensitive string matching")
-                logger.warning("   - Relaxing filter conditions")
-                logger.warning("   - Verifying the database has phage-host associations")
+            
+            # Diagnose the issue - check what data actually exists
+            logger.warning("   Diagnosing issue...")
+            
+            # Check if there are ANY phage-host associations
+            total_assoc = conn.execute("""
+                SELECT COUNT(*) as count 
+                FROM phage_host_associations
+            """).fetchdf()['count'].iloc[0]
+            
+            logger.warning(f"   Total phage-host associations in database: {total_assoc}")
+            
+            if total_assoc == 0:
+                logger.warning("   ❌ Database has no phage-host associations!")
+                logger.warning("   The database may not be fully populated yet.")
+            elif where_clause:
+                # Check without the WHERE clause
+                query_no_where = """
+                SELECT DISTINCT
+                    pha.Phage_ID,
+                    pha.Host_ID,
+                    p.Source_DB as Phage_Source,
+                    p.Length as Phage_Length,
+                    p.GC_content as Phage_GC,
+                    p.Taxonomy as Phage_Taxonomy,
+                    p.Completeness as Phage_Completeness,
+                    p.Lifestyle as Phage_Lifestyle,
+                    p.Cluster as Phage_Cluster,
+                    p.Subcluster as Phage_Subcluster,
+                    h.Species_Name,
+                    h.Assembly_Level as Host_Assembly_Level,
+                    h.Genome_Length as Host_Length,
+                    h.GC_Content as Host_GC,
+                    h.RefSeq_Category as Host_RefSeq_Category
+                FROM phage_host_associations pha
+                JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
+                JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
+                """
+                total_without_filter = conn.execute(query_no_where).fetchdf()
+                logger.warning(f"   Total pairs without WHERE clause: {len(total_without_filter)}")
+                
+                if len(total_without_filter) > 0:
+                    # Check what Completeness values exist
+                    if 'Completeness' in where_clause or 'completeness' in where_clause.lower():
+                        completeness_values = conn.execute("""
+                            SELECT DISTINCT Completeness, COUNT(*) as count
+                            FROM fact_phages
+                            WHERE Completeness IS NOT NULL
+                            GROUP BY Completeness
+                            ORDER BY count DESC
+                        """).fetchdf()
+                        logger.warning(f"   Available Completeness values in database:")
+                        for _, row in completeness_values.iterrows():
+                            logger.warning(f"     - '{row['Completeness']}': {row['count']} phages")
+                    
+                    # Check what Assembly_Level values exist
+                    if 'Assembly_Level' in where_clause or 'assembly_level' in where_clause.lower():
+                        assembly_values = conn.execute("""
+                            SELECT DISTINCT Assembly_Level, COUNT(*) as count
+                            FROM dim_hosts
+                            WHERE Assembly_Level IS NOT NULL
+                            GROUP BY Assembly_Level
+                            ORDER BY count DESC
+                        """).fetchdf()
+                        logger.warning(f"   Available Assembly_Level values in database:")
+                        for _, row in assembly_values.iterrows():
+                            logger.warning(f"     - '{row['Assembly_Level']}': {row['count']} hosts")
+                    
+                    logger.warning("   ⚠️  WHERE clause filters out all data!")
+                    logger.warning("   Suggestion: Adjust WHERE clause to match actual database values")
         else:
             logger.info(f"Loaded metadata for {len(self.metadata)} phage-host pairs")
+        
+        conn.close()
     
     def _load_fasta_file(self, fasta_path: str) -> Fasta:
         """
