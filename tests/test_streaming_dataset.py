@@ -144,6 +144,53 @@ def test_torch_optional():
         return False
 
 
+def test_collate_function():
+    """Test the custom collate function."""
+    print("\n" + "=" * 60)
+    print("Test 6: Custom Collate Function")
+    print("=" * 60)
+    
+    try:
+        from pbi.streaming_dataset import phage_host_collate_fn
+        
+        # Test with sample data
+        batch = [
+            {'Phage_ID': 'phage1', 'Host_ID': 'host1', 'Phage_Length': 100},
+            {'Phage_ID': 'phage2', 'Host_ID': 'host2', 'Phage_Length': 200},
+            {'Phage_ID': 'phage3', 'Host_ID': 'host3', 'Phage_Length': 150},
+        ]
+        
+        collated = phage_host_collate_fn(batch)
+        
+        # Verify structure
+        assert isinstance(collated, dict), "Result should be a dictionary"
+        assert len(collated['Phage_ID']) == 3, "Should have 3 Phage_IDs"
+        assert collated['Phage_ID'] == ['phage1', 'phage2', 'phage3'], "Phage IDs should match"
+        assert collated['Phage_Length'] == [100, 200, 150], "Lengths should match"
+        print("✓ Collate function handles mixed types correctly")
+        
+        # Test with empty batch
+        empty_result = phage_host_collate_fn([])
+        assert empty_result == {}, "Empty batch should return empty dict"
+        print("✓ Collate function handles empty batch")
+        
+        # Test with None values
+        batch_with_none = [
+            {'Phage_ID': 'phage1', 'Cluster': 'A', 'Subcluster': None},
+            {'Phage_ID': 'phage2', 'Cluster': None, 'Subcluster': 'B1'},
+        ]
+        collated_none = phage_host_collate_fn(batch_with_none)
+        assert collated_none['Cluster'] == ['A', None], "Should preserve None values"
+        print("✓ Collate function handles None values correctly")
+        
+        return True
+    except Exception as e:
+        print(f"✗ Test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 def main():
     """Run all tests."""
     print("\n" + "=" * 60)
@@ -155,7 +202,8 @@ def main():
         test_sequence_retriever_methods,
         test_dataset_class_structure,
         test_error_handling,
-        test_torch_optional
+        test_torch_optional,
+        test_collate_function
     ]
     
     results = []
