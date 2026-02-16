@@ -190,12 +190,6 @@ class PhageHostStreamingDataset(IterableDataset):
                         logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
                         return ""
                     
-                    # Check if .fai index file exists
-                    index_path = Path(str(fasta_path) + '.fai')
-                    if not index_path.exists():
-                        logger.warning(f"⚠️  Host FASTA index not found: {index_path}")
-                        return ""
-                    
                     # Check cache size and evict oldest if needed
                     if len(self.host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
                         # Remove oldest (first) item
@@ -206,7 +200,7 @@ class PhageHostStreamingDataset(IterableDataset):
                             except Exception:
                                 pass
                     
-                    # Load FASTA file using helper method
+                    # Load FASTA file using helper method (will create .fai if missing)
                     self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]
@@ -529,12 +523,6 @@ class PhageHostIndexedDataset(Dataset):
                         logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
                         return ""
                     
-                    # Check if .fai index file exists
-                    index_path = Path(str(fasta_path) + '.fai')
-                    if not index_path.exists():
-                        logger.warning(f"⚠️  Host FASTA index not found: {index_path}")
-                        return ""
-                    
                     # Check cache size and evict oldest if needed
                     if len(self.host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
                         # Remove oldest (first) item
@@ -545,6 +533,7 @@ class PhageHostIndexedDataset(Dataset):
                             except Exception:
                                 pass
                     
+                    # Load FASTA file using helper method (will create .fai if missing)
                     self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]
