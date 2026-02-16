@@ -289,6 +289,9 @@ class PhageHostStreamingDataset(IterableDataset):
         # Execute query and fetch in batches
         cursor = self.conn.execute(query)
         
+        # Track if we yield any samples
+        sample_count = 0
+        
         while True:
             # Fetch a batch
             batch = cursor.fetchmany(self.batch_size)
@@ -328,7 +331,19 @@ class PhageHostStreamingDataset(IterableDataset):
                 if self.transform:
                     sample = self.transform(sample)
                 
+                sample_count += 1
                 yield sample
+        
+        # Warn if no samples were yielded
+        if sample_count == 0:
+            logger.warning("⚠️  Streaming dataset yielded 0 samples")
+            if self.where_clause:
+                logger.warning(f"   WHERE clause: {self.where_clause}")
+                logger.warning(f"   Consider:")
+                logger.warning(f"   - Using LOWER() for case-insensitive string matching")
+                logger.warning(f"   - Relaxing filter conditions")
+                logger.warning(f"   - Verifying the database has phage-host associations")
+                logger.warning(f"   - Checking that FASTA files contain required sequences")
         
         # Clean up resources
         self._cleanup()
@@ -479,7 +494,17 @@ class PhageHostIndexedDataset(Dataset):
         
         # Store metadata
         self.metadata = result.to_dict('records')
-        logger.info(f"Loaded metadata for {len(self.metadata)} phage-host pairs")
+        
+        if len(self.metadata) == 0:
+            logger.warning(f"⚠️  Dataset is empty (0 phage-host pairs loaded)")
+            if where_clause:
+                logger.warning(f"   WHERE clause: {where_clause}")
+                logger.warning(f"   Consider:")
+                logger.warning(f"   - Using LOWER() for case-insensitive string matching")
+                logger.warning(f"   - Relaxing filter conditions")
+                logger.warning(f"   - Verifying the database has phage-host associations")
+        else:
+            logger.info(f"Loaded metadata for {len(self.metadata)} phage-host pairs")
     
     def _load_fasta_file(self, fasta_path: str) -> Fasta:
         """
