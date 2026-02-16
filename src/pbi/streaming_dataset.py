@@ -14,6 +14,7 @@ import logging
 from typing import Optional, Callable, Dict, Any
 from pathlib import Path
 import json
+from collections import OrderedDict
 
 try:
     from torch.utils.data import IterableDataset, Dataset
@@ -36,6 +37,10 @@ logger = logging.getLogger(__name__)
 # The null character split is used to handle FASTA headers with spaces
 FASTA_SPLIT_CHAR = '\x00'
 FASTA_DUPLICATE_ACTION = 'first'  # Use first occurrence when duplicates exist
+
+# Maximum number of host FASTA files to keep open simultaneously
+# This prevents "too many open files" errors when using host mapping mode
+MAX_HOST_FASTA_CACHE_SIZE = 100
 
 
 class PhageHostStreamingDataset(IterableDataset):
@@ -116,7 +121,8 @@ class PhageHostStreamingDataset(IterableDataset):
         self.conn = None
         self.phage_fasta = None
         self.host_fasta = None
-        self.host_fasta_cache = {}
+        # Use OrderedDict for LRU cache behavior
+        self.host_fasta_cache = OrderedDict()
     
     def _load_fasta_file(self, fasta_path: str) -> Fasta:
         """
@@ -148,8 +154,8 @@ class PhageHostStreamingDataset(IterableDataset):
         if not self.use_host_mapping and self.host_fasta_path:
             self.host_fasta = self._load_fasta_file(self.host_fasta_path)
         
-        # Reset cache for host mapping mode
-        self.host_fasta_cache = {}
+        # Reset cache for host mapping mode (use OrderedDict for LRU)
+        self.host_fasta_cache = OrderedDict()
     
     def _get_host_sequence_safe(self, host_id: str) -> str:
         """
@@ -163,16 +169,35 @@ class PhageHostStreamingDataset(IterableDataset):
         """
         try:
             if self.use_host_mapping:
-                # Load individual host file on-demand
-                if host_id not in self.host_fasta_cache:
+                # Load individual host file on-demand with LRU cache
+                if host_id in self.host_fasta_cache:
+                    # Move to end (most recently used)
+                    self.host_fasta_cache.move_to_end(host_id)
+                else:
                     if host_id not in self.host_mapping:
-                        logger.warning(f"Host ID '{host_id}' not found in mapping")
+                        logger.warning(f"⚠️  Host ID '{host_id}' not found in mapping")
                         return ""
                     
                     fasta_path = self.host_mapping[host_id]
                     if not Path(fasta_path).exists():
-                        logger.warning(f"Host FASTA file not found: {fasta_path}")
+                        logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
                         return ""
+                    
+                    # Check if .fai index file exists
+                    index_path = Path(str(fasta_path) + '.fai')
+                    if not index_path.exists():
+                        logger.warning(f"⚠️  Host FASTA index not found: {index_path}")
+                        return ""
+                    
+                    # Check cache size and evict oldest if needed
+                    if len(self.host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
+                        # Remove oldest (first) item
+                        oldest_id, oldest_fasta = self.host_fasta_cache.popitem(last=False)
+                        if hasattr(oldest_fasta, 'close'):
+                            try:
+                                oldest_fasta.close()
+                            except Exception:
+                                pass
                     
                     # Load FASTA file using helper method
                     self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
@@ -180,17 +205,17 @@ class PhageHostStreamingDataset(IterableDataset):
                 fasta_obj = self.host_fasta_cache[host_id]
                 keys = list(fasta_obj.keys())
                 if not keys:
-                    logger.warning(f"No sequences found in host file for {host_id}")
+                    logger.warning(f"⚠️  No sequences found in host file for {host_id}")
                     return ""
                 return str(fasta_obj[keys[0]][:].seq)
             else:
                 # Legacy single-file mode
                 return str(self.host_fasta[host_id][:].seq)
         except KeyError:
-            logger.warning(f"Host sequence not found for ID: {host_id}")
+            logger.warning(f"⚠️  Host sequence not found for ID: {host_id}")
             return ""
         except Exception as e:
-            logger.warning(f"Error retrieving host sequence for {host_id}: {e}")
+            logger.warning(f"⚠️  Error retrieving host sequence for {host_id}: {e}")
             return ""
     
     def _get_phage_sequence_safe(self, phage_id: str) -> str:
@@ -206,10 +231,10 @@ class PhageHostStreamingDataset(IterableDataset):
         try:
             return str(self.phage_fasta[phage_id][:].seq)
         except KeyError:
-            logger.warning(f"Phage sequence not found for ID: {phage_id}")
+            logger.warning(f"⚠️  Phage sequence not found for ID: {phage_id}")
             return ""
         except Exception as e:
-            logger.warning(f"Error retrieving phage sequence for {phage_id}: {e}")
+            logger.warning(f"⚠️  Error retrieving phage sequence for {phage_id}: {e}")
             return ""
     
     def __iter__(self):
@@ -287,9 +312,39 @@ class PhageHostStreamingDataset(IterableDataset):
                 
                 yield sample
         
-        # Clean up
+        # Clean up resources
+        self._cleanup()
+    
+    def _cleanup(self):
+        """Clean up resources (close database connection and FASTA files)."""
+        # Close database connection
         if self.conn:
             self.conn.close()
+            self.conn = None
+        
+        # Close cached host FASTA files
+        if self.host_fasta_cache:
+            for fasta_obj in self.host_fasta_cache.values():
+                if hasattr(fasta_obj, 'close'):
+                    try:
+                        fasta_obj.close()
+                    except Exception:
+                        pass
+            self.host_fasta_cache.clear()
+        
+        # Note: phage_fasta and host_fasta will be closed when Fasta objects are garbage collected
+        # or we can explicitly close them if they support it
+        if self.phage_fasta and hasattr(self.phage_fasta, 'close'):
+            try:
+                self.phage_fasta.close()
+            except Exception:
+                pass
+        
+        if self.host_fasta and hasattr(self.host_fasta, 'close'):
+            try:
+                self.host_fasta.close()
+            except Exception:
+                pass
 
 
 class PhageHostIndexedDataset(Dataset):
@@ -369,7 +424,8 @@ class PhageHostIndexedDataset(Dataset):
         # FASTA files will be loaded lazily
         self.phage_fasta = None
         self.host_fasta = None
-        self.host_fasta_cache = {}
+        # Use OrderedDict for LRU cache behavior
+        self.host_fasta_cache = OrderedDict()
     
     def _load_metadata(self, where_clause: Optional[str] = None):
         """Load metadata from database into memory."""
@@ -445,33 +501,52 @@ class PhageHostIndexedDataset(Dataset):
         """
         try:
             if self.use_host_mapping:
-                # Load individual host file on-demand
-                if host_id not in self.host_fasta_cache:
+                # Load individual host file on-demand with LRU cache
+                if host_id in self.host_fasta_cache:
+                    # Move to end (most recently used)
+                    self.host_fasta_cache.move_to_end(host_id)
+                else:
                     if host_id not in self.host_mapping:
-                        logger.warning(f"Host ID '{host_id}' not found in mapping")
+                        logger.warning(f"⚠️  Host ID '{host_id}' not found in mapping")
                         return ""
                     
                     fasta_path = self.host_mapping[host_id]
                     if not Path(fasta_path).exists():
-                        logger.warning(f"Host FASTA file not found: {fasta_path}")
+                        logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
                         return ""
+                    
+                    # Check if .fai index file exists
+                    index_path = Path(str(fasta_path) + '.fai')
+                    if not index_path.exists():
+                        logger.warning(f"⚠️  Host FASTA index not found: {index_path}")
+                        return ""
+                    
+                    # Check cache size and evict oldest if needed
+                    if len(self.host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
+                        # Remove oldest (first) item
+                        oldest_id, oldest_fasta = self.host_fasta_cache.popitem(last=False)
+                        if hasattr(oldest_fasta, 'close'):
+                            try:
+                                oldest_fasta.close()
+                            except Exception:
+                                pass
                     
                     self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
                 
                 fasta_obj = self.host_fasta_cache[host_id]
                 keys = list(fasta_obj.keys())
                 if not keys:
-                    logger.warning(f"No sequences found in host file for {host_id}")
+                    logger.warning(f"⚠️  No sequences found in host file for {host_id}")
                     return ""
                 return str(fasta_obj[keys[0]][:].seq)
             else:
                 # Legacy single-file mode
                 return str(self.host_fasta[host_id][:].seq)
         except KeyError:
-            logger.warning(f"Host sequence not found for ID: {host_id}")
+            logger.warning(f"⚠️  Host sequence not found for ID: {host_id}")
             return ""
         except Exception as e:
-            logger.warning(f"Error retrieving host sequence for {host_id}: {e}")
+            logger.warning(f"⚠️  Error retrieving host sequence for {host_id}: {e}")
             return ""
     
     def _get_phage_sequence_safe(self, phage_id: str) -> str:
@@ -487,10 +562,10 @@ class PhageHostIndexedDataset(Dataset):
         try:
             return str(self.phage_fasta[phage_id][:].seq)
         except KeyError:
-            logger.warning(f"Phage sequence not found for ID: {phage_id}")
+            logger.warning(f"⚠️  Phage sequence not found for ID: {phage_id}")
             return ""
         except Exception as e:
-            logger.warning(f"Error retrieving phage sequence for {phage_id}: {e}")
+            logger.warning(f"⚠️  Error retrieving phage sequence for {phage_id}: {e}")
             return ""
     
     def __len__(self):
@@ -525,3 +600,35 @@ class PhageHostIndexedDataset(Dataset):
             sample = self.transform(sample)
         
         return sample
+    
+    def close(self):
+        """Close all open FASTA file handles to prevent resource leaks."""
+        # Close cached host FASTA files
+        if self.host_fasta_cache:
+            for fasta_obj in self.host_fasta_cache.values():
+                if hasattr(fasta_obj, 'close'):
+                    try:
+                        fasta_obj.close()
+                    except Exception:
+                        pass
+            self.host_fasta_cache.clear()
+        
+        # Close phage FASTA
+        if self.phage_fasta and hasattr(self.phage_fasta, 'close'):
+            try:
+                self.phage_fasta.close()
+            except Exception:
+                pass
+            self.phage_fasta = None
+        
+        # Close host FASTA (legacy mode)
+        if self.host_fasta and hasattr(self.host_fasta, 'close'):
+            try:
+                self.host_fasta.close()
+            except Exception:
+                pass
+            self.host_fasta = None
+    
+    def __del__(self):
+        """Destructor to ensure cleanup when object is deleted."""
+        self.close()
