@@ -50,14 +50,15 @@ def load_fasta_file(fasta_path: str) -> Fasta:
     This helper function automatically creates .fai index files if they don't exist.
     
     Args:
-        fasta_path: Path to FASTA file
+        fasta_path: Path to FASTA file (string or Path object)
         
     Returns:
         Loaded Fasta object
     """
     # Check if index file exists, if not allow pyfaidx to create it
     fasta_path_obj = Path(fasta_path)
-    index_path = fasta_path_obj.parent / (fasta_path_obj.name + '.fai')
+    # .fai is appended to full filename, not replacing extension
+    index_path = fasta_path_obj.with_suffix(fasta_path_obj.suffix + '.fai')
     rebuild = not index_path.exists()
     
     if rebuild:
