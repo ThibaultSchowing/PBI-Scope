@@ -603,6 +603,15 @@ class PhageHostStreamingDataset(IterableDataset):
         self._save_missing_hosts_csv()
         self._cleanup()
     
+    def __enter__(self):
+        """Enter context manager - returns self for use in with statement."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context manager - ensures cleanup is called."""
+        self.close()
+        return False  # Don't suppress exceptions
+    
     def __del__(self):
         """Destructor to ensure cleanup when object is deleted."""
         try:
@@ -1040,6 +1049,15 @@ class PhageHostIndexedDataset(Dataset):
             except Exception:
                 pass
             self.host_fasta = None
+    
+    def __enter__(self):
+        """Enter context manager - returns self for use in with statement."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context manager - ensures cleanup is called."""
+        self.close()
+        return False  # Don't suppress exceptions
     
     def __del__(self):
         """Destructor to ensure cleanup when object is deleted."""
