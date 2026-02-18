@@ -29,7 +29,12 @@ logging.basicConfig(
 )
 
 
-def parse_host_identifier(host_field: str) -> str:
+# Regex patterns for assembly accessions (module-level constants)
+GCA_PATTERN_WITH_SPACE = re.compile(r'\b(GCF|GCA)\s+(\d{9}\.\d+)\b')
+ASSEMBLY_ACCESSION_PATTERN = re.compile(r'^(GCF|GCA)_\d{9}\.\d+$')
+
+
+def extract_best_host_identifier(host_field: str) -> str:
     """
     Parse a host field and extract the best identifier for resolution
     
@@ -54,16 +59,14 @@ def parse_host_identifier(host_field: str) -> str:
         return ""
     
     # Fix GCA/GCF accessions with spaces (e.g., "GCA 900066335.1" → "GCA_900066335.1")
-    gca_pattern = re.compile(r'\b(GCF|GCA)\s+(\d{9}\.\d+)\b')
-    host_field = gca_pattern.sub(r'\1_\2', host_field)
+    host_field = GCA_PATTERN_WITH_SPACE.sub(r'\1_\2', host_field)
     
     # Split on semicolons and try each part
     parts = [p.strip() for p in host_field.split(';')]
     
     # First, look for assembly accessions (highest priority)
-    assembly_pattern = re.compile(r'^(GCF|GCA)_\d{9}\.\d+$')
     for part in parts:
-        if assembly_pattern.match(part):
+        if ASSEMBLY_ACCESSION_PATTERN.match(part):
             return part
     
     # Then look for any valid species names (non-NA, non-empty)
@@ -284,7 +287,7 @@ class HostGenomeDownloader:
         # Parse each host field to extract the best identifier
         host_identifiers = set()
         for host in unique_hosts:
-            identifier = parse_host_identifier(host)
+            identifier = extract_best_host_identifier(host)
             if identifier:
                 host_identifiers.add(identifier)
         
@@ -299,8 +302,7 @@ class HostGenomeDownloader:
     
     def _is_assembly_accession(self, identifier: str) -> bool:
         """Check if identifier is an assembly accession (GCF_/GCA_)"""
-        assembly_pattern = re.compile(r'^(GCF|GCA)_\d{9}\.\d+$')
-        return assembly_pattern.match(identifier) is not None
+        return ASSEMBLY_ACCESSION_PATTERN.match(identifier) is not None
     
     def search_assembly_by_accession(self, accession: str) -> Optional[Dict]:
         """

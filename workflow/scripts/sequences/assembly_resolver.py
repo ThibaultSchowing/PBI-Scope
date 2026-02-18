@@ -146,6 +146,17 @@ class AssemblyResolver:
     to canonical NCBI assembly accessions, with quality-based ranking and filtering.
     """
     
+    # Priority ordering for identifier types (class-level constant)
+    IDENTIFIER_PRIORITY = {
+        IdentifierType.ASSEMBLY_ACCESSION: 0,
+        IdentifierType.BIOSAMPLE: 1,
+        IdentifierType.BIOPROJECT: 2,
+        IdentifierType.TAXID: 3,
+        IdentifierType.SPECIES_NAME: 4,
+        IdentifierType.STRAIN_NAME: 5,
+        IdentifierType.UNKNOWN: 6
+    }
+    
     def __init__(self, 
                  email: str,
                  api_key: Optional[str] = None,
@@ -252,22 +263,13 @@ class AssemblyResolver:
             
             # Skip unknown types that are likely noise
             if id_type == IdentifierType.UNKNOWN:
+                logging.debug(f"Skipping unknown identifier type: '{part}'")
                 continue
             
             identifiers.append((part, id_type))
         
-        # Sort by priority: accessions first, then BioSample/BioProject, then names
-        priority_order = {
-            IdentifierType.ASSEMBLY_ACCESSION: 0,
-            IdentifierType.BIOSAMPLE: 1,
-            IdentifierType.BIOPROJECT: 2,
-            IdentifierType.TAXID: 3,
-            IdentifierType.SPECIES_NAME: 4,
-            IdentifierType.STRAIN_NAME: 5,
-            IdentifierType.UNKNOWN: 6
-        }
-        
-        identifiers.sort(key=lambda x: priority_order.get(x[1], 99))
+        # Sort by priority using class-level constant
+        identifiers.sort(key=lambda x: self.IDENTIFIER_PRIORITY.get(x[1], 99))
         
         return identifiers
     
