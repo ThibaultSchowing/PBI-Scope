@@ -603,6 +603,10 @@ class PhageHostStreamingDataset(IterableDataset):
     
     def close(self):
         """Close all open file handles and database connections to prevent resource leaks."""
+        if self._closed:
+            return  # Already closed, prevent duplicate operations
+        
+        self._closed = True
         self._save_missing_hosts_csv()
         self._cleanup()
     
@@ -708,6 +712,9 @@ class PhageHostIndexedDataset(Dataset):
         
         # Track missing hosts for CSV export
         self.missing_hosts_data: List[Dict[str, Any]] = []
+        
+        # Track if cleanup has already occurred
+        self._closed = False
     
     def _load_metadata(self, where_clause: Optional[str] = None):
         """Load metadata from database into memory."""
@@ -1024,6 +1031,11 @@ class PhageHostIndexedDataset(Dataset):
     
     def close(self):
         """Close all open FASTA file handles to prevent resource leaks."""
+        if self._closed:
+            return  # Already closed, prevent duplicate operations
+        
+        self._closed = True
+        
         # Save missing hosts CSV before closing
         self._save_missing_hosts_csv()
         
