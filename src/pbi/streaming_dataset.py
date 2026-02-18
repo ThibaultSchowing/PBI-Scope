@@ -36,6 +36,57 @@ from pyfaidx import Fasta
 logger = logging.getLogger(__name__)
 
 
+def parse_where_clause(where_clause: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+    """
+    Parse a where_clause that may contain WHERE conditions, LIMIT, and/or OFFSET.
+    
+    Args:
+        where_clause: The clause to parse (e.g., "LIMIT 100", "p.Length > 1000 LIMIT 50", 
+                     "LIMIT 1000 OFFSET 5000", etc.)
+    
+    Returns:
+        Tuple of (where_conditions, limit_offset_clause)
+        - where_conditions: The WHERE conditions only (without LIMIT/OFFSET), or None
+        - limit_offset_clause: The LIMIT/OFFSET clause only, or None
+    
+    Examples:
+        >>> parse_where_clause("LIMIT 100")
+        (None, "LIMIT 100")
+        >>> parse_where_clause("p.Length > 1000 LIMIT 50")
+        ("p.Length > 1000", "LIMIT 50")
+        >>> parse_where_clause("LIMIT 1000 OFFSET 5000")
+        (None, "LIMIT 1000 OFFSET 5000")
+        >>> parse_where_clause("p.GC > 0.5")
+        ("p.GC > 0.5", None)
+    """
+    if not where_clause:
+        return None, None
+    
+    # Normalize whitespace
+    clause = ' '.join(where_clause.split())
+    
+    # Case-insensitive search for LIMIT keyword
+    clause_upper = clause.upper()
+    limit_pos = clause_upper.find(' LIMIT ')
+    
+    # Handle case where LIMIT is at the start
+    if clause_upper.startswith('LIMIT '):
+        limit_pos = 0
+    
+    if limit_pos == -1:
+        # No LIMIT clause found
+        return clause.strip(), None
+    elif limit_pos == 0:
+        # LIMIT is at the start, no WHERE conditions
+        return None, clause.strip()
+    else:
+        # Split at LIMIT position
+        where_part = clause[:limit_pos].strip()
+        limit_part = clause[limit_pos:].strip()
+        
+        return where_part if where_part else None, limit_part if limit_part else None
+
+
 def phage_host_collate_fn(batch):
     """
     Custom collate function for phage-host datasets.
@@ -191,6 +242,9 @@ class PhageHostStreamingDataset(IterableDataset):
         
         # Track missing hosts for CSV export
         self.missing_hosts_data: List[Dict[str, Any]] = []
+        
+        # Track if cleanup has already occurred
+        self._closed = False
     
     def _load_fasta_file(self, fasta_path: str) -> Fasta:
         """
@@ -388,8 +442,14 @@ class PhageHostStreamingDataset(IterableDataset):
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
         
-        if self.where_clause:
-            query += f" WHERE {self.where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(self.where_clause)
+        
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        if limit_offset:
+            query += f" {limit_offset}"
         
         # Execute query and fetch in batches
         cursor = self.conn.execute(query)
@@ -540,6 +600,32 @@ class PhageHostStreamingDataset(IterableDataset):
                 self.host_fasta.close()
             except Exception:
                 pass
+    
+    def close(self):
+        """Close all open file handles and database connections to prevent resource leaks."""
+        if self._closed:
+            return  # Already closed, prevent duplicate operations
+        
+        self._closed = True
+        self._save_missing_hosts_csv()
+        self._cleanup()
+    
+    def __enter__(self):
+        """Enter context manager - returns self for use in with statement."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context manager - ensures cleanup is called."""
+        self.close()
+        return False  # Don't suppress exceptions
+    
+    def __del__(self):
+        """Destructor to ensure cleanup when object is deleted."""
+        try:
+            self.close()
+        except Exception:
+            # Ignore errors during cleanup in destructor
+            pass
 
 
 class PhageHostIndexedDataset(Dataset):
@@ -626,6 +712,9 @@ class PhageHostIndexedDataset(Dataset):
         
         # Track missing hosts for CSV export
         self.missing_hosts_data: List[Dict[str, Any]] = []
+        
+        # Track if cleanup has already occurred
+        self._closed = False
     
     def _load_metadata(self, where_clause: Optional[str] = None):
         """Load metadata from database into memory."""
@@ -653,8 +742,14 @@ class PhageHostIndexedDataset(Dataset):
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
         
-        if where_clause:
-            query += f" WHERE {where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
+        
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        if limit_offset:
+            query += f" {limit_offset}"
         
         result = conn.execute(query).fetchdf()
         
@@ -936,6 +1031,11 @@ class PhageHostIndexedDataset(Dataset):
     
     def close(self):
         """Close all open FASTA file handles to prevent resource leaks."""
+        if self._closed:
+            return  # Already closed, prevent duplicate operations
+        
+        self._closed = True
+        
         # Save missing hosts CSV before closing
         self._save_missing_hosts_csv()
         
@@ -964,6 +1064,15 @@ class PhageHostIndexedDataset(Dataset):
             except Exception:
                 pass
             self.host_fasta = None
+    
+    def __enter__(self):
+        """Enter context manager - returns self for use in with statement."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context manager - ensures cleanup is called."""
+        self.close()
+        return False  # Don't suppress exceptions
     
     def __del__(self):
         """Destructor to ensure cleanup when object is deleted."""
