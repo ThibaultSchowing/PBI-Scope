@@ -29,6 +29,55 @@ logging.basicConfig(
 )
 
 
+# Regex patterns for assembly accessions (module-level constants)
+GCA_PATTERN_WITH_SPACE = re.compile(r'\b(GCF|GCA)\s+(\d{9}\.\d+)\b')
+ASSEMBLY_ACCESSION_PATTERN = re.compile(r'^(GCF|GCA)_\d{9}\.\d+$')
+
+
+def extract_best_host_identifier(host_field: str) -> str:
+    """
+    Parse a host field and extract the best identifier for resolution
+    
+    Handles fields like "NA;GCA 900066335.1;UBA9502;Blautia..." by:
+    1. Splitting on semicolons
+    2. Fixing GCA/GCF accessions with spaces (e.g., "GCA 900066335.1" → "GCA_900066335.1")
+    3. Filtering out "NA" and empty values
+    4. Returning the first valid identifier (prioritizing accessions)
+    
+    Args:
+        host_field: Raw host field value
+        
+    Returns:
+        Best identifier to use for resolution, or empty string if none found
+    """
+    if not host_field or host_field is None:
+        return ""
+    
+    # Handle various "null" representations
+    host_field = str(host_field).strip()
+    if host_field == '' or host_field.lower() in ('nan', 'none', 'null'):
+        return ""
+    
+    # Fix GCA/GCF accessions with spaces (e.g., "GCA 900066335.1" → "GCA_900066335.1")
+    host_field = GCA_PATTERN_WITH_SPACE.sub(r'\1_\2', host_field)
+    
+    # Split on semicolons and try each part
+    parts = [p.strip() for p in host_field.split(';')]
+    
+    # First, look for assembly accessions (highest priority)
+    for part in parts:
+        if ASSEMBLY_ACCESSION_PATTERN.match(part):
+            return part
+    
+    # Then look for any valid species names (non-NA, non-empty)
+    for part in parts:
+        if part and part.upper() != 'NA' and part != '-' and len(part) > 1:
+            # Return first valid non-accession identifier
+            return part
+    
+    return ""
+
+
 class HostGenomeDownloader:
     """
     Download and process host bacterial genomes from NCBI RefSeq
@@ -235,32 +284,71 @@ class HostGenomeDownloader:
         
         logging.info(f"✅ Found {len(unique_hosts)} unique hosts")
         
-        # Clean and extract species names
-        species_names = set()
+        # Parse each host field to extract the best identifier
+        host_identifiers = set()
         for host in unique_hosts:
-            # Extract first two words as species name (Genus species)
-            parts = str(host).strip().split()
-            if len(parts) >= 2:
-                # Check if first word is capitalized (genus name)
-                if parts[0][0].isupper():
-                    species = f"{parts[0]} {parts[1]}"
-                    species_names.add(species)
-                else:
-                    logging.warning(f"   Unexpected format (genus not capitalized): '{host}'")
-            elif len(parts) == 1:
-                if parts[0][0].isupper():
-                    species_names.add(parts[0])
-                else:
-                    logging.warning(f"   Unexpected format (single word, not capitalized): '{host}'")
+            identifier = extract_best_host_identifier(host)
+            if identifier:
+                host_identifiers.add(identifier)
         
-        species_list = sorted(list(species_names))
-        logging.info(f"✅ Extracted {len(species_list)} unique species")
+        host_list = sorted(list(host_identifiers))
+        logging.info(f"✅ Extracted {len(host_list)} unique host identifiers")
         
         # Log some examples
-        for i, species in enumerate(species_list[:5]):
-            logging.info(f"   Example {i+1}: {species}")
+        for i, host_id in enumerate(host_list[:5]):
+            logging.info(f"   Example {i+1}: {host_id}")
         
-        return species_list
+        return host_list
+    
+    def _is_assembly_accession(self, identifier: str) -> bool:
+        """Check if identifier is an assembly accession (GCF_/GCA_)"""
+        return ASSEMBLY_ACCESSION_PATTERN.match(identifier) is not None
+    
+    def search_assembly_by_accession(self, accession: str) -> Optional[Dict]:
+        """
+        Search for assembly by accession number
+        
+        Args:
+            accession: Assembly accession (e.g., "GCA_900066335.1")
+        
+        Returns:
+            Dictionary with assembly info or None if not found
+        """
+        try:
+            time.sleep(self.delay)
+            
+            # Search for exact accession
+            handle = Entrez.esearch(
+                db="assembly",
+                term=f"{accession}[Assembly Accession]",
+                retmax=1
+            )
+            search_results = Entrez.read(handle)
+            handle.close()
+            
+            if not search_results['IdList']:
+                logging.warning(f"⚠️  Assembly not found: {accession}")
+                return None
+            
+            # Get assembly summary
+            time.sleep(self.delay)
+            handle = Entrez.esummary(db="assembly", id=search_results['IdList'][0])
+            summary = Entrez.read(handle, validate=False)
+            handle.close()
+            
+            doc_sum = summary['DocumentSummarySet']['DocumentSummary'][0]
+            
+            return {
+                'accession': doc_sum.get('AssemblyAccession', ''),
+                'assembly_name': doc_sum.get('AssemblyName', ''),
+                'assembly_level': doc_sum.get('AssemblyStatus', ''),
+                'organism_name': doc_sum.get('SpeciesName', ''),
+                'ftp_path': doc_sum.get('FtpPath_RefSeq', '') or doc_sum.get('FtpPath_GenBank', '')
+            }
+            
+        except Exception as e:
+            logging.error(f"❌ Error searching assembly {accession}: {e}")
+            return None
     
     def search_refseq_assembly_datasets(self, species_name: str) -> Optional[Dict]:
         """
@@ -599,10 +687,10 @@ class HostGenomeDownloader:
     
     def download_host_genome(self, species_name: str) -> Optional[Dict]:
         """
-        Download host genome for a given species
+        Download host genome for a given species or assembly accession
         
         Args:
-            species_name: Species name (e.g., "Escherichia coli")
+            species_name: Species name (e.g., "Escherichia coli") or assembly accession (e.g., "GCA_900066335.1")
         
         Returns:
             Dictionary with host metadata or None if failed
@@ -622,12 +710,17 @@ class HostGenomeDownloader:
                 logging.warning(f"   ⚠️  Could not reconstruct metadata, will re-download")
                 self._update_status(species_name, 'not_attempted')
         
-        # Search for assembly (try datasets CLI first, then Entrez)
-        assembly_info = self.search_refseq_assembly_datasets(species_name)
-        
-        if not assembly_info:
-            logging.info(f"   Trying Entrez API fallback...")
-            assembly_info = self.search_refseq_assembly_entrez(species_name)
+        # Check if this is an assembly accession
+        if self._is_assembly_accession(species_name):
+            logging.info(f"   Detected assembly accession: {species_name}")
+            assembly_info = self.search_assembly_by_accession(species_name)
+        else:
+            # Search for assembly (try datasets CLI first, then Entrez)
+            assembly_info = self.search_refseq_assembly_datasets(species_name)
+            
+            if not assembly_info:
+                logging.info(f"   Trying Entrez API fallback...")
+                assembly_info = self.search_refseq_assembly_entrez(species_name)
         
         if not assembly_info:
             logging.warning(f"   ❌ No assembly found for {species_name}")
