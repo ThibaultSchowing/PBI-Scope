@@ -17,6 +17,57 @@ logging.basicConfig(
 )
 
 
+def parse_where_clause(where_clause: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+    """
+    Parse a where_clause that may contain WHERE conditions, LIMIT, and/or OFFSET.
+    
+    Args:
+        where_clause: The clause to parse (e.g., "LIMIT 100", "p.Length > 1000 LIMIT 50", 
+                     "LIMIT 1000 OFFSET 5000", etc.)
+    
+    Returns:
+        Tuple of (where_conditions, limit_offset_clause)
+        - where_conditions: The WHERE conditions only (without LIMIT/OFFSET), or None
+        - limit_offset_clause: The LIMIT/OFFSET clause only, or None
+    
+    Examples:
+        >>> parse_where_clause("LIMIT 100")
+        (None, "LIMIT 100")
+        >>> parse_where_clause("p.Length > 1000 LIMIT 50")
+        ("p.Length > 1000", "LIMIT 50")
+        >>> parse_where_clause("LIMIT 1000 OFFSET 5000")
+        (None, "LIMIT 1000 OFFSET 5000")
+        >>> parse_where_clause("p.GC > 0.5")
+        ("p.GC > 0.5", None)
+    """
+    if not where_clause:
+        return None, None
+    
+    # Normalize whitespace
+    clause = ' '.join(where_clause.split())
+    
+    # Case-insensitive search for LIMIT keyword
+    clause_upper = clause.upper()
+    limit_pos = clause_upper.find(' LIMIT ')
+    
+    # Handle case where LIMIT is at the start
+    if clause_upper.startswith('LIMIT '):
+        limit_pos = 0
+    
+    if limit_pos == -1:
+        # No LIMIT clause found
+        return clause.strip(), None
+    elif limit_pos == 0:
+        # LIMIT is at the start, no WHERE conditions
+        return None, clause.strip()
+    else:
+        # Split at LIMIT position
+        where_part = clause[:limit_pos].strip()
+        limit_part = clause[limit_pos:].strip()
+        
+        return where_part if where_part else None, limit_part if limit_part else None
+
+
 class SequenceRetriever:
     """
     Retrieve sequences from indexed FASTA files based on DuckDB queries
@@ -624,11 +675,17 @@ class SequenceRetriever:
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
         
-        if where_clause:
-            query += f" WHERE {where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
         
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        # If limit parameter is provided, it takes precedence over any LIMIT in where_clause
         if limit:
             query += f" LIMIT {limit}"
+        elif limit_offset:
+            query += f" {limit_offset}"
         
         logging.info(f"🔍 Querying phage-host pairs...")
         result = self.conn.execute(query).fetchdf()
@@ -753,11 +810,17 @@ class SequenceRetriever:
         FROM fact_phages
         """
         
-        if where_clause:
-            query += f" WHERE {where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
         
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        # If limit parameter is provided, it takes precedence over any LIMIT in where_clause
         if limit:
             query += f" LIMIT {limit}"
+        elif limit_offset:
+            query += f" {limit_offset}"
         
         logging.info(f"🔍 Querying phage metadata...")
         result = self.conn.execute(query).fetchdf()
@@ -808,11 +871,17 @@ class SequenceRetriever:
         FROM dim_hosts
         """
         
-        if where_clause:
-            query += f" WHERE {where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
         
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        # If limit parameter is provided, it takes precedence over any LIMIT in where_clause
         if limit:
             query += f" LIMIT {limit}"
+        elif limit_offset:
+            query += f" {limit_offset}"
         
         logging.info(f"🔍 Querying host metadata...")
         result = self.conn.execute(query).fetchdf()
@@ -870,11 +939,17 @@ class SequenceRetriever:
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
         
-        if where_clause:
-            query += f" WHERE {where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
         
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        # If limit parameter is provided, it takes precedence over any LIMIT in where_clause
         if limit:
             query += f" LIMIT {limit}"
+        elif limit_offset:
+            query += f" {limit_offset}"
         
         logging.info(f"🔍 Querying phage-host metadata...")
         result = self.conn.execute(query).fetchdf()
@@ -1083,8 +1158,14 @@ class SequenceRetriever:
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
         
-        if where_clause:
-            query += f" WHERE {where_clause}"
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
+        
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        if limit_offset:
+            query += f" {limit_offset}"
         
         logging.info(f"🔍 Starting batch iteration with batch_size={batch_size}")
         
