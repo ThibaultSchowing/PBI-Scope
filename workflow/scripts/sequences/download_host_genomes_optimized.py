@@ -602,33 +602,35 @@ class OptimizedHostGenomeDownloader:
             logging.debug(f"Entrez download error: {e}")
             return False
     
-    def calculate_genome_stats(self, fasta_path: Path) -> Tuple[int, float]:
+    def calculate_genome_stats(self, fasta_path: Path) -> Tuple[int, float, int]:
         """
-        Calculate genome length and GC content from FASTA file
+        Calculate genome length, GC content, and sequence count from FASTA file
         
         Args:
             fasta_path: Path to FASTA file
         
         Returns:
-            Tuple of (total_length, gc_content_percent)
+            Tuple of (total_length, gc_content_percent, sequence_count)
         """
         try:
             total_length = 0
             total_gc = 0
+            sequence_count = 0
             
             # Use fasta-2line format to handle files with comments
             for record in SeqIO.parse(fasta_path, self.fasta_format):
                 seq_len = len(record.seq)
                 total_length += seq_len
                 total_gc += gc_fraction(record.seq) * seq_len
+                sequence_count += 1
             
             gc_content = (total_gc / total_length * 100) if total_length > 0 else 0
             
-            return total_length, round(gc_content, 2)
+            return total_length, round(gc_content, 2), sequence_count
             
         except Exception as e:
             logging.warning(f"Error calculating genome stats: {e}")
-            return 0, 0.0
+            return 0, 0.0, 0
     
     def download_single_genome(self, species_name: str, output_dir: Path) -> Optional[Dict]:
         """
@@ -711,8 +713,8 @@ class OptimizedHostGenomeDownloader:
             return None
         
         # Calculate stats
-        genome_length, gc_content = self.calculate_genome_stats(output_path)
-        logging.debug(f"   ✅ Downloaded: {genome_length:,} bp, GC: {gc_content}%")
+        genome_length, gc_content, sequence_count = self.calculate_genome_stats(output_path)
+        logging.debug(f"   ✅ Downloaded: {genome_length:,} bp, GC: {gc_content}%, {sequence_count} sequences")
         
         # Create metadata
         metadata = {
@@ -724,6 +726,7 @@ class OptimizedHostGenomeDownloader:
             'Assembly_Level': assembly_info.get('assembly_level', '-'),
             'Genome_Length': genome_length,
             'GC_Content': gc_content,
+            'Sequence_Count': sequence_count,
             'RefSeq_Category': assembly_info.get('refseq_category', '-'),
             'Download_Date': datetime.now().strftime('%Y-%m-%d'),
             'Source': assembly_info.get('source', 'unknown')
@@ -949,7 +952,7 @@ def main():
         columns = [
             'Host_ID', 'Species_Name', 'Strain_Name', 'Assembly_Accession',
             'Assembly_Name', 'Assembly_Level', 'Genome_Length', 'GC_Content',
-            'RefSeq_Category', 'Download_Date', 'Source'
+            'Sequence_Count', 'RefSeq_Category', 'Download_Date', 'Source'
         ]
         
         df = df[columns]
