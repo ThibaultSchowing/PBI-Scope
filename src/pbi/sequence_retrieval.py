@@ -927,7 +927,8 @@ class SequenceRetriever:
         self,
         where_clause: Optional[str] = None,
         batch_size: int = 1000,
-        transform: Optional[object] = None
+        transform: Optional[object] = None,
+        missing_hosts_csv: Optional[str] = None
     ):
         """
         Create a PhageHostStreamingDataset for memory-efficient iteration.
@@ -939,6 +940,8 @@ class SequenceRetriever:
             where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
             batch_size: Number of records to fetch per database query (default: 1000)
             transform: Optional transform function to apply to each sample
+            missing_hosts_csv: Optional path to save CSV of phages with missing hosts
+                              (e.g., "/data/intermediate/missing_hosts.csv")
             
         Returns:
             PhageHostStreamingDataset instance
@@ -946,7 +949,8 @@ class SequenceRetriever:
         Example:
             >>> dataset = retriever.create_streaming_dataset(
             ...     where_clause="Confidence > 0.8",
-            ...     batch_size=1000
+            ...     batch_size=1000,
+            ...     missing_hosts_csv="/data/intermediate/missing_hosts.csv"
             ... )
             >>> from torch.utils.data import DataLoader
             >>> dataloader = DataLoader(dataset, batch_size=32)
@@ -967,13 +971,15 @@ class SequenceRetriever:
             host_mapping_path=self._host_mapping_path,
             where_clause=where_clause,
             batch_size=batch_size,
-            transform=transform
+            transform=transform,
+            missing_hosts_csv=missing_hosts_csv
         )
     
     def create_indexed_dataset(
         self,
         where_clause: Optional[str] = None,
-        transform: Optional[object] = None
+        transform: Optional[object] = None,
+        missing_hosts_csv: Optional[str] = None
     ):
         """
         Create a PhageHostIndexedDataset for random access with caching.
@@ -984,13 +990,16 @@ class SequenceRetriever:
         Args:
             where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
             transform: Optional transform function to apply to each sample
+            missing_hosts_csv: Optional path to save CSV of phages with missing hosts
+                              (e.g., "/data/intermediate/missing_hosts.csv")
             
         Returns:
             PhageHostIndexedDataset instance
             
         Example:
             >>> dataset = retriever.create_indexed_dataset(
-            ...     where_clause="Confidence > 0.8"
+            ...     where_clause="Confidence > 0.8",
+            ...     missing_hosts_csv="/data/intermediate/missing_hosts.csv"
             ... )
             >>> from torch.utils.data import DataLoader
             >>> # Supports shuffling and multi-worker loading
@@ -1011,7 +1020,8 @@ class SequenceRetriever:
             host_fasta_path=self._host_fasta_path,
             host_mapping_path=self._host_mapping_path,
             where_clause=where_clause,
-            transform=transform
+            transform=transform,
+            missing_hosts_csv=missing_hosts_csv
         )
     
     def get_phage_host_pairs_iterator(

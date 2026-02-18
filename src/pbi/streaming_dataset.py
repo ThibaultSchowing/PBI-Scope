@@ -11,10 +11,12 @@ Classes:
 
 import duckdb
 import logging
-from typing import Optional, Callable, Dict, Any
+from typing import Optional, Callable, Dict, Any, List
 from pathlib import Path
 import json
 from collections import OrderedDict
+import csv
+import os
 
 try:
     from torch.utils.data import IterableDataset, Dataset
@@ -146,6 +148,7 @@ class PhageHostStreamingDataset(IterableDataset):
         where_clause: Optional[str] = None,
         batch_size: int = 1000,
         transform: Optional[Callable] = None,
+        missing_hosts_csv: Optional[str] = None,
     ):
         if not TORCH_AVAILABLE:
             logger.warning("PyTorch not available. Dataset will work but cannot be used with DataLoader.")
@@ -163,6 +166,7 @@ class PhageHostStreamingDataset(IterableDataset):
         self.where_clause = where_clause
         self.batch_size = batch_size
         self.transform = transform
+        self.missing_hosts_csv = missing_hosts_csv
         
         # Determine host mode
         self.use_host_mapping = False
@@ -184,6 +188,9 @@ class PhageHostStreamingDataset(IterableDataset):
         self.host_fasta = None
         # Use OrderedDict for LRU cache behavior
         self.host_fasta_cache = OrderedDict()
+        
+        # Track missing hosts for CSV export
+        self.missing_hosts_data: List[Dict[str, Any]] = []
     
     def _load_fasta_file(self, fasta_path: str) -> Fasta:
         """
@@ -212,16 +219,59 @@ class PhageHostStreamingDataset(IterableDataset):
         # Reset cache for host mapping mode (use OrderedDict for LRU)
         self.host_fasta_cache = OrderedDict()
     
-    def _get_host_sequence_safe(self, host_id: str) -> str:
+    def _track_missing_host(self, host_id: str, sample_metadata: Dict[str, Any], failure_reason: str):
+        """
+        Track a missing host for later CSV export.
+        
+        Args:
+            host_id: Host identifier that failed
+            sample_metadata: Metadata about the phage-host pair
+            failure_reason: Description of why the host retrieval failed
+        """
+        self.missing_hosts_data.append({
+            'Phage_ID': sample_metadata.get('Phage_ID', ''),
+            'Host_ID': host_id,
+            'Species_Name': sample_metadata.get('Species_Name', ''),
+            'Phage_Source': sample_metadata.get('Phage_Source', ''),
+            'Phage_Length': sample_metadata.get('Phage_Length', ''),
+            'Phage_Taxonomy': sample_metadata.get('Phage_Taxonomy', ''),
+            'Host_Assembly_Level': sample_metadata.get('Host_Assembly_Level', ''),
+            'Failure_Reason': failure_reason,
+        })
+    
+    def _save_missing_hosts_csv(self):
+        """Save missing hosts data to CSV file if configured."""
+        if not self.missing_hosts_csv or not self.missing_hosts_data:
+            return
+        
+        try:
+            # Create directory if needed
+            csv_path = Path(self.missing_hosts_csv)
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write CSV
+            with open(csv_path, 'w', newline='') as f:
+                if self.missing_hosts_data:
+                    writer = csv.DictWriter(f, fieldnames=self.missing_hosts_data[0].keys())
+                    writer.writeheader()
+                    writer.writerows(self.missing_hosts_data)
+            
+            logger.info(f"💾 Saved {len(self.missing_hosts_data)} missing host records to {csv_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to save missing hosts CSV: {e}")
+    
+    def _get_host_sequence_safe(self, host_id: str, sample_metadata: Optional[Dict[str, Any]] = None) -> str:
         """
         Safely get host sequence with error handling.
         
         Args:
             host_id: Host identifier
+            sample_metadata: Optional metadata about the sample for tracking missing hosts
             
         Returns:
             Host sequence as string, or empty string if not found
         """
+        failure_reason = None
         try:
             if self.use_host_mapping:
                 # Load individual host file on-demand with LRU cache
@@ -230,12 +280,18 @@ class PhageHostStreamingDataset(IterableDataset):
                     self.host_fasta_cache.move_to_end(host_id)
                 else:
                     if host_id not in self.host_mapping:
-                        logger.warning(f"⚠️  Host ID '{host_id}' not found in mapping")
+                        failure_reason = "Host genome not in mapping (not downloaded/available for this host)"
+                        logger.warning(f"⚠️  {failure_reason}: {host_id}")
+                        if sample_metadata:
+                            self._track_missing_host(host_id, sample_metadata, failure_reason)
                         return ""
                     
                     fasta_path = self.host_mapping[host_id]
                     if not Path(fasta_path).exists():
-                        logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
+                        failure_reason = f"Host FASTA file not found on filesystem: {fasta_path}"
+                        logger.warning(f"⚠️  {failure_reason}")
+                        if sample_metadata:
+                            self._track_missing_host(host_id, sample_metadata, failure_reason)
                         return ""
                     
                     # Check cache size and evict oldest if needed
@@ -249,22 +305,40 @@ class PhageHostStreamingDataset(IterableDataset):
                                 pass
                     
                     # Load FASTA file using helper method (will create .fai if missing)
-                    self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
+                    try:
+                        self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
+                    except Exception as e:
+                        failure_reason = f"Error loading/indexing FASTA file: {type(e).__name__}: {e}"
+                        logger.warning(f"⚠️  {failure_reason} for {host_id}")
+                        logger.warning(f"   File path: {fasta_path}")
+                        logger.warning(f"   This may indicate a corrupt file or missing/corrupt .fai index")
+                        if sample_metadata:
+                            self._track_missing_host(host_id, sample_metadata, failure_reason)
+                        return ""
                 
                 fasta_obj = self.host_fasta_cache[host_id]
                 keys = list(fasta_obj.keys())
                 if not keys:
-                    logger.warning(f"⚠️  No sequences found in host file for {host_id}")
+                    failure_reason = "FASTA file is empty (no sequences found)"
+                    logger.warning(f"⚠️  {failure_reason} for {host_id}")
+                    if sample_metadata:
+                        self._track_missing_host(host_id, sample_metadata, failure_reason)
                     return ""
                 return str(fasta_obj[keys[0]][:].seq)
             else:
                 # Legacy single-file mode
                 return str(self.host_fasta[host_id][:].seq)
         except KeyError:
-            logger.warning(f"⚠️  Host sequence not found for ID: {host_id}")
+            failure_reason = "Host sequence ID not found in FASTA file (KeyError)"
+            logger.warning(f"⚠️  {failure_reason}: {host_id}")
+            if sample_metadata:
+                self._track_missing_host(host_id, sample_metadata, failure_reason)
             return ""
         except Exception as e:
-            logger.warning(f"⚠️  Error retrieving host sequence for {host_id}: {e}")
+            failure_reason = f"Unexpected error retrieving sequence: {type(e).__name__}: {e}"
+            logger.warning(f"⚠️  {failure_reason} for {host_id}")
+            if sample_metadata:
+                self._track_missing_host(host_id, sample_metadata, failure_reason)
             return ""
     
     def _get_phage_sequence_safe(self, phage_id: str) -> str:
@@ -352,7 +426,7 @@ class PhageHostStreamingDataset(IterableDataset):
                 
                 # Fetch sequences
                 sample['Phage_Sequence'] = self._get_phage_sequence_safe(sample['Phage_ID'])
-                sample['Host_Sequence'] = self._get_host_sequence_safe(sample['Host_ID'])
+                sample['Host_Sequence'] = self._get_host_sequence_safe(sample['Host_ID'], sample_metadata=sample)
                 
                 # Skip samples with missing sequences
                 if not sample['Phage_Sequence'] or not sample['Host_Sequence']:
@@ -430,6 +504,8 @@ class PhageHostStreamingDataset(IterableDataset):
                     logger.warning(f"   ⚠️  {rows_before_seq_filter} rows matched WHERE clause but all were filtered due to missing sequences")
                     logger.warning("   Check that FASTA files contain the required phage/host sequences")
         
+        # Save missing hosts CSV before cleanup
+        self._save_missing_hosts_csv()
         
         # Clean up resources
         self._cleanup()
@@ -507,6 +583,7 @@ class PhageHostIndexedDataset(Dataset):
         host_mapping_path: Optional[str] = None,
         where_clause: Optional[str] = None,
         transform: Optional[Callable] = None,
+        missing_hosts_csv: Optional[str] = None,
     ):
         if not TORCH_AVAILABLE:
             logger.warning("PyTorch not available. Dataset will work but cannot be used with DataLoader.")
@@ -522,6 +599,7 @@ class PhageHostIndexedDataset(Dataset):
         self.host_fasta_path = host_fasta_path
         self.host_mapping_path = host_mapping_path
         self.transform = transform
+        self.missing_hosts_csv = missing_hosts_csv
         
         # Determine host mode
         self.use_host_mapping = False
@@ -545,6 +623,9 @@ class PhageHostIndexedDataset(Dataset):
         self.host_fasta = None
         # Use OrderedDict for LRU cache behavior
         self.host_fasta_cache = OrderedDict()
+        
+        # Track missing hosts for CSV export
+        self.missing_hosts_data: List[Dict[str, Any]] = []
     
     def _load_metadata(self, where_clause: Optional[str] = None):
         """Load metadata from database into memory."""
@@ -679,16 +760,59 @@ class PhageHostIndexedDataset(Dataset):
         if not self.use_host_mapping and self.host_fasta is None and self.host_fasta_path:
             self.host_fasta = self._load_fasta_file(self.host_fasta_path)
     
-    def _get_host_sequence_safe(self, host_id: str) -> str:
+    def _track_missing_host(self, host_id: str, sample_metadata: Dict[str, Any], failure_reason: str):
+        """
+        Track a missing host for later CSV export.
+        
+        Args:
+            host_id: Host identifier that failed
+            sample_metadata: Metadata about the phage-host pair
+            failure_reason: Description of why the host retrieval failed
+        """
+        self.missing_hosts_data.append({
+            'Phage_ID': sample_metadata.get('Phage_ID', ''),
+            'Host_ID': host_id,
+            'Species_Name': sample_metadata.get('Species_Name', ''),
+            'Phage_Source': sample_metadata.get('Phage_Source', ''),
+            'Phage_Length': sample_metadata.get('Phage_Length', ''),
+            'Phage_Taxonomy': sample_metadata.get('Phage_Taxonomy', ''),
+            'Host_Assembly_Level': sample_metadata.get('Host_Assembly_Level', ''),
+            'Failure_Reason': failure_reason,
+        })
+    
+    def _save_missing_hosts_csv(self):
+        """Save missing hosts data to CSV file if configured."""
+        if not self.missing_hosts_csv or not self.missing_hosts_data:
+            return
+        
+        try:
+            # Create directory if needed
+            csv_path = Path(self.missing_hosts_csv)
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write CSV
+            with open(csv_path, 'w', newline='') as f:
+                if self.missing_hosts_data:
+                    writer = csv.DictWriter(f, fieldnames=self.missing_hosts_data[0].keys())
+                    writer.writeheader()
+                    writer.writerows(self.missing_hosts_data)
+            
+            logger.info(f"💾 Saved {len(self.missing_hosts_data)} missing host records to {csv_path}")
+        except Exception as e:
+            logger.error(f"❌ Failed to save missing hosts CSV: {e}")
+    
+    def _get_host_sequence_safe(self, host_id: str, sample_metadata: Optional[Dict[str, Any]] = None) -> str:
         """
         Safely get host sequence with error handling.
         
         Args:
             host_id: Host identifier
+            sample_metadata: Optional metadata about the sample for tracking missing hosts
             
         Returns:
             Host sequence as string, or empty string if not found
         """
+        failure_reason = None
         try:
             if self.use_host_mapping:
                 # Load individual host file on-demand with LRU cache
@@ -697,12 +821,18 @@ class PhageHostIndexedDataset(Dataset):
                     self.host_fasta_cache.move_to_end(host_id)
                 else:
                     if host_id not in self.host_mapping:
-                        logger.warning(f"⚠️  Host ID '{host_id}' not found in mapping")
+                        failure_reason = "Host genome not in mapping (not downloaded/available for this host)"
+                        logger.warning(f"⚠️  {failure_reason}: {host_id}")
+                        if sample_metadata:
+                            self._track_missing_host(host_id, sample_metadata, failure_reason)
                         return ""
                     
                     fasta_path = self.host_mapping[host_id]
                     if not Path(fasta_path).exists():
-                        logger.warning(f"⚠️  Host FASTA file not found: {fasta_path}")
+                        failure_reason = f"Host FASTA file not found on filesystem: {fasta_path}"
+                        logger.warning(f"⚠️  {failure_reason}")
+                        if sample_metadata:
+                            self._track_missing_host(host_id, sample_metadata, failure_reason)
                         return ""
                     
                     # Check cache size and evict oldest if needed
@@ -716,22 +846,40 @@ class PhageHostIndexedDataset(Dataset):
                                 pass
                     
                     # Load FASTA file using helper method (will create .fai if missing)
-                    self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
+                    try:
+                        self.host_fasta_cache[host_id] = self._load_fasta_file(fasta_path)
+                    except Exception as e:
+                        failure_reason = f"Error loading/indexing FASTA file: {type(e).__name__}: {e}"
+                        logger.warning(f"⚠️  {failure_reason} for {host_id}")
+                        logger.warning(f"   File path: {fasta_path}")
+                        logger.warning(f"   This may indicate a corrupt file or missing/corrupt .fai index")
+                        if sample_metadata:
+                            self._track_missing_host(host_id, sample_metadata, failure_reason)
+                        return ""
                 
                 fasta_obj = self.host_fasta_cache[host_id]
                 keys = list(fasta_obj.keys())
                 if not keys:
-                    logger.warning(f"⚠️  No sequences found in host file for {host_id}")
+                    failure_reason = "FASTA file is empty (no sequences found)"
+                    logger.warning(f"⚠️  {failure_reason} for {host_id}")
+                    if sample_metadata:
+                        self._track_missing_host(host_id, sample_metadata, failure_reason)
                     return ""
                 return str(fasta_obj[keys[0]][:].seq)
             else:
                 # Legacy single-file mode
                 return str(self.host_fasta[host_id][:].seq)
         except KeyError:
-            logger.warning(f"⚠️  Host sequence not found for ID: {host_id}")
+            failure_reason = "Host sequence ID not found in FASTA file (KeyError)"
+            logger.warning(f"⚠️  {failure_reason}: {host_id}")
+            if sample_metadata:
+                self._track_missing_host(host_id, sample_metadata, failure_reason)
             return ""
         except Exception as e:
-            logger.warning(f"⚠️  Error retrieving host sequence for {host_id}: {e}")
+            failure_reason = f"Unexpected error retrieving sequence: {type(e).__name__}: {e}"
+            logger.warning(f"⚠️  {failure_reason} for {host_id}")
+            if sample_metadata:
+                self._track_missing_host(host_id, sample_metadata, failure_reason)
             return ""
     
     def _get_phage_sequence_safe(self, phage_id: str) -> str:
@@ -778,7 +926,7 @@ class PhageHostIndexedDataset(Dataset):
         
         # Fetch sequences
         sample['Phage_Sequence'] = self._get_phage_sequence_safe(meta['Phage_ID'])
-        sample['Host_Sequence'] = self._get_host_sequence_safe(meta['Host_ID'])
+        sample['Host_Sequence'] = self._get_host_sequence_safe(meta['Host_ID'], sample_metadata=meta)
         
         # Apply transform if provided
         if self.transform:
@@ -788,6 +936,9 @@ class PhageHostIndexedDataset(Dataset):
     
     def close(self):
         """Close all open FASTA file handles to prevent resource leaks."""
+        # Save missing hosts CSV before closing
+        self._save_missing_hosts_csv()
+        
         # Close cached host FASTA files
         if self.host_fasta_cache:
             for fasta_obj in self.host_fasta_cache.values():
