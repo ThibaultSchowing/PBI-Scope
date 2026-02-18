@@ -242,6 +242,9 @@ class PhageHostStreamingDataset(IterableDataset):
         
         # Track missing hosts for CSV export
         self.missing_hosts_data: List[Dict[str, Any]] = []
+        
+        # Track if cleanup has already occurred
+        self._closed = False
     
     def _load_fasta_file(self, fasta_path: str) -> Fasta:
         """
