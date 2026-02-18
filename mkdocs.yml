@@ -37,6 +37,7 @@ nav:
       - Overview: guides/overview.md
       - Docker Guide: guides/docker-guide.md
       - Local Installation: guides/installation.md
+      - Pipeline Execution: guides/pipeline-execution.md
       - Analysis Guide: guides/analysis-guide.md
       - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md
