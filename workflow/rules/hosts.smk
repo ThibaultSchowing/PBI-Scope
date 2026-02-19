@@ -36,7 +36,11 @@ rule download_host_genomes:
         assembly_metadata = config.get("assembly_metadata_output", 
                                        config["host_metadata_output"].replace('.csv', '_assemblies.csv')),
         phage_host_links = config.get("phage_host_links_output",
-                                      config["host_metadata_output"].replace('.csv', '_phage_host_links.csv'))
+                                      config["host_metadata_output"].replace('.csv', '_phage_host_links.csv')),
+        phage_host_candidates = config.get("phage_host_candidates_output",
+                                           config["host_metadata_output"].replace('.csv', '_host_candidates.csv')),
+        phage_host_assemblies = config.get("phage_host_assemblies_output",
+                                           config["host_metadata_output"].replace('.csv', '_host_assemblies.csv'))
     params:
         output_dir = config["host_genomes_intermediate"],
         limit = None,  # Set to integer for testing with subset of hosts
@@ -135,4 +139,8 @@ rule all_hosts:
     input:
         config["host_index_complete_flag"],
         config["host_fasta_mapping"],
-        config["host_metadata_output"]
+        config["host_metadata_output"],
+        config.get("phage_host_candidates_output",
+                   config["host_metadata_output"].replace('.csv', '_host_candidates.csv')),
+        config.get("phage_host_assemblies_output",
+                   config["host_metadata_output"].replace('.csv', '_host_assemblies.csv'))
