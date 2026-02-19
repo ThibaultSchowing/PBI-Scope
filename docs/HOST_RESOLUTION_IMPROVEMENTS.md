@@ -2,9 +2,9 @@
 
 ## Overview
 
-This document describes the improvements made to handle semicolon-separated Host fields in the phage metadata pipeline.
+This document describes the improvements made to handle semicolon-separated Host fields in the phage metadata pipeline, including full **multi-host support** (one phage → multiple host assemblies).
 
-## Problem
+## Problem (original)
 
 The pipeline was failing to resolve host genomes for many phages because the "Host" field contained complex, semicolon-separated values like:
 
@@ -17,141 +17,131 @@ Issues:
 2. GCA accession numbers had spaces instead of underscores (e.g., "GCA 900066335.1" vs "GCA_900066335.1")
 3. No fallback mechanism when primary identifier failed
 4. "NA" values were not filtered out
-
-This resulted in logs like:
-```
-2026-02-18 13:57:56,005 - WARNING - ⚠️  Could not resolve TaxID for 'NA;GCA 900066365.1;Lachnospira' (may be ambiguous)
-2026-02-18 13:57:58,059 - WARNING - ⚠️  No assemblies found for species: NA;GCA 900066365.1;Lachnospira
-```
+5. Only the **first successfully resolved host** was kept (multi-host phages were not fully represented)
 
 ## Solution
 
-### 1. Enhanced AssemblyResolver
+### Stage 1 – Lossless parsing: `phage_host_candidates.csv`
 
-**Added new methods:**
+The new standalone `parse_host_field(host_raw)` function splits the raw Host
+field into individual tokens:
 
-- `parse_host_field(host_field: str)` - Parses semicolon-separated fields
-  - Splits on semicolons
-  - Fixes "GCA 900066335.1" → "GCA_900066335.1"
-  - Filters out "NA" and empty values
-  - Identifies type of each component
-  - Returns identifiers in priority order
+* Splits on semicolons.
+* Normalises `GCA 900066335.1` → `GCA_900066335.1` (space → underscore).
+* Drops empty, `NA`, `unknown*`, and `unidentified*` values.
+* Classifies each token:
+  * `assembly_accession` – matches `GCA_` / `GCF_` pattern.
+  * `species_name` – two+ words, genus capitalized (binomial nomenclature).
+  * `other` – single words, codes such as `UBA9502`, etc.
+* Preserves `Token_Order` (1-based position in the original field).
 
-- `resolve_with_fallback(identifier: str)` - Tries multiple resolution strategies
-  - Parses complex fields
-  - Tries each component in priority order:
-    1. Assembly accessions (GCF_/GCA_)
-    2. BioSample accessions
-    3. BioProject accessions
-    4. TaxIDs
-    5. Species names
-  - Returns first successful resolution
+The pipeline writes **one row per (Phage_ID, token)** to
+`phage_host_candidates.csv`.  This is the lossless, auditable record of every
+host candidate parsed from the metadata.
 
-**Updated methods:**
+#### Example
 
-- `get_best_assembly()` - Now uses `resolve_with_fallback()` automatically
+| Phage_ID | Host_Raw                                  | Host_Token       | Token_Type         | Token_Order |
+|----------|-------------------------------------------|------------------|--------------------|-------------|
+| phage1   | NA;GCA 900066335.1;UBA9502;Blautia obeum  | GCA_900066335.1  | assembly_accession | 2           |
+| phage1   | NA;GCA 900066335.1;UBA9502;Blautia obeum  | UBA9502          | other              | 3           |
+| phage1   | NA;GCA 900066335.1;UBA9502;Blautia obeum  | Blautia obeum    | species_name       | 4           |
 
-### 2. Updated All Download Scripts
+### Stage 2 – Resolution: `phage_host_assemblies.csv`
 
-**download_host_genomes_optimized.py:**
-- Modified `extract_unique_hosts_from_csv()` to preserve raw Host values
-- Removed extraction of just "Genus species" format
+Each unique token is resolved independently via `resolve_host_token()`:
 
-**download_host_genomes_robust.py:**
-- Modified `extract_unique_hosts()` to preserve raw Host values
+* `assembly_accession` → direct NCBI Assembly lookup (confidence 0.95).
+* `species_name` → NCBI Taxonomy + Assembly search (confidence 0.70).
+* `other` → attempted species search as fallback (confidence 0.30).
 
-**download_host_genomes.py:**
-- Added `extract_best_host_identifier()` function
-- Added `search_assembly_by_accession()` method
-- Added module-level regex constants to avoid duplication
-- Updated `download_host_genome()` to handle assembly accessions directly
+The pipeline writes **one row per (Phage_ID, Assembly_Accession)** to
+`phage_host_assemblies.csv`.  This is the authoritative flat mapping used to
+drive host genome downloads.
 
-## Examples
+| Column             | Description                                                      |
+|--------------------|------------------------------------------------------------------|
+| Phage_ID           | Phage identifier                                                 |
+| Host_Raw           | Original un-parsed Host field (traceability)                     |
+| Host_Token         | Specific token that was resolved                                 |
+| Token_Type         | `assembly_accession` / `species_name` / `other`                 |
+| Token_Order        | 1-based position in Host_Raw                                    |
+| Assembly_Accession | Resolved NCBI accession                                          |
+| Resolution_Source  | `accession_in_host_field` / `species_to_taxid_to_assembly` / `fallback` |
+| Resolution_Rank    | 1-based rank within results for this token                       |
+| Confidence         | Float 0–1 derived from source + rank                            |
+| Assembly_Level     | `Complete Genome`, `Chromosome`, `Scaffold`, or `Contig`         |
+| RefSeq_Category    | `reference genome`, `representative genome`, or `na`            |
+| Quality_Score      | Integer quality score                                            |
+| Ambiguous          | `True` when multiple equally-plausible hits exist               |
+| Ambiguity_Reason   | Human-readable reason when ambiguous                             |
 
-### Before
+### Stage 3 – Download unique assemblies
 
-```
-Input: "NA;GCA 900066365.1;Lachnospira"
-Processing: Treated as species name
-Result: ❌ FAILED - "NA;GCA 900066365.1;Lachnospira" is not a valid species
-```
+Host genome downloads are now driven by the **unique `Assembly_Accession` values
+in `phage_host_assemblies.csv`**.  Each accession is downloaded exactly once,
+even if linked to many phages (deduplication).
 
-### After
+### Backward-compatible outputs
 
-```
-Input: "NA;GCA 900066365.1;Lachnospira"
-Parsing:
-  1. "GCA_900066365.1" (assembly_accession) - fixed space
-  2. "Lachnospira" (species_name)
-  (Filtered out: "NA")
+The following outputs remain unchanged (same columns):
 
-Resolution strategy:
-  1. Try "GCA_900066365.1" first → ✅ SUCCESS
-  2. Fallback to "Lachnospira" if needed
-```
+* `host_metadata.csv` – per-assembly metadata (one row per unique assembly).
+* `assembly_metadata.csv` – detailed assembly metadata.
+* `phage_host_links.csv` – phage→assembly links (extended, one row per unique
+  (Phage_ID, Assembly_Accession) pair).
+
+## Snakemake caching (idempotency)
+
+Snakemake's file-based dependency tracking ensures the `download_host_genomes`
+rule is **not re-executed** when all output files already exist and are newer
+than the input phage CSV.
+
+The new outputs (`phage_host_candidates` and `phage_host_assemblies`) are
+declared as rule outputs in `hosts.smk`, so Snakemake tracks them automatically.
+
+Within a single run, the `skip_existing=True` parameter (default) prevents
+re-downloading individual genome files that were already successfully retrieved.
 
 ## Testing
 
-Created comprehensive test suite with 12 tests:
+New unit tests in `tests/test_multi_host_parsing.py`:
 
-- `test_parse_simple_species_name` - Basic species names still work
-- `test_parse_gca_with_space` - Fixes "GCA 900066335.1" → "GCA_900066335.1"
-- `test_parse_gcf_with_space` - Fixes "GCF 000005845.2" → "GCF_000005845.2"
-- `test_parse_semicolon_separated_with_na` - Handles NA values correctly
-- `test_parse_complex_semicolon_separated` - Complex multi-component fields
-- `test_parse_empty_field` - Handles null/empty fields
-- `test_parse_only_na_values` - All NA fields return empty
-- `test_priority_ordering` - Accessions prioritized over names
-- `test_gca_embedded_in_text` - GCA fixed even when embedded
-- Plus 3 API integration tests (require NCBI credentials)
+* `TestParseHostField` – 18 tests for the `parse_host_field()` function,
+  including all examples from the problem statement.
+* `TestGenerateCandidates` – 5 tests for `_generate_candidates()`.
+* `TestBuildAssemblyLinks` – 7 tests for `_build_assembly_links()`, including
+  multi-host, unresolved, and ambiguous cases.
 
-All tests pass! ✅
+All 31 tests pass without NCBI credentials.
 
-## Impact
+## API
 
-This change **maximizes the chances of finding a genome for each phage** by:
+```python
+from download_host_genomes_robust import parse_host_field, resolve_host_token, HostToken
 
-1. **Extracting GCA/GCF accessions** when present (most reliable)
-2. **Fixing formatting issues** (space → underscore)
-3. **Providing fallback options** (try species name if accession fails)
-4. **Filtering noise** (NA values, empty strings)
+# Parse a complex Host field into tokens
+tokens = parse_host_field("NA;GCA 900066335.1;UBA9502;Blautia obeum")
+# → [HostToken('GCA_900066335.1', 'assembly_accession', 2),
+#    HostToken('UBA9502', 'other', 3),
+#    HostToken('Blautia obeum', 'species_name', 4)]
 
-## Code Quality
-
-- ✅ All tests pass
-- ✅ Code review completed, feedback addressed
-- ✅ Security scan (CodeQL) - no issues found
-- ✅ Consistent with existing code style
-- ✅ Added comprehensive documentation
+# Resolve a token to assembly links (requires NCBI credentials)
+from assembly_resolver import AssemblyResolver
+resolver = AssemblyResolver(email='user@example.org')
+links = resolve_host_token(tokens[0], resolver, phage_id='p1', host_raw='NA;GCA 900066335.1;...')
+# → [ResolvedAssemblyLink(assembly_accession='GCA_900066335.1', confidence=0.95, ...)]
+```
 
 ## Files Changed
 
-1. `workflow/scripts/sequences/assembly_resolver.py` - Core parsing logic
-2. `workflow/scripts/sequences/download_host_genomes_optimized.py` - Optimized downloader
-3. `workflow/scripts/sequences/download_host_genomes_robust.py` - Robust downloader
-4. `workflow/scripts/sequences/download_host_genomes.py` - Basic downloader
-5. `tests/test_host_field_parsing.py` - New test suite
-6. `tests/demo_host_parsing.py` - Demonstration script
-
-## Usage
-
-No changes to the pipeline interface are required. The improvements are transparent:
-
-```python
-# Works exactly as before, but now handles complex fields
-resolver = AssemblyResolver(email='user@example.org')
-
-# Automatically parses and prioritizes components
-assembly = resolver.get_best_assembly("NA;GCA 900066365.1;Lachnospira")
-# Returns: GCA_900066365.1 assembly metadata
-```
-
-## Demonstration
-
-Run the demo script to see the parsing in action:
-
-```bash
-python tests/demo_host_parsing.py
-```
-
-This shows exactly how each problematic case from the logs is now handled.
+1. `workflow/scripts/sequences/download_host_genomes_robust.py` – Added
+   `HostToken`, `ResolvedAssemblyLink`, `parse_host_field()`,
+   `resolve_host_token()`, helper methods `_generate_candidates()` and
+   `_build_assembly_links()`, and replaced the single-host `process_all_hosts()`
+   with a multi-host pipeline.
+2. `workflow/rules/hosts.smk` – Added `phage_host_candidates` and
+   `phage_host_assemblies` as rule outputs.
+3. `workflow/config/config.yaml` – Added `phage_host_candidates_output` and
+   `phage_host_assemblies_output` config keys.
+4. `tests/test_multi_host_parsing.py` – New unit tests.

@@ -40,6 +40,8 @@ host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
 assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"
 phage_host_links_output: "/data/intermediate/csv/merged/phage_host_links.csv"
+phage_host_candidates_output: "/data/intermediate/csv/merged/phage_host_candidates.csv"
+phage_host_assemblies_output: "/data/intermediate/csv/merged/phage_host_assemblies.csv"
 host_download_log: "/data/logs/host_download.log"
 host_failure_log: "/data/logs/host_download_failures.log"
 
