@@ -1181,10 +1181,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#problem" class="md-nav__link">
+  <a href="#problem-original" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Problem
+        Problem (original)
       
     </span>
   </a>
@@ -1204,10 +1204,38 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-enhanced-assemblyresolver" class="md-nav__link">
+  <a href="#stage-1-lossless-parsing-phage_host_candidatescsv" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Enhanced AssemblyResolver
+        Stage 1 – Lossless parsing: phage_host_candidates.csv
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stage 1 – Lossless parsing: phage_host_candidates.csv">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-resolution-phage_host_assembliescsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2 – Resolution: phage_host_assemblies.csv
       
     </span>
   </a>
@@ -1215,10 +1243,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-updated-all-download-scripts" class="md-nav__link">
+  <a href="#stage-3-download-unique-assemblies" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Updated All Download Scripts
+        Stage 3 – Download unique assemblies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backward-compatible-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backward-compatible outputs
       
     </span>
   </a>
@@ -1231,41 +1270,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
+  <a href="#snakemake-caching-idempotency" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Examples
+        Snakemake caching (idempotency)
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#before" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Before
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#after" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        After
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1281,21 +1292,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#impact" class="md-nav__link">
+  <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Impact
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#code-quality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Code Quality
+        API
       
     </span>
   </a>
@@ -1307,28 +1307,6 @@
     <span class="md-ellipsis">
       
         Files Changed
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Usage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#demonstration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Demonstration
       
     </span>
   </a>
@@ -1357,8 +1335,8 @@
 
 <h1 id="host-genome-resolution-improvements">Host Genome Resolution Improvements<a class="headerlink" href="#host-genome-resolution-improvements" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>This document describes the improvements made to handle semicolon-separated Host fields in the phage metadata pipeline.</p>
-<h2 id="problem">Problem<a class="headerlink" href="#problem" title="Permanent link">&para;</a></h2>
+<p>This document describes the improvements made to handle semicolon-separated Host fields in the phage metadata pipeline, including full <strong>multi-host support</strong> (one phage → multiple host assemblies).</p>
+<h2 id="problem-original">Problem (original)<a class="headerlink" href="#problem-original" title="Permanent link">&para;</a></h2>
 <p>The pipeline was failing to resolve host genomes for many phages because the "Host" field contained complex, semicolon-separated values like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>NA;GCA 900066335.1;UBA9502;Blautia...
 </code></pre></div>
@@ -1366,123 +1344,194 @@
 1. The entire field was treated as a species name (e.g., "NA;GCA 900066335.1;Lachnospira")
 2. GCA accession numbers had spaces instead of underscores (e.g., "GCA 900066335.1" vs "GCA_900066335.1")
 3. No fallback mechanism when primary identifier failed
-4. "NA" values were not filtered out</p>
-<p>This resulted in logs like:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>2026-02-18 13:57:56,005 - WARNING - ⚠️  Could not resolve TaxID for &#39;NA;GCA 900066365.1;Lachnospira&#39; (may be ambiguous)
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>2026-02-18 13:57:58,059 - WARNING - ⚠️  No assemblies found for species: NA;GCA 900066365.1;Lachnospira
-</code></pre></div></p>
+4. "NA" values were not filtered out
+5. Only the <strong>first successfully resolved host</strong> was kept (multi-host phages were not fully represented)</p>
 <h2 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h2>
-<h3 id="1-enhanced-assemblyresolver">1. Enhanced AssemblyResolver<a class="headerlink" href="#1-enhanced-assemblyresolver" title="Permanent link">&para;</a></h3>
-<p><strong>Added new methods:</strong></p>
+<h3 id="stage-1-lossless-parsing-phage_host_candidatescsv">Stage 1 – Lossless parsing: <code>phage_host_candidates.csv</code><a class="headerlink" href="#stage-1-lossless-parsing-phage_host_candidatescsv" title="Permanent link">&para;</a></h3>
+<p>The new standalone <code>parse_host_field(host_raw)</code> function splits the raw Host
+field into individual tokens:</p>
 <ul>
-<li><code>parse_host_field(host_field: str)</code> - Parses semicolon-separated fields</li>
-<li>Splits on semicolons</li>
-<li>Fixes "GCA 900066335.1" → "GCA_900066335.1"</li>
-<li>Filters out "NA" and empty values</li>
-<li>Identifies type of each component</li>
-<li>
-<p>Returns identifiers in priority order</p>
-</li>
-<li>
-<p><code>resolve_with_fallback(identifier: str)</code> - Tries multiple resolution strategies</p>
-</li>
-<li>Parses complex fields</li>
-<li>Tries each component in priority order:<ol>
-<li>Assembly accessions (GCF_/GCA_)</li>
-<li>BioSample accessions</li>
-<li>BioProject accessions</li>
-<li>TaxIDs</li>
-<li>Species names</li>
-</ol>
-</li>
-<li>Returns first successful resolution</li>
+<li>Splits on semicolons.</li>
+<li>Normalises <code>GCA 900066335.1</code> → <code>GCA_900066335.1</code> (space → underscore).</li>
+<li>Drops empty, <code>NA</code>, <code>unknown*</code>, and <code>unidentified*</code> values.</li>
+<li>Classifies each token:</li>
+<li><code>assembly_accession</code> – matches <code>GCA_</code> / <code>GCF_</code> pattern.</li>
+<li><code>species_name</code> – two+ words, genus capitalized (binomial nomenclature).</li>
+<li><code>other</code> – single words, codes such as <code>UBA9502</code>, etc.</li>
+<li>Preserves <code>Token_Order</code> (1-based position in the original field).</li>
 </ul>
-<p><strong>Updated methods:</strong></p>
+<p>The pipeline writes <strong>one row per (Phage_ID, token)</strong> to
+<code>phage_host_candidates.csv</code>.  This is the lossless, auditable record of every
+host candidate parsed from the metadata.</p>
+<h4 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Phage_ID</th>
+<th>Host_Raw</th>
+<th>Host_Token</th>
+<th>Token_Type</th>
+<th>Token_Order</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>phage1</td>
+<td>NA;GCA 900066335.1;UBA9502;Blautia obeum</td>
+<td>GCA_900066335.1</td>
+<td>assembly_accession</td>
+<td>2</td>
+</tr>
+<tr>
+<td>phage1</td>
+<td>NA;GCA 900066335.1;UBA9502;Blautia obeum</td>
+<td>UBA9502</td>
+<td>other</td>
+<td>3</td>
+</tr>
+<tr>
+<td>phage1</td>
+<td>NA;GCA 900066335.1;UBA9502;Blautia obeum</td>
+<td>Blautia obeum</td>
+<td>species_name</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="stage-2-resolution-phage_host_assembliescsv">Stage 2 – Resolution: <code>phage_host_assemblies.csv</code><a class="headerlink" href="#stage-2-resolution-phage_host_assembliescsv" title="Permanent link">&para;</a></h3>
+<p>Each unique token is resolved independently via <code>resolve_host_token()</code>:</p>
 <ul>
-<li><code>get_best_assembly()</code> - Now uses <code>resolve_with_fallback()</code> automatically</li>
+<li><code>assembly_accession</code> → direct NCBI Assembly lookup (confidence 0.95).</li>
+<li><code>species_name</code> → NCBI Taxonomy + Assembly search (confidence 0.70).</li>
+<li><code>other</code> → attempted species search as fallback (confidence 0.30).</li>
 </ul>
-<h3 id="2-updated-all-download-scripts">2. Updated All Download Scripts<a class="headerlink" href="#2-updated-all-download-scripts" title="Permanent link">&para;</a></h3>
-<p><strong>download_host_genomes_optimized.py:</strong>
-- Modified <code>extract_unique_hosts_from_csv()</code> to preserve raw Host values
-- Removed extraction of just "Genus species" format</p>
-<p><strong>download_host_genomes_robust.py:</strong>
-- Modified <code>extract_unique_hosts()</code> to preserve raw Host values</p>
-<p><strong>download_host_genomes.py:</strong>
-- Added <code>extract_best_host_identifier()</code> function
-- Added <code>search_assembly_by_accession()</code> method
-- Added module-level regex constants to avoid duplication
-- Updated <code>download_host_genome()</code> to handle assembly accessions directly</p>
-<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
-<h3 id="before">Before<a class="headerlink" href="#before" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Input: &quot;NA;GCA 900066365.1;Lachnospira&quot;
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Processing: Treated as species name
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>Result: ❌ FAILED - &quot;NA;GCA 900066365.1;Lachnospira&quot; is not a valid species
-</code></pre></div>
-<h3 id="after">After<a class="headerlink" href="#after" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Input: &quot;NA;GCA 900066365.1;Lachnospira&quot;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Parsing:
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  1. &quot;GCA_900066365.1&quot; (assembly_accession) - fixed space
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  2. &quot;Lachnospira&quot; (species_name)
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  (Filtered out: &quot;NA&quot;)
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>Resolution strategy:
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  1. Try &quot;GCA_900066365.1&quot; first → ✅ SUCCESS
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>  2. Fallback to &quot;Lachnospira&quot; if needed
-</code></pre></div>
+<p>The pipeline writes <strong>one row per (Phage_ID, Assembly_Accession)</strong> to
+<code>phage_host_assemblies.csv</code>.  This is the authoritative flat mapping used to
+drive host genome downloads.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phage_ID</td>
+<td>Phage identifier</td>
+</tr>
+<tr>
+<td>Host_Raw</td>
+<td>Original un-parsed Host field (traceability)</td>
+</tr>
+<tr>
+<td>Host_Token</td>
+<td>Specific token that was resolved</td>
+</tr>
+<tr>
+<td>Token_Type</td>
+<td><code>assembly_accession</code> / <code>species_name</code> / <code>other</code></td>
+</tr>
+<tr>
+<td>Token_Order</td>
+<td>1-based position in Host_Raw</td>
+</tr>
+<tr>
+<td>Assembly_Accession</td>
+<td>Resolved NCBI accession</td>
+</tr>
+<tr>
+<td>Resolution_Source</td>
+<td><code>accession_in_host_field</code> / <code>species_to_taxid_to_assembly</code> / <code>fallback</code></td>
+</tr>
+<tr>
+<td>Resolution_Rank</td>
+<td>1-based rank within results for this token</td>
+</tr>
+<tr>
+<td>Confidence</td>
+<td>Float 0–1 derived from source + rank</td>
+</tr>
+<tr>
+<td>Assembly_Level</td>
+<td><code>Complete Genome</code>, <code>Chromosome</code>, <code>Scaffold</code>, or <code>Contig</code></td>
+</tr>
+<tr>
+<td>RefSeq_Category</td>
+<td><code>reference genome</code>, <code>representative genome</code>, or <code>na</code></td>
+</tr>
+<tr>
+<td>Quality_Score</td>
+<td>Integer quality score</td>
+</tr>
+<tr>
+<td>Ambiguous</td>
+<td><code>True</code> when multiple equally-plausible hits exist</td>
+</tr>
+<tr>
+<td>Ambiguity_Reason</td>
+<td>Human-readable reason when ambiguous</td>
+</tr>
+</tbody>
+</table>
+<h3 id="stage-3-download-unique-assemblies">Stage 3 – Download unique assemblies<a class="headerlink" href="#stage-3-download-unique-assemblies" title="Permanent link">&para;</a></h3>
+<p>Host genome downloads are now driven by the <strong>unique <code>Assembly_Accession</code> values
+in <code>phage_host_assemblies.csv</code></strong>.  Each accession is downloaded exactly once,
+even if linked to many phages (deduplication).</p>
+<h3 id="backward-compatible-outputs">Backward-compatible outputs<a class="headerlink" href="#backward-compatible-outputs" title="Permanent link">&para;</a></h3>
+<p>The following outputs remain unchanged (same columns):</p>
+<ul>
+<li><code>host_metadata.csv</code> – per-assembly metadata (one row per unique assembly).</li>
+<li><code>assembly_metadata.csv</code> – detailed assembly metadata.</li>
+<li><code>phage_host_links.csv</code> – phage→assembly links (extended, one row per unique
+  (Phage_ID, Assembly_Accession) pair).</li>
+</ul>
+<h2 id="snakemake-caching-idempotency">Snakemake caching (idempotency)<a class="headerlink" href="#snakemake-caching-idempotency" title="Permanent link">&para;</a></h2>
+<p>Snakemake's file-based dependency tracking ensures the <code>download_host_genomes</code>
+rule is <strong>not re-executed</strong> when all output files already exist and are newer
+than the input phage CSV.</p>
+<p>The new outputs (<code>phage_host_candidates</code> and <code>phage_host_assemblies</code>) are
+declared as rule outputs in <code>hosts.smk</code>, so Snakemake tracks them automatically.</p>
+<p>Within a single run, the <code>skip_existing=True</code> parameter (default) prevents
+re-downloading individual genome files that were already successfully retrieved.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<p>Created comprehensive test suite with 12 tests:</p>
+<p>New unit tests in <code>tests/test_multi_host_parsing.py</code>:</p>
 <ul>
-<li><code>test_parse_simple_species_name</code> - Basic species names still work</li>
-<li><code>test_parse_gca_with_space</code> - Fixes "GCA 900066335.1" → "GCA_900066335.1"</li>
-<li><code>test_parse_gcf_with_space</code> - Fixes "GCF 000005845.2" → "GCF_000005845.2"</li>
-<li><code>test_parse_semicolon_separated_with_na</code> - Handles NA values correctly</li>
-<li><code>test_parse_complex_semicolon_separated</code> - Complex multi-component fields</li>
-<li><code>test_parse_empty_field</code> - Handles null/empty fields</li>
-<li><code>test_parse_only_na_values</code> - All NA fields return empty</li>
-<li><code>test_priority_ordering</code> - Accessions prioritized over names</li>
-<li><code>test_gca_embedded_in_text</code> - GCA fixed even when embedded</li>
-<li>Plus 3 API integration tests (require NCBI credentials)</li>
+<li><code>TestParseHostField</code> – 18 tests for the <code>parse_host_field()</code> function,
+  including all examples from the problem statement.</li>
+<li><code>TestGenerateCandidates</code> – 5 tests for <code>_generate_candidates()</code>.</li>
+<li><code>TestBuildAssemblyLinks</code> – 7 tests for <code>_build_assembly_links()</code>, including
+  multi-host, unresolved, and ambiguous cases.</li>
 </ul>
-<p>All tests pass! ✅</p>
-<h2 id="impact">Impact<a class="headerlink" href="#impact" title="Permanent link">&para;</a></h2>
-<p>This change <strong>maximizes the chances of finding a genome for each phage</strong> by:</p>
-<ol>
-<li><strong>Extracting GCA/GCF accessions</strong> when present (most reliable)</li>
-<li><strong>Fixing formatting issues</strong> (space → underscore)</li>
-<li><strong>Providing fallback options</strong> (try species name if accession fails)</li>
-<li><strong>Filtering noise</strong> (NA values, empty strings)</li>
-</ol>
-<h2 id="code-quality">Code Quality<a class="headerlink" href="#code-quality" title="Permanent link">&para;</a></h2>
-<ul>
-<li>✅ All tests pass</li>
-<li>✅ Code review completed, feedback addressed</li>
-<li>✅ Security scan (CodeQL) - no issues found</li>
-<li>✅ Consistent with existing code style</li>
-<li>✅ Added comprehensive documentation</li>
-</ul>
+<p>All 31 tests pass without NCBI credentials.</p>
+<h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">download_host_genomes_robust</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_host_field</span><span class="p">,</span> <span class="n">resolve_host_token</span><span class="p">,</span> <span class="n">HostToken</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Parse a complex Host field into tokens</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">tokens</span> <span class="o">=</span> <span class="n">parse_host_field</span><span class="p">(</span><span class="s2">&quot;NA;GCA 900066335.1;UBA9502;Blautia obeum&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># → [HostToken(&#39;GCA_900066335.1&#39;, &#39;assembly_accession&#39;, 2),</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">#    HostToken(&#39;UBA9502&#39;, &#39;other&#39;, 3),</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">#    HostToken(&#39;Blautia obeum&#39;, &#39;species_name&#39;, 4)]</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Resolve a token to assembly links (requires NCBI credentials)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="kn">from</span><span class="w"> </span><span class="nn">assembly_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">AssemblyResolver</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">resolver</span> <span class="o">=</span> <span class="n">AssemblyResolver</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;user@example.org&#39;</span><span class="p">)</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">links</span> <span class="o">=</span> <span class="n">resolve_host_token</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resolver</span><span class="p">,</span> <span class="n">phage_id</span><span class="o">=</span><span class="s1">&#39;p1&#39;</span><span class="p">,</span> <span class="n">host_raw</span><span class="o">=</span><span class="s1">&#39;NA;GCA 900066335.1;...&#39;</span><span class="p">)</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1"># → [ResolvedAssemblyLink(assembly_accession=&#39;GCA_900066335.1&#39;, confidence=0.95, ...)]</span>
+</code></pre></div>
 <h2 id="files-changed">Files Changed<a class="headerlink" href="#files-changed" title="Permanent link">&para;</a></h2>
 <ol>
-<li><code>workflow/scripts/sequences/assembly_resolver.py</code> - Core parsing logic</li>
-<li><code>workflow/scripts/sequences/download_host_genomes_optimized.py</code> - Optimized downloader</li>
-<li><code>workflow/scripts/sequences/download_host_genomes_robust.py</code> - Robust downloader</li>
-<li><code>workflow/scripts/sequences/download_host_genomes.py</code> - Basic downloader</li>
-<li><code>tests/test_host_field_parsing.py</code> - New test suite</li>
-<li><code>tests/demo_host_parsing.py</code> - Demonstration script</li>
+<li><code>workflow/scripts/sequences/download_host_genomes_robust.py</code> – Added
+   <code>HostToken</code>, <code>ResolvedAssemblyLink</code>, <code>parse_host_field()</code>,
+   <code>resolve_host_token()</code>, helper methods <code>_generate_candidates()</code> and
+   <code>_build_assembly_links()</code>, and replaced the single-host <code>process_all_hosts()</code>
+   with a multi-host pipeline.</li>
+<li><code>workflow/rules/hosts.smk</code> – Added <code>phage_host_candidates</code> and
+   <code>phage_host_assemblies</code> as rule outputs.</li>
+<li><code>workflow/config/config.yaml</code> – Added <code>phage_host_candidates_output</code> and
+   <code>phage_host_assemblies_output</code> config keys.</li>
+<li><code>tests/test_multi_host_parsing.py</code> – New unit tests.</li>
 </ol>
-<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<p>No changes to the pipeline interface are required. The improvements are transparent:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Works exactly as before, but now handles complex fields</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">resolver</span> <span class="o">=</span> <span class="n">AssemblyResolver</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">&#39;user@example.org&#39;</span><span class="p">)</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Automatically parses and prioritizes components</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">assembly</span> <span class="o">=</span> <span class="n">resolver</span><span class="o">.</span><span class="n">get_best_assembly</span><span class="p">(</span><span class="s2">&quot;NA;GCA 900066365.1;Lachnospira&quot;</span><span class="p">)</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Returns: GCA_900066365.1 assembly metadata</span>
-</code></pre></div>
-<h2 id="demonstration">Demonstration<a class="headerlink" href="#demonstration" title="Permanent link">&para;</a></h2>
-<p>Run the demo script to see the parsing in action:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python<span class="w"> </span>tests/demo_host_parsing.py
-</code></pre></div>
-<p>This shows exactly how each problematic case from the logs is now handled.</p>
 
 
 
