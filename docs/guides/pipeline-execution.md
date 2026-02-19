@@ -93,7 +93,7 @@ python download_host_genomes_optimized.py \
     --input ../../data/intermediate/phage_metadata.csv \
     --output ../../data/processed/genomes \
     --config ../../config/genome_download_config.yaml \
-    --metadata ../../data/processed/host_metadata.csv \
+    --metadata ../../data/intermediate/csv/merged/host_metadata.csv \
     --limit 10  # Optional: limit for testing
 ```
 
@@ -124,7 +124,7 @@ ETA: 1.2 hours | Rate: 15.3 genomes/min
 
 #### 1. Metadata CSV (`host_metadata.csv`)
 
-**Location**: `data/processed/host_metadata.csv`
+**Location**: `data/intermediate/csv/merged/host_metadata.csv`
 
 This CSV contains **successful** downloads with full tracking information:
 
@@ -148,7 +148,7 @@ Escherichia_coli_GCF_000005845.2,Escherichia coli,K-12,GCF_000005845.2,ASM584v2,
 import pandas as pd
 
 # Load metadata
-metadata = pd.read_csv('data/processed/host_metadata.csv')
+metadata = pd.read_csv('data/intermediate/csv/merged/host_metadata.csv')
 
 # Summary statistics
 print(f"Total genomes: {len(metadata)}")
@@ -380,6 +380,302 @@ snakemake --cores 8 --use-conda \
 ```bash
 # Test run with 100 species
 snakemake --cores 4 --use-conda --config limit=100
+```
+
+---
+
+## Complete Pipeline Steps Overview
+
+This section provides a detailed breakdown of all pipeline steps, their inputs, outputs, and data flow.
+
+### Pipeline Architecture
+
+```mermaid
+graph TD
+    A[Phage Data Download] --> B[Host Genome Download]
+    B --> C[Database Creation]
+    C --> D[Sequence Indexing]
+    
+    A --> A1[Metadata TSVs]
+    A --> A2[FASTA Files]
+    A1 --> E[Merged Metadata CSV]
+    A2 --> F[Merged FASTA Files]
+    
+    E --> C
+    B --> B1[Host Metadata CSV]
+    B --> B2[Host FASTA Files]
+    B1 --> C
+    
+    F --> D
+    B2 --> D
+```
+
+### Step-by-Step Pipeline Execution
+
+#### Step 1: Phage Metadata Download
+
+**Purpose**: Download phage metadata from multiple databases (RefSeq, GenBank, PhageScope, etc.)
+
+**Snakemake Rule**: Multiple rules in `workflow/rules/phagescope.smk`
+
+**Inputs**: 
+- URL list from `workflow/config/config.yaml`
+- Databases: RefSeq, GenBank, EMBL, DDBJ, PhagesDB, GVD, GPD, MGV, etc.
+
+**Outputs**:
+- Individual TSV files: `data/intermediate/csv/[feature]/[source].tsv`
+- Merged CSV: `data/intermediate/csv/merged/merged_phage_metadata.csv`
+- Report: `data/processed/reports/phage_metadata_report.html`
+
+**Key Features Downloaded**:
+1. Phage metadata (basic information)
+2. Annotated proteins metadata
+3. tRNA/tmRNA metadata
+4. Anti-CRISPR metadata
+5. Virulent factor metadata
+6. Transmembrane protein metadata
+7. Antimicrobial resistance genes
+8. CRISPR arrays
+
+**Execution**:
+```bash
+snakemake --cores 4 --use-conda phage_metadata_merged_output
+```
+
+---
+
+#### Step 2: Phage FASTA Download
+
+**Purpose**: Download phage genome sequences in FASTA format
+
+**Snakemake Rule**: `download_and_extract_phage_fasta` in `workflow/rules/phagescope.smk`
+
+**Inputs**:
+- Compressed TAR.GZ files from PhageScope API
+- One per database source
+
+**Outputs**:
+- Compressed: `data/raw/phage_fasta_compressed/`
+- Extracted: `data/raw/phage_fasta_extracted/`
+- Merged per source: `data/intermediate/fasta/phages/[source].fasta`
+- Final merged: `data/processed/sequences/all_phages.fasta`
+
+**Execution**:
+```bash
+snakemake --cores 4 --use-conda all_phages_fasta
+```
+
+---
+
+#### Step 3: Protein FASTA Download
+
+**Purpose**: Download phage protein sequences in FASTA format
+
+**Snakemake Rule**: `download_and_extract_protein_fasta` in `workflow/rules/phagescope.smk`
+
+**Inputs**:
+- Compressed TAR.GZ files from PhageScope API
+- One per database source
+
+**Outputs**:
+- Compressed: `data/raw/protein_fasta_compressed/`
+- Extracted: `data/raw/protein_fasta_extracted/`
+- Merged per source: `data/intermediate/fasta/proteins/[source].fasta`
+- Final merged: `data/processed/sequences/all_proteins.fasta`
+
+**Execution**:
+```bash
+snakemake --cores 4 --use-conda all_proteins_fasta
+```
+
+---
+
+#### Step 4: Host Genome Download
+
+**Purpose**: Download bacterial host genomes from NCBI RefSeq
+
+**Snakemake Rule**: `download_host_genomes` in `workflow/rules/hosts.smk`
+
+**Inputs**:
+- Phage metadata CSV (extracts unique host species)
+- Path: `data/intermediate/csv/merged/merged_phage_metadata.csv`
+
+**Process**:
+1. Extract unique host species from phage metadata
+2. Query NCBI Assembly database for each species
+3. Download reference genome FASTA files
+4. Calculate genome statistics (length, GC content, etc.)
+5. Track download status (success/failure)
+
+**Outputs**:
+- **Host Metadata CSV**: `data/intermediate/csv/merged/host_metadata.csv`
+  - Contains: Host_ID, Species_Name, Assembly_Accession, Assembly_Level, Genome_Length, GC_Content, etc.
+- **Assembly Metadata CSV**: `data/intermediate/csv/merged/assembly_metadata.csv`
+  - Detailed assembly information with normalized accessions
+- **Phage-Host Links CSV**: `data/intermediate/csv/merged/phage_host_links.csv`
+  - Links between phage IDs and host assembly accessions
+- **Individual FASTA Files**: `data/intermediate/fasta/hosts/[Host_ID].fna`
+- **Download Log**: `data/logs/host_download.log`
+- **Failure Log**: `data/logs/host_download_failures.log`
+
+**Configuration** (in `workflow/config/config.yaml`):
+- `ncbi_email`: Required by NCBI
+- `use_robust_downloader`: Default true (uses improved downloader)
+- `metadata_only_mode`: Set true to skip downloads (metadata only)
+- `skip_existing_downloads`: Default true (resume capability)
+- `validate_file_checksums`: Default true (integrity checks)
+
+**Execution**:
+```bash
+# Full download
+snakemake --cores 4 --use-conda download_host_genomes
+
+# Metadata only (no downloads)
+snakemake --cores 4 --use-conda --config metadata_only_mode=true download_host_genomes
+
+# Test with limited species
+snakemake --cores 4 --use-conda --config limit=100 download_host_genomes
+```
+
+---
+
+#### Step 5: Host Genome Mapping
+
+**Purpose**: Create JSON mapping from Host_ID to individual FASTA files
+
+**Snakemake Rule**: `create_host_mapping` in `workflow/rules/hosts.smk`
+
+**Inputs**:
+- Host metadata CSV: `data/intermediate/csv/merged/host_metadata.csv`
+- Individual host FASTA files: `data/intermediate/fasta/hosts/*.fna`
+
+**Outputs**:
+- Host mapping JSON: `data/processed/sequences/host_fasta_mapping.json`
+  - Maps Host_ID → file path for efficient loading
+  - Validates file existence and size
+
+**Why**: Avoids merging all host genomes into one large file, enabling on-demand loading for better memory efficiency
+
+**Execution**:
+```bash
+snakemake --cores 4 --use-conda host_fasta_mapping
+```
+
+---
+
+#### Step 6: Sequence Indexing
+
+**Purpose**: Create FAIDX indexes for fast random access to sequences
+
+**Snakemake Rules**: 
+- `index_all_phages` in `workflow/rules/sequences.smk`
+- `index_all_proteins` in `workflow/rules/sequences.smk`
+- `index_individual_host_sequences` in `workflow/rules/hosts.smk`
+
+**Inputs**:
+- Merged phage FASTA: `data/processed/sequences/all_phages.fasta`
+- Merged protein FASTA: `data/processed/sequences/all_proteins.fasta`
+- Host mapping JSON: `data/processed/sequences/host_fasta_mapping.json`
+
+**Outputs**:
+- Phage index: `data/processed/sequences/all_phages.fasta.fai`
+- Protein index: `data/processed/sequences/all_proteins.fasta.fai`
+- Host indexes: Individual `.fai` files for each host genome
+- Completion flag: `data/processed/sequences/.host_indexes_complete`
+
+**Execution**:
+```bash
+snakemake --cores 4 --use-conda \
+    all_phages_fasta.fai \
+    all_proteins_fasta.fai \
+    host_index_complete_flag
+```
+
+---
+
+#### Step 7: Database Creation
+
+**Purpose**: Load all metadata into DuckDB database for efficient querying
+
+**Snakemake Rule**: `create_duckdb` in `workflow/rules/database.smk`
+
+**Inputs**:
+- All merged metadata CSVs
+- Phage metadata: `data/intermediate/csv/merged/merged_phage_metadata.csv`
+- Host metadata: `data/intermediate/csv/merged/host_metadata.csv`
+- Assembly metadata: `data/intermediate/csv/merged/assembly_metadata.csv`
+- Phage-host links: `data/intermediate/csv/merged/phage_host_links.csv`
+- Annotated proteins, features, etc.
+
+**Outputs**:
+- DuckDB database: `data/processed/databases/phage_database.duckdb`
+- Optimized database: `data/processed/databases/phage_database_optimized.duckdb`
+- Validation report: `data/processed/reports/database_validation.html`
+
+**Tables Created**:
+1. `phages` - Main phage metadata
+2. `hosts` - Host genome metadata
+3. `assemblies` - Assembly details
+4. `phage_host_links` - Phage-host relationships
+5. `annotated_proteins` - Protein annotations
+6. `trna_tmrna` - tRNA/tmRNA features
+7. `anti_crispr` - Anti-CRISPR proteins
+8. `virulent_factors` - Virulence factors
+9. `transmembrane_proteins` - Transmembrane proteins
+10. `amr_genes` - Antimicrobial resistance genes
+11. `crispr_arrays` - CRISPR arrays
+
+**Execution**:
+```bash
+snakemake --cores 4 --use-conda optimized_duckdb_output
+```
+
+---
+
+### Complete Pipeline Execution
+
+To run the entire pipeline from start to finish:
+
+```bash
+# Full pipeline with all steps
+snakemake --cores 8 --use-conda all
+
+# With specific configuration
+snakemake --cores 8 --use-conda all \
+    --config ncbi_email=your@email.com
+```
+
+### Output File Summary
+
+| File Type | Location | Purpose |
+|-----------|----------|---------|
+| Phage Metadata CSV | `data/intermediate/csv/merged/merged_phage_metadata.csv` | Merged phage metadata from all sources |
+| Host Metadata CSV | `data/intermediate/csv/merged/host_metadata.csv` | Downloaded host genome metadata |
+| Assembly Metadata CSV | `data/intermediate/csv/merged/assembly_metadata.csv` | Detailed assembly information |
+| Phage-Host Links CSV | `data/intermediate/csv/merged/phage_host_links.csv` | Phage-to-host assembly mappings |
+| All Phages FASTA | `data/processed/sequences/all_phages.fasta` | Merged phage genomes |
+| All Proteins FASTA | `data/processed/sequences/all_proteins.fasta` | Merged phage proteins |
+| Host FASTA Mapping | `data/processed/sequences/host_fasta_mapping.json` | Host genome file paths |
+| Individual Host FASTA | `data/intermediate/fasta/hosts/[Host_ID].fna` | Individual host genomes |
+| DuckDB Database | `data/processed/databases/phage_database_optimized.duckdb` | Main queryable database |
+| Validation Report | `data/processed/reports/database_validation.html` | Database quality report |
+
+### Data Flow Diagram
+
+```
+Raw Data Sources (PhageScope API, NCBI)
+    ↓
+Download & Extract (TSV, FASTA, Genomes)
+    ↓
+data/raw/ & data/intermediate/
+    ↓
+Merge & Process
+    ↓
+data/intermediate/csv/merged/ & data/intermediate/fasta/
+    ↓
+Create Database & Index
+    ↓
+data/processed/databases/ & data/processed/sequences/
 ```
 
 ---
