@@ -184,10 +184,14 @@ class RobustHostGenomeDownloader:
     
     def extract_unique_hosts(self) -> List[str]:
         """
-        Extract unique host species from phage metadata CSV
+        Extract unique host identifiers from phage metadata CSV
+        
+        This method now preserves the raw Host field values, allowing the
+        AssemblyResolver to handle complex semicolon-separated fields with
+        GCA accessions, species names, etc.
         
         Returns:
-            List of unique species names in "Genus species" format
+            List of unique host identifiers (raw values from CSV)
         """
         logging.info("📋 Extracting unique hosts from phage metadata...")
         
@@ -196,7 +200,7 @@ class RobustHostGenomeDownloader:
         if 'Host' not in df.columns:
             raise ValueError("Host column not found in phage metadata CSV")
         
-        # Filter for valid hosts
+        # Filter for valid hosts (not empty, not '-', not unknown/unidentified)
         valid_mask = (
             df['Host'].notna() &
             (df['Host'] != '-') &
@@ -205,22 +209,19 @@ class RobustHostGenomeDownloader:
             (~df['Host'].str.contains('unidentified', case=False, na=False))
         )
         
+        # Get unique host values (preserve raw values for better resolution)
         unique_hosts = df.loc[valid_mask, 'Host'].unique()
         
-        # Extract species names (Genus species format)
-        species_names = set()
-        for host in unique_hosts:
-            parts = str(host).strip().split()
-            if len(parts) >= 2 and parts[0][0].isupper():
-                species = f"{parts[0]} {parts[1]}"
-                species_names.add(species)
-            elif len(parts) == 1 and parts[0][0].isupper():
-                species_names.add(parts[0])
+        # Convert to list and strip whitespace
+        host_list = [str(host).strip() for host in unique_hosts]
         
-        species_list = sorted(list(species_names))
-        logging.info(f"✅ Found {len(species_list)} unique host species")
+        # Remove any that became empty after stripping
+        host_list = [h for h in host_list if h]
         
-        return species_list
+        host_list = sorted(host_list)
+        logging.info(f"✅ Found {len(host_list)} unique host identifiers")
+        
+        return host_list
     
     def resolve_host_assemblies(self, species_list: List[str]) -> Dict[str, AssemblyMetadata]:
         """

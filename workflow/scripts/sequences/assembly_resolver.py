@@ -146,6 +146,17 @@ class AssemblyResolver:
     to canonical NCBI assembly accessions, with quality-based ranking and filtering.
     """
     
+    # Priority ordering for identifier types (class-level constant)
+    IDENTIFIER_PRIORITY = {
+        IdentifierType.ASSEMBLY_ACCESSION: 0,
+        IdentifierType.BIOSAMPLE: 1,
+        IdentifierType.BIOPROJECT: 2,
+        IdentifierType.TAXID: 3,
+        IdentifierType.SPECIES_NAME: 4,
+        IdentifierType.STRAIN_NAME: 5,
+        IdentifierType.UNKNOWN: 6
+    }
+    
     def __init__(self, 
                  email: str,
                  api_key: Optional[str] = None,
@@ -175,6 +186,8 @@ class AssemblyResolver:
         self.biosample_pattern = re.compile(r'^SAM(N|D|EA?)\d+$')
         self.bioproject_pattern = re.compile(r'^PRJ(NA|EA|DB)\d+$')
         self.taxid_pattern = re.compile(r'^\d+$')
+        # Pattern to match GCA/GCF with space instead of underscore (e.g., "GCA 900066335.1")
+        self.assembly_with_space_pattern = re.compile(r'\b(GCF|GCA)\s+(\d{9}\.\d+)\b')
         
         logging.info(f"✅ AssemblyResolver initialized")
         logging.info(f"   Email: {email}")
@@ -206,6 +219,110 @@ class AssemblyResolver:
             return IdentifierType.SPECIES_NAME
         else:
             return IdentifierType.UNKNOWN
+    
+    def parse_host_field(self, host_field: str) -> List[Tuple[str, IdentifierType]]:
+        """
+        Parse a complex host field that may contain semicolon-separated values
+        
+        This method handles fields like "NA;GCA 900066335.1;UBA9502;Blautia..." by:
+        1. Splitting on semicolons
+        2. Fixing GCA/GCF accessions with spaces (e.g., "GCA 900066335.1" → "GCA_900066335.1")
+        3. Filtering out "NA" and empty values
+        4. Identifying the type of each component
+        5. Returning them in priority order (accessions first, then names)
+        
+        Args:
+            host_field: Raw host field value
+            
+        Returns:
+            List of (identifier, type) tuples in priority order
+        """
+        if not host_field or host_field is None:
+            return []
+        
+        # Handle various "null" representations
+        host_field = str(host_field).strip()
+        if host_field == '' or host_field.lower() in ('nan', 'none', 'null'):
+            return []
+        
+        # First, try to fix GCA/GCF accessions with spaces anywhere in the field
+        # This handles "GCA 900066335.1" → "GCA_900066335.1"
+        host_field = self.assembly_with_space_pattern.sub(r'\1_\2', host_field)
+        
+        # Split on semicolons
+        parts = [p.strip() for p in host_field.split(';')]
+        
+        # Parse each part and classify
+        identifiers = []
+        for part in parts:
+            if not part or part.upper() == 'NA' or part == '-' or part == '':
+                continue
+            
+            # Identify type
+            id_type = self.identify_type(part)
+            
+            # Skip unknown types that are likely noise
+            if id_type == IdentifierType.UNKNOWN:
+                logging.debug(f"Skipping unknown identifier type: '{part}'")
+                continue
+            
+            identifiers.append((part, id_type))
+        
+        # Sort by priority using class-level constant
+        identifiers.sort(key=lambda x: self.IDENTIFIER_PRIORITY.get(x[1], 99))
+        
+        return identifiers
+    
+    def resolve_with_fallback(self,
+                              identifier: str,
+                              prefer_refseq: bool = True,
+                              require_complete: bool = False,
+                              max_results: int = 10) -> List[AssemblyMetadata]:
+        """
+        Resolve identifier with automatic fallback for complex fields
+        
+        This method first checks if the identifier is a complex semicolon-separated
+        field and tries multiple resolution strategies:
+        1. Try each component in priority order (accessions first)
+        2. Return the first successful resolution
+        
+        Args:
+            identifier: Input identifier (may be complex semicolon-separated)
+            prefer_refseq: Prefer RefSeq (GCF_) over GenBank (GCA_)
+            require_complete: Only return complete genomes
+            max_results: Maximum number of results to return
+            
+        Returns:
+            List of AssemblyMetadata objects, ranked by quality score
+        """
+        # Parse the field to extract potential identifiers
+        parsed_identifiers = self.parse_host_field(identifier)
+        
+        if not parsed_identifiers:
+            # Fall back to standard resolution
+            return self.resolve(identifier, prefer_refseq, require_complete, max_results)
+        
+        # If we have multiple identifiers, try them in priority order
+        if len(parsed_identifiers) > 1:
+            logging.info(f"🔍 Parsed complex field '{identifier}' into {len(parsed_identifiers)} components")
+            for i, (parsed_id, id_type) in enumerate(parsed_identifiers, 1):
+                logging.info(f"   {i}. '{parsed_id}' (type: {id_type.value})")
+        
+        # Try each identifier until we get results
+        for parsed_id, id_type in parsed_identifiers:
+            try:
+                results = self.resolve(parsed_id, prefer_refseq, require_complete, max_results)
+                if results:
+                    if len(parsed_identifiers) > 1:
+                        logging.info(f"✅ Successfully resolved using: '{parsed_id}' ({id_type.value})")
+                    return results
+            except Exception as e:
+                logging.debug(f"Failed to resolve '{parsed_id}': {e}")
+                continue
+        
+        # No results from any component
+        logging.warning(f"⚠️  Could not resolve any component of: {identifier}")
+        return []
     
     def resolve(self, 
                 identifier: str,
@@ -557,16 +674,17 @@ class AssemblyResolver:
         Get single best assembly for an identifier
         
         Convenience method that returns only the top-ranked assembly.
+        Automatically handles complex semicolon-separated fields.
         
         Args:
-            identifier: Input identifier
+            identifier: Input identifier (may be complex semicolon-separated)
             prefer_refseq: Prefer RefSeq over GenBank
             require_complete: Only consider complete genomes
             
         Returns:
             Top-ranked AssemblyMetadata or None
         """
-        assemblies = self.resolve(
+        assemblies = self.resolve_with_fallback(
             identifier,
             prefer_refseq=prefer_refseq,
             require_complete=require_complete,
