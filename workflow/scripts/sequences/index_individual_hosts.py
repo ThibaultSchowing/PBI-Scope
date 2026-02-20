@@ -47,8 +47,10 @@ def index_host_files(mapping_file: str, log_file: str):
                 continue
             
             # Create index using pyfaidx
-            # Opening Fasta object automatically creates .fai index
-            _ = Fasta(str(fasta_file))
+            # Use duplicate_action='first' to handle FASTA files with duplicate
+            # sequence IDs (raises ValueError with default 'stop' action)
+            with Fasta(str(fasta_file), duplicate_action='first'):
+                pass
             
             # Verify index was created
             if index_file.exists():
