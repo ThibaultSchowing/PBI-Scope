@@ -116,14 +116,19 @@ rule create_host_mapping:
 rule index_individual_host_sequences:
     """
     Create pyfaidx indexes for individual host genome FASTA files
-    
-    Generates .fai index files for each host genome to enable fast random access
-    without needing to merge all files into one large file.
+
+    FASTA quality-control procedure (non-destructive):
+    1. Header audit: duplicate sequence identifiers → file rejected, event logged.
+    2. Sequence content audit: identical sequences → warning logged, file still indexed.
+
+    Generates .fai index files for all files that pass the header-uniqueness check.
+    Produces a DataFrame-loadable CSV QC log for downstream analysis.
     """
     input:
         mapping = config["host_fasta_mapping"]
     output:
-        touch(config["host_index_complete_flag"])
+        flag    = touch(config["host_index_complete_flag"]),
+        qc_log  = config["host_fasta_qc_log"]
     log:
         "logs/index_individual_host_sequences.log"
     conda:
@@ -132,12 +137,43 @@ rule index_individual_host_sequences:
         "../scripts/sequences/index_individual_hosts.py"
 
 
+rule create_host_status_report:
+    """
+    Combined per-phage host status report (DataFrame-loadable CSV)
+
+    Joins phage_host_candidates + phage_host_assemblies + assembly_metadata
+    + FASTA QC log into one table with one row per (Phage_ID, Host_Token).
+
+    Enables queries like:
+    - For all phages, how many have ≥1 resolved host assembly?
+    - Of resolved hosts, how many were downloaded / indexed / rejected?
+    """
+    input:
+        candidates        = config.get("phage_host_candidates_output",
+                                       config["host_metadata_output"].replace('.csv', '_host_candidates.csv')),
+        assemblies        = config.get("phage_host_assemblies_output",
+                                       config["host_metadata_output"].replace('.csv', '_host_assemblies.csv')),
+        assembly_metadata = config.get("assembly_metadata_output",
+                                       config["host_metadata_output"].replace('.csv', '_assemblies.csv')),
+        qc_log            = config["host_fasta_qc_log"]
+    output:
+        status_report = config["host_status_report"]
+    log:
+        "logs/create_host_status_report.log"
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/sequences/create_host_status_report.py"
+
+
 rule all_hosts:
     """
     Target rule for all host genome processing
     """
     input:
         config["host_index_complete_flag"],
+        config["host_fasta_qc_log"],
+        config["host_status_report"],
         config["host_fasta_mapping"],
         config["host_metadata_output"],
         config.get("phage_host_candidates_output",
