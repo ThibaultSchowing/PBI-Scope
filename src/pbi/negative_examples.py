@@ -63,26 +63,33 @@ class NegativeExampleGenerator:
     
     def _cache_phages_and_hosts(self):
         """Cache available phages and hosts from database"""
-        # Get all phages with metadata
+        # Get all phages with metadata - include all columns for consistent dataset
         phage_query = """
         SELECT DISTINCT
             Phage_ID,
+            Source_DB as Phage_Source,
             GC_content as Phage_GC,
             Length as Phage_Length,
-            Taxonomy
+            Taxonomy as Phage_Taxonomy,
+            Completeness as Phage_Completeness,
+            Lifestyle as Phage_Lifestyle,
+            Cluster as Phage_Cluster,
+            Subcluster as Phage_Subcluster
         FROM fact_phages
         WHERE GC_content IS NOT NULL
             AND Length IS NOT NULL
         """
         self.all_phages = self.conn.execute(phage_query).fetchdf()
         
-        # Get all hosts with metadata
+        # Get all hosts with metadata - include all columns for consistent dataset
         host_query = """
         SELECT DISTINCT
             Host_ID,
             Species_Name,
             GC_Content as Host_GC,
-            Genome_Length as Host_Length
+            Genome_Length as Host_Length,
+            Assembly_Level as Host_Assembly_Level,
+            RefSeq_Category as Host_RefSeq_Category
         FROM dim_hosts
         WHERE GC_Content IS NOT NULL
             AND Genome_Length IS NOT NULL
@@ -102,6 +109,40 @@ class NegativeExampleGenerator:
             Set of (phage_id, host_id) tuples
         """
         return set(zip(positive_pairs['Phage_ID'], positive_pairs['Host_ID']))
+    
+    def _build_negative_record(self, phage, host, extra_fields: dict = None) -> dict:
+        """
+        Build a negative example record with full metadata matching the positive schema.
+        
+        Args:
+            phage: Row from self.all_phages DataFrame
+            host: Row from self.all_hosts DataFrame
+            extra_fields: Optional dict of additional fields (e.g. GC_Difference)
+        
+        Returns:
+            Dict with all metadata columns and Label=0
+        """
+        record = {
+            'Phage_ID': phage['Phage_ID'],
+            'Host_ID': host['Host_ID'],
+            'Phage_Source': phage.get('Phage_Source'),
+            'Phage_Length': phage.get('Phage_Length'),
+            'Phage_GC': phage.get('Phage_GC'),
+            'Phage_Taxonomy': phage.get('Phage_Taxonomy'),
+            'Phage_Completeness': phage.get('Phage_Completeness'),
+            'Phage_Lifestyle': phage.get('Phage_Lifestyle'),
+            'Phage_Cluster': phage.get('Phage_Cluster'),
+            'Phage_Subcluster': phage.get('Phage_Subcluster'),
+            'Species_Name': host.get('Species_Name'),
+            'Host_Assembly_Level': host.get('Host_Assembly_Level'),
+            'Host_Length': host.get('Host_Length'),
+            'Host_GC': host.get('Host_GC'),
+            'Host_RefSeq_Category': host.get('Host_RefSeq_Category'),
+            'Label': 0,
+        }
+        if extra_fields:
+            record.update(extra_fields)
+        return record
     
     def generate_random_negatives(self, 
                                    positive_pairs: pd.DataFrame,
@@ -143,15 +184,7 @@ class NegativeExampleGenerator:
             
             # Check if this is not a positive pair
             if pair not in positive_set:
-                negatives.append({
-                    'Phage_ID': phage['Phage_ID'],
-                    'Host_ID': host['Host_ID'],
-                    'Phage_GC': phage.get('Phage_GC'),
-                    'Phage_Length': phage.get('Phage_Length'),
-                    'Host_GC': host.get('Host_GC'),
-                    'Host_Length': host.get('Host_Length'),
-                    'Label': 0
-                })
+                negatives.append(self._build_negative_record(phage, host))
             
             attempts += 1
             
@@ -217,16 +250,7 @@ class NegativeExampleGenerator:
             
             # Must not be positive AND have high GC difference
             if pair not in positive_set and gc_diff >= min_gc_difference:
-                negatives.append({
-                    'Phage_ID': phage['Phage_ID'],
-                    'Host_ID': host['Host_ID'],
-                    'Phage_GC': phage.get('Phage_GC'),
-                    'Phage_Length': phage.get('Phage_Length'),
-                    'Host_GC': host.get('Host_GC'),
-                    'Host_Length': host.get('Host_Length'),
-                    'GC_Difference': gc_diff,
-                    'Label': 0
-                })
+                negatives.append(self._build_negative_record(phage, host, {'GC_Difference': gc_diff}))
             
             attempts += 1
             
@@ -312,16 +336,7 @@ class NegativeExampleGenerator:
             pair = (phage['Phage_ID'], host['Host_ID'])
             
             if pair not in positive_set:
-                negatives.append({
-                    'Phage_ID': phage['Phage_ID'],
-                    'Host_ID': host['Host_ID'],
-                    'Phage_GC': phage.get('Phage_GC'),
-                    'Phage_Length': phage.get('Phage_Length'),
-                    'Host_GC': host.get('Host_GC'),
-                    'Host_Length': host.get('Host_Length'),
-                    'Host_Species': host.get('Species_Name'),
-                    'Label': 0
-                })
+                negatives.append(self._build_negative_record(phage, host))
             
             attempts += 1
             
