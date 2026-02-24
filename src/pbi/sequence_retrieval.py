@@ -28,6 +28,41 @@ def _fasta_key_function(header: str) -> str:
     return parts[0] if parts else header
 
 
+def _load_protein_fasta(path: str) -> "Fasta":
+    """
+    Load a protein FASTA file using full headers as keys.
+
+    Protein FASTA headers have the phage accession as the first token
+    (e.g. ">AE002163.1 CDS_1 hypothetical protein"), so multiple proteins
+    from the same phage share the same first token.  Using only the first
+    token as the key therefore causes pyfaidx to raise ``Duplicate key``.
+
+    Using ``split_char='\\x00'`` (a character that never appears in FASTA
+    headers) together with ``read_long_names=True`` makes pyfaidx read the
+    *full* header line directly from the FASTA file and use it as the key,
+    giving every protein sequence a unique, unambiguous identifier.
+    """
+    try:
+        return Fasta(
+            path,
+            read_long_names=True,
+            split_char='\x00',
+        )
+    except ValueError as e:
+        if 'Duplicate key' in str(e):
+            # The existing .fai was built with first-token keys; rebuild it.
+            logging.warning(
+                f"⚠️  Duplicate keys in protein FASTA index, rebuilding: {path}"
+            )
+            return Fasta(
+                path,
+                read_long_names=True,
+                split_char='\x00',
+                rebuild=True,
+            )
+        raise
+
+
 def parse_where_clause(where_clause: Optional[str]) -> tuple[Optional[str], Optional[str]]:
     """
     Parse a where_clause that may contain WHERE conditions, LIMIT, and/or OFFSET.
@@ -218,11 +253,7 @@ class SequenceRetriever:
             start = time.time()
             
             with self._protein_lock:
-                self._protein_fasta = Fasta(
-                    self._protein_fasta_path,
-                    rebuild=False,
-                    key_function=_fasta_key_function
-                )
+                self._protein_fasta = _load_protein_fasta(self._protein_fasta_path)
                 self._protein_count = len(self._protein_fasta.keys())
             
             elapsed = time.time() - start
@@ -300,11 +331,7 @@ class SequenceRetriever:
                 if self._protein_fasta is None:  # Double-check locking
                     logging.info(f"📂 Loading protein FASTA on-demand: {self._protein_fasta_path}")
                     start = time.time()
-                    self._protein_fasta = Fasta(
-                        self._protein_fasta_path,
-                        rebuild=False,
-                        key_function=_fasta_key_function
-                    )
+                    self._protein_fasta = _load_protein_fasta(self._protein_fasta_path)
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
         return self._protein_fasta
@@ -1325,8 +1352,14 @@ class SequenceRetriever:
                     'Sequence': str(seq)
                 })
             except KeyError:
-                missing_ids.append(protein_id)
-                logging.warning(f"⚠️  Protein ID '{protein_id}' not found in FASTA")
+                # Fallback: the FASTA key is the full header (e.g. "AE002163.1 CDS_1 desc").
+                # Try prefix match first, then a token-index lookup.
+                seq = self._fuzzy_protein_lookup(protein_id)
+                if seq is not None:
+                    sequences.append({'Protein_ID': protein_id, 'Sequence': seq})
+                else:
+                    missing_ids.append(protein_id)
+                    logging.warning(f"⚠️  Protein ID '{protein_id}' not found in FASTA")
         
         if missing_ids:
             logging.warning(f"⚠️  {len(missing_ids):,} protein IDs not found in FASTA file")
@@ -1335,6 +1368,58 @@ class SequenceRetriever:
         logging.info(f"✅ Retrieved {len(df):,} sequences")
         
         return df
+
+    def _build_protein_token_index(self) -> dict:
+        """
+        Build (once) a mapping of every whitespace-delimited token in every protein
+        FASTA key to that key.  Used by _fuzzy_protein_lookup for O(1) fallback
+        lookups instead of O(n) scans.
+
+        Common words (e.g. "hypothetical", "protein") will map to the first key
+        that contained them; accession tokens (e.g. "YP_009137915.1") are unique
+        and therefore return the correct key.
+        """
+        if not hasattr(self, '_protein_token_idx'):
+            idx: dict = {}
+            for key in self.protein_fasta.keys():
+                for token in key.split():
+                    idx.setdefault(token, key)
+            self._protein_token_idx = idx
+        return self._protein_token_idx
+
+    def _fuzzy_protein_lookup(self, protein_id: str) -> Optional[str]:
+        """
+        Try to find a protein sequence whose FASTA header matches protein_id
+        approximately.
+
+        Strategy (in order):
+        1. Prefix match: the full header starts with protein_id.
+        2. Token match: the second whitespace-delimited token of protein_id
+           (the protein accession when the first token is the phage accession)
+           appears as an exact token in a FASTA header, using a pre-built index
+           so the lookup is O(1).
+
+        Returns the sequence string, or None if no match is found.
+        """
+        fasta = self.protein_fasta
+
+        # 1. Prefix match (handles "AE002163.1 CDS_1" matching key "AE002163.1 CDS_1 desc")
+        for key in fasta.keys():
+            if key.startswith(protein_id):
+                return str(fasta[key][:].seq)
+
+        # 2. Token-index lookup (O(1) after the index is built once)
+        pid_parts = protein_id.split()
+        # When the first token is the phage accession, use the second token
+        # (actual protein accession) as the search target; otherwise use the
+        # full protein_id as a single token.
+        search_token = pid_parts[1] if len(pid_parts) > 1 else pid_parts[0]
+        idx = self._build_protein_token_index()
+        matched_key = idx.get(search_token)
+        if matched_key is not None:
+            return str(fasta[matched_key][:].seq)
+
+        return None
 
 # Example usage and testing
 if __name__ == "__main__":
