@@ -93,7 +93,11 @@ docker compose up -d analysis
 
 ### 2. Open Example Notebook
 
-Navigate to `notebooks/analysis_direct_access_guide.ipynb` in Jupyter Lab to see complete examples.
+Navigate to one of the main notebooks in Jupyter Lab to get started:
+
+- `notebooks/01_database_exploration.ipynb` — Database exploration and quality control
+- `notebooks/02_sequence_retrieval.ipynb` — Sequence retrieval with the PBI package
+- `notebooks/03_ml_streaming.ipynb` — AI/ML with streaming data
 
 ### 3. Create Your First Analysis
 
@@ -1280,7 +1284,7 @@ If you're running the Docker container on a remote server, you may need port for
 
 ## 📚 Additional Resources
 
-- **Example Notebook**: `notebooks/analysis_direct_access_guide.ipynb`
+- **Example Notebooks**: `notebooks/01_database_exploration.ipynb`, `notebooks/02_sequence_retrieval.ipynb`, `notebooks/03_ml_streaming.ipynb`
 - **Docker Guide**: [docs/guides/docker-guide.md](docker-guide.md)
 - **DuckDB Documentation**: https://duckdb.org/docs/
 - **pyfaidx Documentation**: https://github.com/mdshw5/pyfaidx

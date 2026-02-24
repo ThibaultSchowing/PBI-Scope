@@ -2,228 +2,117 @@
 
 This directory contains Jupyter notebooks for exploring and analyzing the PBI phage genomics database.
 
-## Analysis Notebooks
+## Main Notebooks
 
-### 🚀 **analysis_direct_access_guide.ipynb** (NEW - Recommended)
-**Comprehensive guide for efficient bulk data analysis using the Analysis service**
+These three notebooks serve as the primary guides for working with PBI data:
 
-This is the primary notebook for working with large-scale phage genomics data. It demonstrates:
+### 📊 `01_database_exploration.ipynb` — Database Exploration and Quality Control
+Comprehensive guide to understanding the database contents and data quality:
+- Database statistics and overview
+- Phage source database distribution
+- Phage quality metrics (completeness, lifestyle, genome length, GC content)
+- Host genome coverage analysis
+- Phage-host pair statistics
+- Understanding missing sequences (phages without hosts, hosts without genomes)
 
-- **Direct Database Access**: Query DuckDB directly without API overhead (5-50x faster)
-- **Batch Processing**: Efficiently process millions of records
-- **Memory Management**: Handle large datasets without out-of-memory errors
-- **Data Export**: Export to Parquet, CSV, and other formats
-- **Real-World Examples**: Complete E. coli phages analysis workflow
-- **Best Practices**: Read-only connections, proper resource cleanup, performance tips
+### 🔬 `02_sequence_retrieval.ipynb` — Sequence Retrieval with the PBI Package
+Complete guide to retrieving data using the PBI Python package:
+- Connecting to the database with `pbi.quick_connect()`
+- Querying phage and host metadata with filtering
+- LIMIT / OFFSET pagination
+- Retrieving DNA sequences (phage, host, protein)
+- Phage-host pairs with sequences as DataFrames
+- Batch iteration for large datasets
 
-**When to use this notebook:**
-- Analyzing large datasets (>10,000 records)
-- Exporting bulk data for external analysis
-- Building machine learning datasets
-- Complex SQL queries with multi-table joins
-- Performance-critical operations
+### 🤖 `03_ml_streaming.ipynb` — AI/ML with Phage-Host Data
+End-to-end machine learning workflow from raw data to model training:
+- **Part 1 (DataFrame approach):** EDA, feature engineering, negative example generation, Random Forest baseline
+- **Part 2 (Streaming approach):** Memory-efficient `PhageHostStreamingDataset`, `PhageHostIndexedDataset`, batch iterators, custom transforms, train/test splitting
 
-**Requirements:** Analysis Docker container must be running (`docker compose up -d analysis`)
+## Subdirectories
 
-## Exploration Notebooks
+### `exploration/`
+Development notebooks used while building the database. Useful as historical reference:
+- `expl_1.ipynb` — Initial database exploration
+- `expl_2_PhageScope.ipynb` — PhageScope data integration
+- `expl_3_VRHdb.ipynb` — VRHdb database integration
+- `expl_4_INPHARED.ipynb` — INPHARED database integration
+- `expl_5_TestDB.ipynb` — Database testing and validation
+- `expl_6_Fasta.ipynb` — FASTA file handling and indexing
+- `expl_7_hostgenomes.ipynb` — Host genome retrieval and processing
 
-These notebooks were used during database development and exploration:
-
-- **expl_1.ipynb**: Initial database exploration
-- **expl_2_PhageScope.ipynb**: PhageScope data integration
-- **expl_3_VRHdb.ipynb**: VRHdb database integration
-- **expl_4_INPHARED.ipynb**: INPHARED database integration
-- **expl_5_TestDB.ipynb**: Database testing and validation
-- **expl_6_Fasta.ipynb**: FASTA file handling and indexing
-- **expl_7_hostgenomes.ipynb**: Host genome retrieval and processing
-
-## Machine Learning Notebooks
-
-### ml_1_phage_host_dataset.ipynb
-**Creating balanced datasets for phage-host interaction prediction**
-
-Demonstrates:
-- Generating positive phage-host pairs
-- Creating negative examples using multiple strategies
-- Building balanced datasets for ML training
-- Dataset validation and statistics
-- Exporting datasets to `/workspace/ml_datasets/` (writable in container)
-
-**Important:** Files are saved to `/workspace/ml_datasets/` which is local to the analysis container. To access exported files from your host machine:
-```bash
-# Copy files from container to host
-docker cp pbi-analysis:/workspace/ml_datasets/phage_host_features.csv ./
-
-# Or mount /workspace as a volume in docker-compose.yml
-```
-
-### example_streaming_ml.ipynb
-**PyTorch-compatible streaming datasets for memory-efficient ML workflows**
-
-Demonstrates:
-- **Streaming datasets** for large-scale data (memory-efficient iteration)
-- **Indexed datasets** with shuffling and random access
-- **Simple batch iterators** for non-PyTorch workflows
-- **Custom transforms** for data preprocessing
-- **Performance comparison** of different approaches
-- **Train/test splitting** using SQL WHERE clauses
-
-**Features:**
-- Compatible with PyTorch DataLoader
-- Works without PyTorch for pandas-based workflows
-- Handles missing sequences gracefully
-- Provides helpful warnings for empty datasets
-
-**Note:** Uses case-insensitive filters (`LOWER()`) to handle database variations.
-
-## Usage Examples
-
-### use_1_pbi.ipynb
-**Basic usage of the PBI Python package**
-
-Introduction to:
-- Connecting to the database
-- Querying metadata
-- Retrieving sequences
-- Working with the `SequenceRetriever` class
+### `bin/`
+Previous versions of the main notebooks, kept for reference:
+- `quality_control.ipynb` — Predecessor to `01_database_exploration.ipynb`
+- `use_1_pbi.ipynb` — Predecessor to `02_sequence_retrieval.ipynb`
+- `ml_1_phage_host_dataset.ipynb` — Predecessor to `03_ml_streaming.ipynb` (ML part)
+- `example_streaming_ml.ipynb` — Predecessor to `03_ml_streaming.ipynb` (streaming part)
+- `analysis_direct_access_guide.ipynb` — Direct DuckDB access guide
 
 ## Getting Started
 
-### Using the Analysis Service (Recommended)
-
-**⚠️ Security Note**: The analysis service runs Jupyter Lab without authentication for local development convenience. **Do not expose port 8888 to untrusted networks.** For remote access, use SSH tunneling:
+### Using the Analysis Docker Service (Recommended)
 
 ```bash
-# On remote server
+# Start the analysis container
 docker compose up -d analysis
 
-# On local machine
-ssh -L 8888:localhost:8888 user@remote-server
-# Then access http://localhost:8888 locally
+# Access Jupyter Lab at http://localhost:8888
 ```
 
-1. **Start the Analysis container:**
-   ```bash
-   docker compose up -d analysis
-   ```
-
-2. **Access Jupyter Lab:**
-   - Open http://localhost:8888 in your browser
-   - Navigate to `analysis_direct_access_guide.ipynb`
-
-3. **Start analyzing:**
-   - Follow the examples in the notebook
-   - Modify queries for your specific use case
-   - Export results for further analysis
+> ⚠️ **Security Note**: The analysis service runs Jupyter Lab without authentication for local development convenience. Do not expose port 8888 to untrusted networks. For remote access, use SSH tunneling.
 
 ### Local Development
 
-If running locally (not in Docker):
-
 ```bash
-# Ensure the PBI package is installed
+# Install the PBI package
 pip install -e .
 
-# Start Jupyter Lab
+# Start Jupyter Lab from the project root
 jupyter lab
 
-# Navigate to notebooks directory
+# Navigate to the notebooks/ directory
 ```
 
-**Note:** Local notebooks need to use local paths (e.g., `./data/processed/...`) instead of Docker paths (`/data/processed/...`).
+## Key Concepts
 
-## Best Practices
+### Missing Sequences
+When iterating over phage-host pairs, warnings like the following are expected:
+```
+⚠️  Host sequence not found for ID: GCF_979243125_1
+```
+This happens because not every phage has a host genome downloaded. The code automatically **skips** such pairs while keeping the warning. This is the correct behavior — a stream of phage-host pairs must have both sequences available.
 
-1. **Always use read-only database connections:**
-   ```python
-   conn = duckdb.connect(db_path, read_only=True)
-   ```
-
-2. **Process data in batches** to avoid memory issues:
-   ```python
-   BATCH_SIZE = 1000
-   for offset in range(0, total, BATCH_SIZE):
-       batch = conn.execute(f"... LIMIT {BATCH_SIZE} OFFSET {offset}").fetchdf()
-   ```
-
-3. **Close connections** when done:
-   ```python
-   try:
-       conn = duckdb.connect(db_path, read_only=True)
-       # Your work here
-   finally:
-       conn.close()
-   ```
-
-4. **Export large datasets** using DuckDB's native functions:
-   ```python
-   conn.execute("COPY (...) TO 'output.parquet' (FORMAT PARQUET)")
-   ```
+### Connection Pattern
+All notebooks use the same connection pattern:
+```python
+import pbi
+retriever = pbi.quick_connect()  # auto-detects database and FASTA paths
+# ... work with retriever ...
+retriever.close()
+```
 
 ## Troubleshooting
 
 ### Kernel Crashes / Out of Memory
+- Use `LIMIT` to work with smaller datasets first
+- Use the streaming/batch iterator approach for large datasets
+- Use DuckDB aggregations instead of loading everything into pandas
 
-**Problem:** Jupyter kernel crashes when loading large datasets
-
-**Solutions:**
-- Reduce batch size in queries
-- Use `LIMIT` to test with smaller datasets first
-- Export to disk instead of loading into memory
-- Use DuckDB aggregations instead of pandas operations
-
-### Database Locked Error
-
-**Problem:** `IO Error: Could not set lock on file`
-
-**Solution:** Always use `read_only=True` when connecting:
+### Database Lock Error
+Always use read-only connections (the PBI package does this by default):
 ```python
 conn = duckdb.connect(db_path, read_only=True)
 ```
 
 ### Path Not Found
-
-**Problem:** `FileNotFoundError: /data/processed/...`
-
-**Solutions:**
-- **In Docker:** Use absolute Docker paths: `/data/processed/...`
-- **Locally:** Use relative paths: `./data/processed/...` or set `DATA_PATH` environment variable
-
-### Jupyter Lab Not Accessible
-
-**Problem:** Cannot connect to http://localhost:8888
-
-**Solutions:**
-```bash
-# Check if container is running
-docker ps | grep pbi-analysis
-
-# Check logs for errors
-docker logs pbi-analysis
-
-# Restart the service
-docker compose restart analysis
-```
+- **In Docker:** Paths like `/data/processed/...` are set automatically via `DATA_PATH`
+- **Locally:** Set the `DATA_PATH` environment variable or use project-relative paths
 
 ## Additional Resources
 
-- **Analysis Guide**: [docs/guides/analysis-guide.md](../docs/guides/analysis-guide.md)
-- **Docker Guide**: [docs/guides/docker-guide.md](../docs/guides/docker-guide.md)
-- **Machine Learning Guide**: [docs/guides/machine-learning.md](../docs/guides/machine-learning.md)
-- **PBI Documentation**: https://thibaultschowing.github.io/PBI/
-
-## Contributing
-
-When creating new notebooks:
-
-1. Add a descriptive filename (e.g., `analysis_your_topic.ipynb`)
-2. Include a clear title and introduction in the first cell
-3. Document your methodology and findings
-4. Add the notebook to this README with a brief description
-5. Ensure the notebook works in both Docker and local environments (or note requirements)
-
-## Questions or Issues?
-
-- Check the [Analysis Guide](../docs/guides/analysis-guide.md) for detailed troubleshooting
-- Review example notebooks for reference implementations
-- Open an issue on GitHub with your question
+- [PBI Package Guide](../docs/guides/pbi-package.md)
+- [Analysis Guide](../docs/guides/analysis-guide.md)
+- [Machine Learning Guide](../docs/guides/machine-learning.md)
+- [Docker Guide](../docs/guides/docker-guide.md)
+- [PBI Documentation](https://thibaultschowing.github.io/PBI/)
