@@ -13,7 +13,6 @@ Main classes:
 from .sequence_retrieval import SequenceRetriever
 from .negative_examples import NegativeExampleGenerator
 from .streaming_dataset import PhageHostStreamingDataset, PhageHostIndexedDataset, phage_host_collate_fn
-# from .database import DatabaseManager  # If you have this class / later
 
 # Package metadata
 __version__ = "0.1.0"
@@ -26,7 +25,6 @@ __all__ = [
     'PhageHostStreamingDataset',
     'PhageHostIndexedDataset',
     'phage_host_collate_fn',
-    # 'DatabaseManager',
 ]
 
 # Optional: Add convenience functions

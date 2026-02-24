@@ -43,6 +43,7 @@ nav:
       - Machine Learning: guides/machine-learning.md
   - Database:
       - Overview: database/overview.md
+      - Host Resolution: database/host-resolution.md
       - Validation Report: reports/database_validation.html
   - API:
       - Overview: api/overview.md

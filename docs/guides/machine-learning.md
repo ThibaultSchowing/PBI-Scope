@@ -779,6 +779,6 @@ ensemble.fit(X_train, y_train)
 
 ## Getting Help
 
-- Check the [example notebook](../../notebooks/ml_1_phage_host_dataset.ipynb)
+- Check the [ML/streaming notebook](../../notebooks/03_ml_streaming.ipynb)
 - Review [database documentation](../database/overview.md)
 - Open an issue on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)
