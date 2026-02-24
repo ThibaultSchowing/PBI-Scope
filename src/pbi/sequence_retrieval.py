@@ -9,12 +9,23 @@ from pathlib import Path
 import threading
 import time
 from typing import Optional
+from collections import OrderedDict
 from Bio.SeqUtils import gc_fraction
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+# Maximum number of host FASTA files to keep open simultaneously.
+# Prevents "too many open files" OS errors when using host-mapping mode.
+MAX_HOST_FASTA_CACHE_SIZE = 100
+
+
+def _fasta_key_function(header: str) -> str:
+    """Extract the accession ID (first whitespace-delimited token) from a FASTA header."""
+    parts = header.split()
+    return parts[0] if parts else header
 
 
 def parse_where_clause(where_clause: Optional[str]) -> tuple[Optional[str], Optional[str]]:
@@ -119,7 +130,7 @@ class SequenceRetriever:
         self._host_fasta_path = host_fasta_path  # Legacy single-file mode
         self._host_mapping_path = host_mapping_path  # New mapping mode
         self._host_mapping = None  # Mapping from Host_ID to file path
-        self._host_fasta_cache = {}  # Cache of loaded Fasta objects per host
+        self._host_fasta_cache = OrderedDict()  # LRU cache of loaded Fasta objects per host
         self._host_fasta = None  # For legacy single-file mode
         self._host_lock = threading.Lock()
         self._host_count = None
@@ -195,8 +206,7 @@ class SequenceRetriever:
                 self._phage_fasta = Fasta(
                     self._phage_fasta_path,
                     rebuild=False,
-                    split_char='\x00',
-                    read_long_names=True
+                    key_function=_fasta_key_function
                 )
                 self._phage_count = len(self._phage_fasta.keys())
             
@@ -211,8 +221,7 @@ class SequenceRetriever:
                 self._protein_fasta = Fasta(
                     self._protein_fasta_path,
                     rebuild=False,
-                    split_char='\x00',
-                    read_long_names=True
+                    key_function=_fasta_key_function
                 )
                 self._protein_count = len(self._protein_fasta.keys())
             
@@ -228,8 +237,7 @@ class SequenceRetriever:
                     self._host_fasta = Fasta(
                         self._host_fasta_path,
                         rebuild=False,
-                        split_char='\x00',
-                        read_long_names=True
+                        key_function=_fasta_key_function
                     )
                     self._host_count = len(self._host_fasta.keys())
                 
@@ -278,8 +286,7 @@ class SequenceRetriever:
                     self._phage_fasta = Fasta(
                         self._phage_fasta_path,
                         rebuild=False,
-                        split_char='\x00',
-                        read_long_names=True
+                        key_function=_fasta_key_function
                     )
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
@@ -296,8 +303,7 @@ class SequenceRetriever:
                     self._protein_fasta = Fasta(
                         self._protein_fasta_path,
                         rebuild=False,
-                        split_char='\x00',
-                        read_long_names=True
+                        key_function=_fasta_key_function
                     )
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
@@ -332,8 +338,7 @@ class SequenceRetriever:
                     self._host_fasta = Fasta(
                         self._host_fasta_path,
                         rebuild=False,
-                        split_char='\x00',
-                        read_long_names=True
+                        key_function=_fasta_key_function
                     )
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
@@ -357,27 +362,41 @@ class SequenceRetriever:
             # Should not be called in legacy mode
             raise RuntimeError("This method is only for host mapping mode")
         
-        # Check if already cached
-        if host_id in self._host_fasta_cache:
-            return self._host_fasta_cache[host_id]
-        
-        # Get file path from mapping
+        # Get file path from mapping (check before acquiring lock)
         if host_id not in self._host_mapping:
             raise KeyError(f"Host ID '{host_id}' not found in mapping")
         
         fasta_path = self._host_mapping[host_id]
         
-        # Load the fasta file
+        # Load the fasta file with LRU cache management
         with self._host_lock:
-            if host_id not in self._host_fasta_cache:  # Double-check locking
-                logging.debug(f"Loading host FASTA for {host_id}: {fasta_path}")
-                fasta_obj = Fasta(
-                    fasta_path,
-                    rebuild=False,
-                    split_char='\x00',
-                    read_long_names=True
-                )
-                self._host_fasta_cache[host_id] = fasta_obj
+            if host_id in self._host_fasta_cache:
+                # Move to end (most recently used)
+                self._host_fasta_cache.move_to_end(host_id)
+                return self._host_fasta_cache[host_id]
+            
+            # Evict oldest entry if cache is full
+            if len(self._host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
+                oldest_id, oldest_fasta = self._host_fasta_cache.popitem(last=False)
+                if hasattr(oldest_fasta, 'close'):
+                    try:
+                        oldest_fasta.close()
+                    except Exception as e:
+                        logging.debug(f"Error closing evicted host FASTA for {oldest_id}: {e}")
+            
+            # Check if .fai index exists; rebuild if missing
+            index_path = Path(str(fasta_path) + '.fai')
+            rebuild = not index_path.exists()
+            if rebuild:
+                logging.info(f"Creating index for {fasta_path}")
+            
+            logging.debug(f"Loading host FASTA for {host_id}: {fasta_path}")
+            fasta_obj = Fasta(
+                fasta_path,
+                rebuild=rebuild,
+                key_function=_fasta_key_function
+            )
+            self._host_fasta_cache[host_id] = fasta_obj
         
         return self._host_fasta_cache[host_id]
     
