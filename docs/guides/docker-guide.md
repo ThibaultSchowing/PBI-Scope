@@ -93,7 +93,7 @@ docker compose run --rm pipeline
 ```
 
 **Expected behavior**:
-- First run: Downloads data to `/data/raw/*_compressed/` (will take 2-4 hours)
+- First run: Downloads data to `/data/raw/*_compressed/` (will take ~4 hours for phage data, ~12–18 hours for host genomes)
 - Extracted files in `/data/raw/*_extracted/` are temporary and removed after merging
 - Downloaded archives persist and won't be re-downloaded on subsequent runs
 - Subsequent runs: "Nothing to be done (all requested files are present and up to date)"
@@ -140,7 +140,7 @@ This will:
 
 ### 2. Run the Pipeline to Build the Database
 
-Run the pipeline to download data and build the database. This process can take 2-4 hours for the metadata, and 14 hours for the host resolution and download. 
+Run the pipeline to download data and build the database. This process can take **~4 hours** for the phage metadata, and **~12–18 hours** for the host resolution and download. 
 
 ```bash
 docker compose run --rm pipeline
@@ -494,7 +494,7 @@ services:
 
 ### Pipeline Takes Too Long
 
-- First run typically takes 2-4 hours due to data download
+- First run typically takes ~4 hours for phage data, plus ~12–18 hours for host genome downloads
 - Subsequent runs are faster (only processes changed data)
 - Use `--cores` flag to adjust parallelism:
   ```bash

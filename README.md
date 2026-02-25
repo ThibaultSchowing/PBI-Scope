@@ -1,132 +1,129 @@
 # PBI - Phage Bacteria Interaction
 
-> Comprehensive phage genomics database with integrated host genomes, protein annotations, and machine learning tools for phage-host interaction prediction.
+> A proof-of-concept bioinformatics pipeline that makes phage genomic data from [PhageScope](https://phagescope.deepomics.org/database) available in an efficient, structured format for training neural networks and AI models for phage-host interaction prediction.
 
 [![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI/)
 
 ## 🎯 What is PBI?
 
-PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) and NCBI RefSeq bacterial genomes into a queryable DuckDB database with indexed FASTA files. It provides:
+PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) via PhageScope and downloads matching bacterial host genomes from NCBI RefSeq, consolidating everything into a queryable DuckDB database with indexed FASTA files. It provides:
 
-- **📊 Unified Database**: 800K+ phages, proteins, and host genomes in one place
-- **⚡ Fast Access**: Indexed sequences with pyfaidx for instant retrieval
-- **🐍 Python Package**: Easy-to-use `pbi` package for data access
-- **🌐 REST API**: HTTP API for external integrations
-- **🔬 Direct Analysis**: Jupyter Lab environment for bulk data analysis (5-50x faster than API)
-- **🤖 ML Ready**: Built-in tools for phage-host interaction prediction
+- **📊 Unified Database**: ~873K phages, ~43M protein annotations in one DuckDB database
+- **🦠 Host Genomes**: NCBI RefSeq bacterial reference genomes, indexed for fast retrieval
+- **⚡ Fast Access**: Indexed sequences with pyfaidx + `host_fasta_mapping.json` for instant retrieval
+- **🐍 Python Package**: Easy-to-use `pbi` package for data access and ML dataset preparation
+- **🔬 Jupyter Lab**: Analysis container with direct database access (recommended usage)
+- **🤖 ML Ready**: Built-in tools for phage-host interaction prediction (streaming datasets, negative example generation)
+
+> **Note**: PBI is a proof of concept, dependent on PhageScope as its primary data source.
 
 ## 📚 Documentation
 
-**Full documentation available at: https://thibaultschowing.github.io/PBI/**
+**Full documentation: https://thibaultschowing.github.io/PBI/**
 
 ### Quick Links
 
-- 🚀 **[Getting Started](https://thibaultschowing.github.io/PBI/guides/docker-guide/)** - Installation and basic usage
-- 📖 **[Analysis Guide](https://thibaultschowing.github.io/PBI/guides/analysis-guide/)** - Database access and data retrieval
-- 🤖 **[Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/)** - ML dataset preparation
-- 🔧 **[API Reference](https://thibaultschowing.github.io/PBI/api/)** - REST API endpoints
-- 📊 **[Database Schema](https://thibaultschowing.github.io/PBI/getting-started/overview/)** - Tables and relationships
+- 🚀 **[Installation Guide](https://thibaultschowing.github.io/PBI/guides/installation/)** — Docker setup, SSH port forwarding, running the pipeline
+- 🔍 **[How It Works](https://thibaultschowing.github.io/PBI/guides/how-it-works/)** — Pipeline internals, `pbi` package, key data files
+- 📊 **[Analysis Container Usage](https://thibaultschowing.github.io/PBI/guides/analysis-guide/)** — Jupyter Lab, demo notebooks
+- 🤖 **[Machine Learning Guide](https://thibaultschowing.github.io/PBI/guides/machine-learning/)** — ML dataset preparation
+- 📖 **[Database Schema](https://thibaultschowing.github.io/PBI/database/overview/)** — Tables, relationships, host data
 
 ## 🚀 Quick Start
 
-### Docker (Recommended)
+### Requirements
+
+- Docker (v20.10+) and Docker Compose (v2.0+)
+- At least **225 GB** of free disk space
+- **16 GB RAM** minimum (32 GB recommended)
+- NCBI API key (optional but strongly recommended for 10x faster host downloads)
+
+### 1. Clone and Configure
 
 ```bash
-# 1. Build and run the pipeline to create the database
+git clone https://github.com/ThibaultSchowing/PBI.git
+cd PBI
+
+# Edit NCBI credentials in workflow/config/config.yaml
+# ncbi.email: your.email@example.com
+# ncbi.api_key: YOUR_API_KEY
+```
+
+### 2. Run the Pipeline (in tmux for long SSH sessions)
+
+```bash
+# Set up SSH port forwarding first (on your local machine):
+# ssh -L 8888:localhost:8888 username@your-server
+
+tmux new -s pbi
+
 docker compose build pipeline
 docker compose run --rm pipeline
-
-# 2. Start the analysis service (Jupyter Lab)
-docker compose build analysis
-docker compose up -d analysis
-
-# 3. Access Jupyter Lab
-# Browser: http://localhost:8888
-# VSCode: See analysis guide for remote kernel connection
-# Open notebooks/ml_1_phage_host_dataset.ipynb to get started
+# ~4 hours for phage data, ~12-18 hours for host genomes
 ```
 
-### Using the Python Package
-
-```python
-from pbi import quick_connect, NegativeExampleGenerator
-
-# Connect to database (automatically uses correct paths in Docker)
-retriever = quick_connect()
-
-# Get database statistics
-stats = retriever.get_stats()
-print(f"Total phages: {stats['database']['phages']:,}")
-
-# Query phage-host interaction pairs
-pairs = retriever.get_phage_host_pairs(limit=1000)
-
-# Retrieve sequences
-phage_ids = pairs['Phage_ID'].tolist()
-sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
-
-# Generate ML datasets
-neg_gen = NegativeExampleGenerator(retriever)
-dataset = neg_gen.generate_balanced_dataset(
-    positive_pairs=pairs,
-    strategy='mixed',
-    positive_ratio=0.5
-)
-```
-
-### Machine Learning with PyTorch (Optional)
-
-For ML workflows using PyTorch DataLoader and streaming datasets:
+### 3. Start the Analysis Container
 
 ```bash
-# Install PBI with PyTorch support
-pip install -e ".[ml]"
-
-# Or install PyTorch separately
-pip install torch
+docker compose build analysis
+docker compose up -d analysis
+# Access Jupyter Lab at http://localhost:8888
 ```
+
+### 4. Use the PBI Package in Jupyter
 
 ```python
 from pbi import quick_connect
 
-retriever = quick_connect()
+retriever = quick_connect()  # auto-detects paths via DATA_PATH env var
+stats = retriever.get_stats()
+print(f"Total phages: {stats['database']['phages']:,}")
 
-# Create PyTorch-compatible streaming dataset
-dataset = retriever.create_streaming_dataset(
-    where_clause="p.Completeness = 'complete'"
+# Get phage-host interaction pairs
+pairs = retriever.get_phage_host_pairs(limit=1000)
+
+# Retrieve sequences
+sequences = retriever.get_sequences_by_ids(
+    pairs['Phage_ID'].tolist(), sequence_type='phage'
 )
-
-# Use with PyTorch DataLoader
-from torch.utils.data import DataLoader
-loader = DataLoader(dataset, batch_size=32)
-for batch in loader:
-    # Train your model
-    pass
 ```
+
+Open `notebooks/01_database_exploration.ipynb` to get started with the demo notebooks.
+
+## 📓 Demo Notebooks
+
+Three notebooks in `notebooks/` demonstrate the main workflows:
+
+| Notebook | Description |
+|----------|-------------|
+| `01_database_exploration.ipynb` | Database statistics, quality control, host coverage analysis |
+| `02_sequence_retrieval.ipynb` | Metadata queries, sequence retrieval, phage-host pairs |
+| `03_ml_streaming.ipynb` | ML dataset preparation, negative examples, PyTorch streaming |
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Pipeline   │────▶│   pbi-data   │◀────│  Analysis   │
-│ (Snakemake) │     │    volume    │     │(Jupyter Lab)│
-└─────────────┘     └──────────────┘     └─────────────┘
-                           │
-                           ├────▶ DuckDB database
-                           ├────▶ Indexed FASTA files
-                           └────▶ Metadata & reports
+┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
+│  Pipeline   │────▶│   pbi-data   │◀────│  Analysis       │
+│ (Snakemake) │     │   volume     │     │ (Jupyter Lab)   │
+└─────────────┘     └──────────────┘     │  port 8888      │
+                           │             └─────────────────┘
+                           ├────▶ DuckDB database (~15 GB)
+                           ├────▶ Phage FASTA + index (~40 GB)
+                           ├────▶ Protein FASTA + index (~60 GB)
+                           └────▶ Host FASTA files + mapping JSON
 ```
 
-**Services:**
-- **Pipeline**: Snakemake workflow to build the database (~150GB data)
-- **Analysis**: Jupyter Lab with direct database access (port 8888)
-- **API**: REST API for external integrations (port 8000)
+**Services (docker-compose.yml):**
+- **Pipeline**: Snakemake workflow to build the database (~225 GB data total)
+- **Analysis**: Jupyter Lab with `pbi` package pre-installed (port 8888)
+- **API**: REST API for external integrations (port 8000, currently untested)
 
 ## 📊 Data Sources
 
-- **Phage Databases**: RefSeq, Genbank, PhagesDB, MillardLab, INPHARED, and 9+ more
-- **Host Genomes**: NCBI RefSeq bacterial reference genomes
-- **Annotations**: Proteins, CRISPR spacers, AMR genes, lifestyle predictions
+- **Phage Databases**: 14+ databases via PhageScope (RefSeq, Genbank, PhagesDB, MillardLab, INPHARED, GOV2, MGV, GVD, IMGVR, GPD, CHVD, STV, TemPhD, IGVD)
+- **Host Genomes**: NCBI RefSeq bacterial reference genomes (~9,000 unique assemblies attempted)
+- **Annotations**: Proteins, CRISPR arrays, AMR genes, anti-CRISPR, virulence factors, tRNA/tmRNA
 
 ## 🔗 Links
 
@@ -137,7 +134,3 @@ for batch in loader:
 ## License
 
 See LICENSE file for details.
-
----
-
-**Note**: For the most up-to-date information, please refer to the [online documentation](https://thibaultschowing.github.io/PBI/). Archived documentation has been removed from the navigation to maintain clarity and focus on current best practices.

@@ -1,6 +1,18 @@
-# Direct Data Access Guide
+# Analysis Container Usage Guide
 
-This guide explains how to efficiently access and analyze the PBI database using the dedicated analysis container and the `pbi` Python package.
+This guide explains how to use the PBI analysis container (Jupyter Lab) to explore the database, retrieve sequences, and prepare machine learning datasets. This is the **recommended way** to interact with PBI data.
+
+## Demo Notebooks
+
+Three demo notebooks are included in the `notebooks/` directory. Start with these to get familiar with PBI:
+
+| Notebook | Description |
+|----------|-------------|
+| 📊 [`01_database_exploration.ipynb`](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/01_database_exploration.ipynb) | Database statistics, phage quality metrics, host coverage analysis, and data quality assessment |
+| 🔬 [`02_sequence_retrieval.ipynb`](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/02_sequence_retrieval.ipynb) | Connecting to the database, querying metadata, retrieving phage/host/protein sequences |
+| 🤖 [`03_ml_streaming.ipynb`](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/03_ml_streaming.ipynb) | End-to-end ML workflow: feature engineering, negative example generation, streaming datasets for PyTorch |
+
+Open these in Jupyter Lab after starting the analysis container (see [Installation Guide](installation.md) for setup).
 
 ## Overview
 
@@ -23,21 +35,14 @@ The `pbi` Python package provides convenient classes for database and sequence a
 The `pbi` package is pre-installed in the analysis container with all dependencies configured correctly. This is the **recommended way** to use the package:
 
 ```bash
-# Start the analysis container
+# Start the analysis container (see Installation Guide for SSH port forwarding first)
 docker compose up -d analysis
 # Access Jupyter Lab at http://localhost:8888
 ```
 
-**Local Installation (Not Recommended)**
+**Local Installation (Not Recommended for Full Pipeline)**
 
-While it's possible to install the package locally, this approach has several limitations:
-
-- Requires manual management of large data files (~150 GB)
-- Potential path configuration issues
-- Missing the containerized environment benefits
-- Difficult to maintain consistency with production setup
-
-If you still want to use it locally for development:
+While it's possible to install the package locally for development, this requires manual management of large data files (~225 GB):
 
 ```bash
 # Install the package
@@ -89,6 +94,7 @@ docker compose up -d analysis
 
 # Access Jupyter Lab
 # Open http://localhost:8888 in your browser
+# (Use SSH port forwarding if on a remote server - see Installation Guide)
 ```
 
 ### 2. Open Example Notebook
@@ -121,8 +127,8 @@ print(f"Proteins: {stats['database']['proteins']:,}")
 print(f"Hosts: {stats['database']['hosts']:,}")
 
 # Query and retrieve sequences
-df = retriever.query_phages("SELECT * FROM fact_phages WHERE Length > 100000 LIMIT 10")
-phage_ids = df['Phage_ID'].tolist()
+phages = retriever.get_phage_metadata("Length > 100000", limit=10)
+phage_ids = phages['Phage_ID'].tolist()
 sequences = retriever.get_sequences_by_ids(phage_ids, sequence_type='phage')
 ```
 
@@ -141,7 +147,7 @@ conn = duckdb.connect(DB_PATH, read_only=True)
 
 # Query phages
 query = """
-SELECT Phage_ID, Accession, Length, GC_Content
+SELECT Phage_ID, Length, GC_content
 FROM fact_phages
 WHERE Length > 100000
 LIMIT 10
@@ -176,6 +182,7 @@ The `pbi` Python package provides a high-level interface to the PBI database and
 1. **`quick_connect()`** - Convenience function for instant database access
 2. **`SequenceRetriever`** - Core class for querying metadata and retrieving sequences
 3. **`NegativeExampleGenerator`** - ML utility for generating negative training examples
+4. **`PhageHostStreamingDataset`** / **`PhageHostIndexedDataset`** - PyTorch-compatible dataset classes
 
 **How it works in Docker:**
 
@@ -190,14 +197,13 @@ from pbi import quick_connect
 
 retriever = quick_connect()
 
-# Method 1: Query-based retrieval
-df = retriever.query_phages("""
-    SELECT Phage_ID, Accession, Length, GC_Content, Completeness
-    FROM fact_phages 
-    WHERE Length > 50000 AND Completeness = 'complete'
-    LIMIT 100
-""")
-
+# Get phage metadata with filters
+phages = retriever.get_phage_metadata(
+    "Length > 50000 AND Lifestyle = 'Lytic'",
+    limit=100
+)
+print(phages.head())
+```
 # Get sequences for these phages
 sequences = retriever.get_sequences_by_ids(
     df['Phage_ID'].tolist(), 

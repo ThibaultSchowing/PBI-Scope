@@ -1,8 +1,8 @@
 # Database Overview
 
-The PBI database uses a **star schema** design optimized for analytical queries on phage genomic data.
+The PBI database consists of two main components: the **phage metadata database** (DuckDB) and the **host genome data** (individual FASTA files + mapping index).
 
-## Quick Facts
+## Phage Metadata Database
 
 - **Database Engine**: DuckDB (columnar, embedded analytical database)
 - **Schema**: Star schema with 1 fact table and 8 dimension tables
@@ -11,6 +11,20 @@ The PBI database uses a **star schema** design optimized for analytical queries 
 - **Total Proteins**: ~43 million
 - **Data Sources**: 14+ major phage databases via PhageScope
 
+## Host Genome Data
+
+- **Storage**: Individual FASTA files, one per assembly
+- **Index**: `host_fasta_mapping.json` maps host IDs to file paths
+- **Source**: NCBI RefSeq bacterial reference genomes
+- **Coverage**: ~9,000 unique assembly accessions attempted; variable success rate depending on NCBI availability
+- **Location**: `/data/processed/sequences/` (in Docker)
+
+The host genome data is **not stored in the DuckDB database** — it is kept as separate FASTA files for memory efficiency, since individual host genomes can be very large. The `pbi` Python package uses `host_fasta_mapping.json` to locate and retrieve host sequences on demand.
+
+See [Host Resolution Details](host-resolution.md) for information on how host species names are parsed and resolved to NCBI assemblies.
+
+---
+
 ## Database Schema
 
 ```
@@ -18,7 +32,7 @@ The PBI database uses a **star schema** design optimized for analytical queries 
                   dim_terminators ──┤
                   dim_anti_crispr ──┤
              dim_virulent_factors ──┤
-       dim_transmembrane_proteins ──┤──> fact_phages (central)
+       dim_transmembrane_proteins ──┤──▶ fact_phages (central)
                    dim_trna_tmrna ──┤
 dim_antimicrobial_resistance_genes ─┤
                   dim_crispr_array ─┘
@@ -26,6 +40,7 @@ dim_antimicrobial_resistance_genes ─┤
 
 All dimension tables link to `fact_phages` via **`Phage_ID`** foreign key, enabling comprehensive multi-dimensional analysis.
 
+Host genome information is linked via external files (`phage_host_links.csv`, `host_fasta_mapping.json`) rather than a database table.
 ## Tables
 
 ### Fact Table: `fact_phages`

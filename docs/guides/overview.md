@@ -6,90 +6,84 @@ Welcome to the PBI guides! Choose the guide that matches your needs.
 
 New to PBI? Start here:
 
-### 🐳 [Docker Guide](docker-guide.md) (Recommended)
-The fastest way to get PBI up and running. Ideal for:
-- Quick evaluation and testing
-- Consistent environments
-- Production deployments
-- Users who prefer containers
+### 🐳 [Installation Guide](installation.md) (Docker — Recommended)
 
-**Time to first query**: 
-- ~2-4 hours for the PhageScope phages data (mostly downloading data)
-- ~ 18 hours for the download of bacterial hosts 
-   - 9000 genomes attempts
-   - Use Entrez API key to maximize the request rate
-   
+The only fully supported execution method. Docker is required for the full pipeline (including host genome downloads). Covers:
+- Installing Docker
+- Cloning the repository and configuring NCBI credentials
+- Running the pipeline container
+- Setting up SSH port forwarding and accessing the Jupyter Lab analysis container
 
-### 💻 [Local Installation](installation.md)
-For development and customization. Best for:
-- Active development
-- Custom modifications
-- Learning the pipeline internals
-- Maximum flexibility
+**Time for first pipeline run:**
+- **~4 hours** — phage metadata download and processing
+- **~12–18 hours** — host genome resolution and download (requires NCBI API key for best speed)
 
-**Time to setup**: ~30 minutes + 2-4 hours for pipeline
+> **Note**: Use `tmux` or a similar terminal multiplexer to keep your SSH session alive during long runs.
+
+### 🔍 [How It Works](how-it-works.md)
+
+Understand the PBI internals before diving in:
+- The Snakemake pipeline stages and rules
+- The `pbi` Python package and its key classes
+- Key data files (including `host_fasta_mapping.json`)
+- Host resolution process
+- Docker services and data flow
 
 ## Usage Guides
 
-Once installed, learn how to use PBI:
+Once the pipeline has run, use these guides to interact with the data:
 
-### [Database Overview](../database/overview.md)
-Understand the database schema, tables, and data sources.
+### 📊 [Analysis Container Usage](analysis-guide.md) (Recommended)
 
-### [API Reference](../api/overview.md)
-Learn to query data via the REST API (work in progress).
+The primary way to explore and analyze PBI data using Jupyter Lab with direct database access. Includes links to the three demo notebooks:
 
-### [Command Reference](../reference/commands.md)
-Quick reference for common operations and commands.
+- `01_database_exploration.ipynb` — Database statistics and quality control
+- `02_sequence_retrieval.ipynb` — Sequence retrieval with the `pbi` package
+- `03_ml_streaming.ipynb` — AI/ML dataset preparation and streaming
 
-## Choosing Your Path
+### 📖 [Pipeline Execution Guide](pipeline-execution.md)
 
-```
-Are you...
-│
-├─ Just trying it out?
-│  └─> Use Docker Guide
-│
-├─ Planning to modify the code?
-│  └─> Use Local Installation
-│
-├─ Setting up for production?
-│  └─> Use Docker Guide + custom configuration
-│
-└─ Analyzing existing data?
-   └─> Either works, Docker is faster
-```
+Detailed information about the pipeline steps, especially host genome download tracking and monitoring. Also covers local execution (without Docker) as an alternative.
+
+### 🐍 [PBI Package Reference](pbi-package.md)
+
+API reference for the `pbi` Python package — `SequenceRetriever`, `NegativeExampleGenerator`, and dataset classes.
+
+### 🤖 [Machine Learning Guide](machine-learning.md)
+
+End-to-end guide for building phage-host interaction prediction models using PBI data.
+
+## Database Documentation
+
+### 📊 [Database Overview](../database/overview.md)
+
+Understand the database schema, tables, data sources, and how host genome data is stored separately.
+
+### 🔗 [Host Resolution Details](../database/host-resolution.md)
+
+How host species names from phage metadata are parsed, classified, and resolved to NCBI assembly accessions.
 
 ## What You'll Get
 
-Regardless of installation method, you'll have:
+After running the full pipeline, you'll have:
 
-- **~873,000 phage genomes** with metadata
+- **~873,000 phage genomes** with metadata (from 14+ databases via PhageScope)
 - **~43 million protein annotations**
-- **Optimized DuckDB database** (~15 GB)
-- **Indexed FASTA files** (~100 GB)
+- **Optimized DuckDB database** (~15 GB) for fast analytical queries
+- **Indexed FASTA files** (~100 GB) for phages and proteins
+- **Host genome FASTA files** from NCBI RefSeq, indexed via `host_fasta_mapping.json`
 - **HTML validation reports**
-- **REST API** for programmatic access (optional)
 
-## Prerequisites Comparison
+## Prerequisites
 
-| Requirement | Docker | Local |
-|-------------|--------|-------|
-| Docker | ✅ Required | ❌ Not needed |
-| Python | ❌ Not needed | ✅ Required (3.8+) |
-| Conda | ❌ Not needed | ✅ Required |
-| Disk Space | 250+ GB | 250+ GB |
-| RAM | 16+ GB | 32+ GB recommended |
-| Time to First Run (Phages only) | 2-4 hours | 2-4 hours + setup |
-| Time to First Run (With Hosts)| ~24 hours | ~24 hours + setup |
-
-## Next Steps
-
-1. Choose your installation method
-2. Follow the corresponding guide
-3. Explore the [Database Documentation](../database/overview.md)
-4. Try some [example commands](../reference/commands.md)
-5. Query data via the [API](../api/overview.md) or Python
+| Requirement | Required |
+|-------------|---------|
+| Docker (v20.10+) | ✅ Yes |
+| Docker Compose (v2.0+) | ✅ Yes |
+| Disk Space | ✅ 225+ GB |
+| RAM | ✅ 16+ GB (32 GB recommended) |
+| NCBI API key | Recommended (10x faster host downloads) |
+| Python / Conda | Only for local development |
 
 ## Need Help?
 
@@ -99,4 +93,5 @@ Regardless of installation method, you'll have:
 
 ---
 
-Ready? Pick a guide above and get started!
+Ready? Start with the [Installation Guide](installation.md)!
+
