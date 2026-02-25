@@ -1,23 +1,17 @@
-# Host Genome Resolution Improvements
+# Host Genome Resolution
 
 ## Overview
 
-This document describes the improvements made to handle semicolon-separated Host fields in the phage metadata pipeline, including full **multi-host support** (one phage → multiple host assemblies).
+This page describes how PBI resolves phage host information to downloadable bacterial genome assemblies from NCBI RefSeq.
 
-## Problem (original)
-
-The pipeline was failing to resolve host genomes for many phages because the "Host" field contained complex, semicolon-separated values like:
+Host genome resolution is a critical step because phage metadata from PhageScope contains complex, varied host field formats. A single phage's "Host" field may contain multiple identifiers in different formats, separated by semicolons:
 
 ```
-NA;GCA 900066335.1;UBA9502;Blautia...
+NA;GCA 900066335.1;UBA9502;Blautia obeum
 ```
 
-Issues:
-1. The entire field was treated as a species name (e.g., "NA;GCA 900066335.1;Lachnospira")
-2. GCA accession numbers had spaces instead of underscores (e.g., "GCA 900066335.1" vs "GCA_900066335.1")
-3. No fallback mechanism when primary identifier failed
-4. "NA" values were not filtered out
-5. Only the **first successfully resolved host** was kept (multi-host phages were not fully represented)
+The pipeline parses this into individual tokens, classifies each token, and resolves them to NCBI assembly accessions.
+
 
 ## Solution
 

@@ -35,12 +35,13 @@ nav:
   - Home: index.md
   - Guides:
       - Overview: guides/overview.md
-      - Docker Guide: guides/docker-guide.md
-      - Local Installation: guides/installation.md
+      - Installation (Docker): guides/installation.md
+      - How It Works: guides/how-it-works.md
+      - Analysis Container: guides/analysis-guide.md
       - Pipeline Execution: guides/pipeline-execution.md
-      - Analysis Guide: guides/analysis-guide.md
       - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md
+      - Docker Advanced: guides/docker-guide.md
   - Database:
       - Overview: database/overview.md
       - Host Resolution: database/host-resolution.md

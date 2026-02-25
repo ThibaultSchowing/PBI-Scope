@@ -1,291 +1,152 @@
 # Installation Guide
 
-Get started with PBI for local development and analysis.
+This guide explains how to install and configure PBI using Docker, which is the **primary and recommended execution method**. Docker is required to run the full pipeline, as the host genome download step requires significant disk space and benefits from containerization.
 
-## Prerequisites
+> **Note on local execution**: It is technically possible to run the pipeline locally without Docker (using Snakemake directly), but this is not recommended for the full pipeline due to the large disk space requirements (~225 GB) and complex dependency management. See the [Pipeline Execution Guide](pipeline-execution.md) for local execution details.
+
+## System Requirements
 
 - **Operating System**: Linux/macOS (Windows via WSL2)
-- **Python**: 3.8 or higher
-- **Conda**: For managing environments
-- **Internet**: For data downloads
-- **Disk Space**: >50 GB recommended (>100 GB for full dataset)
-- **RAM**: >32 GB recommended for smooth execution without swapping
-- **Time**: Building the full database takes 2-4 hours on first run
+- **Docker**: Version 20.10 or later
+- **Docker Compose**: Version 2.0 or later
+- **Disk Space**: At least **225 GB** of free disk space (for data, cache, and Docker volumes)
+- **RAM**: 16 GB minimum (32 GB recommended)
+- **Internet**: Stable connection for initial data downloads
+- **Time**:
+  - First pipeline run (phage metadata only): **~4 hours**
+  - Full pipeline (including host genome resolution + download): **~12–18 hours**
 
-## ⚙️ Environment Variables and Data Paths
+> **Tip**: Use `tmux` or another terminal multiplexer to keep your session alive during long pipeline runs, especially when connecting via SSH.
 
-**Before you start**, understand where PBI will store data:
+## Step 1: Install Docker
 
-### Default Behavior
-
-By default, PBI stores all data in the `./data/` directory relative to your project root:
-
-```bash
-PBI/
-├── data/                          # ~150+ GB total
-│   ├── raw/                       # ~50 GB (downloaded archives)
-│   ├── intermediate/              # ~50 GB (processing files)
-│   └── processed/                 # ~50 GB (final database & sequences)
-│       ├── databases/
-│       ├── sequences/
-│       └── reports/
-```
-
-**⚠️ Important**: Make sure you have at least **150 GB of free disk space** in your project directory, or configure a custom location (see below).
-
-### Custom Data Directory (Recommended)
-
-To store data in a different location (e.g., on a larger disk), set the `PBI_DATA_DIR` environment variable **before** running the pipeline:
+### On Linux (Ubuntu/Debian)
 
 ```bash
-# Set custom data directory (replace with your desired path)
-export PBI_DATA_DIR="/mnt/large-disk/pbi-data"
+# Install Docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
 
-# Make it persistent (add to ~/.bashrc or ~/.zshrc)
-echo 'export PBI_DATA_DIR="/mnt/large-disk/pbi-data"' >> ~/.bashrc
+# Install Docker Compose plugin
+sudo apt-get install -y docker-compose-plugin
+
+# Verify
+docker --version
+docker compose version
 ```
 
-The pipeline will then use:
-- `/mnt/large-disk/pbi-data/raw/`
-- `/mnt/large-disk/pbi-data/intermediate/`
-- `/mnt/large-disk/pbi-data/processed/`
+### On macOS
 
-### Environment Variables Reference
+Download and install [Docker Desktop](https://www.docker.com/products/docker-desktop/). Docker Compose is included.
 
-| Variable | Purpose | Default | Required |
-|----------|---------|---------|----------|
-| `PBI_DATA_DIR` | Base directory for all pipeline data | `./data` | No |
-| `DATA_PATH` | Path for API to find processed data | `data/processed` | Only for API |
-| `NCBI_EMAIL` | Your email for NCBI API | - | For genome downloads |
-| `NCBI_API_KEY` | NCBI API key (increases rate limit) | - | Optional but recommended |
+### On Windows (WSL2)
 
-**For API usage**, set `DATA_PATH` to point to the processed data:
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) with WSL2 backend enabled. Run all commands from within your WSL2 terminal.
 
-```bash
-# If using default location
-export DATA_PATH="data/processed"
-
-# If using custom PBI_DATA_DIR
-export DATA_PATH="/mnt/large-disk/pbi-data/processed"
-```
-
-## Step-by-Step Installation
-
-### 1. Clone the Repository
+## Step 2: Clone the Repository
 
 ```bash
 git clone https://github.com/ThibaultSchowing/PBI.git
 cd PBI
-
-# Verify repository structure
-ls -la
-# Should see: workflow/, src/, data/, notebooks/, docs/, README.md, etc.
 ```
 
-### 2. Install Anaconda/Miniconda
+## Step 3: Configure the Pipeline
 
-If you don't have Conda installed:
+Before running, configure your NCBI credentials (required for host genome downloads):
+
+Copy the example config (if it exists) or edit directly:
 
 ```bash
-# Download Miniconda (lightweight)
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-# Install
-bash Miniconda3-latest-Linux-x86_64.sh
-
-# Verify installation
-conda --version
+# Edit the pipeline configuration
+nano workflow/config/config.yaml
 ```
 
-Make sure the `conda` command is in your PATH.
+Key settings to configure:
 
-### 3. Install PBI Package
+```yaml
+ncbi:
+  email: your.email@example.com   # Required by NCBI Terms of Service
+  api_key: "YOUR_NCBI_API_KEY"    # Optional but strongly recommended (10x faster)
+```
 
-Create a virtual environment and install the PBI package:
+> **NCBI API Key**: Get a free API key at https://www.ncbi.nlm.nih.gov/account/ — it increases the download rate limit from 3 to 10 requests/second, significantly speeding up the host genome download stage.
+
+## Step 4: Build and Run the Pipeline Container
+
+### 4.1 Build the Pipeline Image
 
 ```bash
-# Create and activate environment
-conda create -n pbi python=3.10
-conda activate pbi
-
-# Install PBI package in development mode
-pip install -e .
-
-# Verify installation
-python -c "import pbi; print(f'✅ PBI v{pbi.__version__} installed successfully')"
+docker compose build pipeline
 ```
 
-### 4. Build the Database
-
-**⚠️ Important**: The first run downloads ~50 GB of data and may take 2-4 hours depending on your connection.
-
-#### Basic Execution
+### 4.2 Run the Pipeline
 
 ```bash
-# Run the Snakemake pipeline
-# Use 2-4 cores for first run (I/O bottleneck)
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cores 4 --use-conda --printshellcmds
+# Run in a tmux session to survive SSH disconnections
+tmux new -s pbi-pipeline
+
+docker compose run --rm pipeline
 ```
 
-#### With Caching (Optional but Recommended)
+**What happens:**
 
-If you plan to modify or update the data frequently, use caching:
+1. **Stage 1 — Phage data** (~4 hours): Downloads and processes phage metadata and FASTA sequences from 14+ databases via PhageScope
+2. **Stage 2 — Host resolution** (~12–18 hours): Parses host fields from phage metadata, resolves them to NCBI assemblies, downloads reference genomes
+
+**Output** (stored in the `pbi-data` Docker volume):
+- `/data/processed/databases/phage_database_optimized.duckdb` — Main database
+- `/data/processed/sequences/all_phages.fasta` (+ `.fai` index)
+- `/data/processed/sequences/all_proteins.fasta` (+ `.fai` index)
+- `/data/processed/sequences/host_fasta_mapping.json` — Maps host IDs to FASTA file paths
+- `/data/processed/reports/` — HTML validation and statistics reports
+
+## Step 5: Connect to the Analysis Container
+
+The analysis container provides a Jupyter Lab environment with direct access to the database and sequences.
+
+### 5.1 Set Up SSH Port Forwarding (for Remote Servers)
+
+If PBI is running on a remote server, forward port 8888 **before** you start the container:
 
 ```bash
-# Create cache directory
-mkdir -p /mnt/snakemake-cache
-
-# Export cache location (add to ~/.bashrc for persistence)
-export SNAKEMAKE_OUTPUT_CACHE=/mnt/snakemake-cache/
-
-# Run pipeline with caching
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cache --cores 4 --use-conda --printshellcmds
+# On your local machine
+ssh -L 8888:localhost:8888 username@your-server-address
 ```
 
-#### Command Options Explained
+This maps port 8888 on the remote server to your local machine so you can open Jupyter Lab in your browser at `http://localhost:8888`.
 
-- `--directory workflow`: Set working directory to workflow/
-- `--snakefile workflow/Snakefile`: Specify the Snakefile
-- `--cores 4`: Use 4 CPU cores (adjust based on your system)
-- `--use-conda`: Automatically create required conda environments
-- `--printshellcmds`: Show commands being executed (useful for debugging)
-- `--cache`: Use caching for intermediate files (optional)
-
-#### Running Specific Steps
+### 5.2 Build and Start the Analysis Container
 
 ```bash
-# Create database only (without reports)
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cores 4 --use-conda \
-  ../data/databases/phage_database.duckdb
+# Build the analysis image
+docker compose build analysis
 
-# Generate validation report
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cores 4 --use-conda \
-  reports/database_validation.html
-
-# Create optimized database
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cores 4 --use-conda \
-  ../data/databases/phage_database_optimized.duckdb
-
-# Keep temporary files for debugging
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --notemp --cores 4 --use-conda
+# Start in detached mode
+docker compose up -d analysis
 ```
 
-### 5. Verify Installation
+### 5.3 Access Jupyter Lab
 
-After the pipeline completes, verify the outputs:
+Open your browser and navigate to:
 
-```bash
-# Check database exists
-ls -lh data/databases/
-
-# Check sequence files
-ls -lh data/sequences/
-
-# Check reports
-ls -lh workflow/reports/
+```
+http://localhost:8888
 ```
 
-### 6. Start Using PBI
+No password is required (local development mode). Start with the demo notebooks in the `notebooks/` directory.
 
-#### In Python/Jupyter
+> ⚠️ **Security Warning**: Do not expose port 8888 to untrusted networks. Always use SSH tunneling for remote access.
 
-```bash
-# Start Jupyter Lab
-jupyter lab
+## Environment Variables
 
-# Or specify a custom port
-jupyter lab --port 8889
-```
+| Variable | Purpose | Default | Required |
+|----------|---------|---------|----------|
+| `DATA_PATH` | Path for API/analysis to find processed data | `/data/processed` | Set automatically in Docker |
+| `NCBI_EMAIL` | Your email for NCBI API | — | For genome downloads |
+| `NCBI_API_KEY` | NCBI API key (increases rate limit) | — | Optional but recommended |
 
-Create a new notebook and test your installation:
-
-```python
-import pbi
-import duckdb
-
-# Connect to database
-conn = duckdb.connect('data/databases/phage_database_optimized.duckdb')
-
-# Check database statistics
-stats = conn.execute("""
-    SELECT 
-        'Phages' as Type, COUNT(*) as Count FROM fact_phages
-    UNION ALL
-    SELECT 'Proteins', COUNT(*) FROM dim_proteins
-    UNION ALL
-    SELECT 'tRNA/tmRNA', COUNT(*) FROM dim_trna_tmrna
-""").df()
-
-print("📊 Database Statistics:")
-print(stats)
-
-# Query some data
-df = conn.execute("""
-    SELECT Phage_ID, Length, GC_content, Host, Lifestyle
-    FROM fact_phages 
-    WHERE Length > 100000 
-    LIMIT 10
-""").df()
-
-print("\n✅ Sample of large phages:")
-print(df)
-
-conn.close()
-```
-
-#### Command Line Usage
-
-```python
-# Connect to database in Python
-python
->>> import duckdb
->>> conn = duckdb.connect('data/databases/phage_database_optimized.duckdb')
->>> conn.execute("SELECT COUNT(*) FROM fact_phages").fetchall()
->>> conn.close()
-```
-
-## Quick Reference
-
-### Update Database
-
-To refresh with new data:
-
-```bash
-cd workflow
-snakemake --cores 4 --use-conda
-```
-
-### Check What Would Run
-
-Dry-run to see what would be updated:
-
-```bash
-cd workflow
-snakemake -n
-```
-
-### Generate Workflow Diagram
-
-Visualize the pipeline:
-
-```bash
-cd workflow
-snakemake --dag | dot -Tsvg > dag/workflow.svg
-```
-
-### Clean Temporary Files
-
-Remove temporary files after execution:
-
-```bash
-snakemake --delete-temp-output
-```
+These are configured in `docker-compose.yml` and passed automatically to the containers.
 
 ## Troubleshooting
 
@@ -295,99 +156,53 @@ snakemake --delete-temp-output
 # Check disk space
 df -h
 
-# Clean Snakemake cache if needed
-rm -rf workflow/.snakemake/
+# Clean Docker system (careful: removes unused images and volumes)
+docker system prune
+
+# Clean only the Snakemake cache volume (preserves data)
+./cleanup_cache.sh
 ```
 
-### "ModuleNotFoundError: No module named 'pbi'"
+### Pipeline Fails Mid-Run
+
+The pipeline uses Snakemake's file-based checkpointing. If it fails, simply re-run:
 
 ```bash
-# Reinstall PBI package from project root
-cd /path/to/PBI
-conda activate pbi
-pip install -e .
+docker compose run --rm pipeline
 ```
 
-### Conda Environment Issues
+Already-completed steps and downloaded files will be reused. You can also use:
 
 ```bash
-# Remove and recreate all Snakemake environments
-rm -rf workflow/.snakemake/conda/
-
-# Next run will rebuild environments
-snakemake --cores 4 --use-conda
+docker compose run --rm pipeline snakemake --cores 4 --use-conda --rerun-incomplete
 ```
 
-### Out of Memory Errors
+### Jupyter Lab Not Loading
 
-- Reduce number of cores: `--cores 2`
-- Close other applications
-- Consider using Docker with memory limits
-- Ensure swap space is enabled
+```bash
+# Check container status
+docker ps | grep analysis
 
-### Slow Execution
+# Check logs
+docker compose logs analysis
 
-- First run is always slow (downloading data)
-- Use more cores for subsequent runs: `--cores all`
-- Consider using SSD for data storage
-- Enable caching to avoid re-downloading
+# Restart
+docker compose restart analysis
+```
 
-## What Gets Installed
+### Pipeline Runs Again After Completion
 
-**Data Storage Requirements:**
+Ensure that the `pbi-data` volume is intact:
 
-- **Conda packages**: `workflow/.snakemake/conda/` (~2 GB)
-- **Raw data**: `data/raw/` (~40-50 GB compressed, temporary)
-- **Processed data**: `data/processed/` (~50 GB)
-- **Database**: `data/databases/` (~15 GB)
-- **Sequences**: `data/sequences/` (~100 GB)
-- **Total**: ~150-200 GB
+```bash
+docker run --rm -v pbi-data:/data alpine ls -lh /data/processed/databases/
+```
+
+If the database file is missing, the pipeline needs to re-run.
 
 ## Next Steps
 
-- Explore example notebooks in `notebooks/`
-- Read the [Database Overview](../database/overview.md)
-- Check out the [Command Reference](../reference/commands.md)
-- View generated reports in `workflow/reports/`
+- Read [How It Works](how-it-works.md) to understand the pipeline and `pbi` package
+- Explore the database with [Analysis Container Usage](analysis-guide.md)
+- Check the [Docker Guide](docker-guide.md) for advanced Docker operations
 
-## Advanced Configuration
-
-### Custom Snakemake Config
-
-Edit `workflow/config/config.yaml` to customize:
-
-- Data source URLs
-- Output paths
-- Processing parameters
-- Resource limits
-
-### Running in Background
-
-```bash
-# Run pipeline in background with logs
-nohup snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cores 4 --use-conda --printshellcmds > pipeline.log 2>&1 &
-
-# Check progress
-tail -f pipeline.log
-```
-
-### Using Screen/Tmux
-
-For long-running pipelines:
-
-```bash
-# Start screen session
-screen -S pbi-pipeline
-
-# Run pipeline
-snakemake --directory workflow --snakefile workflow/Snakefile \
-  --cores 4 --use-conda
-
-# Detach: Ctrl+A, then D
-# Reattach: screen -r pbi-pipeline
-```
-
----
-
-For Docker-based installation, see the [Docker Guide](docker-guide.md).

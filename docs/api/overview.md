@@ -1,23 +1,22 @@
 # API Reference
 
-> ⚠️ **WORK IN PROGRESS** - The API is currently in active development. Features are being tested and may change.
+> ⚠️ **UNTESTED** - The REST API is currently **untested** and is **not the recommended way** to interact with PBI data. For efficient data access and machine learning workflows, use the [analysis container](../guides/analysis-guide.md) with the `pbi` Python package directly (5-50x faster than API for bulk operations).
 
-The PBI API provides a REST interface for querying the phage database and retrieving sequences programmatically.
+The PBI API provides a REST interface for querying the phage database and retrieving sequences programmatically. It may be useful for lightweight external integrations where only a few records need to be retrieved.
 
 ## Current Status
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Database Connection | Working | Connects to DuckDB database |
-| Health Endpoints | Working | `/health` and `/stats` functional |
-| SQL Query Endpoint | Working | `/query` with basic safety checks |
-| Phage Retrieval | Working | Query and ID-based retrieval |
-| Protein Retrieval | Working | Query and ID-based retrieval |
-| FASTA Export | Working | Export sequences to FASTA format |
-| Authentication | Planned | No auth currently - use with caution |
+| Database Connection | Implemented | Connects to DuckDB database |
+| Health Endpoints | Implemented | `/health` and `/stats` |
+| SQL Query Endpoint | Implemented | `/query` with basic safety checks |
+| Phage Retrieval | Implemented | Query and ID-based retrieval |
+| Protein Retrieval | Implemented | Query and ID-based retrieval |
+| FASTA Export | Implemented | Export sequences to FASTA format |
+| **Testing** | ❌ **Not done** | API has not been validated |
+| Authentication | Planned | No auth currently |
 | Rate Limiting | Planned | Not yet implemented |
-| Async Support | In Testing | Being validated |
-| Advanced Filters | In Testing | Complex query builders |
 | Batch Operations | Planned | Bulk data operations |
 
 ## Quick Start

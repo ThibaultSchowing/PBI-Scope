@@ -1,17 +1,42 @@
 # Pipeline Execution Guide
 
-This guide explains how to execute the PBI data pipeline, particularly focusing on the host genome download step, and how to track and analyze the results.
+This guide explains how the PBI data pipeline executes, particularly focusing on the host genome download step. It also covers how to run the pipeline locally without Docker if needed.
 
 ## Overview
 
 The PBI pipeline consists of several major steps:
 
-1. **Phage Data Collection** - Download phage metadata and sequences from multiple databases
-2. **Host Genome Download** - Download bacterial host genomes from NCBI RefSeq
-3. **Database Population** - Load all data into DuckDB database
-4. **FASTA Index Creation** - Create index files for fast sequence access
+1. **Phage Data Collection** (~4 hours) — Download phage metadata and sequences from 14+ databases via PhageScope
+2. **Host Genome Resolution** (~12–18 hours) — Parse host species names, resolve to NCBI assemblies, download bacterial genomes
+3. **Database Creation** — Load all phage metadata into DuckDB database with star schema
+4. **FASTA Indexing** — Create pyfaidx index files for fast sequence access
+5. **Reporting** — Generate HTML validation and statistics reports
 
-This guide focuses on the **Host Genome Download** step, which is where most tracking and logging occurs.
+> **Docker is the recommended execution method.** See the [Installation Guide](installation.md) for Docker setup instructions. The sections below also describe local execution for development purposes.
+
+## Local Execution (Without Docker)
+
+It is possible to execute the pipeline locally without Docker, which can be useful for development or when Docker is not available. However, this requires managing conda environments and disk space manually.
+
+```bash
+# 1. Install dependencies
+conda env create -f workflow/envs/base_environment.yaml
+conda activate pbi-env
+
+# Install PBI package
+pip install -e .
+
+# 2. Configure NCBI credentials
+# Edit workflow/config/config.yaml and set your email and API key
+
+# 3. Run the pipeline
+./run_local.sh
+# or directly:
+snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cores 4 --use-conda --printshellcmds
+```
+
+**Note**: The first run downloads ~50 GB of phage data and then attempts to download ~9,000 bacterial host genomes. Total runtime is similar to Docker (~4h for phages, ~12–18h for hosts).
 
 ---
 
