@@ -30,8 +30,8 @@ The PBI Docker setup provides a containerized environment with three specialized
 
 Two Docker volumes ensure data persistence:
 
-- **`pbi-data`**: Stores all pipeline outputs (database, sequences, reports) - ~150 GB
-- **`pbi-cache`**: Stores Snakemake metadata and conda environments - ~2-3 GB
+- **`pbi-data`**: Stores all pipeline outputs (database, sequences, reports) - ~202 GB
+- **`pbi-cache`**: Stores Snakemake metadata and conda environments - ~18 GB
 
 All services share read-only access to the `pbi-data` volume, while only the pipeline can write to it.
 
@@ -140,7 +140,7 @@ This will:
 
 ### 2. Run the Pipeline to Build the Database
 
-Run the pipeline to download data and build the database. This process can take 2-4 hours:
+Run the pipeline to download data and build the database. This process can take 2-4 hours for the metadata, and 14 hours for the host resolution and download. 
 
 ```bash
 docker compose run --rm pipeline

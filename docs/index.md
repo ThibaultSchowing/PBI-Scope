@@ -14,20 +14,36 @@ New to PBI? Get started in minutes:
 
     ---
 
-    Fastest way to get started. Just build and run!
+    Fastest way to get started. 
+
+    Connect to your server with port 8888 redirection (used later to connect to jupyter lab). You must have at least **225 Go** of disk space available for data and cache. 
+
+    ```bash
+    ssh  -L 8888:localhost:8888 username@domain
+    ```
+    
+    
+    Just build and run the pipeline ! It can take between 12 to 18 hours for the first run, use tmux or another terminal multiplexer to keep your ssh session active !
 
     ```bash
     docker compose build pipeline
     docker compose run --rm pipeline
     ```
 
+    Then build and run the analysis container, allowing to explore the PBI functionnalities with Python !
+
+    ```bash
+    docker compose build analysis
+    docker compose up -d analysis
+    ```
+
     [Docker Guide →](guides/docker-guide.md)
 
--   **Local Installation**
+-   **Local Installation** (untested)
 
     ---
 
-    For development and customization.
+    For development and customization. However, because of the relatively disk space required, developpment has been continued within Docker as soon as the Host genomes have been included in the pipeline. 
 
     ```bash
     conda env create -f workflow/envs/base_environment.yaml
