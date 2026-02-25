@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/docker-guide/">
       
       
-        <link rel="prev" href="../overview/">
+        <link rel="prev" href="../machine-learning/">
       
       
-        <link rel="next" href="../installation/">
+        <link rel="next" href="../../database/overview/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Docker Guide - PBI Documentation</title>
+        <title>Docker Advanced - PBI Documentation</title>
       
     
     
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Docker Guide
+              Docker Advanced
             
           </span>
         </div>
@@ -543,6 +543,174 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation (Docker)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-it-works/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis Container
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pbi-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PBI Package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -562,7 +730,7 @@
   <span class="md-ellipsis">
     
   
-    Docker Guide
+    Docker Advanced
   
 
     
@@ -580,7 +748,7 @@
   <span class="md-ellipsis">
     
   
-    Docker Guide
+    Docker Advanced
   
 
     
@@ -1423,146 +1591,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Local Installation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../pipeline-execution/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Pipeline Execution
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../analysis-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Analysis Guide
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../pbi-package/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    PBI Package
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../machine-learning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Machine Learning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2973,7 +3001,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
 </code></pre></div>
 <p><strong>Expected behavior</strong>:
-- First run: Downloads data to <code>/data/raw/*_compressed/</code> (will take 2-4 hours)
+- First run: Downloads data to <code>/data/raw/*_compressed/</code> (will take ~4 hours for phage data, ~12–18 hours for host genomes)
 - Extracted files in <code>/data/raw/*_extracted/</code> are temporary and removed after merging
 - Downloaded archives persist and won't be re-downloaded on subsequent runs
 - Subsequent runs: "Nothing to be done (all requested files are present and up to date)"</p>
@@ -3003,7 +3031,7 @@
 - Set up the workflow environment
 - Prepare the workflow directory</p>
 <h3 id="2-run-the-pipeline-to-build-the-database">2. Run the Pipeline to Build the Database<a class="headerlink" href="#2-run-the-pipeline-to-build-the-database" title="Permanent link">&para;</a></h3>
-<p>Run the pipeline to download data and build the database. This process can take 2-4 hours for the metadata, and 14 hours for the host resolution and download. </p>
+<p>Run the pipeline to download data and build the database. This process can take <strong>~4 hours</strong> for the phage metadata, and <strong>~12–18 hours</strong> for the host resolution and download. </p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
 </code></pre></div>
 <p>The <code>--rm</code> flag automatically removes the container after completion.</p>
@@ -3256,7 +3284,7 @@
 3. If file doesn't exist, re-run the pipeline</p>
 <h3 id="pipeline-takes-too-long">Pipeline Takes Too Long<a class="headerlink" href="#pipeline-takes-too-long" title="Permanent link">&para;</a></h3>
 <ul>
-<li>First run typically takes 2-4 hours due to data download</li>
+<li>First run typically takes ~4 hours for phage data, plus ~12–18 hours for host genome downloads</li>
 <li>Subsequent runs are faster (only processes changed data)</li>
 <li>Use <code>--cores</code> flag to adjust parallelism:
   <div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline<span class="w"> </span>snakemake<span class="w"> </span>--cores<span class="w"> </span><span class="m">2</span><span class="w"> </span>--use-conda<span class="w"> </span>--printshellcmds

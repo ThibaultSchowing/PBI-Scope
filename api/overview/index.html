@@ -543,14 +543,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/docker-guide/" class="md-nav__link">
+      <a href="../../guides/installation/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Docker Guide
+    Installation (Docker)
   
 
     
@@ -571,14 +571,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/installation/" class="md-nav__link">
+      <a href="../../guides/how-it-works/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local Installation
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/analysis-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis Container
   
 
     
@@ -607,34 +635,6 @@
     
   
     Pipeline Execution
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/analysis-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Analysis Guide
   
 
     
@@ -691,6 +691,34 @@
     
   
     Machine Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/docker-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Advanced
   
 
     
@@ -2153,9 +2181,9 @@
 
 <h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
 <blockquote>
-<p>⚠️ <strong>WORK IN PROGRESS</strong> - The API is currently in active development. Features are being tested and may change.</p>
+<p>⚠️ <strong>UNTESTED</strong> - The REST API is currently <strong>untested</strong> and is <strong>not the recommended way</strong> to interact with PBI data. For efficient data access and machine learning workflows, use the <a href="../../guides/analysis-guide/">analysis container</a> with the <code>pbi</code> Python package directly (5-50x faster than API for bulk operations).</p>
 </blockquote>
-<p>The PBI API provides a REST interface for querying the phage database and retrieving sequences programmatically.</p>
+<p>The PBI API provides a REST interface for querying the phage database and retrieving sequences programmatically. It may be useful for lightweight external integrations where only a few records need to be retrieved.</p>
 <h2 id="current-status">Current Status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -2168,53 +2196,48 @@
 <tbody>
 <tr>
 <td>Database Connection</td>
-<td>Working</td>
+<td>Implemented</td>
 <td>Connects to DuckDB database</td>
 </tr>
 <tr>
 <td>Health Endpoints</td>
-<td>Working</td>
-<td><code>/health</code> and <code>/stats</code> functional</td>
+<td>Implemented</td>
+<td><code>/health</code> and <code>/stats</code></td>
 </tr>
 <tr>
 <td>SQL Query Endpoint</td>
-<td>Working</td>
+<td>Implemented</td>
 <td><code>/query</code> with basic safety checks</td>
 </tr>
 <tr>
 <td>Phage Retrieval</td>
-<td>Working</td>
+<td>Implemented</td>
 <td>Query and ID-based retrieval</td>
 </tr>
 <tr>
 <td>Protein Retrieval</td>
-<td>Working</td>
+<td>Implemented</td>
 <td>Query and ID-based retrieval</td>
 </tr>
 <tr>
 <td>FASTA Export</td>
-<td>Working</td>
+<td>Implemented</td>
 <td>Export sequences to FASTA format</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>❌ <strong>Not done</strong></td>
+<td>API has not been validated</td>
 </tr>
 <tr>
 <td>Authentication</td>
 <td>Planned</td>
-<td>No auth currently - use with caution</td>
+<td>No auth currently</td>
 </tr>
 <tr>
 <td>Rate Limiting</td>
 <td>Planned</td>
 <td>Not yet implemented</td>
-</tr>
-<tr>
-<td>Async Support</td>
-<td>In Testing</td>
-<td>Being validated</td>
-</tr>
-<tr>
-<td>Advanced Filters</td>
-<td>In Testing</td>
-<td>Complex query builders</td>
 </tr>
 <tr>
 <td>Batch Operations</td>

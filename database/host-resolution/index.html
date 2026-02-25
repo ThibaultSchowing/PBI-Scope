@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#host-genome-resolution-improvements" class="md-skip">
+        <a href="#host-genome-resolution" class="md-skip">
           Skip to content
         </a>
       
@@ -543,14 +543,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/docker-guide/" class="md-nav__link">
+      <a href="../../guides/installation/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Docker Guide
+    Installation (Docker)
   
 
     
@@ -571,14 +571,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/installation/" class="md-nav__link">
+      <a href="../../guides/how-it-works/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local Installation
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/analysis-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis Container
   
 
     
@@ -607,34 +635,6 @@
     
   
     Pipeline Execution
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/analysis-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Analysis Guide
   
 
     
@@ -691,6 +691,34 @@
     
   
     Machine Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/docker-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Advanced
   
 
     
@@ -867,17 +895,6 @@
     <span class="md-ellipsis">
       
         Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#problem-original" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Problem (original)
       
     </span>
   </a>
@@ -1409,17 +1426,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#problem-original" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Problem (original)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#solution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1561,19 +1567,13 @@
   
 
 
-<h1 id="host-genome-resolution-improvements">Host Genome Resolution Improvements<a class="headerlink" href="#host-genome-resolution-improvements" title="Permanent link">&para;</a></h1>
+<h1 id="host-genome-resolution">Host Genome Resolution<a class="headerlink" href="#host-genome-resolution" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>This document describes the improvements made to handle semicolon-separated Host fields in the phage metadata pipeline, including full <strong>multi-host support</strong> (one phage → multiple host assemblies).</p>
-<h2 id="problem-original">Problem (original)<a class="headerlink" href="#problem-original" title="Permanent link">&para;</a></h2>
-<p>The pipeline was failing to resolve host genomes for many phages because the "Host" field contained complex, semicolon-separated values like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>NA;GCA 900066335.1;UBA9502;Blautia...
+<p>This page describes how PBI resolves phage host information to downloadable bacterial genome assemblies from NCBI RefSeq.</p>
+<p>Host genome resolution is a critical step because phage metadata from PhageScope contains complex, varied host field formats. A single phage's "Host" field may contain multiple identifiers in different formats, separated by semicolons:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>NA;GCA 900066335.1;UBA9502;Blautia obeum
 </code></pre></div>
-<p>Issues:
-1. The entire field was treated as a species name (e.g., "NA;GCA 900066335.1;Lachnospira")
-2. GCA accession numbers had spaces instead of underscores (e.g., "GCA 900066335.1" vs "GCA_900066335.1")
-3. No fallback mechanism when primary identifier failed
-4. "NA" values were not filtered out
-5. Only the <strong>first successfully resolved host</strong> was kept (multi-host phages were not fully represented)</p>
+<p>The pipeline parses this into individual tokens, classifies each token, and resolves them to NCBI assembly accessions.</p>
 <h2 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h2>
 <h3 id="stage-1-lossless-parsing-phage_host_candidatescsv">Stage 1 – Lossless parsing: <code>phage_host_candidates.csv</code><a class="headerlink" href="#stage-1-lossless-parsing-phage_host_candidatescsv" title="Permanent link">&para;</a></h3>
 <p>The new standalone <code>parse_host_field(host_raw)</code> function splits the raw Host

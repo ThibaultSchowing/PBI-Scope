@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/installation/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/how-it-works/">
       
       
-        <link rel="prev" href="../overview/">
+        <link rel="prev" href="../installation/">
       
       
-        <link rel="next" href="../how-it-works/">
+        <link rel="next" href="../analysis-guide/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Installation (Docker) - PBI Documentation</title>
+        <title>How It Works - PBI Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation-guide" class="md-skip">
+        <a href="#how-pbi-works" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation (Docker)
+              How It Works
             
           </span>
         </div>
@@ -543,6 +543,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation (Docker)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -562,7 +590,7 @@
   <span class="md-ellipsis">
     
   
-    Installation (Docker)
+    How It Works
   
 
     
@@ -580,7 +608,7 @@
   <span class="md-ellipsis">
     
   
-    Installation (Docker)
+    How It Works
   
 
     
@@ -606,10 +634,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#the-big-picture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        The Big Picture
       
     </span>
   </a>
@@ -617,22 +645,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-install-docker" class="md-nav__link">
+  <a href="#the-snakemake-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Install Docker
+        The Snakemake Pipeline
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 1: Install Docker">
+    <nav class="md-nav" aria-label="The Snakemake Pipeline">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#on-linux-ubuntudebian" class="md-nav__link">
+  <a href="#pipeline-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        On Linux (Ubuntu/Debian)
+        Pipeline Stages
       
     </span>
   </a>
@@ -640,10 +668,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#on-macos" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        On macOS
+        Configuration
       
     </span>
   </a>
@@ -651,10 +679,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#on-windows-wsl2" class="md-nav__link">
+  <a href="#key-scripts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        On Windows (WSL2)
+        Key Scripts
       
     </span>
   </a>
@@ -667,44 +695,34 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-2-clone-the-repository" class="md-nav__link">
+  <a href="#the-pbi-python-package" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: Clone the Repository
+        The pbi Python Package
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-configure-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: Configure the Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-build-and-run-the-pipeline-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Build and Run the Pipeline Container
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 4: Build and Run the Pipeline Container">
+    <nav class="md-nav" aria-label="The pbi Python Package">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#41-build-the-pipeline-image" class="md-nav__link">
+  <a href="#main-classes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.1 Build the Pipeline Image
+        Main Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Main Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sequenceretriever" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SequenceRetriever
       
     </span>
   </a>
@@ -712,10 +730,65 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#42-run-the-pipeline" class="md-nav__link">
+  <a href="#negativeexamplegenerator" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.2 Run the Pipeline
+        NegativeExampleGenerator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phagehoststreamingdataset-phagehostindexeddataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PhageHostStreamingDataset / PhageHostIndexedDataset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-data-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Data Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Data Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-host_fasta_mappingjson-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The host_fasta_mapping.json File
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-quick_connect-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How quick_connect() Works
       
     </span>
   </a>
@@ -728,44 +801,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-connect-to-the-analysis-container" class="md-nav__link">
+  <a href="#host-resolution-process" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 5: Connect to the Analysis Container
+        Host Resolution Process
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 5: Connect to the Analysis Container">
+    <nav class="md-nav" aria-label="Host Resolution Process">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#51-set-up-ssh-port-forwarding-for-remote-servers" class="md-nav__link">
+  <a href="#resolution-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5.1 Set Up SSH Port Forwarding (for Remote Servers)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#52-build-and-start-the-analysis-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.2 Build and Start the Analysis Container
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#53-access-jupyter-lab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.3 Access Jupyter Lab
+        Resolution Stages
       
     </span>
   </a>
@@ -778,66 +829,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
+  <a href="#the-rest-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Environment Variables
+        The REST API
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
+    <nav class="md-nav" aria-label="The REST API">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#no-space-left-on-device" class="md-nav__link">
+  <a href="#how-the-api-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        "No space left on device"
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-fails-mid-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Fails Mid-Run
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jupyter-lab-not-loading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Jupyter Lab Not Loading
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-runs-again-after-completion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Runs Again After Completion
+        How the API Works
       
     </span>
   </a>
@@ -850,10 +857,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#docker-services" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        Docker Services
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Flow Summary
       
     </span>
   </a>
@@ -864,34 +882,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../how-it-works/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    How It Works
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1537,10 +1527,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#the-big-picture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        The Big Picture
       
     </span>
   </a>
@@ -1548,22 +1538,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-install-docker" class="md-nav__link">
+  <a href="#the-snakemake-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Install Docker
+        The Snakemake Pipeline
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 1: Install Docker">
+    <nav class="md-nav" aria-label="The Snakemake Pipeline">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#on-linux-ubuntudebian" class="md-nav__link">
+  <a href="#pipeline-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        On Linux (Ubuntu/Debian)
+        Pipeline Stages
       
     </span>
   </a>
@@ -1571,10 +1561,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#on-macos" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        On macOS
+        Configuration
       
     </span>
   </a>
@@ -1582,10 +1572,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#on-windows-wsl2" class="md-nav__link">
+  <a href="#key-scripts" class="md-nav__link">
     <span class="md-ellipsis">
       
-        On Windows (WSL2)
+        Key Scripts
       
     </span>
   </a>
@@ -1598,44 +1588,34 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-2-clone-the-repository" class="md-nav__link">
+  <a href="#the-pbi-python-package" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 2: Clone the Repository
+        The pbi Python Package
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-configure-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: Configure the Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-build-and-run-the-pipeline-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Build and Run the Pipeline Container
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 4: Build and Run the Pipeline Container">
+    <nav class="md-nav" aria-label="The pbi Python Package">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#41-build-the-pipeline-image" class="md-nav__link">
+  <a href="#main-classes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.1 Build the Pipeline Image
+        Main Classes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Main Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sequenceretriever" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SequenceRetriever
       
     </span>
   </a>
@@ -1643,10 +1623,65 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#42-run-the-pipeline" class="md-nav__link">
+  <a href="#negativeexamplegenerator" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.2 Run the Pipeline
+        NegativeExampleGenerator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phagehoststreamingdataset-phagehostindexeddataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PhageHostStreamingDataset / PhageHostIndexedDataset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-data-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Data Files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Data Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-host_fasta_mappingjson-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The host_fasta_mapping.json File
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-quick_connect-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How quick_connect() Works
       
     </span>
   </a>
@@ -1659,44 +1694,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-connect-to-the-analysis-container" class="md-nav__link">
+  <a href="#host-resolution-process" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 5: Connect to the Analysis Container
+        Host Resolution Process
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Step 5: Connect to the Analysis Container">
+    <nav class="md-nav" aria-label="Host Resolution Process">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#51-set-up-ssh-port-forwarding-for-remote-servers" class="md-nav__link">
+  <a href="#resolution-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5.1 Set Up SSH Port Forwarding (for Remote Servers)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#52-build-and-start-the-analysis-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.2 Build and Start the Analysis Container
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#53-access-jupyter-lab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.3 Access Jupyter Lab
+        Resolution Stages
       
     </span>
   </a>
@@ -1709,66 +1722,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
+  <a href="#the-rest-api" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Environment Variables
+        The REST API
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
+    <nav class="md-nav" aria-label="The REST API">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#no-space-left-on-device" class="md-nav__link">
+  <a href="#how-the-api-works" class="md-nav__link">
     <span class="md-ellipsis">
       
-        "No space left on device"
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-fails-mid-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Fails Mid-Run
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jupyter-lab-not-loading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Jupyter Lab Not Loading
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-runs-again-after-completion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Runs Again After Completion
+        How the API Works
       
     </span>
   </a>
@@ -1781,10 +1750,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#docker-services" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        Docker Services
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Flow Summary
       
     </span>
   </a>
@@ -1811,177 +1791,299 @@
   
 
 
-<h1 id="installation-guide">Installation Guide<a class="headerlink" href="#installation-guide" title="Permanent link">&para;</a></h1>
-<p>This guide explains how to install and configure PBI using Docker, which is the <strong>primary and recommended execution method</strong>. Docker is required to run the full pipeline, as the host genome download step requires significant disk space and benefits from containerization.</p>
-<blockquote>
-<p><strong>Note on local execution</strong>: It is technically possible to run the pipeline locally without Docker (using Snakemake directly), but this is not recommended for the full pipeline due to the large disk space requirements (~225 GB) and complex dependency management. See the <a href="../pipeline-execution/">Pipeline Execution Guide</a> for local execution details.</p>
-</blockquote>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Operating System</strong>: Linux/macOS (Windows via WSL2)</li>
-<li><strong>Docker</strong>: Version 20.10 or later</li>
-<li><strong>Docker Compose</strong>: Version 2.0 or later</li>
-<li><strong>Disk Space</strong>: At least <strong>225 GB</strong> of free disk space (for data, cache, and Docker volumes)</li>
-<li><strong>RAM</strong>: 16 GB minimum (32 GB recommended)</li>
-<li><strong>Internet</strong>: Stable connection for initial data downloads</li>
-<li><strong>Time</strong>:</li>
-<li>First pipeline run (phage metadata only): <strong>~4 hours</strong></li>
-<li>Full pipeline (including host genome resolution + download): <strong>~12–18 hours</strong></li>
-</ul>
-<blockquote>
-<p><strong>Tip</strong>: Use <code>tmux</code> or another terminal multiplexer to keep your session alive during long pipeline runs, especially when connecting via SSH.</p>
-</blockquote>
-<h2 id="step-1-install-docker">Step 1: Install Docker<a class="headerlink" href="#step-1-install-docker" title="Permanent link">&para;</a></h2>
-<h3 id="on-linux-ubuntudebian">On Linux (Ubuntu/Debian)<a class="headerlink" href="#on-linux-ubuntudebian" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Install Docker</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://get.docker.com<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span><span class="nv">$USER</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>newgrp<span class="w"> </span>docker
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># Install Docker Compose plugin</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>docker-compose-plugin
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Verify</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>docker<span class="w"> </span>--version
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>docker<span class="w"> </span>compose<span class="w"> </span>version
-</code></pre></div>
-<h3 id="on-macos">On macOS<a class="headerlink" href="#on-macos" title="Permanent link">&para;</a></h3>
-<p>Download and install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a>. Docker Compose is included.</p>
-<h3 id="on-windows-wsl2">On Windows (WSL2)<a class="headerlink" href="#on-windows-wsl2" title="Permanent link">&para;</a></h3>
-<p>Install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a> with WSL2 backend enabled. Run all commands from within your WSL2 terminal.</p>
-<h2 id="step-2-clone-the-repository">Step 2: Clone the Repository<a class="headerlink" href="#step-2-clone-the-repository" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI.git
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>PBI
-</code></pre></div>
-<h2 id="step-3-configure-the-pipeline">Step 3: Configure the Pipeline<a class="headerlink" href="#step-3-configure-the-pipeline" title="Permanent link">&para;</a></h2>
-<p>Before running, configure your NCBI credentials (required for host genome downloads):</p>
-<p>Copy the example config (if it exists) or edit directly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Edit the pipeline configuration</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>nano<span class="w"> </span>workflow/config/config.yaml
-</code></pre></div>
-<p>Key settings to configure:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">ncbi</span><span class="p">:</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your.email@example.com</span><span class="w">   </span><span class="c1"># Required by NCBI Terms of Service</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;YOUR_NCBI_API_KEY&quot;</span><span class="w">    </span><span class="c1"># Optional but strongly recommended (10x faster)</span>
-</code></pre></div>
-<blockquote>
-<p><strong>NCBI API Key</strong>: Get a free API key at https://www.ncbi.nlm.nih.gov/account/ — it increases the download rate limit from 3 to 10 requests/second, significantly speeding up the host genome download stage.</p>
-</blockquote>
-<h2 id="step-4-build-and-run-the-pipeline-container">Step 4: Build and Run the Pipeline Container<a class="headerlink" href="#step-4-build-and-run-the-pipeline-container" title="Permanent link">&para;</a></h2>
-<h3 id="41-build-the-pipeline-image">4.1 Build the Pipeline Image<a class="headerlink" href="#41-build-the-pipeline-image" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
-</code></pre></div>
-<h3 id="42-run-the-pipeline">4.2 Run the Pipeline<a class="headerlink" href="#42-run-the-pipeline" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Run in a tmux session to survive SSH disconnections</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>tmux<span class="w"> </span>new<span class="w"> </span>-s<span class="w"> </span>pbi-pipeline
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
-</code></pre></div>
-<p><strong>What happens:</strong></p>
+<h1 id="how-pbi-works">How PBI Works<a class="headerlink" href="#how-pbi-works" title="Permanent link">&para;</a></h1>
+<p>This page explains the internal architecture of PBI: the Snakemake pipeline, the <code>pbi</code> Python package, key data files, and the REST API.</p>
+<h2 id="the-big-picture">The Big Picture<a class="headerlink" href="#the-big-picture" title="Permanent link">&para;</a></h2>
+<p>PBI is a data pipeline that:</p>
 <ol>
-<li><strong>Stage 1 — Phage data</strong> (~4 hours): Downloads and processes phage metadata and FASTA sequences from 14+ databases via PhageScope</li>
-<li><strong>Stage 2 — Host resolution</strong> (~12–18 hours): Parses host fields from phage metadata, resolves them to NCBI assemblies, downloads reference genomes</li>
+<li>Downloads phage genomic data from <a href="https://phagescope.deepomics.org/database">PhageScope</a> (which aggregates 14+ databases)</li>
+<li>Parses host information from phage metadata and resolves it to NCBI RefSeq assemblies</li>
+<li>Downloads bacterial reference genomes from NCBI</li>
+<li>Merges everything into an optimized DuckDB database and indexed FASTA files</li>
+<li>Exposes this data through a Python package (<code>pbi</code>) and optionally a REST API</li>
 </ol>
-<p><strong>Output</strong> (stored in the <code>pbi-data</code> Docker volume):
-- <code>/data/processed/databases/phage_database_optimized.duckdb</code> — Main database
-- <code>/data/processed/sequences/all_phages.fasta</code> (+ <code>.fai</code> index)
-- <code>/data/processed/sequences/all_proteins.fasta</code> (+ <code>.fai</code> index)
-- <code>/data/processed/sequences/host_fasta_mapping.json</code> — Maps host IDs to FASTA file paths
-- <code>/data/processed/reports/</code> — HTML validation and statistics reports</p>
-<h2 id="step-5-connect-to-the-analysis-container">Step 5: Connect to the Analysis Container<a class="headerlink" href="#step-5-connect-to-the-analysis-container" title="Permanent link">&para;</a></h2>
-<p>The analysis container provides a Jupyter Lab environment with direct access to the database and sequences.</p>
-<h3 id="51-set-up-ssh-port-forwarding-for-remote-servers">5.1 Set Up SSH Port Forwarding (for Remote Servers)<a class="headerlink" href="#51-set-up-ssh-port-forwarding-for-remote-servers" title="Permanent link">&para;</a></h3>
-<p>If PBI is running on a remote server, forward port 8888 <strong>before</strong> you start the container:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># On your local machine</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>username@your-server-address
+<p>The ultimate goal is to provide phage-host interaction data in an efficient, structured format for training neural networks and AI models.</p>
+<hr />
+<h2 id="the-snakemake-pipeline">The Snakemake Pipeline<a class="headerlink" href="#the-snakemake-pipeline" title="Permanent link">&para;</a></h2>
+<p><strong>Location</strong>: <code>workflow/</code></p>
+<p>The pipeline is orchestrated by <a href="https://snakemake.readthedocs.io/">Snakemake</a>, a workflow manager that tracks file dependencies and only re-runs steps when inputs change.</p>
+<h3 id="pipeline-stages">Pipeline Stages<a class="headerlink" href="#pipeline-stages" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>workflow/Snakefile
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>     │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>     ├── rules/phagescope.smk   → Download phage metadata (CSV) + FASTA archives
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>     │                             from PhageScope API for each of the 14+ databases
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>     │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>     ├── rules/database.smk     → Merge CSV files, create and optimize DuckDB database,
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>     │                             generate HTML validation reports
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>     │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>     ├── rules/sequences.smk    → Merge and index phage/protein FASTA files with pyfaidx
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>     │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>     └── rules/hosts.smk        → Parse host fields → resolve to NCBI assemblies →
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                                   download host FASTA files → build host_fasta_mapping.json
 </code></pre></div>
-<p>This maps port 8888 on the remote server to your local machine so you can open Jupyter Lab in your browser at <code>http://localhost:8888</code>.</p>
-<h3 id="52-build-and-start-the-analysis-container">5.2 Build and Start the Analysis Container<a class="headerlink" href="#52-build-and-start-the-analysis-container" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Build the analysis image</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Start in detached mode</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
-</code></pre></div>
-<h3 id="53-access-jupyter-lab">5.3 Access Jupyter Lab<a class="headerlink" href="#53-access-jupyter-lab" title="Permanent link">&para;</a></h3>
-<p>Open your browser and navigate to:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>http://localhost:8888
-</code></pre></div>
-<p>No password is required (local development mode). Start with the demo notebooks in the <code>notebooks/</code> directory.</p>
-<blockquote>
-<p>⚠️ <strong>Security Warning</strong>: Do not expose port 8888 to untrusted networks. Always use SSH tunneling for remote access.</p>
-</blockquote>
-<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<p><strong><code>workflow/config/config.yaml</code></strong> — main pipeline configuration:
+- PhageScope API endpoints and database list
+- Output paths (all under <code>/data/</code> in Docker)
+- NCBI credentials (<code>email</code>, <code>api_key</code>)
+- Download parameters (concurrency, retries, timeouts)</p>
+<h3 id="key-scripts">Key Scripts<a class="headerlink" href="#key-scripts" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Variable</th>
+<th>Script</th>
 <th>Purpose</th>
-<th>Default</th>
-<th>Required</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>DATA_PATH</code></td>
-<td>Path for API/analysis to find processed data</td>
-<td><code>/data/processed</code></td>
-<td>Set automatically in Docker</td>
+<td><code>workflow/scripts/preprocessing/mergers/</code></td>
+<td>Merge per-database CSV files into unified metadata</td>
 </tr>
 <tr>
-<td><code>NCBI_EMAIL</code></td>
-<td>Your email for NCBI API</td>
-<td>—</td>
-<td>For genome downloads</td>
+<td><code>workflow/scripts/database/create_duckdb.py</code></td>
+<td>Create the star-schema DuckDB database</td>
 </tr>
 <tr>
-<td><code>NCBI_API_KEY</code></td>
-<td>NCBI API key (increases rate limit)</td>
-<td>—</td>
-<td>Optional but recommended</td>
+<td><code>workflow/scripts/database/optimize_duckdb.py</code></td>
+<td>Add indexes and views for query performance</td>
+</tr>
+<tr>
+<td><code>workflow/scripts/database/validate_db.py</code></td>
+<td>Generate HTML validation reports</td>
+</tr>
+<tr>
+<td><code>workflow/scripts/sequences/</code></td>
+<td>FASTA merging, indexing, host genome downloads</td>
+</tr>
+<tr>
+<td><code>workflow/scripts/sequences/download_host_genomes_robust.py</code></td>
+<td>Multi-host parsing and NCBI download</td>
 </tr>
 </tbody>
 </table>
-<p>These are configured in <code>docker-compose.yml</code> and passed automatically to the containers.</p>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="no-space-left-on-device">"No space left on device"<a class="headerlink" href="#no-space-left-on-device" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Check disk space</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>df<span class="w"> </span>-h
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Clean Docker system (careful: removes unused images and volumes)</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>docker<span class="w"> </span>system<span class="w"> </span>prune
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Clean only the Snakemake cache volume (preserves data)</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>./cleanup_cache.sh
+<hr />
+<h2 id="the-pbi-python-package">The <code>pbi</code> Python Package<a class="headerlink" href="#the-pbi-python-package" title="Permanent link">&para;</a></h2>
+<p><strong>Location</strong>: <code>src/pbi/</code></p>
+<p>The <code>pbi</code> package is the primary way to interact with PBI data in Python. It handles database connections, sequence retrieval, and machine learning dataset preparation.</p>
+<h3 id="main-classes">Main Classes<a class="headerlink" href="#main-classes" title="Permanent link">&para;</a></h3>
+<h4 id="sequenceretriever"><code>SequenceRetriever</code><a class="headerlink" href="#sequenceretriever" title="Permanent link">&para;</a></h4>
+<p>The central class for accessing the database and FASTA files.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">quick_connect</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># In Docker (paths auto-detected via DATA_PATH environment variable)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">retriever</span> <span class="o">=</span> <span class="n">quick_connect</span><span class="p">()</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Manual initialization</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequenceRetriever</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">retriever</span> <span class="o">=</span> <span class="n">SequenceRetriever</span><span class="p">(</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/databases/phage_database_optimized.duckdb&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">phage_fasta_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/sequences/all_phages.fasta&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">protein_fasta_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/sequences/all_proteins.fasta&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">host_mapping_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/sequences/host_fasta_mapping.json&quot;</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">)</span>
 </code></pre></div>
-<h3 id="pipeline-fails-mid-run">Pipeline Fails Mid-Run<a class="headerlink" href="#pipeline-fails-mid-run" title="Permanent link">&para;</a></h3>
-<p>The pipeline uses Snakemake's file-based checkpointing. If it fails, simply re-run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
+<p><strong>Key methods:</strong>
+- <code>get_phage_metadata(where=None, limit=None)</code> — query phage metadata
+- <code>get_host_metadata(where=None)</code> — query host metadata
+- <code>get_phage_host_pairs(where=None, limit=None)</code> — get linked phage-host pairs
+- <code>get_sequences_by_ids(ids, sequence_type='phage')</code> — retrieve FASTA sequences
+- <code>get_stats()</code> — database and file statistics
+- <code>export_fasta(df, path, id_col)</code> — export sequences to FASTA</p>
+<h4 id="negativeexamplegenerator"><code>NegativeExampleGenerator</code><a class="headerlink" href="#negativeexamplegenerator" title="Permanent link">&para;</a></h4>
+<p>Generates negative training examples (non-interacting phage-host pairs) for machine learning.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NegativeExampleGenerator</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">neg_gen</span> <span class="o">=</span> <span class="n">NegativeExampleGenerator</span><span class="p">(</span><span class="n">retriever</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">neg_gen</span><span class="o">.</span><span class="n">generate_balanced_dataset</span><span class="p">(</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">positive_pairs</span><span class="o">=</span><span class="n">pairs</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;mixed&#39;</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">positive_ratio</span><span class="o">=</span><span class="mf">0.5</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
 </code></pre></div>
-<p>Already-completed steps and downloaded files will be reused. You can also use:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline<span class="w"> </span>snakemake<span class="w"> </span>--cores<span class="w"> </span><span class="m">4</span><span class="w"> </span>--use-conda<span class="w"> </span>--rerun-incomplete
+<h4 id="phagehoststreamingdataset-phagehostindexeddataset"><code>PhageHostStreamingDataset</code> / <code>PhageHostIndexedDataset</code><a class="headerlink" href="#phagehoststreamingdataset-phagehostindexeddataset" title="Permanent link">&para;</a></h4>
+<p>PyTorch-compatible dataset classes for memory-efficient streaming through large datasets.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhageHostStreamingDataset</span><span class="p">,</span> <span class="n">PhageHostIndexedDataset</span><span class="p">,</span> <span class="n">phage_host_collate_fn</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">PhageHostStreamingDataset</span><span class="p">(</span><span class="n">retriever</span><span class="p">,</span> <span class="n">where_clause</span><span class="o">=</span><span class="s2">&quot;p.Lifestyle = &#39;Lytic&#39;&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">collate_fn</span><span class="o">=</span><span class="n">phage_host_collate_fn</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="jupyter-lab-not-loading">Jupyter Lab Not Loading<a class="headerlink" href="#jupyter-lab-not-loading" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Check container status</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>docker<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>analysis
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Check logs</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>analysis
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># Restart</span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>analysis
+<h3 id="key-data-files">Key Data Files<a class="headerlink" href="#key-data-files" title="Permanent link">&para;</a></h3>
+<p>The <code>pbi</code> package works with these key files produced by the pipeline:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Location</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>phage_database_optimized.duckdb</code></td>
+<td><code>/data/processed/databases/</code></td>
+<td>Main DuckDB database with all phage metadata</td>
+</tr>
+<tr>
+<td><code>all_phages.fasta</code> + <code>.fai</code></td>
+<td><code>/data/processed/sequences/</code></td>
+<td>All phage genome sequences, indexed with pyfaidx</td>
+</tr>
+<tr>
+<td><code>all_proteins.fasta</code> + <code>.fai</code></td>
+<td><code>/data/processed/sequences/</code></td>
+<td>All protein sequences, indexed with pyfaidx</td>
+</tr>
+<tr>
+<td><code>host_fasta_mapping.json</code></td>
+<td><code>/data/processed/sequences/</code></td>
+<td>Maps host assembly IDs to their FASTA file paths</td>
+</tr>
+<tr>
+<td>Individual host FASTA files</td>
+<td><code>/data/processed/sequences/hosts/</code></td>
+<td>One FASTA file per downloaded host assembly</td>
+</tr>
+</tbody>
+</table>
+<h4 id="the-host_fasta_mappingjson-file">The <code>host_fasta_mapping.json</code> File<a class="headerlink" href="#the-host_fasta_mappingjson-file" title="Permanent link">&para;</a></h4>
+<p>This JSON file is the key index for host genome access. It maps each host assembly accession to the path of its downloaded FASTA file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;GCF_000005845.2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/processed/sequences/hosts/Escherichia_coli_GCF_000005845.2.fna&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;GCF_000006945.2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/processed/sequences/hosts/Salmonella_enterica_GCF_000006945.2.fna&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="err">...</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="pipeline-runs-again-after-completion">Pipeline Runs Again After Completion<a class="headerlink" href="#pipeline-runs-again-after-completion" title="Permanent link">&para;</a></h3>
-<p>Ensure that the <code>pbi-data</code> volume is intact:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>pbi-data:/data<span class="w"> </span>alpine<span class="w"> </span>ls<span class="w"> </span>-lh<span class="w"> </span>/data/processed/databases/
+<p>The <code>SequenceRetriever</code> uses this file to efficiently retrieve individual host sequences without loading all host FASTA data into memory.</p>
+<h3 id="how-quick_connect-works">How <code>quick_connect()</code> Works<a class="headerlink" href="#how-quick_connect-works" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">quick_connect</span><span class="p">():</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">paths</span> <span class="o">=</span> <span class="n">get_default_paths</span><span class="p">()</span>  <span class="c1"># Reads DATA_PATH env var or uses project-relative defaults</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">return</span> <span class="n">SequenceRetriever</span><span class="p">(</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">db_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">],</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">phage_fasta_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;phage_fasta&#39;</span><span class="p">],</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">protein_fasta_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;protein_fasta&#39;</span><span class="p">],</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">host_mapping_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;host_mapping&#39;</span><span class="p">]</span>  <span class="c1"># Uses host_fasta_mapping.json</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="p">)</span>
 </code></pre></div>
-<p>If the database file is missing, the pipeline needs to re-run.</p>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Read <a href="../how-it-works/">How It Works</a> to understand the pipeline and <code>pbi</code> package</li>
-<li>Explore the database with <a href="../analysis-guide/">Analysis Container Usage</a></li>
-<li>Check the <a href="../docker-guide/">Docker Guide</a> for advanced Docker operations</li>
-</ul>
+<p>In Docker, the <code>DATA_PATH</code> environment variable is set to <code>/data/processed</code>, so <code>quick_connect()</code> automatically finds all files.</p>
+<hr />
+<h2 id="host-resolution-process">Host Resolution Process<a class="headerlink" href="#host-resolution-process" title="Permanent link">&para;</a></h2>
+<p>Host genome resolution is a multi-stage process because phage metadata contains complex, semicolon-separated host fields like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NA;GCA 900066335.1;UBA9502;Blautia obeum
+</code></pre></div>
+<h3 id="resolution-stages">Resolution Stages<a class="headerlink" href="#resolution-stages" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Parsing</strong> (<code>phage_host_candidates.csv</code>): Each host field is split into tokens, classified as assembly accession, species name, or other identifier.</p>
+</li>
+<li>
+<p><strong>Resolution</strong> (<code>phage_host_assemblies.csv</code>): Each token is resolved to an NCBI assembly accession via:</p>
+</li>
+<li>Direct assembly lookup (for <code>GCA_</code>/<code>GCF_</code> accessions)</li>
+<li>NCBI Taxonomy + Assembly search (for species names)</li>
+<li>
+<p>Fallback species search (for other identifiers)</p>
+</li>
+<li>
+<p><strong>Download</strong>: Unique assemblies are downloaded from NCBI RefSeq, deduplicated across phages.</p>
+</li>
+<li>
+<p><strong>Mapping</strong>: <code>host_fasta_mapping.json</code> is built, mapping host IDs to downloaded FASTA files.</p>
+</li>
+</ol>
+<p>See the <a href="../../database/host-resolution/">Host Resolution Details</a> page for full documentation.</p>
+<hr />
+<h2 id="the-rest-api">The REST API<a class="headerlink" href="#the-rest-api" title="Permanent link">&para;</a></h2>
+<p><strong>Location</strong>: <code>api/</code></p>
+<p>The REST API is built with <a href="https://fastapi.tiangolo.com/">FastAPI</a> and provides HTTP endpoints for querying the database and retrieving sequences.</p>
+<blockquote>
+<p>⚠️ <strong>Note</strong>: The REST API is currently <strong>untested</strong> and is not the recommended way to interact with PBI data. For analysis and machine learning, use the <a href="../analysis-guide/">analysis container</a> with the <code>pbi</code> Python package directly.</p>
+</blockquote>
+<h3 id="how-the-api-works">How the API Works<a class="headerlink" href="#how-the-api-works" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># api/app.py — simplified structure</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">duckdb</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># On startup, connects to DuckDB and indexes FASTA files</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># Exposes endpoints for health checks, SQL queries, and sequence retrieval</span>
+</code></pre></div>
+<p>Key endpoints:
+- <code>GET /health</code> — health check
+- <code>GET /stats</code> — database statistics
+- <code>POST /query</code> — execute SQL queries
+- <code>POST /phages</code> — retrieve phage sequences
+- <code>POST /phages/fasta</code> — export FASTA format</p>
+<p>See the <a href="../../api/overview/">API Reference</a> for full documentation.</p>
+<hr />
+<h2 id="docker-services">Docker Services<a class="headerlink" href="#docker-services" title="Permanent link">&para;</a></h2>
+<p>The <code>docker-compose.yml</code> defines three services:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Image</th>
+<th>Purpose</th>
+<th>Port</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pipeline</code></td>
+<td><code>pbi-pipeline</code></td>
+<td>Runs Snakemake to build the database</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>analysis</code></td>
+<td><code>pbi-analysis</code></td>
+<td>Jupyter Lab with <code>pbi</code> package pre-installed</td>
+<td>8888</td>
+</tr>
+<tr>
+<td><code>api</code></td>
+<td><code>pbi-api</code></td>
+<td>FastAPI REST server</td>
+<td>8000</td>
+</tr>
+</tbody>
+</table>
+<p>All services share the <code>pbi-data</code> Docker volume (read-only for analysis and API, read-write for pipeline).</p>
+<hr />
+<h2 id="data-flow-summary">Data Flow Summary<a class="headerlink" href="#data-flow-summary" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>PhageScope API (14+ databases)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>         │
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>         ▼  [phagescope.smk]
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>   Raw CSVs + compressed FASTA archives
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>   /data/raw/
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>         │
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>         ▼  [database.smk + sequences.smk]
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>   Merged metadata + merged FASTA files
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>   /data/intermediate/
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>         │
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>         ▼  [database.smk]
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>   phage_database_optimized.duckdb   ←── all phage/protein metadata
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>   /data/processed/databases/
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>         │
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>   all_phages.fasta + .fai           ←── phage genome sequences
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>   all_proteins.fasta + .fai         ←── protein sequences
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>   /data/processed/sequences/
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>         │
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>NCBI RefSeq
+<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>         │
+<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>         ▼  [hosts.smk]
+<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>   Individual host FASTA files       ←── bacterial reference genomes
+<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>   host_fasta_mapping.json           ←── index: host_id → FASTA path
+<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>   /data/processed/sequences/
+<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>         │
+<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>         ▼
+<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>   pbi Python package (SequenceRetriever)
+<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a>         │
+<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>         ├──▶ Jupyter Lab notebooks (analysis container, port 8888)
+<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a>         └──▶ REST API (api container, port 8000) [untested]
+</code></pre></div>
 
 
 

@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/database/overview/">
       
       
-        <link rel="prev" href="../../guides/machine-learning/">
+        <link rel="prev" href="../../guides/docker-guide/">
       
       
         <link rel="next" href="../host-resolution/">
@@ -543,14 +543,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/docker-guide/" class="md-nav__link">
+      <a href="../../guides/installation/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Docker Guide
+    Installation (Docker)
   
 
     
@@ -571,14 +571,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/installation/" class="md-nav__link">
+      <a href="../../guides/how-it-works/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Local Installation
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/analysis-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis Container
   
 
     
@@ -607,34 +635,6 @@
     
   
     Pipeline Execution
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../guides/analysis-guide/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Analysis Guide
   
 
     
@@ -691,6 +691,34 @@
     
   
     Machine Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/docker-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Advanced
   
 
     
@@ -835,10 +863,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-facts" class="md-nav__link">
+  <a href="#phage-metadata-database" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Facts
+        Phage Metadata Database
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#host-genome-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host Genome Data
       
     </span>
   </a>
@@ -1670,10 +1709,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-facts" class="md-nav__link">
+  <a href="#phage-metadata-database" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Facts
+        Phage Metadata Database
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#host-genome-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host Genome Data
       
     </span>
   </a>
@@ -2106,8 +2156,8 @@
 
 
 <h1 id="database-overview">Database Overview<a class="headerlink" href="#database-overview" title="Permanent link">&para;</a></h1>
-<p>The PBI database uses a <strong>star schema</strong> design optimized for analytical queries on phage genomic data.</p>
-<h2 id="quick-facts">Quick Facts<a class="headerlink" href="#quick-facts" title="Permanent link">&para;</a></h2>
+<p>The PBI database consists of two main components: the <strong>phage metadata database</strong> (DuckDB) and the <strong>host genome data</strong> (individual FASTA files + mapping index).</p>
+<h2 id="phage-metadata-database">Phage Metadata Database<a class="headerlink" href="#phage-metadata-database" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Database Engine</strong>: DuckDB (columnar, embedded analytical database)</li>
 <li><strong>Schema</strong>: Star schema with 1 fact table and 8 dimension tables</li>
@@ -2116,17 +2166,29 @@
 <li><strong>Total Proteins</strong>: ~43 million</li>
 <li><strong>Data Sources</strong>: 14+ major phage databases via PhageScope</li>
 </ul>
+<h2 id="host-genome-data">Host Genome Data<a class="headerlink" href="#host-genome-data" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Storage</strong>: Individual FASTA files, one per assembly</li>
+<li><strong>Index</strong>: <code>host_fasta_mapping.json</code> maps host IDs to file paths</li>
+<li><strong>Source</strong>: NCBI RefSeq bacterial reference genomes</li>
+<li><strong>Coverage</strong>: ~9,000 unique assembly accessions attempted; variable success rate depending on NCBI availability</li>
+<li><strong>Location</strong>: <code>/data/processed/sequences/</code> (in Docker)</li>
+</ul>
+<p>The host genome data is <strong>not stored in the DuckDB database</strong> — it is kept as separate FASTA files for memory efficiency, since individual host genomes can be very large. The <code>pbi</code> Python package uses <code>host_fasta_mapping.json</code> to locate and retrieve host sequences on demand.</p>
+<p>See <a href="../host-resolution/">Host Resolution Details</a> for information on how host species names are parsed and resolved to NCBI assemblies.</p>
+<hr />
 <h2 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                     dim_proteins ──┐
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                  dim_terminators ──┤
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                  dim_anti_crispr ──┤
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>             dim_virulent_factors ──┤
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>       dim_transmembrane_proteins ──┤──&gt; fact_phages (central)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>       dim_transmembrane_proteins ──┤──▶ fact_phages (central)
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                   dim_trna_tmrna ──┤
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>dim_antimicrobial_resistance_genes ─┤
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                  dim_crispr_array ─┘
 </code></pre></div>
 <p>All dimension tables link to <code>fact_phages</code> via <strong><code>Phage_ID</code></strong> foreign key, enabling comprehensive multi-dimensional analysis.</p>
+<p>Host genome information is linked via external files (<code>phage_host_links.csv</code>, <code>host_fasta_mapping.json</code>) rather than a database table.</p>
 <h2 id="tables">Tables<a class="headerlink" href="#tables" title="Permanent link">&para;</a></h2>
 <h3 id="fact-table-fact_phages">Fact Table: <code>fact_phages</code><a class="headerlink" href="#fact-table-fact_phages" title="Permanent link">&para;</a></h3>
 <p>Central table containing core phage metadata.</p>
