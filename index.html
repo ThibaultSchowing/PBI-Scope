@@ -1466,19 +1466,27 @@
 <li>
 <p><strong>Docker Setup</strong> (Recommended)</p>
 <hr />
-<p>Fastest way to get started. Just build and run!</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
+<p>Fastest way to get started. </p>
+<p>Connect to your server with port 8888 redirection (used later to connect to jupyter lab). You must have at least <strong>225 Go</strong> of disk space available for data and cache. </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ssh<span class="w">  </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>username@domain
+</code></pre></div>
+<p>Just build and run the pipeline ! It can take between 12 to 18 hours for the first run, use tmux or another terminal multiplexer to keep your ssh session active !</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
+</code></pre></div>
+<p>Then build and run the analysis container, allowing to explore the PBI functionnalities with Python !</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
 </code></pre></div>
 <p><a href="guides/docker-guide/">Docker Guide →</a></p>
 </li>
 <li>
-<p><strong>Local Installation</strong></p>
+<p><strong>Local Installation</strong> (untested)</p>
 <hr />
-<p>For development and customization.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>workflow/envs/base_environment.yaml
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>./run_local.sh
+<p>For development and customization. However, because of the relatively disk space required, developpment has been continued within Docker as soon as the Host genomes have been included in the pipeline. </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>workflow/envs/base_environment.yaml
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>./run_local.sh
 </code></pre></div>
 <p><a href="guides/installation/">Installation Guide →</a></p>
 </li>
@@ -1505,39 +1513,39 @@
 <li><strong>Validates</strong> data quality with comprehensive reports</li>
 </ol>
 <h3 id="architecture-diagram">Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>┌─────────────────────────────────────────────────────────────┐
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>│                   PBI Pipeline Architecture                  │
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>│                                                              │
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│  ┌──────────────┐         ┌──────────────┐                 │
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│  │  Data Sources│         │   Pipeline    │                 │
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│  │  PhageScope  │────────▶│  (Snakemake)  │                 │
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│  │  NCBI RefSeq │         │               │                 │
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>│  │  + 12 more   │         └───────┬───────┘                 │
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>│  └──────────────┘                 │                         │
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>│                                   ▼                         │
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>│                        ┌────────────────────┐               │
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>│                        │  Data Processing   │               │
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>│                        │  - Extract FASTA   │               │
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>│                        │  - Merge metadata  │               │
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>│                        │  - Optimize schema │               │
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>│                        └─────────┬──────────┘               │
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>│                                  │                          │
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>│                                  ▼                          │
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>│                   ┌──────────────────────────┐              │
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>│                   │   Final Outputs          │              │
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>│                   │  ├─ DuckDB Database      │              │
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>│                   │  ├─ Indexed FASTA files  │              │
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>│                   │  └─ HTML Reports         │              │
-<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>│                   └──────────┬───────────────┘              │
-<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>│                              │                              │
-<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>│              ┌───────────────┴───────────────┐              │
-<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>│              ▼                               ▼              │
-<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>│     ┌─────────────────┐           ┌──────────────────┐     │
-<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>│     │   REST API      │           │  Python Package  │     │
-<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>│     │   (FastAPI)     │           │  (pbi)           │     │
-<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>│     └─────────────────┘           └──────────────────┘     │
-<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>│                                                              │
-<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>└──────────────────────────────────────────────────────────────┘
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>┌─────────────────────────────────────────────────────────────┐
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>│                   PBI Pipeline Architecture                  │
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│                                                              │
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│  ┌──────────────┐         ┌──────────────┐                 │
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│  │  Data Sources│         │   Pipeline    │                 │
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>│  │  PhageScope  │────────▶│  (Snakemake)  │                 │
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│  │  NCBI RefSeq │         │               │                 │
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>│  │  + 12 more   │         └───────┬───────┘                 │
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>│  └──────────────┘                 │                         │
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>│                                   ▼                         │
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>│                        ┌────────────────────┐               │
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>│                        │  Data Processing   │               │
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>│                        │  - Extract FASTA   │               │
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>│                        │  - Merge metadata  │               │
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>│                        │  - Optimize schema │               │
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>│                        └─────────┬──────────┘               │
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>│                                  │                          │
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>│                                  ▼                          │
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>│                   ┌──────────────────────────┐              │
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>│                   │   Final Outputs          │              │
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>│                   │  ├─ DuckDB Database      │              │
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>│                   │  ├─ Indexed FASTA files  │              │
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>│                   │  └─ HTML Reports         │              │
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>│                   └──────────┬───────────────┘              │
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>│                              │                              │
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>│              ┌───────────────┴───────────────┐              │
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>│              ▼                               ▼              │
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>│     ┌─────────────────┐           ┌──────────────────┐     │
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>│     │   REST API      │           │  Python Package  │     │
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>│     │   (FastAPI)     │           │  (pbi)           │     │
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>│     └─────────────────┘           └──────────────────┘     │
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>│                                                              │
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>└──────────────────────────────────────────────────────────────┘
 </code></pre></div>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <div class="grid cards">

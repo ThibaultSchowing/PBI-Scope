@@ -2934,8 +2934,8 @@
 <h3 id="data-persistence">Data Persistence<a class="headerlink" href="#data-persistence" title="Permanent link">&para;</a></h3>
 <p>Two Docker volumes ensure data persistence:</p>
 <ul>
-<li><strong><code>pbi-data</code></strong>: Stores all pipeline outputs (database, sequences, reports) - ~150 GB</li>
-<li><strong><code>pbi-cache</code></strong>: Stores Snakemake metadata and conda environments - ~2-3 GB</li>
+<li><strong><code>pbi-data</code></strong>: Stores all pipeline outputs (database, sequences, reports) - ~202 GB</li>
+<li><strong><code>pbi-cache</code></strong>: Stores Snakemake metadata and conda environments - ~18 GB</li>
 </ul>
 <p>All services share read-only access to the <code>pbi-data</code> volume, while only the pipeline can write to it.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
@@ -3003,7 +3003,7 @@
 - Set up the workflow environment
 - Prepare the workflow directory</p>
 <h3 id="2-run-the-pipeline-to-build-the-database">2. Run the Pipeline to Build the Database<a class="headerlink" href="#2-run-the-pipeline-to-build-the-database" title="Permanent link">&para;</a></h3>
-<p>Run the pipeline to download data and build the database. This process can take 2-4 hours:</p>
+<p>Run the pipeline to download data and build the database. This process can take 2-4 hours for the metadata, and 14 hours for the host resolution and download. </p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
 </code></pre></div>
 <p>The <code>--rm</code> flag automatically removes the container after completion.</p>
