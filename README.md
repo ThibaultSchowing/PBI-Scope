@@ -18,7 +18,9 @@ PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) v
 - **🔬 Jupyter Lab**: Analysis container with direct database access (recommended usage)
 - **🤖 ML Ready**: Built-in tools for phage-host interaction prediction (streaming datasets, negative example generation)
 
-> **Note**: PBI is a proof of concept, dependent on PhageScope as its primary data source.
+> **Note**: PBI is a proof of concept, dependent on PhageScope as its primary data source. 
+
+![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema.png)
 
 ## 📚 Documentation
 
@@ -52,7 +54,7 @@ cd PBI
 # ncbi.api_key: YOUR_API_KEY
 ```
 
-### 2. Run the Pipeline (in tmux for long SSH sessions)
+### 2. Run the Pipeline (in tmux or equivalent for long SSH sessions)
 
 ```bash
 # Set up SSH port forwarding first (on your local machine):
@@ -62,7 +64,7 @@ tmux new -s pbi
 
 docker compose build pipeline
 docker compose run --rm pipeline
-# ~4 hours for phage data, ~12-18 hours for host genomes
+# ~4 hours for PhageScope data, ~12-18 hours for host genomes
 ```
 
 ### 3. Start the Analysis Container
@@ -106,11 +108,11 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  Pipeline   │────▶│   pbi-data   │◀────│  Analysis       │
-│ (Snakemake) │     │   volume     │     │ (Jupyter Lab)   │
-└─────────────┘     └──────────────┘     │  port 8888      │
-                           │             └─────────────────┘
+┌─────────────┐      ┌──────────────┐      ┌─────────────────┐
+│  Pipeline   │────▶│   pbi-data    │◀────│  Analysis       │
+│ (Snakemake) │      │   volume     │      │ (Jupyter Lab)   │
+└─────────────┘      └──────────────┘      │  port 8888      │
+                           │               └─────────────────┘
                            ├────▶ DuckDB database (~15 GB)
                            ├────▶ Phage FASTA + index (~40 GB)
                            ├────▶ Protein FASTA + index (~60 GB)
@@ -129,7 +131,7 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 - **Annotations**: Proteins, CRISPR arrays, AMR genes, anti-CRISPR, virulence factors, tRNA/tmRNA
 
 ## 🔗 Links
-
+- 🗃️ **[PhageScope](https://phagescope.deepomics.org/workspace/)**
 - 📚 **[Full Documentation](https://thibaultschowing.github.io/PBI/)**
 - 🐛 **[Issue Tracker](https://github.com/ThibaultSchowing/PBI/issues)**
 - 📧 **[Contact](https://github.com/ThibaultSchowing)**
