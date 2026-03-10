@@ -26,6 +26,8 @@ PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) v
 
 **Full documentation: https://thibaultschowing.github.io/PBI/**
 
+**Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks)**
+
 ### Quick Links
 
 - 🚀 **[Installation Guide](https://thibaultschowing.github.io/PBI/guides/installation/)** — Docker setup, SSH port forwarding, running the pipeline
