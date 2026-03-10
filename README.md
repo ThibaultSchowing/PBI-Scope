@@ -116,7 +116,7 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
                            ├────▶ DuckDB database (~15 GB)
                            ├────▶ Phage FASTA + index (~40 GB)
                            ├────▶ Protein FASTA + index (~60 GB)
-                           └────▶ Host FASTA files + mapping JSON
+                           └────▶ Host FASTA files + mapping JSON (~87 GB)
 ```
 
 **Services (docker-compose.yml):**
