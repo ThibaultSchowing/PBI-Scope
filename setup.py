@@ -1,13 +1,21 @@
 from setuptools import setup, find_packages
 from pathlib import Path
+import re
 
 # Read README for long description
 readme_file = Path(__file__).parent / "README.md"
 long_description = readme_file.read_text() if readme_file.exists() else ""
 
+# Read version from src/pbi/__init__.py without importing the package
+init_py = Path(__file__).parent / "src" / "pbi" / "__init__.py"
+version_match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', init_py.read_text(), re.M)
+if not version_match:
+    raise RuntimeError("Unable to find __version__ in src/pbi/__init__.py")
+version = version_match.group(1)
+
 setup(
     name="pbi",
-    version="0.1.0",
+    version=version,
     author="Thibault Schowing",
     author_email="thibault.schowing@heig-vd.ch",
     description="Phage Bacteria Interaction (PBI) Library for sequence retrieval and analysis",

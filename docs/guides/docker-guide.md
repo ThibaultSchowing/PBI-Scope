@@ -384,6 +384,25 @@ docker run --rm -v pbi-data:/data -v $(pwd):/backup alpine \
   cp /data/processed/reports/database_validation.html /backup/
 ```
 
+### Create a temporary container to access the data
+ ```bash
+ # Similar as above : This creates a container named extractor that maps your volume to /data. 
+ # We use docker create instead of run so it doesn't try to execute anything.
+
+ docker create --name extractor -v pbi_pbi-data:/data alpine
+
+ # Copy the file(s) to your current directory
+ # Replace filename.db with the actual name of the file you saw in your ls command.
+ # You can also copy directories
+ 
+ docker cp extractor:/data/processed/databases/filename.db ./filename.db
+
+# Remove the temporary container
+# Clean up the container once the copy is finished.
+
+docker rm extractor
+ ```
+
 ### Clean Up Everything
 
 To remove containers, volumes, and images:
