@@ -497,7 +497,7 @@ services:
 - Check available disk space: `df -h`
 - Clean up Docker: `docker system prune -a --volumes`
 - Clean up cache volume only: `docker volume rm pbi-cache`
-- Ensure at least 60 GB free space
+- Ensure that you have enough free space
 
 ### API Can't Connect to Database
 
@@ -515,14 +515,14 @@ services:
 
 - First run typically takes ~4 hours for phage data, plus ~12–18 hours for host genome downloads
 - Subsequent runs are faster (only processes changed data)
-- Use `--cores` flag to adjust parallelism:
+- Use `--cores` flag to adjust parallelism (caution ! More than 4 cores can reach your I/O limit on a laptop):
   ```bash
-  docker compose run --rm pipeline snakemake --cores 2 --use-conda --printshellcmds
+  docker compose run --rm pipeline snakemake --cores 4 --use-conda --printshellcmds
   ```
 
 ### API Startup is Slow
 
-- FASTA file indexing may take 30-60 seconds on first startup
+- FASTA file indexing may take up to 5 minutes on first startup
 - This is normal for large files
 - Check logs: `docker compose logs api`
 

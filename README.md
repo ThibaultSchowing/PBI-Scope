@@ -143,4 +143,4 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 
 ## License
 
-See LICENSE file for details.
+MIT

@@ -15,7 +15,7 @@ from .negative_examples import NegativeExampleGenerator
 from .streaming_dataset import PhageHostStreamingDataset, PhageHostIndexedDataset, phage_host_collate_fn
 
 # Package metadata
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Thibault Schowing, CI4CB"
 
 # Define what gets imported with "from pbi import *"
