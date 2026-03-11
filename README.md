@@ -26,7 +26,7 @@ PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) v
 
 ## 📚 Documentation
 
-**Full [documentation](https://img.shields.io/badge/docs-github%20pages-blue)**.
+**Full [documentation](https://thibaultschowing.github.io/PBI/)**.
 
 **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks)**
 
