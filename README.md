@@ -3,7 +3,9 @@
 
 # PBI - Phage Bacteria Interaction
 
-> A proof-of-concept bioinformatics pipeline that makes phage genomic data from [PhageScope](https://phagescope.deepomics.org/database) available in an efficient, structured format for training neural networks and AI models for phage-host interaction prediction.
+> A proof-of-concept dockerized bioinformatics pipeline that makes phage genomic data from [PhageScope](https://phagescope.deepomics.org/database) available in an efficient, structured format for training neural networks and AI models for phage-host interaction prediction.
+>
+> **Install - Wait - Work** The pipeline takes care of everything within Docker !
 
 [![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI/)
 
