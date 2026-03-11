@@ -2465,7 +2465,7 @@
 <li>Check available disk space: <code>df -h</code></li>
 <li>Clean up Docker: <code>docker system prune -a --volumes</code></li>
 <li>Clean up cache volume only: <code>docker volume rm pbi-cache</code></li>
-<li>Ensure at least 60 GB free space</li>
+<li>Ensure that you have enough free space</li>
 </ul>
 <h3 id="api-cant-connect-to-database">API Can't Connect to Database<a class="headerlink" href="#api-cant-connect-to-database" title="Permanent link">&para;</a></h3>
 <p><strong>Error</strong>: <code>Database not found: /data/processed/databases/phage_database_optimized.duckdb</code></p>
@@ -2479,13 +2479,13 @@
 <ul>
 <li>First run typically takes ~4 hours for phage data, plus ~12–18 hours for host genome downloads</li>
 <li>Subsequent runs are faster (only processes changed data)</li>
-<li>Use <code>--cores</code> flag to adjust parallelism:
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline<span class="w"> </span>snakemake<span class="w"> </span>--cores<span class="w"> </span><span class="m">2</span><span class="w"> </span>--use-conda<span class="w"> </span>--printshellcmds
+<li>Use <code>--cores</code> flag to adjust parallelism (caution ! More than 4 cores can reach your I/O limit on a laptop):
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline<span class="w"> </span>snakemake<span class="w"> </span>--cores<span class="w"> </span><span class="m">4</span><span class="w"> </span>--use-conda<span class="w"> </span>--printshellcmds
 </code></pre></div></li>
 </ul>
 <h3 id="api-startup-is-slow">API Startup is Slow<a class="headerlink" href="#api-startup-is-slow" title="Permanent link">&para;</a></h3>
 <ul>
-<li>FASTA file indexing may take 30-60 seconds on first startup</li>
+<li>FASTA file indexing may take up to 5 minutes on first startup</li>
 <li>This is normal for large files</li>
 <li>Check logs: <code>docker compose logs api</code></li>
 </ul>
