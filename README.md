@@ -43,9 +43,9 @@ PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) v
 ### Requirements
 
 - Docker (v20.10+) and Docker Compose (v2.0+)
-- At least **225 GB** of free disk space
+- At least **230 GB** of free disk space
 - **16 GB RAM** minimum (32 GB recommended)
-- NCBI API key (optional but strongly recommended for 10x faster host downloads)
+- NCBI API key (optional but strongly recommended for 10x faster host downloads) -> [Get it here](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)
 
 ### 1. Clone and Configure
 
@@ -53,9 +53,10 @@ PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) v
 git clone https://github.com/ThibaultSchowing/PBI.git
 cd PBI
 
-# Edit NCBI credentials in workflow/config/config.yaml
-# ncbi.email: your.email@example.com
-# ncbi.api_key: YOUR_API_KEY
+# Create environment variables with your NCBI credentials
+export NCBI_EMAIL="you@domain.org"
+export NCBI_API_KEY="..."
+
 ```
 
 ### 2. Run the Pipeline (in tmux or equivalent for long SSH sessions)
@@ -112,15 +113,15 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 ## 🏗️ Architecture
 
 ```
-┌─────────────┐      ┌──────────────┐      ┌─────────────────┐
-│  Pipeline   │────▶│   pbi-data    │◀────│  Analysis       │
-│ (Snakemake) │      │   volume     │      │ (Jupyter Lab)   │
-└─────────────┘      └──────────────┘      │  port 8888      │
-                           │               └─────────────────┘
-                           ├────▶ DuckDB database (~15 GB)
-                           ├────▶ Phage FASTA + index (~40 GB)
-                           ├────▶ Protein FASTA + index (~60 GB)
-                           └────▶ Host FASTA files + mapping JSON (~87 GB)
+┌─────────────┐            ┌──────────────┐      ┌─────────────────┐
+│  Pipeline   │──builds──▶│   pbi-data    │◀────│  Analysis       │
+│ (Snakemake) │            │   volume     │      │ (Jupyter Lab)   │
+└─────────────┘            └──────────────┘      │  port 8888      │
+                                 │               └─────────────────┘
+                                 ├────▶ DuckDB database (~15 GB)
+                                 ├────▶ Phage FASTA + index (~40 GB)
+                                 ├────▶ Protein FASTA + index (~60 GB)
+                                 └────▶ Host FASTA files + mapping JSON (~87 GB)
 ```
 
 **Services (docker-compose.yml):**
@@ -130,7 +131,7 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 
 ## 📊 Data Sources
 
-- **Phage Databases**: 14+ databases via PhageScope (RefSeq, Genbank, PhagesDB, MillardLab, INPHARED, GOV2, MGV, GVD, IMGVR, GPD, CHVD, STV, TemPhD, IGVD)
+- **Phage Databases**: 14+ databases via [PhageScope](https://phagescope.deepomics.org/workspace/) (RefSeq, Genbank, PhagesDB, MillardLab, INPHARED, GOV2, MGV, GVD, IMGVR, GPD, CHVD, STV, TemPhD, IGVD)
 - **Host Genomes**: NCBI RefSeq bacterial reference genomes (~9,000 unique assemblies attempted)
 - **Annotations**: Proteins, CRISPR arrays, AMR genes, anti-CRISPR, virulence factors, tRNA/tmRNA
 
