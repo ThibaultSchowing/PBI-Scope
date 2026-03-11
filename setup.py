@@ -8,12 +8,12 @@ long_description = readme_file.read_text() if readme_file.exists() else ""
 setup(
     name="pbi",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="Phage Bioinformatics Interface - Tools for phage genomics database interaction",
+    author="Thibault Schowing",
+    author_email="thibault.schowing@heig-vd.ch",
+    description="Phage Bacteria Interaction (PBI) Library for sequence retrieval and analysis",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/PBI",
+    url="https://github.com/ThibaultSchowing/PBI",
     
     # Package discovery
     package_dir={"": "src"},  # Packages are under src/

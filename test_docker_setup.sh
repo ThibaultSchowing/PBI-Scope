@@ -29,7 +29,7 @@ fi
 echo ""
 
 echo -e "${BLUE}Step 3: Verifying path configuration${NC}"
-python tests/test_docker_paths.py
+python3 tests/test_docker_paths.py
 echo ""
 
 echo "=========================================="
