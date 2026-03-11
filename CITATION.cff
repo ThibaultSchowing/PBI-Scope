@@ -2,17 +2,17 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "Phage Bacteria Interaction pipeline"
-version: 0.1.0
-date-released: 2024-01-01
+version: 0.2.0
+date-released: 2026-03-11
 authors:
   - family-names: Schowing
     given-names: Thibault
     orcid: https://orcid.org/0000-0002-5096-3775
 abstract: >-
-  A proof-of-concept bioinformatics pipeline that makes phage genomic data
+  A bioinformatics pipeline that makes phage genomic data
   from PhageScope available in an efficient, structured format for training
   neural networks and AI models for phage-host interaction prediction.
-  PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB,
+  PBI integrates data from 14 phage databases (RefSeq, Genbank, PhagesDB,
   etc.) and downloads matching bacterial host genomes from NCBI RefSeq,
   consolidating everything into a queryable DuckDB database with indexed
   FASTA files.
