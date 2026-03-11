@@ -98,7 +98,7 @@ sequences = retriever.get_sequences_by_ids(
 )
 ```
 
-Open `notebooks/01_database_exploration.ipynb` to get started with the demo notebooks.
+Open [the notebooks folder](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks) to get started with the demo.
 
 ## 📓 Demo Notebooks
 
@@ -131,7 +131,7 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 
 ## 📊 Data Sources
 
-- **Phage Databases**: 14+ databases via [PhageScope](https://phagescope.deepomics.org/workspace/) (RefSeq, Genbank, PhagesDB, MillardLab, INPHARED, GOV2, MGV, GVD, IMGVR, GPD, CHVD, STV, TemPhD, IGVD)
+- **Phage Databases**: 14 databases via [PhageScope](https://phagescope.deepomics.org/workspace/) (RefSeq, Genbank, EMBL, DDBJ, PhagesDB, GOV2, MGV, GVD, IMG/VR, GPD, CHVD, STV, TemPhD, IGVD)
 - **Host Genomes**: NCBI RefSeq bacterial reference genomes (~9,000 unique assemblies attempted)
 - **Annotations**: Proteins, CRISPR arrays, AMR genes, anti-CRISPR, virulence factors, tRNA/tmRNA
 
