@@ -4,7 +4,7 @@ This directory contains Jupyter notebooks for exploring and analyzing the PBI ph
 
 ## Main Notebooks
 
-These three notebooks serve as the primary guides for working with PBI data:
+These notebooks serve as the primary guides for working with PBI data:
 
 ### 📊 `01_database_exploration.ipynb` — Database Exploration and Quality Control
 Comprehensive guide to understanding the database contents and data quality:
@@ -28,6 +28,16 @@ Complete guide to retrieving data using the PBI Python package:
 End-to-end machine learning workflow from raw data to model training:
 - **Part 1 (DataFrame approach):** EDA, feature engineering, negative example generation, Random Forest baseline
 - **Part 2 (Streaming approach):** Memory-efficient `PhageHostStreamingDataset`, `PhageHostIndexedDataset`, batch iterators, custom transforms, train/test splitting
+
+### 📦 `04_data_release_exploration.ipynb` — Data Release Smoke Test & Exploration
+Standalone notebook distributed alongside the Zenodo data release (no PBI package required — only `duckdb` and `pandas`):
+- Connect to the DuckDB database in read-only mode and verify all tables
+- Explore phage metadata: source distribution, genome length, GC content, lifestyle, host organisms
+- Inspect annotation coverage per phage (proteins, terminators, AMR genes, CRISPR, etc.)
+- Browse all CSV files in `phages/` and `hosts/` with row counts and column previews
+- Host download status from JSON files
+- Clickable links to HTML data-merging and validation reports in `reports/`
+- Example cross-table SQL queries
 
 ## Subdirectories
 
