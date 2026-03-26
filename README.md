@@ -12,7 +12,7 @@
 
 ## 🎯 What is PBI?
 
-PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) via PhageScope and downloads matching bacterial host genomes from NCBI RefSeq, consolidating everything into a queryable DuckDB database with indexed FASTA files. It provides:
+PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) via [PhageScope](https://phagescope.deepomics.org/database) and downloads matching bacterial host genomes from NCBI RefSeq, consolidating everything into a queryable DuckDB database with indexed FASTA files. It provides:
 
 - **📊 Unified Database**: ~873K phages, ~43M protein annotations in one DuckDB database
 - **🦠 Host Genomes**: NCBI RefSeq bacterial reference genomes, indexed for fast retrieval
@@ -21,7 +21,7 @@ PBI integrates data from 14+ phage databases (RefSeq, Genbank, PhagesDB, etc.) v
 - **🔬 Jupyter Lab**: Analysis container with direct database access (recommended usage)
 - **🤖 ML Ready**: Built-in tools for phage-host interaction prediction (streaming datasets, negative example generation)
 
-> **Note**: PBI is dependent on PhageScope as its primary data source. 
+> **Note**: PBI is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, unavailable data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information.
 
 ![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema.png)
 
@@ -70,7 +70,7 @@ tmux new -s pbi
 
 docker compose build pipeline
 docker compose run --rm pipeline
-# ~4 hours for PhageScope data, ~12-18 hours for host genomes
+# ~4 hours for PhageScope data, ~12-18 hours for host genomes retrieval
 ```
 
 ### 3. Start the Analysis Container
