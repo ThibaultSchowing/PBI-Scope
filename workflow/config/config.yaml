@@ -48,7 +48,7 @@ host_fasta_qc_log: "/data/logs/host_fasta_qc.csv"
 host_status_report: "/data/intermediate/csv/merged/host_status_report.csv"
 
 # Host download settings
-ncbi_email: "phage.pipeline@example.com"  # Required by NCBI - update with your email
+ncbi_email: "phage.pipeline@example.com"  # Fallback only — set NCBI_EMAIL env variable instead (see .env.example)
 max_host_download_retries: 3
 host_download_delay: 0.5  # seconds between requests
 prefer_complete_genomes: true
