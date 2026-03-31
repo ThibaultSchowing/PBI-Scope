@@ -45,7 +45,6 @@ nav:
   - Database:
       - Overview: database/overview.md
       - Host Resolution: database/host-resolution.md
-      - Validation Report: reports/database_validation.html
   - API:
       - Overview: api/overview.md
   - Reference:

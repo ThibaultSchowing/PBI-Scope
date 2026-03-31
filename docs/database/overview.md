@@ -40,8 +40,9 @@ dim_antimicrobial_resistance_genes ─┤
 
 All dimension tables link to `fact_phages` via **`Phage_ID`** foreign key, enabling comprehensive multi-dimensional analysis.
 
-Host genome information is linked via external files (`phage_host_links.csv`, `host_fasta_mapping.json`) rather than a database table.
-## Tables
+Host genome information is linked via external CSV/JSON files rather than a database table — see [Host-Phage Link Files](#host-phage-link-files-csv--json) below.
+
+## Database Tables
 
 ### Fact Table: `fact_phages`
 
@@ -172,6 +173,38 @@ Antimicrobial resistance gene annotations.
 
 **Row Count**: ~2,602 genes
 
+---
+
+## Host-Phage Link Files (CSV / JSON)
+
+> ⚠️ **These are flat files, not database tables.** Host genome data is intentionally kept outside the DuckDB database because individual host genomes can be very large. The files below provide the link between phage records and their associated bacterial host assemblies.
+
+The pipeline produces the following host-related files in `/data/processed/sequences/` (inside Docker):
+
+| File | Type | Description |
+|------|------|-------------|
+| `phage_host_candidates.csv` | CSV file | One row per (Phage_ID, token): lossless record of every host candidate parsed from the raw Host field. Used for auditing and traceability. |
+| `phage_host_assemblies.csv` | CSV file | One row per (Phage_ID, Assembly_Accession): authoritative flat mapping of phages to resolved NCBI assembly accessions. Drives genome downloads. |
+| `phage_host_links.csv` | CSV file | One row per unique (Phage_ID, Assembly_Accession) pair. Backward-compatible output used by the `pbi` package to retrieve phage–host pairs. |
+| `host_metadata.csv` | CSV file | One row per unique assembly: per-assembly metadata (level, RefSeq category, quality score, etc.). |
+| `assembly_metadata.csv` | CSV file | Detailed NCBI assembly metadata for each downloaded host genome. |
+| `host_fasta_mapping.json` | JSON file | Maps each host assembly accession (e.g. `GCF_000005845.2`) to the path of its downloaded FASTA file. Used by `SequenceRetriever` for fast on-demand access. |
+| Individual FASTA files | FASTA (`.fna`) | One file per downloaded host assembly, stored under `hosts/`. |
+
+### Key Columns in `phage_host_links.csv`
+
+| Column | Description |
+|--------|-------------|
+| `Phage_ID` | Phage identifier (matches `fact_phages.Phage_ID`) |
+| `Assembly_Accession` | Resolved NCBI assembly accession |
+| `Host_Raw` | Original un-parsed Host field (traceability) |
+| `Confidence` | Float 0–1 indicating resolution confidence |
+| `Resolution_Source` | How the accession was resolved (`accession_in_host_field` / `species_to_taxid_to_assembly` / `fallback`) |
+
+See [Host Resolution Details](host-resolution.md) for a full description of how host fields are parsed and resolved to NCBI assemblies.
+
+---
+
 ## Data Sources
 
 The database integrates data from **14 major phage databases** via PhageScope:
@@ -293,6 +326,17 @@ Reports are generated in the `workflow/reports/` directory after running the pip
 - Phage Metadata Report
 - Annotated Proteins Report
 - And more for each data type
+
+### Database Validation Report
+
+!!! note "Report scope"
+    The validation report below was generated **before host data was added** to the pipeline. It reflects the state of the DuckDB database (all phage tables) and does not yet include host-phage link statistics.
+
+The full interactive report is embedded below. You can also [open it in a new tab](../reports/database_validation.html){target="_blank"}.
+
+<div style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin: 1rem 0;">
+<iframe src="../../reports/database_validation.html" width="100%" height="900px" style="border: none; display: block;"></iframe>
+</div>
 
 ## Sequence Files
 
