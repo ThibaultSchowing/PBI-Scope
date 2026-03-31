@@ -197,7 +197,7 @@ See the [Host Resolution Details](../database/host-resolution.md) page for full 
 
 The REST API is built with [FastAPI](https://fastapi.tiangolo.com/) and provides HTTP endpoints for querying the database and retrieving sequences.
 
-> ⚠️ **Note**: The REST API is currently **untested** and is not the recommended way to interact with PBI data. For analysis and machine learning, use the [analysis container](analysis-guide.md) with the `pbi` Python package directly.
+> ⚠️ **Note**: The REST API is currently a **Work In Progress** and is not the recommended way to interact with PBI data. It has not been updated for host management. For analysis and machine learning, use the [analysis container](analysis-guide.md) with the `pbi` Python package directly.
 
 ### How the API Works
 

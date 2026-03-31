@@ -45,7 +45,7 @@ The recommended (and primary) way to run PBI is via Docker. See the [Installatio
 
     ---
 
-    REST API reference. Note: the API is currently **untested** and not the recommended way to interact with the data.
+    REST API reference. ⚠️ **Work In Progress** — the API is not yet updated for host management and is not the recommended way to interact with data.
 
 </div>
 
@@ -151,7 +151,7 @@ All phage dimension tables link to `fact_phages` via **`Phage_ID`**. Host genome
 | **Sequences** | ✅ Complete | Indexed FASTA files (phages, proteins, hosts) |
 | **Docker** | ✅ Complete | Production-ready containers |
 | **Python Package** | 🔧 Active Development | Core functionality available |
-| **REST API** | ⚠️ Untested | Basic endpoints implemented, not validated |
+| **REST API** | 🚧 Work In Progress | Basic endpoints implemented; not tested, not updated for host management |
 | **Documentation** | 🔧 Active Development | Continuously improving |
 
 ## Need Help?

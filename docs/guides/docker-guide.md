@@ -14,11 +14,12 @@ The PBI Docker setup provides a containerized environment with three specialized
    - Generates indexed FASTA files and validation reports
    - Runs once to create the database, then can be rerun for updates
 
-2. **API Service** (`pbi-api`)
+2. **API Service** (`pbi-api`) — ⚠️ *Work In Progress*
    - Provides REST API endpoints for database queries
    - Returns data in JSON and FASTA formats
-   - Suitable for external integrations and programmatic access
-   - Interactive API documentation at `/docs`
+   - **Not yet updated for host management** — host endpoints are not available
+   - Interactive API documentation at `/docs` (once running)
+   - See the [API documentation](../api/overview.md) for current status
 
 3. **Analysis Service** (`pbi-analysis`)
    - Jupyter Lab environment for direct data access

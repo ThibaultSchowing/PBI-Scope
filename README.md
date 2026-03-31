@@ -129,7 +129,7 @@ Three notebooks in `notebooks/` demonstrate the main workflows:
 **Services (docker-compose.yml):**
 - **Pipeline**: Snakemake workflow to build the database (~225 GB data total)
 - **Analysis**: Jupyter Lab with `pbi` package pre-installed (port 8888)
-- **API**: REST API for external integrations (port 8000, currently untested)
+- **API**: REST API for external integrations (port 8000, currently a Work In Progress — not updated for host management)
 
 ## 📊 Data Sources
 
