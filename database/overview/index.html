@@ -896,15 +896,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tables" class="md-nav__link">
+  <a href="#database-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tables
+        Database Tables
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Tables">
+    <nav class="md-nav" aria-label="Database Tables">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1020,6 +1020,34 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#host-phage-link-files-csv-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host-Phage Link Files (CSV / JSON)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Host-Phage Link Files (CSV / JSON)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-columns-in-phage_host_linkscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Columns in phage_host_links.csv
+      
+    </span>
+  </a>
   
 </li>
         
@@ -1184,6 +1212,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#database-validation-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Validation Report
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1313,34 +1352,6 @@
     
   
     Host Resolution
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reports/database_validation.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Validation Report
   
 
     
@@ -1742,15 +1753,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tables" class="md-nav__link">
+  <a href="#database-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tables
+        Database Tables
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Tables">
+    <nav class="md-nav" aria-label="Database Tables">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1866,6 +1877,34 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#host-phage-link-files-csv-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host-Phage Link Files (CSV / JSON)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Host-Phage Link Files (CSV / JSON)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-columns-in-phage_host_linkscsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Columns in phage_host_links.csv
+      
+    </span>
+  </a>
   
 </li>
         
@@ -2030,6 +2069,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#database-validation-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Validation Report
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2188,8 +2238,8 @@
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                  dim_crispr_array ─┘
 </code></pre></div>
 <p>All dimension tables link to <code>fact_phages</code> via <strong><code>Phage_ID</code></strong> foreign key, enabling comprehensive multi-dimensional analysis.</p>
-<p>Host genome information is linked via external files (<code>phage_host_links.csv</code>, <code>host_fasta_mapping.json</code>) rather than a database table.</p>
-<h2 id="tables">Tables<a class="headerlink" href="#tables" title="Permanent link">&para;</a></h2>
+<p>Host genome information is linked via external CSV/JSON files rather than a database table — see <a href="#host-phage-link-files-csv--json">Host-Phage Link Files</a> below.</p>
+<h2 id="database-tables">Database Tables<a class="headerlink" href="#database-tables" title="Permanent link">&para;</a></h2>
 <h3 id="fact-table-fact_phages">Fact Table: <code>fact_phages</code><a class="headerlink" href="#fact-table-fact_phages" title="Permanent link">&para;</a></h3>
 <p>Central table containing core phage metadata.</p>
 <p><strong>Key Columns:</strong>
@@ -2280,6 +2330,91 @@
 - <code>gene_name</code>: AMR gene name
 - <code>resistance_type</code>: Type of resistance</p>
 <p><strong>Row Count</strong>: ~2,602 genes</p>
+<hr />
+<h2 id="host-phage-link-files-csv-json">Host-Phage Link Files (CSV / JSON)<a class="headerlink" href="#host-phage-link-files-csv-json" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>⚠️ <strong>These are flat files, not database tables.</strong> Host genome data is intentionally kept outside the DuckDB database because individual host genomes can be very large. The files below provide the link between phage records and their associated bacterial host assemblies.</p>
+</blockquote>
+<p>The pipeline produces the following host-related files in <code>/data/processed/sequences/</code> (inside Docker):</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>phage_host_candidates.csv</code></td>
+<td>CSV file</td>
+<td>One row per (Phage_ID, token): lossless record of every host candidate parsed from the raw Host field. Used for auditing and traceability.</td>
+</tr>
+<tr>
+<td><code>phage_host_assemblies.csv</code></td>
+<td>CSV file</td>
+<td>One row per (Phage_ID, Assembly_Accession): authoritative flat mapping of phages to resolved NCBI assembly accessions. Drives genome downloads.</td>
+</tr>
+<tr>
+<td><code>phage_host_links.csv</code></td>
+<td>CSV file</td>
+<td>One row per unique (Phage_ID, Assembly_Accession) pair. Backward-compatible output used by the <code>pbi</code> package to retrieve phage–host pairs.</td>
+</tr>
+<tr>
+<td><code>host_metadata.csv</code></td>
+<td>CSV file</td>
+<td>One row per unique assembly: per-assembly metadata (level, RefSeq category, quality score, etc.).</td>
+</tr>
+<tr>
+<td><code>assembly_metadata.csv</code></td>
+<td>CSV file</td>
+<td>Detailed NCBI assembly metadata for each downloaded host genome.</td>
+</tr>
+<tr>
+<td><code>host_fasta_mapping.json</code></td>
+<td>JSON file</td>
+<td>Maps each host assembly accession (e.g. <code>GCF_000005845.2</code>) to the path of its downloaded FASTA file. Used by <code>SequenceRetriever</code> for fast on-demand access.</td>
+</tr>
+<tr>
+<td>Individual FASTA files</td>
+<td>FASTA (<code>.fna</code>)</td>
+<td>One file per downloaded host assembly, stored under <code>hosts/</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-columns-in-phage_host_linkscsv">Key Columns in <code>phage_host_links.csv</code><a class="headerlink" href="#key-columns-in-phage_host_linkscsv" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code></td>
+<td>Phage identifier (matches <code>fact_phages.Phage_ID</code>)</td>
+</tr>
+<tr>
+<td><code>Assembly_Accession</code></td>
+<td>Resolved NCBI assembly accession</td>
+</tr>
+<tr>
+<td><code>Host_Raw</code></td>
+<td>Original un-parsed Host field (traceability)</td>
+</tr>
+<tr>
+<td><code>Confidence</code></td>
+<td>Float 0–1 indicating resolution confidence</td>
+</tr>
+<tr>
+<td><code>Resolution_Source</code></td>
+<td>How the accession was resolved (<code>accession_in_host_field</code> / <code>species_to_taxid_to_assembly</code> / <code>fallback</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../host-resolution/">Host Resolution Details</a> for a full description of how host fields are parsed and resolved to NCBI assemblies.</p>
+<hr />
 <h2 id="data-sources">Data Sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
 <p>The database integrates data from <strong>14 major phage databases</strong> via PhageScope:</p>
 <table>
@@ -2465,6 +2600,16 @@
 - Phage Metadata Report
 - Annotated Proteins Report
 - And more for each data type</p>
+<h3 id="database-validation-report">Database Validation Report<a class="headerlink" href="#database-validation-report" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Report scope</p>
+<p>The validation report below was generated <strong>before host data was added</strong> to the pipeline. It reflects the state of the DuckDB database (all phage tables) and does not yet include host-phage link statistics.</p>
+</div>
+<p>The full interactive report is embedded below. You can also <a href="../../reports/database_validation.html" target="_blank">open it in a new tab</a>.</p>
+<div style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin: 1rem 0;">
+<iframe src="../../reports/database_validation.html" width="100%" height="900px" style="border: none; display: block;"></iframe>
+</div>
+
 <h2 id="sequence-files">Sequence Files<a class="headerlink" href="#sequence-files" title="Permanent link">&para;</a></h2>
 <p>In addition to the database, the pipeline generates indexed FASTA files:</p>
 <h3 id="phage-genomes">Phage Genomes<a class="headerlink" href="#phage-genomes" title="Permanent link">&para;</a></h3>
