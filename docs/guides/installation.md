@@ -53,21 +53,18 @@ cd PBI
 
 ## Step 3: Configure the Pipeline
 
-Before running, configure your NCBI credentials (required for host genome downloads):
-
-Copy the example config (if it exists) or edit directly:
+Before running, set your NCBI credentials as environment variables (required for host genome downloads). Using environment variables keeps sensitive credentials out of version-controlled config files.
 
 ```bash
-# Edit the pipeline configuration
-nano workflow/config/config.yaml
+export NCBI_EMAIL="your.email@example.com"   # Required by NCBI Terms of Service
+export NCBI_API_KEY="YOUR_NCBI_API_KEY"      # Optional but strongly recommended (10x faster)
 ```
 
-Key settings to configure:
+Alternatively, copy the provided example and create a `.env` file in the project root (Docker Compose reads it automatically):
 
-```yaml
-ncbi:
-  email: your.email@example.com   # Required by NCBI Terms of Service
-  api_key: "YOUR_NCBI_API_KEY"    # Optional but strongly recommended (10x faster)
+```bash
+cp .env.example .env
+# Edit .env and fill in your credentials
 ```
 
 > **NCBI API Key**: Get a free API key at https://www.ncbi.nlm.nih.gov/account/ — it increases the download rate limit from 3 to 10 requests/second, significantly speeding up the host genome download stage.
@@ -143,10 +140,20 @@ No password is required (local development mode). Start with the demo notebooks 
 | Variable | Purpose | Default | Required |
 |----------|---------|---------|----------|
 | `DATA_PATH` | Path for API/analysis to find processed data | `/data/processed` | Set automatically in Docker |
-| `NCBI_EMAIL` | Your email for NCBI API | — | For genome downloads |
+| `NCBI_EMAIL` | Your email for NCBI API | — | Yes, for genome downloads |
 | `NCBI_API_KEY` | NCBI API key (increases rate limit) | — | Optional but recommended |
 
-These are configured in `docker-compose.yml` and passed automatically to the containers.
+`NCBI_EMAIL` and `NCBI_API_KEY` must be set in your shell **before** running Docker Compose, or placed in a `.env` file at the project root. Docker Compose reads the `.env` file automatically and passes both variables into the container. `DATA_PATH` and other internal variables are configured in `docker-compose.yml` and set automatically.
+
+```bash
+# Option A: export in your current shell session
+export NCBI_EMAIL="your.email@example.com"
+export NCBI_API_KEY="your-api-key"
+
+# Option B: .env file in the project root (persists across sessions)
+cp .env.example .env
+# then edit .env with your values
+```
 
 ## Troubleshooting
 
