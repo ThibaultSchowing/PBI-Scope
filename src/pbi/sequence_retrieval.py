@@ -2,15 +2,16 @@
 
 import duckdb
 from pyfaidx import Fasta
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional, Union
 import pandas as pd
 import logging
 from pathlib import Path
 import threading
 import time
-from typing import Optional
 from collections import OrderedDict
 from Bio.SeqUtils import gc_fraction
+
+from .fasta_utils import assemble_genome, get_genome_stats
 
 logging.basicConfig(
     level=logging.INFO,
@@ -427,39 +428,225 @@ class SequenceRetriever:
         
         return self._host_fasta_cache[host_id]
     
-    def get_host_sequence(self, host_id: str) -> str:
+    def get_host_sequence(self, host_id: str, contig_mode: str = "first") -> str:
         """
-        Get sequence for a specific host ID
-        
+        Get sequence for a specific host ID.
+
         Works with both legacy single-file mode and new mapping mode.
         In mapping mode, loads individual host files on-demand.
-        
+
         Args:
-            host_id: Host identifier
-            
+            host_id: Host identifier.
+            contig_mode: How to handle multi-contig FASTA files.
+
+                * ``"first"`` *(default)* – return only the first (longest)
+                  contig.  Preserves the original single-string behaviour.
+                * ``"concat"`` – concatenate all contigs into one string
+                  (contigs sorted by length desc, then header asc).  Useful
+                  when the host genome is fragmented across scaffolds.
+
+                .. note::
+                    For the legacy single-merged-file mode the host entry
+                    is always a single record, so both modes are equivalent.
+
         Returns:
-            Host sequence as string
-            
+            Host sequence as a single string.
+
         Raises:
-            KeyError: If host_id not found
+            KeyError: If *host_id* is not found.
+            ValueError: If *contig_mode* is not a recognised value.
         """
         if not self._has_host_data:
             raise ValueError("Host FASTA not configured")
-        
+
+        if contig_mode not in ("first", "concat"):
+            raise ValueError(
+                f"contig_mode must be 'first' or 'concat', got '{contig_mode}'."
+            )
+
         if self._use_host_mapping:
             # New mapping mode - load individual file
             fasta_obj = self._get_host_fasta_for_id(host_id)
-            # The fasta file should contain the host genome
-            # Get the first (and typically only) sequence
-            keys = list(fasta_obj.keys())
-            if not keys:
+            if not fasta_obj.keys():
                 raise KeyError(f"No sequences found in host file for {host_id}")
-            # Return the sequence from the file
-            return str(fasta_obj[keys[0]][:].seq)
+            return assemble_genome(fasta_obj, mode=contig_mode)
         else:
             # Legacy mode - use single merged file
             return str(self.host_fasta[host_id][:].seq)
     
+    def get_host_genome(
+        self,
+        host_id: str,
+        mode: str = "concat",
+        gap: int = 0,
+        order: str = "length_desc",
+    ) -> Union[str, List[str], Dict[str, str]]:
+        """Retrieve the full genome for a host, handling multi-contig FASTA files.
+
+        This is the preferred method when a host genome is fragmented across
+        multiple scaffolds or chromosomes.
+
+        In mapping mode (*host_mapping_path* was provided at construction time),
+        each host has its own FASTA file that may contain many contigs.  This
+        method assembles them according to *mode* and *order*.
+
+        In legacy single-file mode, the host entry is always a single record,
+        so *mode* has no practical effect (all modes return equivalent results).
+
+        Args:
+            host_id: Host identifier (must exist in the host mapping).
+            mode: Assembly mode – see :func:`~pbi.fasta_utils.assemble_genome`
+                for full documentation.
+
+                * ``"concat"`` *(default)* – all contigs joined into one string.
+                * ``"first"`` – only the first contig (longest by default).
+                * ``"list"`` – list of per-contig strings.
+                * ``"dict"`` – ``{header: sequence}`` mapping.
+
+            gap: Number of ``N`` characters to insert between contigs when
+                *mode* is ``"concat"``.  Default is ``0``.
+            order: Contig ordering.  ``"length_desc"`` *(default)* or
+                ``"file"``.  See :func:`~pbi.fasta_utils.assemble_genome`.
+
+        Returns:
+            * ``str`` when *mode* is ``"concat"`` or ``"first"``.
+            * ``list[str]`` when *mode* is ``"list"``.
+            * ``dict[str, str]`` when *mode* is ``"dict"``.
+
+        Raises:
+            ValueError: If host data is not configured or arguments are invalid.
+            KeyError: If *host_id* is not found.
+
+        Example:
+            >>> # Concatenated genome (default):
+            >>> seq = retriever.get_host_genome("GCF_000005845")
+
+            >>> # With 100-N gap between scaffolds:
+            >>> seq = retriever.get_host_genome("GCF_000005845", gap=100)
+
+            >>> # List of individual contig sequences:
+            >>> contigs = retriever.get_host_genome("GCF_000005845", mode="list")
+
+            >>> # Statistics only (no assembly):
+            >>> stats = retriever.get_host_genome_stats("GCF_000005845")
+        """
+        if not self._has_host_data:
+            raise ValueError("Host FASTA not configured")
+
+        if self._use_host_mapping:
+            fasta_obj = self._get_host_fasta_for_id(host_id)
+            if not fasta_obj.keys():
+                raise KeyError(f"No sequences found in host file for {host_id}")
+            return assemble_genome(fasta_obj, mode=mode, gap=gap, order=order)
+        else:
+            # Legacy mode – always a single record; all modes are equivalent.
+            seq = str(self.host_fasta[host_id][:].seq)
+            if mode == "list":
+                return [seq]
+            if mode == "dict":
+                return {host_id: seq}
+            return seq
+
+    def get_host_genome_stats(
+        self,
+        host_id: str,
+        order: str = "length_desc",
+    ) -> Dict[str, object]:
+        """Return contig statistics for a host genome FASTA.
+
+        Useful for inspecting assembly fragmentation without loading the full
+        sequence data.
+
+        Args:
+            host_id: Host identifier.
+            order: Contig ordering for the returned *lengths* list.
+                ``"length_desc"`` *(default)* or ``"file"``.
+
+        Returns:
+            dict with keys:
+
+            * ``"contig_count"`` (:class:`int`) – number of records.
+            * ``"lengths"`` (:class:`list[int]`) – per-contig lengths.
+            * ``"total_length"`` (:class:`int`) – sum of all lengths.
+
+        Raises:
+            ValueError: If host data is not configured.
+            KeyError: If *host_id* is not found.
+
+        Example:
+            >>> stats = retriever.get_host_genome_stats("GCF_000005845")
+            >>> print(stats["contig_count"])   # e.g. 7
+            >>> print(stats["total_length"])   # e.g. 5400000
+        """
+        if not self._has_host_data:
+            raise ValueError("Host FASTA not configured")
+
+        if self._use_host_mapping:
+            fasta_obj = self._get_host_fasta_for_id(host_id)
+            return get_genome_stats(fasta_obj, order=order)
+        else:
+            seq = str(self.host_fasta[host_id][:].seq)
+            length = len(seq)
+            return {"contig_count": 1, "lengths": [length], "total_length": length}
+
+    def get_phage_genome(
+        self,
+        phage_id: str,
+        mode: str = "concat",
+        gap: int = 0,
+        order: str = "length_desc",
+    ) -> Union[str, List[str], Dict[str, str]]:
+        """Retrieve the full genome for a phage, handling multi-contig cases.
+
+        Most phage genomes are single-contig; this method handles the rare
+        cases where a phage FASTA entry is split across multiple records.
+
+        When there is exactly one record for *phage_id*, all modes return
+        equivalent results (a single sequence string / single-element
+        list or dict).
+
+        .. note::
+            This method operates on the **per-phage record** looked up by
+            *phage_id* key.  It does *not* attempt to group records that share
+            a common prefix.  For the typical single-record phage case,
+            ``get_phage_genome(id)`` is equivalent to ``get_phage_sequence(id)``.
+
+        Args:
+            phage_id: Phage identifier (must exist as a key in the phage FASTA).
+            mode: Assembly mode.  See :func:`~pbi.fasta_utils.assemble_genome`.
+                Default is ``"concat"``.
+            gap: Gap N-characters between contigs for ``mode="concat"``.
+                Default is ``0``.
+            order: Contig ordering.  ``"length_desc"`` *(default)* or
+                ``"file"``.
+
+        Returns:
+            * ``str`` when *mode* is ``"concat"`` or ``"first"``.
+            * ``list[str]`` when *mode* is ``"list"``.
+            * ``dict[str, str]`` when *mode* is ``"dict"``.
+
+        Raises:
+            KeyError: If *phage_id* is not found in the phage FASTA.
+
+        Example:
+            >>> seq = retriever.get_phage_genome("NC_000866")
+            >>> # For a typical single-contig phage this is the same as:
+            >>> seq = str(retriever.phage_fasta["NC_000866"][:].seq)
+        """
+        try:
+            seq = str(self.phage_fasta[phage_id][:].seq)
+        except KeyError:
+            raise KeyError(f"Phage ID '{phage_id}' not found in phage FASTA.")
+
+        # Phage FASTA is keyed by accession – one key → one record.
+        # Wrap into a minimal single-entry container to honour the mode API.
+        if mode == "list":
+            return [seq]
+        if mode == "dict":
+            return {phage_id: seq}
+        # "first" and "concat" both reduce to the single sequence.
+        return seq
+
     def wait_until_ready(self, timeout: Optional[float] = None):
         """
         Wait for background loading to complete
@@ -662,42 +849,75 @@ class SequenceRetriever:
         
         return self.get_host_sequences(query)
     
-    def get_phage_host_pairs(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
+    def get_phage_host_pairs(
+        self,
+        where_clause: str = None,
+        limit: Optional[int] = None,
+        host_contig_mode: str = "first",
+        phage_contig_mode: str = "first",
+    ) -> pd.DataFrame:
         """
-        Get phage-host interaction pairs with sequences and metadata
-        
+        Get phage-host interaction pairs with sequences and metadata.
+
         Args:
-            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
-            limit: Optional limit on number of pairs
-        
+            where_clause: Optional SQL WHERE clause to filter pairs (without
+                the ``WHERE`` keyword).
+            limit: Optional limit on number of pairs.
+            host_contig_mode: How to handle multi-contig host FASTA files.
+
+                * ``"first"`` *(default)* – return only the first/largest
+                  contig (original behaviour; fully backward-compatible).
+                * ``"concat"`` – concatenate all contigs into one string
+                  (sorted by length desc).  Use this to include the full
+                  host genome even when it is split across scaffolds.
+
+            phage_contig_mode: How to handle phage sequences.  Currently
+                phage FASTA records are always single-contig, so both
+                ``"first"`` and ``"concat"`` are equivalent.  Provided for
+                forward-compatibility.
+
         Returns:
-            DataFrame with columns: Phage_ID, Host_ID, Phage_Source, Phage_Length, Phage_GC,
-                                    Phage_Taxonomy, Phage_Completeness, Phage_Lifestyle, Phage_Cluster,
-                                    Phage_Subcluster, Species_Name, Host_Assembly_Level, Host_Length,
-                                    Host_GC, Host_RefSeq_Category, Phage_Sequence, Host_Sequence
-        
+            DataFrame with columns: Phage_ID, Host_ID, Phage_Source,
+            Phage_Length, Phage_GC, Phage_Taxonomy, Phage_Completeness,
+            Phage_Lifestyle, Phage_Cluster, Phage_Subcluster, Species_Name,
+            Host_Assembly_Level, Host_Length, Host_GC, Host_RefSeq_Category,
+            Phage_Sequence, Host_Sequence.
+
         Example:
-            # Get all pairs
+            # Get all pairs (default – single contig per sequence)
             pairs = retriever.get_phage_host_pairs()
-            
+
+            # Full host genome even for fragmented assemblies
+            pairs = retriever.get_phage_host_pairs(host_contig_mode="concat")
+
+            # Full host genome with 100-N gaps between scaffolds
+            # (use get_phage_host_pairs_iterator for gap control)
+
             # Get pairs for specific lifestyle
             pairs = retriever.get_phage_host_pairs("p.Lifestyle = 'Lytic'", limit=1000)
-            
-            # Get pairs from specific source
-            pairs = retriever.get_phage_host_pairs("p.Source_DB = 'PhagesDB'")
-            
+
             # Get pairs with complete host genomes
             pairs = retriever.get_phage_host_pairs("h.Assembly_Level = 'Complete Genome'")
         """
         if not self._has_host_data:
             raise ValueError("Host data not available - run host genome download workflow first")
-        
+
+        # Validate contig_mode arguments early
+        for mode_name, mode_val in (
+            ("host_contig_mode", host_contig_mode),
+            ("phage_contig_mode", phage_contig_mode),
+        ):
+            if mode_val not in ("first", "concat"):
+                raise ValueError(
+                    f"{mode_name} must be 'first' or 'concat', got '{mode_val}'."
+                )
+
         # Ensure FASTA files are loaded (phage always needs to be loaded)
         _ = self.phage_fasta
         # For legacy mode, ensure host FASTA is loaded
         if not self._use_host_mapping:
             _ = self.host_fasta
-        
+
         # Build query
         query = """
         SELECT DISTINCT
@@ -720,33 +940,36 @@ class SequenceRetriever:
         JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
-        
+
         # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
         where_conditions, limit_offset = parse_where_clause(where_clause)
-        
+
         if where_conditions:
             query += f" WHERE {where_conditions}"
-        
+
         # If limit parameter is provided, it takes precedence over any LIMIT in where_clause
         if limit:
             query += f" LIMIT {limit}"
         elif limit_offset:
             query += f" {limit_offset}"
-        
+
         logging.info(f"🔍 Querying phage-host pairs...")
         result = self.conn.execute(query).fetchdf()
-        
+
         logging.info(f"📊 Found {len(result):,} phage-host pairs")
-        
+
         # Fetch sequences
         phage_ids = result['Phage_ID'].tolist()
         host_ids = result['Host_ID'].tolist()
-        
-        logging.info(f"📥 Fetching sequences for {len(phage_ids):,} phages and {len(set(host_ids)):,} unique hosts")
-        
+
+        logging.info(
+            f"📥 Fetching sequences for {len(phage_ids):,} phages and "
+            f"{len(set(host_ids)):,} unique hosts"
+        )
+
         phage_seqs = {}
         host_seqs = {}
-        
+
         # Fetch phage sequences
         for phage_id in phage_ids:
             try:
@@ -754,29 +977,29 @@ class SequenceRetriever:
                 phage_seqs[phage_id] = str(seq)
             except KeyError:
                 phage_seqs[phage_id] = None
-        
+
         # Fetch host sequences (unique only)
         for host_id in set(host_ids):
             try:
-                seq = self.get_host_sequence(host_id)
+                seq = self.get_host_sequence(host_id, contig_mode=host_contig_mode)
                 host_seqs[host_id] = seq
             except KeyError:
                 host_seqs[host_id] = None
-        
+
         # Add sequences to result
         result['Phage_Sequence'] = result['Phage_ID'].map(phage_seqs)
         result['Host_Sequence'] = result['Host_ID'].map(host_seqs)
-        
+
         # Filter out rows with missing sequences
         before_count = len(result)
         result = result.dropna(subset=['Phage_Sequence', 'Host_Sequence'])
         after_count = len(result)
-        
+
         if before_count > after_count:
             logging.warning(f"⚠️  Removed {before_count - after_count} pairs with missing sequences")
-        
+
         logging.info(f"✅ Retrieved {len(result):,} complete phage-host pairs with sequences")
-        
+
         return result
     
     def _fetch_host_sequences(self, host_ids: list) -> pd.DataFrame:
@@ -1008,38 +1231,79 @@ class SequenceRetriever:
         """Print help information"""
         help_text = """
         SequenceRetriever Help:
-        
-        Methods:
+
+        Core sequence retrieval methods:
             - get_phage_sequences(query: str, limit: Optional[int] = None) -> pd.DataFrame
             - get_protein_sequences(query: str, limit: Optional[int] = None) -> pd.DataFrame
             - get_host_sequences(query: str, limit: Optional[int] = None) -> pd.DataFrame
-            - get_phage_host_pairs(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
-            - get_sequences_by_ids(phage_ids: Optional[List[str]] = None, protein_ids: Optional[List[str]] = None) -> Dict
+            - get_host_sequence(host_id: str, contig_mode: str = "first") -> str
+                  contig_mode="first"   : return only the first/largest contig (default)
+                  contig_mode="concat"  : concatenate all contigs into one string
+
+        Full-genome retrieval (multi-contig support):
+            - get_host_genome(host_id, mode="concat", gap=0, order="length_desc")
+                  Retrieve complete host genome even when split across scaffolds.
+                  mode="concat"  : all contigs joined into one string (default)
+                  mode="first"   : only the first/largest contig
+                  mode="list"    : list of per-contig strings
+                  mode="dict"    : {header: sequence} mapping
+                  gap=N          : insert N "N" characters between contigs
+                  order="length_desc" : sort by length desc (default, deterministic)
+                  order="file"        : preserve FASTA file order
+            - get_host_genome_stats(host_id, order="length_desc") -> dict
+                  Returns {"contig_count", "lengths", "total_length"}
+            - get_phage_genome(phage_id, mode="concat", gap=0, order="length_desc")
+                  Same interface as get_host_genome; for phages (usually single-contig).
+
+        Pair retrieval methods:
+            - get_phage_host_pairs(where_clause=None, limit=None,
+                                   host_contig_mode="first", phage_contig_mode="first")
+                  -> pd.DataFrame  with Phage_Sequence, Host_Sequence columns
+                  Use host_contig_mode="concat" for full fragmented host genomes.
+            - get_phage_host_pairs_iterator(where_clause=None, batch_size=1000,
+                                            host_contig_mode="first", phage_contig_mode="first")
+                  -> iterator of DataFrame batches (memory-efficient)
+
+        Metadata methods:
+            - get_sequences_by_ids(phage_ids, protein_ids) -> Dict
             - get_protein_sequences_by_phage(phage_id: str) -> pd.DataFrame
-            - get_phage_metadata(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
-            - get_host_metadata(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
-            - get_phage_host_metadata(where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame
-            - export_fasta(df: pd.DataFrame, output_path: str, id_col: str = 'Phage_ID')
+            - get_phage_metadata(where_clause=None, limit=None) -> pd.DataFrame
+            - get_host_metadata(where_clause=None, limit=None) -> pd.DataFrame
+            - get_phage_host_metadata(where_clause=None, limit=None) -> pd.DataFrame
+            - export_fasta(df, output_path, id_col="Phage_ID")
             - get_stats() -> Dict
             - close()
-        
+
         Usage Examples:
-            # Sequences
-            retriever = SequenceRetriever(db_path, phage_fasta_path, protein_fasta_path)
-            phage_df = retriever.get_phage_sequences("SELECT Phage_ID FROM fact_phages WHERE Length > 50000", limit=100)
-            protein_df = retriever.get_protein_sequences("SELECT Protein_ID FROM dim_proteins WHERE Molecular_weight > 50000", limit=100)
-            
-            # Metadata
-            phage_meta = retriever.get_phage_metadata("Source_DB = 'PhagesDB'", limit=100)
-            host_meta = retriever.get_host_metadata("Species_Name LIKE '%Escherichia%'")
-            pairs_meta = retriever.get_phage_host_metadata("p.Lifestyle = 'Lytic'")
-            
-            # Phage-host pairs with sequences and metadata
-            pairs = retriever.get_phage_host_pairs("p.Source_DB = 'PhagesDB'", limit=100)
-            
-            # Export
-            retriever.export_fasta(phage_df, "output_phages.fasta", id_col='Phage_ID')
-            stats = retriever.get_stats()
+            # Connect
+            retriever = SequenceRetriever(db_path, phage_fasta_path, protein_fasta_path,
+                                          host_mapping_path=host_mapping_path)
+
+            # Standard sequence retrieval (unchanged)
+            phage_df = retriever.get_phage_sequences(
+                "SELECT Phage_ID FROM fact_phages WHERE Length > 50000", limit=100)
+
+            # Get full host genome (multi-contig safe)
+            full_genome = retriever.get_host_genome("GCF_000005845")
+            print(len(full_genome), "bp total")
+
+            # Inspect contig fragmentation
+            stats = retriever.get_host_genome_stats("GCF_000005845")
+            print(stats["contig_count"], "contigs,", stats["total_length"], "bp total")
+
+            # Phage-host pairs with concatenated host genomes
+            pairs = retriever.get_phage_host_pairs(
+                "p.Lifestyle = 'Lytic'", limit=100, host_contig_mode="concat")
+
+            # Batch iterator with full host genomes
+            for batch_df in retriever.get_phage_host_pairs_iterator(
+                    host_contig_mode="concat", batch_size=500):
+                print(f"Batch: {len(batch_df)} pairs, "
+                      f"host genome sizes: {batch_df['Host_Sequence'].str.len().describe()}")
+
+            # Export, stats, close
+            retriever.export_fasta(phage_df, "output_phages.fasta", id_col="Phage_ID")
+            retriever.get_stats()
             retriever.close()
         """
         print(help_text)
@@ -1148,39 +1412,71 @@ class SequenceRetriever:
     def get_phage_host_pairs_iterator(
         self,
         where_clause: Optional[str] = None,
-        batch_size: int = 1000
+        batch_size: int = 1000,
+        host_contig_mode: str = "first",
+        phage_contig_mode: str = "first",
     ):
-        """
-        Get an iterator that yields batches of phage-host pairs as DataFrames.
-        
+        """Get an iterator that yields batches of phage-host pairs as DataFrames.
+
         This provides a simple memory-efficient way to process large datasets
         in batches without loading everything into memory at once.
         Alternative for non-PyTorch workflows.
-        
+
         Args:
-            where_clause: Optional SQL WHERE clause to filter pairs (without WHERE keyword)
-            batch_size: Number of pairs to fetch per batch (default: 1000)
-            
+            where_clause: Optional SQL WHERE clause to filter pairs (without
+                the ``WHERE`` keyword).
+            batch_size: Number of pairs to fetch per batch (default: 1000).
+            host_contig_mode: How to handle multi-contig host FASTA files.
+
+                * ``"first"`` *(default)* – return only the first/largest
+                  contig (original behaviour; fully backward-compatible).
+                * ``"concat"`` – concatenate all contigs into one string
+                  (sorted by length desc).  Use this to include the full
+                  host genome even when it is split across scaffolds.
+
+            phage_contig_mode: How to handle phage sequences.  Currently
+                phage FASTA records are always single-contig, so both
+                ``"first"`` and ``"concat"`` are equivalent.  Provided for
+                forward-compatibility.
+
         Yields:
-            DataFrame batches containing phage-host pairs with sequences and metadata
-            
+            DataFrame batches containing phage-host pairs with sequences and
+            metadata.  The ``Host_Sequence`` column will contain the
+            concatenated genome when *host_contig_mode* is ``"concat"``.
+
         Example:
+            >>> # Default – single contig per host (original behaviour)
             >>> for batch_df in retriever.get_phage_host_pairs_iterator(
             ...     where_clause="Confidence > 0.8",
-            ...     batch_size=1000
+            ...     batch_size=1000,
             ... ):
-            ...     # Process batch DataFrame
             ...     print(f"Processing {len(batch_df)} pairs")
-            ...     # Do feature extraction, analysis, etc.
+
+            >>> # Full concatenated host genome
+            >>> for batch_df in retriever.get_phage_host_pairs_iterator(
+            ...     host_contig_mode="concat",
+            ...     batch_size=500,
+            ... ):
+            ...     print(batch_df[["Phage_ID", "Host_ID", "Host_Sequence"]].head())
         """
         if not self._has_host_data:
             raise ValueError("Host data not available - run host genome download workflow first")
-        
+
+        # Validate contig_mode arguments early
+        for mode_name, mode_val in (
+            ("host_contig_mode", host_contig_mode),
+            ("phage_contig_mode", phage_contig_mode),
+        ):
+            if mode_val not in ("first", "concat"):
+                raise ValueError(
+                    f"{mode_name} must be 'first' or 'concat', got '{mode_val}'."
+                )
+
         # Ensure FASTA files are loaded
         _ = self.phage_fasta
         if not self._use_host_mapping:
             _ = self.host_fasta
-        
+
         # Build query
         query = """
         SELECT DISTINCT
@@ -1203,74 +1499,85 @@ class SequenceRetriever:
         JOIN fact_phages p ON pha.Phage_ID = p.Phage_ID
         JOIN dim_hosts h ON pha.Host_ID = h.Host_ID
         """
-        
+
         # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
         where_conditions, limit_offset = parse_where_clause(where_clause)
-        
+
         if where_conditions:
             query += f" WHERE {where_conditions}"
-        
+
         if limit_offset:
             query += f" {limit_offset}"
-        
+
         logging.info(f"🔍 Starting batch iteration with batch_size={batch_size}")
-        
+
         # Execute query and fetch in batches
         cursor = self.conn.execute(query)
         batch_num = 0
-        
+
         while True:
             # Fetch a batch
             batch_df = cursor.fetch_df_chunk(batch_size)
             if batch_df is None or len(batch_df) == 0:
                 break
-            
+
             batch_num += 1
             logging.info(f"📦 Processing batch {batch_num} ({len(batch_df)} pairs)")
-            
+
             # Fetch sequences for this batch
             phage_seqs = {}
             host_seqs = {}
-            
+
             for phage_id in batch_df['Phage_ID'].unique():
                 phage_seqs[phage_id] = self._get_sequence_safe(phage_id, 'phage')
-            
+
             for host_id in batch_df['Host_ID'].unique():
-                host_seqs[host_id] = self._get_sequence_safe(host_id, 'host')
-            
+                host_seqs[host_id] = self._get_sequence_safe(
+                    host_id, 'host', host_contig_mode=host_contig_mode
+                )
+
             # Add sequences to batch
             batch_df['Phage_Sequence'] = batch_df['Phage_ID'].map(phage_seqs)
             batch_df['Host_Sequence'] = batch_df['Host_ID'].map(host_seqs)
-            
+
             # Filter out rows with missing sequences
             before_count = len(batch_df)
             batch_df = batch_df.dropna(subset=['Phage_Sequence', 'Host_Sequence'])
             after_count = len(batch_df)
-            
+
             if before_count > after_count:
-                logging.warning(f"⚠️  Removed {before_count - after_count} pairs with missing sequences from batch")
-            
+                logging.warning(
+                    f"⚠️  Removed {before_count - after_count} pairs with missing sequences from batch"
+                )
+
             if len(batch_df) > 0:
                 yield batch_df
-        
+
         logging.info(f"✅ Completed iteration over {batch_num} batches")
     
-    def _get_sequence_safe(self, seq_id: str, seq_type: str) -> str:
-        """
-        Helper method for safe sequence retrieval with error handling.
-        
+    def _get_sequence_safe(
+        self,
+        seq_id: str,
+        seq_type: str,
+        host_contig_mode: str = "first",
+    ) -> str:
+        """Helper method for safe sequence retrieval with error handling.
+
         Args:
-            seq_id: Sequence identifier (Phage_ID or Host_ID)
-            seq_type: Type of sequence ('phage' or 'host')
-            
+            seq_id: Sequence identifier (Phage_ID or Host_ID).
+            seq_type: Type of sequence – ``'phage'`` or ``'host'``.
+            host_contig_mode: Contig assembly mode forwarded to
+                :meth:`get_host_sequence` when *seq_type* is ``'host'``.
+                See :meth:`get_host_sequence` for details.
+
         Returns:
-            Sequence as string, or empty string if not found
+            Sequence as a string, or an empty string if not found.
         """
         try:
             if seq_type == 'phage':
                 return str(self.phage_fasta[seq_id][:].seq)
             elif seq_type == 'host':
-                return self.get_host_sequence(seq_id)
+                return self.get_host_sequence(seq_id, contig_mode=host_contig_mode)
             else:
                 raise ValueError(f"Invalid seq_type: {seq_type}")
         except KeyError:
