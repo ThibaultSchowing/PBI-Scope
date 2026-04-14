@@ -1,0 +1,14 @@
+required:
+  - Phage_ID
+  - Source_DB
+optional:
+  - Terminator
+  - Start
+  - Stop
+  - Sense
+  - Loc
+  - Confidence
+aliases:
+  Phage_id: Phage_ID
+  source_db: Source_DB
+defaults: {}

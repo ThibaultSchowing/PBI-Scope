@@ -1,0 +1,20 @@
+required:
+  - Phage_ID
+  - Source_DB
+optional:
+  - Length
+  - GC_content
+  - Taxonomy
+  - Completeness
+  - Host
+  - Lifestyle
+  - Cluster
+  - Subcluster
+aliases:
+  Phage_id: Phage_ID
+  phage_id: Phage_ID
+  source_db: Source_DB
+  Phage_Source: Source_DB
+  Phage_source: Source_DB
+  GC%: GC_content
+defaults: {}

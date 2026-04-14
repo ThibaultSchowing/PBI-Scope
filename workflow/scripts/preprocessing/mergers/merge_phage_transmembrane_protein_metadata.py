@@ -7,10 +7,12 @@ import numpy as np
 import os
 import logging
 import csv
+from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 
 sys.path.append('scripts')
 import utils
+from schema_contracts import load_contract, normalize_df_schema
 
 # Snakemake inputs and outputs
 inputs = snakemake.input
@@ -21,6 +23,7 @@ COLUMNS_LIST = ["Phage_ID", "Protein_ID", "Length", "PredictedTMHsNumber", "Expn
 NUMERICAL_COLUMNS = ["Length", "PredictedTMHsNumber", "ExpnumberofAAsinTMHs", "Insidestart", "Insideend", "Expnumberfirst60AAs", "Insidestart", "Insideend", "TMhelixstart", "TMhelixend", "TotalprobofNin" , "Outsidestart", "Outsideend"]
 
 STRING_COLUMNS = ["Phage_ID", "Protein_ID", "POSSIBLENterm", "Insidesource", "TMhelixsource", "Outsidesource", "Source_DB"]
+CONTRACT = load_contract(Path(__file__).resolve().parents[3] / "schemas" / "transmembrane_protein_metadata_merged.yaml")
 
 # List of DataFrames
 dfs = []
@@ -39,13 +42,27 @@ for infile in inputs:
     # Ensure all expected columns are named correctly 
     #df = utils.rename_columns(df, infile)
 
-    # Validate and reorder columns to match expected schema
-    df = utils.validate_columns(df, COLUMNS_LIST, infile)
+    if "Source_DB" not in df.columns:
+        source_name = os.path.basename(infile).split("_")[0]
+        df["Source_DB"] = source_name
+
+    df, _ = normalize_df_schema(df, CONTRACT, dataset_name="transmembrane_protein_metadata", logger=logging.getLogger(__name__))
 
     # Convert numerical columns to numeric types
     df = utils.convert_numerical_columns(df, NUMERICAL_COLUMNS)
 
     dfs.append(df)
+
+if dfs:
+    final_schema_df = pd.concat([df.head(0) for df in dfs], ignore_index=True, sort=False)
+    final_schema_df, _ = normalize_df_schema(
+        final_schema_df,
+        CONTRACT,
+        dataset_name="transmembrane_protein_metadata_merged",
+        logger=logging.getLogger(__name__),
+    )
+    final_columns = list(final_schema_df.columns)
+    dfs = [df.reindex(columns=final_columns) for df in dfs]
 
 # Crée le dossier output si besoin
 os.makedirs(os.path.dirname(output), exist_ok=True)

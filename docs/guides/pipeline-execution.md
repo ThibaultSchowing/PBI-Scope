@@ -40,6 +40,41 @@ snakemake --directory workflow --snakefile workflow/Snakefile \
 
 ---
 
+## Schema Contracts for Metadata Merging
+
+The metadata merger step now uses schema contracts under `workflow/schemas/` (YAML files) to make upstream CSV/TSV changes safer.
+
+- `required`: canonical columns that must exist (pipeline fails fast if missing)
+- `optional`: canonical columns that are added as missing (`NA`/defaults)
+- `aliases`: old/alternate names mapped to canonical names
+- `defaults`: optional default values for optional columns
+
+Unknown/new upstream columns are preserved and written to merged outputs (they are not dropped).
+
+### Updating contracts
+
+When upstream fields are renamed or new fields appear:
+
+1. Add the alias in the relevant `workflow/schemas/*.yaml` contract (`aliases:` section).
+2. Add new canonical fields to `optional:` if they should be present even when absent in some sources.
+3. Add `defaults:` if a missing optional field should get a fixed value instead of `NA`.
+
+### Schema drift report
+
+Use the drift reporter to validate one input file against a contract:
+
+```bash
+python workflow/scripts/preprocessing/report_schema_drift.py \
+  --contract workflow/schemas/phage_metadata_merged.yaml \
+  --input path/to/source_file.tsv \
+  --dataset-name phage_metadata
+```
+
+The command prints alias usage, missing optional fields, collisions, and unknown preserved columns.  
+It exits non-zero when required columns are missing.
+
+---
+
 ## Host Genome Download Pipeline
 
 ### Architecture Overview
