@@ -125,6 +125,37 @@ snakemake --cores 4 --use-conda --config limit=100
 
 **Configuration File**: `workflow/config/genome_download_config.yaml`
 
+### Why Snakemake re-runs a task
+
+Snakemake decides to execute a rule again when one of these is true:
+
+- One or more output files are missing
+- An input file is newer than an output file
+- The rule implementation changed (for example the Python script used by `script:` changed)
+- You explicitly force it (`--forcerun`, `--forceall`, or related flags)
+
+If none of the above happens, Snakemake skips the rule.
+
+### Host resolution reuse across reruns
+
+Host token resolution now persists a cache file:
+
+- `/data/intermediate/csv/merged/host_token_resolution_cache.json`
+
+When `reuse_host_resolution_cache: true` (default), already-resolved host tokens are reused on later runs, so expensive NCBI resolution calls are not repeated unnecessarily.
+
+This is especially useful when the host rule is re-triggered but host tokens are unchanged.
+
+#### Force a full host resolution refresh
+
+To force the rule **and** disable cache reuse for that run:
+
+```bash
+snakemake --cores 4 --use-conda \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
+```
+
 ```yaml
 ncbi:
   email: your.email@example.com  # Required by NCBI
@@ -156,6 +187,35 @@ python download_host_genomes_optimized.py \
     --metadata ../../data/processed/host_metadata.csv \
     --limit 10  # Optional: limit for testing
 ```
+
+---
+
+## Docker: force-rerun examples
+
+Use `docker compose run --rm pipeline` and pass a Snakemake command override:
+
+```bash
+# Force re-run CSV download/merge related rule(s) by rule name
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_all_tsvs merge_phage_metadata_tsvs
+
+# Force host resolution/download rule
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_host_genomes
+
+# Force host resolution and ignore persisted token-resolution cache for this run
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
+```
+
+The Docker image default command should stay unforced; forcing is a run-time choice.
 
 ---
 

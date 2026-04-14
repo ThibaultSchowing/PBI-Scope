@@ -40,13 +40,16 @@ rule download_host_genomes:
         phage_host_candidates = config.get("phage_host_candidates_output",
                                            config["host_metadata_output"].replace('.csv', '_host_candidates.csv')),
         phage_host_assemblies = config.get("phage_host_assemblies_output",
-                                           config["host_metadata_output"].replace('.csv', '_host_assemblies.csv'))
+                                           config["host_metadata_output"].replace('.csv', '_host_assemblies.csv')),
+        host_resolution_cache = config.get("host_resolution_cache_output",
+                                           config["host_metadata_output"].replace('.csv', '_token_resolution_cache.json'))
     params:
         output_dir = config["host_genomes_intermediate"],
         limit = None,  # Set to integer for testing with subset of hosts
         metadata_only = config.get("metadata_only_mode", False),
         skip_existing = config.get("skip_existing_downloads", True),
         validate_checksums = config.get("validate_file_checksums", True),
+        reuse_resolution_cache = config.get("reuse_host_resolution_cache", True),
         use_robust_downloader = config.get("use_robust_downloader", True)  # Use new robust downloader by default
     log:
         config["host_download_log"]

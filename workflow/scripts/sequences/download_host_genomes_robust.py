@@ -349,7 +349,9 @@ class RobustHostGenomeDownloader:
                  validate_checksums: bool = True,
                  download_optional_files: bool = False,
                  phage_host_candidates_output: Optional[str] = None,
-                 phage_host_assemblies_output: Optional[str] = None):
+                 phage_host_assemblies_output: Optional[str] = None,
+                 host_resolution_cache_output: Optional[str] = None,
+                 reuse_resolution_cache: bool = True):
         """
         Initialize RobustHostGenomeDownloader
 
@@ -369,6 +371,11 @@ class RobustHostGenomeDownloader:
                 Defaults to *metadata_output* with ``_host_candidates`` suffix.
             phage_host_assemblies_output: Path for phage_host_assemblies.csv.
                 Defaults to *metadata_output* with ``_host_assemblies`` suffix.
+            host_resolution_cache_output: Path for persistent token-resolution
+                cache (JSON). Defaults to *metadata_output* with
+                ``_token_resolution_cache.json`` suffix.
+            reuse_resolution_cache: If True, reuse cached token resolutions from
+                previous runs to avoid repeated NCBI lookups.
         """
         self.phage_csv_path = Path(phage_csv_path)
         self.output_dir = Path(output_dir)
@@ -390,6 +397,10 @@ class RobustHostGenomeDownloader:
         self.phage_host_assemblies_output = Path(
             phage_host_assemblies_output or f"{_base}_host_assemblies.csv"
         )
+        self.host_resolution_cache_output = Path(
+            host_resolution_cache_output or f"{_base}_token_resolution_cache.json"
+        )
+        self.reuse_resolution_cache = reuse_resolution_cache
 
         # Create output directories
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -398,6 +409,7 @@ class RobustHostGenomeDownloader:
         self.phage_host_links_output.parent.mkdir(parents=True, exist_ok=True)
         self.phage_host_candidates_output.parent.mkdir(parents=True, exist_ok=True)
         self.phage_host_assemblies_output.parent.mkdir(parents=True, exist_ok=True)
+        self.host_resolution_cache_output.parent.mkdir(parents=True, exist_ok=True)
         
         # Initialize assembly resolver
         self.resolver = AssemblyResolver(
@@ -412,6 +424,7 @@ class RobustHostGenomeDownloader:
         
         # Load existing metadata if available
         self.existing_metadata = self._load_existing_metadata()
+        self.token_resolution_cache = self._load_token_resolution_cache()
         
         logging.info("✅ RobustHostGenomeDownloader initialized")
         logging.info(f"   Phage CSV: {self.phage_csv_path}")
@@ -419,8 +432,90 @@ class RobustHostGenomeDownloader:
         logging.info(f"   Metadata only: {self.metadata_only}")
         logging.info(f"   Skip existing: {self.skip_existing}")
         logging.info(f"   Validate checksums: {self.validate_checksums}")
+        logging.info(f"   Reuse resolution cache: {self.reuse_resolution_cache}")
+        logging.info(f"   Resolution cache file: {self.host_resolution_cache_output}")
         if self.existing_metadata:
             logging.info(f"   Found {len(self.existing_metadata)} existing genomes")
+        if self.token_resolution_cache:
+            logging.info(f"   Found cached resolutions for {len(self.token_resolution_cache)} host tokens")
+
+    @staticmethod
+    def _assembly_to_cache_dict(assembly: AssemblyMetadata) -> Dict:
+        """Convert AssemblyMetadata to a JSON-serializable dict."""
+        return {
+            'assembly_accession': assembly.assembly_accession,
+            'assembly_name': assembly.assembly_name,
+            'organism_name': assembly.organism_name,
+            'species_taxid': assembly.species_taxid,
+            'strain': assembly.strain,
+            'assembly_level': assembly.assembly_level,
+            'refseq_category': assembly.refseq_category,
+            'version': assembly.version,
+            'is_latest': assembly.is_latest,
+            'biosample': assembly.biosample,
+            'bioproject': assembly.bioproject,
+            'ftp_path': assembly.ftp_path,
+            'submission_date': assembly.submission_date,
+        }
+
+    @staticmethod
+    def _cache_dict_to_assembly(data: Dict) -> AssemblyMetadata:
+        """Convert cached dict to AssemblyMetadata."""
+        return AssemblyMetadata(
+            assembly_accession=data.get('assembly_accession', ''),
+            assembly_name=data.get('assembly_name', '-'),
+            organism_name=data.get('organism_name', '-'),
+            species_taxid=data.get('species_taxid'),
+            strain=data.get('strain'),
+            assembly_level=data.get('assembly_level', 'Contig'),
+            refseq_category=data.get('refseq_category', 'na'),
+            version=data.get('version', 1),
+            is_latest=data.get('is_latest', True),
+            biosample=data.get('biosample'),
+            bioproject=data.get('bioproject'),
+            ftp_path=data.get('ftp_path'),
+            submission_date=data.get('submission_date'),
+        )
+
+    def _load_token_resolution_cache(self) -> Dict[str, List[AssemblyMetadata]]:
+        """Load persistent token→assemblies cache from previous runs."""
+        if not self.reuse_resolution_cache:
+            return {}
+        if not self.host_resolution_cache_output.exists():
+            return {}
+
+        try:
+            with open(self.host_resolution_cache_output, 'r') as f:
+                raw_cache = json.load(f)
+
+            cache: Dict[str, List[AssemblyMetadata]] = {}
+            for token, raw_assemblies in raw_cache.items():
+                cache[token] = [
+                    self._cache_dict_to_assembly(item)
+                    for item in (raw_assemblies or [])
+                ]
+            return cache
+        except Exception as exc:
+            logging.warning(f"⚠️  Could not load token resolution cache: {exc}")
+            return {}
+
+    def _save_token_resolution_cache(self, token_to_assemblies: Dict[str, List[AssemblyMetadata]]) -> None:
+        """Persist token→assemblies mapping to JSON for future reruns."""
+        serializable = {
+            token: [self._assembly_to_cache_dict(asm) for asm in assemblies]
+            for token, assemblies in token_to_assemblies.items()
+        }
+        tmp_path = self.host_resolution_cache_output.with_suffix(
+            self.host_resolution_cache_output.suffix + ".tmp"
+        )
+        try:
+            with open(tmp_path, 'w') as f:
+                json.dump(serializable, f, indent=2, sort_keys=True)
+            tmp_path.replace(self.host_resolution_cache_output)
+        except Exception as exc:
+            logging.warning(f"⚠️  Could not write token resolution cache: {exc}")
+            if tmp_path.exists():
+                tmp_path.unlink(missing_ok=True)
     
     def _load_existing_metadata(self) -> Dict[str, Dict]:
         """Load existing assembly metadata to avoid re-processing"""
@@ -902,6 +997,15 @@ class RobustHostGenomeDownloader:
         for i, (tok, tok_type) in enumerate(unique_tokens.items(), 1):
             logging.info(f"[{i}/{len(unique_tokens)}] Resolving '{tok}' ({tok_type})…")
 
+            if tok in self.token_resolution_cache:
+                token_to_assemblies[tok] = self.token_resolution_cache[tok]
+                cached_assemblies = self.token_resolution_cache[tok]
+                if cached_assemblies:
+                    logging.info(f"   ✓ Cached token resolution: {cached_assemblies[0].assembly_accession}")
+                else:
+                    logging.info("   ✓ Cached token resolution: no assembly")
+                continue
+
             # Check assembly_cache (populated by resolve_host_assemblies() too)
             if tok in self.assembly_cache:
                 cached = self.assembly_cache[tok]
@@ -917,6 +1021,11 @@ class RobustHostGenomeDownloader:
                 logging.info(f"   ✅ {assemblies[0].assembly_accession}")
             else:
                 logging.warning(f"   ❌ No assembly found for '{tok}'")
+
+        self._save_token_resolution_cache(token_to_assemblies)
+        logging.info(
+            f"✅ Updated token resolution cache: {self.host_resolution_cache_output}"
+        )
 
         # ------------------------------------------------------------------
         # Stage 3: Build phage_host_assemblies
@@ -1178,6 +1287,8 @@ def main():
             download_optional_files=snakemake.params.get('download_optional_files', False),
             phage_host_candidates_output=snakemake.output.get('phage_host_candidates'),
             phage_host_assemblies_output=snakemake.output.get('phage_host_assemblies'),
+            host_resolution_cache_output=snakemake.output.get('host_resolution_cache'),
+            reuse_resolution_cache=snakemake.params.get('reuse_resolution_cache', True),
         )
         downloader.run()
     else:
@@ -1190,6 +1301,7 @@ def main():
         parser.add_argument('--phage-host-links', help='Phage-host links output CSV')
         parser.add_argument('--phage-host-candidates', help='Phage-host candidates output CSV')
         parser.add_argument('--phage-host-assemblies', help='Phage-host assemblies output CSV')
+        parser.add_argument('--host-resolution-cache', help='Host token resolution cache JSON output')
         parser.add_argument('--ncbi-email', default=os.environ.get('NCBI_EMAIL'), help='NCBI email')
         parser.add_argument('--ncbi-api-key', default=os.environ.get('NCBI_API_KEY'), help='NCBI API key')
         parser.add_argument('--metadata-only', action='store_true', help='Metadata only mode')
@@ -1202,6 +1314,9 @@ def main():
                             action='store_false', help='Skip checksum validation')
         parser.set_defaults(validate_checksums=True)
         parser.add_argument('--download-optional', action='store_true', help='Download optional files')
+        parser.add_argument('--no-resolution-cache', dest='reuse_resolution_cache', action='store_false',
+                            help='Disable reuse of token resolution cache')
+        parser.set_defaults(reuse_resolution_cache=True)
 
         args = parser.parse_args()
 
@@ -1225,6 +1340,8 @@ def main():
             download_optional_files=args.download_optional,
             phage_host_candidates_output=args.phage_host_candidates,
             phage_host_assemblies_output=args.phage_host_assemblies,
+            host_resolution_cache_output=args.host_resolution_cache,
+            reuse_resolution_cache=args.reuse_resolution_cache,
         )
         downloader.run()
 
