@@ -33,7 +33,7 @@ import urllib.error
 import gzip
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Any, Dict, List, Optional, Tuple, Set
 from datetime import datetime
 import json
 import pandas as pd
@@ -440,7 +440,7 @@ class RobustHostGenomeDownloader:
             logging.info(f"   Found cached resolutions for {len(self.token_resolution_cache)} host tokens")
 
     @staticmethod
-    def _assembly_to_cache_dict(assembly: AssemblyMetadata) -> Dict:
+    def _assembly_to_cache_dict(assembly: AssemblyMetadata) -> Dict[str, Any]:
         """Convert AssemblyMetadata to a JSON-serializable dict."""
         return {
             'assembly_accession': assembly.assembly_accession,
@@ -459,7 +459,7 @@ class RobustHostGenomeDownloader:
         }
 
     @staticmethod
-    def _cache_dict_to_assembly(data: Dict) -> AssemblyMetadata:
+    def _cache_dict_to_assembly(data: Dict[str, Any]) -> AssemblyMetadata:
         """Convert cached dict to AssemblyMetadata."""
         return AssemblyMetadata(
             assembly_accession=data.get('assembly_accession', ''),
@@ -999,7 +999,7 @@ class RobustHostGenomeDownloader:
 
             if tok in self.token_resolution_cache:
                 token_to_assemblies[tok] = self.token_resolution_cache[tok]
-                cached_assemblies = self.token_resolution_cache[tok]
+                cached_assemblies = token_to_assemblies[tok]
                 if cached_assemblies:
                     logging.info(f"   ✓ Cached token resolution: {cached_assemblies[0].assembly_accession}")
                 else:
