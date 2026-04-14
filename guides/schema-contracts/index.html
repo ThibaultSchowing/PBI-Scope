@@ -1,0 +1,2476 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+      
+      
+      
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/schema-contracts/">
+      
+      
+        <link rel="prev" href="../pipeline-execution/">
+      
+      
+        <link rel="next" href="../pbi-package/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Schema Contracts - PBI Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#schema-contracts-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PBI Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Schema Contracts
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ThibaultSchowing/PBI" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ThibaultSchowing/PBI
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../database/overview/" class="md-tabs__link">
+          
+  
+  
+  Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/overview/" class="md-tabs__link">
+          
+  
+  
+  API
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/commands/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/code-structure/" class="md-tabs__link">
+          
+  
+  
+  Developer
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../future-steps/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Future Steps
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PBI Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ThibaultSchowing/PBI" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ThibaultSchowing/PBI
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation (Docker)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-it-works/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis Container
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipeline-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Execution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Contracts
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schema Contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-a-contract-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a Contract Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How a Contract Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Processing order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-schema-contracts-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All Schema Contracts at a Glance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="All Schema Contracts at a Glance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phage_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        phage_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotated_proteins_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotated_proteins_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crispr_array_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        crispr_array_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transcription_terminator_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transcription_terminator_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti_crispr_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        anti_crispr_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virulent_factor_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        virulent_factor_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transmembrane_protein_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transmembrane_protein_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trna_tmrna_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trna_tmrna_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#antimicrobial_resistance_gene_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        antimicrobial_resistance_gene_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consistency-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consistency Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-do-when-upstream-data-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to Do When Upstream Data Changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What to Do When Upstream Data Changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-a-column-is-renamed-in-the-source-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1 — A column is renamed in the source CSV
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-new-columns-appear-in-the-source-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2 — New columns appear in the source CSV
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scenario 2 — New columns appear in the source CSV">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2a-to-include-the-new-column-in-the-duckdb-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2a — To include the new column in the DuckDB table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2b-to-expose-the-new-column-through-the-pbi-python-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2b — To expose the new column through the pbi Python package
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-a-previously-optional-column-becomes-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3 — A previously optional column becomes required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-4-a-required-column-is-removed-by-the-upstream-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 4 — A required column is removed by the upstream source
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-change-procedure-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary: Change Procedure Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema-drift-report-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Drift Report Tool
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-the-code-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the Code Lives
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pbi-package/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PBI Package
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../machine-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Machine Learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Advanced
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Database
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../database/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../database/host-resolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/code-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../future-steps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Steps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-a-contract-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a Contract Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How a Contract Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Processing order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-schema-contracts-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All Schema Contracts at a Glance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="All Schema Contracts at a Glance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phage_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        phage_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#annotated_proteins_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        annotated_proteins_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crispr_array_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        crispr_array_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transcription_terminator_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transcription_terminator_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anti_crispr_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        anti_crispr_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#virulent_factor_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        virulent_factor_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transmembrane_protein_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        transmembrane_protein_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trna_tmrna_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        trna_tmrna_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#antimicrobial_resistance_gene_metadata_mergedyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        antimicrobial_resistance_gene_metadata_merged.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consistency-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consistency Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-do-when-upstream-data-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What to Do When Upstream Data Changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What to Do When Upstream Data Changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-a-column-is-renamed-in-the-source-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1 — A column is renamed in the source CSV
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-new-columns-appear-in-the-source-csv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2 — New columns appear in the source CSV
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scenario 2 — New columns appear in the source CSV">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2a-to-include-the-new-column-in-the-duckdb-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2a — To include the new column in the DuckDB table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2b-to-expose-the-new-column-through-the-pbi-python-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2b — To expose the new column through the pbi Python package
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-a-previously-optional-column-becomes-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3 — A previously optional column becomes required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-4-a-required-column-is-removed-by-the-upstream-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 4 — A required column is removed by the upstream source
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-change-procedure-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary: Change Procedure Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema-drift-report-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Drift Report Tool
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-the-code-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the Code Lives
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="schema-contracts-guide">Schema Contracts Guide<a class="headerlink" href="#schema-contracts-guide" title="Permanent link">&para;</a></h1>
+<p>This page explains PBI's <strong>schema contract</strong> system — what it is, how it works, and what to do when upstream data sources change.</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>PBI downloads metadata CSV/TSV files from 14+ phage databases via <a href="https://phagescope.deepomics.org/">PhageScope</a>.
+Each database may use slightly different column names, add new columns over time, or rename existing ones.</p>
+<p>To keep the preprocessing and database-building steps resilient to these changes, every merger script uses a <strong>schema contract</strong>: a YAML file that declares exactly which columns are expected, which are optional, and how alternate names are mapped to canonical names.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>workflow/schemas/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── phage_metadata_merged.yaml
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── annotated_proteins_metadata_merged.yaml
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── crispr_array_metadata_merged.yaml
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── transcription_terminator_metadata_merged.yaml
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├── anti_crispr_metadata_merged.yaml
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── virulent_factor_metadata_merged.yaml
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>├── transmembrane_protein_metadata_merged.yaml
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>├── trna_tmrna_metadata_merged.yaml
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>└── antimicrobial_resistance_gene_metadata_merged.yaml
+</code></pre></div>
+<p>Each merger script (<code>workflow/scripts/preprocessing/mergers/merge_*.py</code>) loads its contract and calls <code>normalize_df_schema()</code> on every input file before merging.</p>
+<hr />
+<h2 id="how-a-contract-works">How a Contract Works<a class="headerlink" href="#how-a-contract-works" title="Permanent link">&para;</a></h2>
+<p>A contract is a YAML file with four sections:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">required</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Phage_ID</span><span class="w">       </span><span class="c1"># Must exist — pipeline fails fast if missing</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Source_DB</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">optional</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Length</span><span class="w">         </span><span class="c1"># Added as NA (or a default) when absent</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GC_content</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Host</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nt">aliases</span><span class="p">:</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nt">Phage_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Phage_ID</span><span class="w">       </span><span class="c1"># Alternate name → canonical name</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nt">GC%</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GC_content</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="nt">defaults</span><span class="p">:</span><span class="w">          </span><span class="c1"># Optional: provide a fill value instead of NA</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="nt">Host</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;unknown&quot;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Meaning</th>
+<th>What happens if absent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>required</code></td>
+<td>Column must be present (after alias resolution)</td>
+<td><code>ValueError</code> raised — pipeline stops</td>
+</tr>
+<tr>
+<td><code>optional</code></td>
+<td>Column should exist but may be absent</td>
+<td>Added with <code>pd.NA</code> or the value from <code>defaults</code></td>
+</tr>
+<tr>
+<td><code>aliases</code></td>
+<td>Old or alternate column names → canonical name</td>
+<td>Applied silently before validation</td>
+</tr>
+<tr>
+<td><code>defaults</code></td>
+<td>Default value for a specific optional column</td>
+<td>Falls back to <code>pd.NA</code> if not set</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-order">Processing order<a class="headerlink" href="#processing-order" title="Permanent link">&para;</a></h3>
+<p>For every input file:</p>
+<ol>
+<li><strong>Strip whitespace</strong> from all column names.</li>
+<li><strong>Apply aliases</strong> — rename any alias column to its canonical form.<br />
+<em>Collision rule</em>: if both the alias and the canonical column exist, the canonical column wins and the alias column is dropped (logged as a collision).</li>
+<li><strong>Check required columns</strong> — raise <code>ValueError</code> with a clear message if any required column is still missing.</li>
+<li><strong>Add missing optional columns</strong> — filled with <code>pd.NA</code> or the configured default.</li>
+<li><strong>Keep unknown columns</strong> — new upstream columns that are not in the contract are <strong>not dropped</strong>; they are sorted and appended at the end.</li>
+<li><strong>Reorder deterministically</strong> — output column order is always <code>required + optional + sorted(unknown)</code>.</li>
+<li>A structured <strong>report</strong> is returned containing: <code>aliases_applied</code>, <code>collisions</code>, <code>missing_optional</code>, <code>added_optional</code>, <code>unknown_columns</code>.</li>
+</ol>
+<hr />
+<h2 id="all-schema-contracts-at-a-glance">All Schema Contracts at a Glance<a class="headerlink" href="#all-schema-contracts-at-a-glance" title="Permanent link">&para;</a></h2>
+<h3 id="phage_metadata_mergedyaml"><code>phage_metadata_merged.yaml</code><a class="headerlink" href="#phage_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code></td>
+<td><strong>required</strong></td>
+<td>Primary key</td>
+</tr>
+<tr>
+<td><code>Source_DB</code></td>
+<td><strong>required</strong></td>
+<td>Source database name</td>
+</tr>
+<tr>
+<td><code>Length</code></td>
+<td>optional</td>
+<td>Genome length in bp</td>
+</tr>
+<tr>
+<td><code>GC_content</code></td>
+<td>optional</td>
+<td>Alias: <code>GC%</code></td>
+</tr>
+<tr>
+<td><code>Taxonomy</code>, <code>Completeness</code>, <code>Host</code>, <code>Lifestyle</code>, <code>Cluster</code>, <code>Subcluster</code></td>
+<td>optional</td>
+<td>Phage annotations</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>phage_id</code>, <code>Phage_Source</code>, <code>Phage_source</code>, <code>source_db</code>, <code>GC%</code></p>
+<hr />
+<h3 id="annotated_proteins_metadata_mergedyaml"><code>annotated_proteins_metadata_merged.yaml</code><a class="headerlink" href="#annotated_proteins_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Protein_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>Protein_source</code>, <code>Function_prediction_source</code>, <code>Start</code>, <code>Stop</code>, <code>Strand</code>, <code>Product</code>, <code>Protein_classification</code></td>
+<td>optional</td>
+</tr>
+<tr>
+<td><code>Molecular_weight</code>, <code>Aromaticity</code>, <code>Instability_index</code>, <code>Isoelectric_point</code>, <code>Helix_fraction</code>, <code>Turn_fraction</code>, <code>Sheet_fraction</code>, <code>Reduced_coefficient</code>, <code>Oxidized_coefficient</code></td>
+<td>optional (biophysical properties)</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>Protein_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="crispr_array_metadata_mergedyaml"><code>crispr_array_metadata_merged.yaml</code><a class="headerlink" href="#crispr_array_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>CRISPR_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td>All other CRISPR statistics (positions, spacer counts, conservation, etc.)</td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="transcription_terminator_metadata_mergedyaml"><code>transcription_terminator_metadata_merged.yaml</code><a class="headerlink" href="#transcription_terminator_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>Terminator</code>, <code>Start</code>, <code>Stop</code>, <code>Sense</code>, <code>Loc</code>, <code>Confidence</code></td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="anti_crispr_metadata_mergedyaml"><code>anti_crispr_metadata_merged.yaml</code><a class="headerlink" href="#anti_crispr_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Protein_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>Source</code></td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>Protein_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="virulent_factor_metadata_mergedyaml"><code>virulent_factor_metadata_merged.yaml</code><a class="headerlink" href="#virulent_factor_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Protein_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>Aligned_Protein_in_VFDB</code></td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>Protein_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="transmembrane_protein_metadata_mergedyaml"><code>transmembrane_protein_metadata_merged.yaml</code><a class="headerlink" href="#transmembrane_protein_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Protein_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>Length</code>, <code>PredictedTMHsNumber</code>, <code>ExpnumberofAAsinTMHs</code>, <code>Expnumberfirst60AAs</code>, <code>TotalprobofNin</code>, <code>POSSIBLENterm</code>, all segment start/end columns</td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>Protein_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="trna_tmrna_metadata_mergedyaml"><code>trna_tmrna_metadata_merged.yaml</code><a class="headerlink" href="#trna_tmrna_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>t(m)RNA_ID</code>, <code>Source</code>, <code>t(m)RNA</code>, <code>Start</code>, <code>Stop</code>, <code>Strand</code>, <code>Length</code>, <code>Permuted</code>, <code>Sequence</code></td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>source_db</code></p>
+<hr />
+<h3 id="antimicrobial_resistance_gene_metadata_mergedyaml"><code>antimicrobial_resistance_gene_metadata_merged.yaml</code><a class="headerlink" href="#antimicrobial_resistance_gene_metadata_mergedyaml" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code>, <code>Protein_ID</code>, <code>Source_DB</code></td>
+<td><strong>required</strong></td>
+</tr>
+<tr>
+<td><code>Aligned_Protein_in_CARD</code></td>
+<td>optional</td>
+</tr>
+</tbody>
+</table>
+<p>Known aliases: <code>Phage_id</code>, <code>Protein_id</code>, <code>source_db</code></p>
+<hr />
+<h2 id="consistency-verification">Consistency Verification<a class="headerlink" href="#consistency-verification" title="Permanent link">&para;</a></h2>
+<p>All contracts have been verified against <code>workflow/scripts/database/create_duckdb.py</code>:
+every column selected in SQL <code>CREATE TABLE ... AS SELECT ...</code> for each DuckDB table
+is covered either as <code>required</code> or <code>optional</code> in the corresponding contract.</p>
+<p>To re-verify at any time:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;PY&#39;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="s">import yaml</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="s">from pathlib import Path</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="s"># Mapping: contract file → columns DuckDB reads from the merged CSV</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="s">checks = {</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="s">    &quot;phage_metadata_merged.yaml&quot;: [</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="s">        &quot;Phage_ID&quot;, &quot;Source_DB&quot;, &quot;Length&quot;, &quot;GC_content&quot;, &quot;Taxonomy&quot;,</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="s">        &quot;Completeness&quot;, &quot;Host&quot;, &quot;Lifestyle&quot;, &quot;Cluster&quot;, &quot;Subcluster&quot;],</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="s">    &quot;annotated_proteins_metadata_merged.yaml&quot;: [</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="s">        &quot;Phage_ID&quot;, &quot;Protein_ID&quot;, &quot;Protein_source&quot;, &quot;Function_prediction_source&quot;,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="s">        &quot;Start&quot;, &quot;Stop&quot;, &quot;Strand&quot;, &quot;Product&quot;, &quot;Protein_classification&quot;,</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="s">        &quot;Molecular_weight&quot;, &quot;Aromaticity&quot;, &quot;Instability_index&quot;, &quot;Isoelectric_point&quot;,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="s">        &quot;Helix_fraction&quot;, &quot;Turn_fraction&quot;, &quot;Sheet_fraction&quot;,</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="s">        &quot;Reduced_coefficient&quot;, &quot;Oxidized_coefficient&quot;, &quot;Source_DB&quot;],</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="s">    # ... add remaining tables as needed</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="s">}</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="s">schema_dir = Path(&quot;workflow/schemas&quot;)</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="s">for fname, used_cols in checks.items():</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="s">    with open(schema_dir / fname) as fh:</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="s">        c = yaml.safe_load(fh)</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="s">    covered = set(c.get(&quot;required&quot;, []) + c.get(&quot;optional&quot;, []))</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="s">    missing = set(used_cols) - covered</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="s">    if missing:</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="s">        print(f&quot;❌ {fname}: uncovered columns → {missing}&quot;)</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="s">    else:</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="s">        print(f&quot;✅ {fname}: all columns covered&quot;)</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="s">PY</span>
+</code></pre></div>
+<hr />
+<h2 id="what-to-do-when-upstream-data-changes">What to Do When Upstream Data Changes<a class="headerlink" href="#what-to-do-when-upstream-data-changes" title="Permanent link">&para;</a></h2>
+<h3 id="scenario-1-a-column-is-renamed-in-the-source-csv">Scenario 1 — A column is renamed in the source CSV<a class="headerlink" href="#scenario-1-a-column-is-renamed-in-the-source-csv" title="Permanent link">&para;</a></h3>
+<p><strong>Example</strong>: PhageScope renames <code>GC%</code> to <code>GC_content</code>.</p>
+<p><strong>Action</strong>:</p>
+<ol>
+<li>Open the relevant contract, e.g. <code>workflow/schemas/phage_metadata_merged.yaml</code>.</li>
+<li>Add the old name under <code>aliases:</code>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">aliases</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">GC%</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GC_content</span><span class="w">   </span><span class="c1"># ← add this</span>
+</code></pre></div>
+<ol>
+<li>Rebuild the database. The merger will silently rename the column and log it.</li>
+</ol>
+<hr />
+<h3 id="scenario-2-new-columns-appear-in-the-source-csv">Scenario 2 — New columns appear in the source CSV<a class="headerlink" href="#scenario-2-new-columns-appear-in-the-source-csv" title="Permanent link">&para;</a></h3>
+<p><strong>Example</strong>: PhageScope adds <code>Is_Predicted</code> and <code>Prediction_Source</code> fields.</p>
+<p>New columns that are <strong>not</strong> in the contract are <strong>automatically preserved</strong> in the merged CSV — you do not need to do anything for the data to flow through safely.</p>
+<p>However, for each layer of the pipeline, explicit action is required to <em>use</em> the new columns:</p>
+<h4 id="2a-to-include-the-new-column-in-the-duckdb-table">2a — To include the new column in the DuckDB table<a class="headerlink" href="#2a-to-include-the-new-column-in-the-duckdb-table" title="Permanent link">&para;</a></h4>
+<ol>
+<li>Add it to the relevant contract as <code>optional:</code>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">optional</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Is_Predicted</span><span class="w">       </span><span class="c1"># ← new</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prediction_Source</span><span class="w">  </span><span class="c1"># ← new</span>
+</code></pre></div>
+<ol>
+<li>Edit <code>workflow/scripts/database/create_duckdb.py</code> and add the column to the <code>SELECT</code> for the corresponding table:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">fact_phages</span><span class="w"> </span><span class="k">AS</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">SELECT</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="n">Phage_ID</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="n">Is_Predicted</span><span class="p">,</span><span class="w">        </span><span class="c1">-- new</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="n">Prediction_Source</span><span class="p">,</span><span class="w">   </span><span class="c1">-- new</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="n">Source_DB</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="k">FROM</span><span class="w"> </span><span class="n">read_csv</span><span class="p">(...)</span>
+</code></pre></div>
+<ol>
+<li>Rebuild the database.</li>
+</ol>
+<blockquote>
+<p><strong>Note</strong>: <code>create_duckdb.py</code> uses explicit <code>SELECT</code> lists. Unknown columns in the merged CSV are not automatically ingested into DuckDB tables — you must add them to the SQL explicitly.</p>
+</blockquote>
+<h4 id="2b-to-expose-the-new-column-through-the-pbi-python-package">2b — To expose the new column through the <code>pbi</code> Python package<a class="headerlink" href="#2b-to-expose-the-new-column-through-the-pbi-python-package" title="Permanent link">&para;</a></h4>
+<p>The <code>pbi</code> package queries specific DuckDB table columns (e.g. <code>get_phage_metadata()</code> returns a fixed set of columns).</p>
+<ol>
+<li>Edit <code>src/pbi/sequence_retrieval.py</code> and update the relevant query:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s2">SELECT</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s2">    Phage_ID,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s2">    Source_DB,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s2">    ...</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s2">    Is_Predicted,      -- new</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="s2">    Prediction_Source, -- new</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="s2">    ...</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="s2">FROM fact_phages</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+<ol>
+<li>Update the method docstring to document the new return columns.</li>
+<li>Bump the package version in <code>src/pbi/__init__.py</code> if the interface changes.</li>
+</ol>
+<blockquote>
+<p><strong>The <code>pbi</code> package does NOT automatically expose new database columns.</strong> Explicit changes to <code>sequence_retrieval.py</code> are required.</p>
+</blockquote>
+<hr />
+<h3 id="scenario-3-a-previously-optional-column-becomes-required">Scenario 3 — A previously optional column becomes required<a class="headerlink" href="#scenario-3-a-previously-optional-column-becomes-required" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Move it from <code>optional:</code> to <code>required:</code> in the contract.</li>
+<li>The pipeline will now fail fast (with a clear error message) if any source file is missing the column, instead of silently filling it with <code>NA</code>.</li>
+</ol>
+<hr />
+<h3 id="scenario-4-a-required-column-is-removed-by-the-upstream-source">Scenario 4 — A required column is removed by the upstream source<a class="headerlink" href="#scenario-4-a-required-column-is-removed-by-the-upstream-source" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Move it from <code>required:</code> to <code>optional:</code> in the contract.</li>
+<li>Optionally add a <code>defaults:</code> entry if a fallback value is meaningful.</li>
+<li>Update <code>create_duckdb.py</code> if the column is used in the SQL <code>SELECT</code> — either remove it or wrap it with <code>COALESCE(col, NULL)</code>.</li>
+</ol>
+<hr />
+<h2 id="summary-change-procedure-checklist">Summary: Change Procedure Checklist<a class="headerlink" href="#summary-change-procedure-checklist" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Contract</th>
+<th><code>create_duckdb.py</code></th>
+<th><code>pbi</code> package</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Column renamed</td>
+<td>Add alias</td>
+<td>No change needed</td>
+<td>No change needed</td>
+</tr>
+<tr>
+<td>New column — preserve only</td>
+<td>No change</td>
+<td>No change</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>New column — add to DuckDB</td>
+<td>Add to <code>optional:</code></td>
+<td>Add to <code>SELECT</code></td>
+<td>No change</td>
+</tr>
+<tr>
+<td>New column — expose via <code>pbi</code></td>
+<td>Add to <code>optional:</code></td>
+<td>Add to <code>SELECT</code></td>
+<td>Add to query in <code>sequence_retrieval.py</code></td>
+</tr>
+<tr>
+<td>Optional → required</td>
+<td>Move in contract</td>
+<td>No change</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>Required column removed</td>
+<td>Move to <code>optional:</code></td>
+<td>Handle <code>NULL</code> in SQL</td>
+<td>Handle <code>None</code> in Python</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="schema-drift-report-tool">Schema Drift Report Tool<a class="headerlink" href="#schema-drift-report-tool" title="Permanent link">&para;</a></h2>
+<p>Use this CLI to check any source file against a contract <em>before</em> running the pipeline:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>workflow/scripts/preprocessing/report_schema_drift.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>--contract<span class="w"> </span>workflow/schemas/phage_metadata_merged.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>--input<span class="w"> </span>path/to/downloaded/phage_metadata.tsv<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>--dataset-name<span class="w"> </span>phage_metadata
+</code></pre></div>
+<p><strong>Output example:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>✅ Schema drift check passed
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Missing optional before normalization: [&#39;Host&#39;, &#39;Lifestyle&#39;]
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>Added optional columns: [&#39;Host&#39;, &#39;Lifestyle&#39;]
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>Aliases applied: [{&#39;from&#39;: &#39;GC%&#39;, &#39;to&#39;: &#39;GC_content&#39;}]
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>Collisions: []
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>Unknown columns preserved: [&#39;Is_Predicted&#39;, &#39;Prediction_Source&#39;]
+</code></pre></div>
+<p>Exit code is non-zero when required columns are missing, allowing use in CI checks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>python<span class="w"> </span>workflow/scripts/preprocessing/report_schema_drift.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>--contract<span class="w"> </span>workflow/schemas/phage_metadata_merged.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span>--input<span class="w"> </span>new_data.tsv<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Schema check failed!&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="where-the-code-lives">Where the Code Lives<a class="headerlink" href="#where-the-code-lives" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>workflow/schemas/*.yaml</code></td>
+<td>One contract per merged output</td>
+</tr>
+<tr>
+<td><code>workflow/scripts/preprocessing/mergers/schema_contracts.py</code></td>
+<td><code>load_contract()</code> and <code>normalize_df_schema()</code></td>
+</tr>
+<tr>
+<td><code>workflow/scripts/preprocessing/mergers/merge_*.py</code></td>
+<td>Each merger — calls <code>normalize_df_schema</code> on input and final merged DataFrame</td>
+</tr>
+<tr>
+<td><code>workflow/scripts/preprocessing/report_schema_drift.py</code></td>
+<td>CLI drift reporter</td>
+</tr>
+<tr>
+<td><code>workflow/scripts/database/create_duckdb.py</code></td>
+<td>Reads merged CSVs and builds DuckDB tables</td>
+</tr>
+<tr>
+<td><code>src/pbi/sequence_retrieval.py</code></td>
+<td><code>pbi</code> package — queries DuckDB columns explicitly</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ThibaultSchowing/PBI" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
