@@ -137,18 +137,18 @@ def merge_dataframes_chunked(dfs, output_file):
             pass
         return 0
     
-    # Ensure all dataframes have the same column order as the first one
-    # This prevents CSV tokenization errors when reading in chunks
-    first_columns = list(dfs[0].columns)
-    logging.info(f"Ensuring all dataframes have consistent column order: {first_columns}")
-    
+    # Ensure all dataframes use the same union of columns without dropping unknown/new fields.
+    # Preserve deterministic order by first appearance.
+    all_columns = []
+    for df in dfs:
+        for col in df.columns:
+            if col not in all_columns:
+                all_columns.append(col)
+
+    logging.info(f"Ensuring all dataframes have consistent column order: {all_columns}")
+
     for i, df in enumerate(dfs):
-        # Use validate_columns to ensure consistent column order and add missing columns
-        # Note: validate_columns keeps extra columns at the end, so we need to filter them
-        validated_df = validate_columns(df, first_columns)
-        
-        # Keep only the columns from the first dataframe (remove any extras)
-        dfs[i] = validated_df[first_columns]
+        dfs[i] = df.reindex(columns=all_columns)
     
     total_rows = 0
     

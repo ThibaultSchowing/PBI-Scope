@@ -1,0 +1,17 @@
+required:
+  - Phage_ID
+  - Source_DB
+optional:
+  - t(m)RNA_ID
+  - Source
+  - t(m)RNA
+  - Start
+  - Stop
+  - Strand
+  - Length
+  - Permuted
+  - Sequence
+aliases:
+  Phage_id: Phage_ID
+  source_db: Source_DB
+defaults: {}
