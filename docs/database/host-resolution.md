@@ -97,6 +97,23 @@ declared as rule outputs in `hosts.smk`, so Snakemake tracks them automatically.
 Within a single run, the `skip_existing=True` parameter (default) prevents
 re-downloading individual genome files that were already successfully retrieved.
 
+Across reruns, host token resolution also uses a persistent cache file:
+
+- `host_token_resolution_cache.json` (default path:
+  `/data/intermediate/csv/merged/host_token_resolution_cache.json`)
+
+When `reuse_host_resolution_cache: true` (default in `workflow/config/config.yaml`),
+previously resolved tokens are reused, so expensive taxonomy/assembly lookups are
+not repeated unnecessarily.
+
+To force a fresh token resolution pass, disable cache reuse for that run:
+
+```bash
+snakemake --cores 4 --use-conda \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
+```
+
 ## Testing
 
 New unit tests in `tests/test_multi_host_parsing.py`:

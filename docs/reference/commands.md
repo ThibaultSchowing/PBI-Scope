@@ -46,6 +46,26 @@ snakemake --directory workflow --snakefile workflow/Snakefile \
   reports/database_validation.html
 ```
 
+### Force Re-run (Snakemake)
+
+```bash
+# Force host resolution/download rule
+snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cores 4 --use-conda \
+  --forcerun download_host_genomes
+
+# Force host resolution and ignore persisted token cache for this run
+snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cores 4 --use-conda \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
+
+# Force CSV download + merge rule examples
+snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cores 4 --use-conda \
+  --forcerun download_all_tsvs merge_phage_metadata_tsvs
+```
+
 ### Workflow Visualization
 
 ```bash
@@ -93,6 +113,19 @@ docker compose logs pipeline
 
 # Run pipeline with custom cores
 docker compose run --rm pipeline snakemake --cores 2 --use-conda
+
+# Force host resolution in Docker
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_host_genomes
+
+# Force host resolution in Docker and disable token-cache reuse
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
 ```
 
 ### API

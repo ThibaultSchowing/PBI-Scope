@@ -42,6 +42,7 @@ assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"
 phage_host_links_output: "/data/intermediate/csv/merged/phage_host_links.csv"
 phage_host_candidates_output: "/data/intermediate/csv/merged/phage_host_candidates.csv"
 phage_host_assemblies_output: "/data/intermediate/csv/merged/phage_host_assemblies.csv"
+host_resolution_cache_output: "/data/intermediate/csv/merged/host_token_resolution_cache.json"
 host_download_log: "/data/logs/host_download.log"
 host_failure_log: "/data/logs/host_download_failures.log"
 host_fasta_qc_log: "/data/logs/host_fasta_qc.csv"
@@ -56,6 +57,7 @@ assembly_levels: ["Complete Genome", "Chromosome", "Scaffold"]  # Priority order
 metadata_only_mode: false  # Set to true to skip downloads and only gather metadata
 skip_existing_downloads: true  # Skip already downloaded genomes
 validate_file_checksums: true  # Validate downloaded file integrity
+reuse_host_resolution_cache: true  # Reuse token resolution cache across reruns
 
 
 protein_fasta_urls:
