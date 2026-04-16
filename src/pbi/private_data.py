@@ -274,6 +274,22 @@ def write_private_manifest(manifest: Dict, output_path: Path) -> None:
 def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs: Iterable[str]) -> Dict:
     ingested = []
     skipped = []
+    allowed_source_tables = {"fact_phages", "private_interactions", "private_entity_attributes"}
+
+    def _delete_private_rows_for_sources(table_name: str, source_dbs: List[str]) -> None:
+        if table_name not in allowed_source_tables:
+            raise ValueError(f"Unsupported table for private-source cleanup: {table_name}")
+        if not source_dbs:
+            return
+        placeholders = ", ".join(["?"] * len(source_dbs))
+        conn.execute(
+            f"""
+            DELETE FROM {table_name}
+            WHERE source_type = 'private'
+              AND Source_DB IN ({placeholders})
+            """,
+            source_dbs,
+        )
 
     conn.execute(
         """
@@ -300,18 +316,23 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
         )
         """
     )
+    conn.execute("DROP TABLE IF EXISTS private_phage_host_associations")
     conn.execute(
         """
-        CREATE TABLE IF NOT EXISTS private_phage_host_associations (
+        -- Materialized helper table used by create_duckdb views and downstream
+        -- joins that need source-aware private phage-host links.
+        CREATE TABLE private_phage_host_associations (
             Phage_ID VARCHAR,
-            Host_ID VARCHAR
+            Host_ID VARCHAR,
+            Source_DB VARCHAR,
+            source_type VARCHAR
         )
         """
     )
 
+    validations: List[PrivateSourceValidation] = []
     for source_dir_str in source_dirs:
-        source_dir = Path(source_dir_str)
-        validation = validate_private_source(source_dir, include_dataframe=True)
+        validation = validate_private_source(Path(source_dir_str), include_dataframe=True)
         if not validation.is_valid or validation.metadata_df is None:
             skipped.append(
                 {
@@ -321,7 +342,26 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
                 }
             )
             continue
+        validations.append(validation)
 
+    current_source_dbs = sorted({validation.source_db for validation in validations})
+    _delete_private_rows_for_sources("fact_phages", current_source_dbs)
+    _delete_private_rows_for_sources("private_interactions", current_source_dbs)
+    _delete_private_rows_for_sources("private_entity_attributes", current_source_dbs)
+
+    existing_private_sources = {
+        row[0]
+        for row in conn.execute(
+            "SELECT DISTINCT Source_DB FROM fact_phages WHERE source_type = 'private'"
+        ).fetchall()
+        if row[0]
+    }
+    stale_source_dbs = sorted(existing_private_sources - set(current_source_dbs))
+    _delete_private_rows_for_sources("fact_phages", stale_source_dbs)
+    _delete_private_rows_for_sources("private_interactions", stale_source_dbs)
+    _delete_private_rows_for_sources("private_entity_attributes", stale_source_dbs)
+
+    for validation in validations:
         df = validation.metadata_df.drop_duplicates(subset=["Phage_ID", "Host_ID", "Source_DB"]).copy()
         df["source_type"] = "private"
 
@@ -356,70 +396,6 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
             """
             INSERT INTO fact_phages
             SELECT * FROM private_phages_df
-            """
-        )
-
-        if "dim_hosts" not in set(conn.execute("SHOW TABLES").fetchnumpy()["name"]):
-            conn.execute(
-                """
-                CREATE TABLE dim_hosts (
-                    Host_ID VARCHAR,
-                    Species_Name VARCHAR,
-                    Strain_Name VARCHAR,
-                    Assembly_Accession VARCHAR,
-                    Assembly_Name VARCHAR,
-                    Assembly_Level VARCHAR,
-                    Genome_Length BIGINT,
-                    GC_Content DOUBLE,
-                    RefSeq_Category VARCHAR,
-                    Download_Date VARCHAR,
-                    Source VARCHAR,
-                    source_type VARCHAR
-                )
-                """
-            )
-
-        private_hosts = df[["Host_ID", "Host_name"]].drop_duplicates().rename(columns={"Host_name": "Species_Name"})
-        private_hosts["Strain_Name"] = pd.NA
-        private_hosts["Assembly_Accession"] = pd.NA
-        private_hosts["Assembly_Name"] = pd.NA
-        private_hosts["Assembly_Level"] = pd.NA
-        private_hosts["Genome_Length"] = pd.NA
-        private_hosts["GC_Content"] = pd.NA
-        private_hosts["RefSeq_Category"] = pd.NA
-        private_hosts["Download_Date"] = pd.NA
-        private_hosts["Source"] = "private"
-        private_hosts["source_type"] = "private"
-        private_hosts = private_hosts[
-            [
-                "Host_ID",
-                "Species_Name",
-                "Strain_Name",
-                "Assembly_Accession",
-                "Assembly_Name",
-                "Assembly_Level",
-                "Genome_Length",
-                "GC_Content",
-                "RefSeq_Category",
-                "Download_Date",
-                "Source",
-                "source_type",
-            ]
-        ]
-        conn.register("private_hosts_df", private_hosts)
-        conn.execute(
-            """
-            INSERT INTO dim_hosts
-            SELECT * FROM private_hosts_df
-            """
-        )
-
-        private_associations = df[["Phage_ID", "Host_ID"]].drop_duplicates()
-        conn.register("private_associations_df", private_associations)
-        conn.execute(
-            """
-            INSERT INTO private_phage_host_associations
-            SELECT * FROM private_associations_df
             """
         )
 
@@ -477,6 +453,64 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
                 "unique_hosts": validation.stats["unique_hosts"],
             }
         )
+
+    # Recompute the association table from canonical private_interactions to keep
+    # link rows exactly in sync after source additions/removals/updates.
+    conn.execute(
+        """
+        INSERT INTO private_phage_host_associations
+        SELECT DISTINCT Phage_ID, Host_ID, Source_DB, source_type
+        FROM private_interactions
+        WHERE source_type = 'private'
+        """
+    )
+
+    if "dim_hosts" not in set(conn.execute("SHOW TABLES").fetchnumpy()["name"]):
+        conn.execute(
+            """
+            CREATE TABLE dim_hosts (
+                Host_ID VARCHAR,
+                Species_Name VARCHAR,
+                Strain_Name VARCHAR,
+                Assembly_Accession VARCHAR,
+                Assembly_Name VARCHAR,
+                Assembly_Level VARCHAR,
+                Genome_Length BIGINT,
+                GC_Content DOUBLE,
+                RefSeq_Category VARCHAR,
+                Download_Date VARCHAR,
+                Source VARCHAR,
+                source_type VARCHAR
+            )
+            """
+        )
+
+    # Private host rows are regenerated from current private_interactions so stale
+    # hosts disappear automatically when sources are removed.
+    conn.execute("DELETE FROM dim_hosts WHERE source_type = 'private'")
+    conn.execute(
+        """
+        INSERT INTO dim_hosts
+        SELECT
+            Host_ID,
+            Host_name AS Species_Name,
+            NULL AS Strain_Name,
+            NULL AS Assembly_Accession,
+            NULL AS Assembly_Name,
+            NULL AS Assembly_Level,
+            NULL AS Genome_Length,
+            NULL AS GC_Content,
+            NULL AS RefSeq_Category,
+            NULL AS Download_Date,
+            'private' AS Source,
+            'private' AS source_type
+        FROM (
+            SELECT DISTINCT Host_ID, Host_name
+            FROM private_interactions
+            WHERE source_type = 'private'
+        )
+        """
+    )
 
     return {"ingested": ingested, "skipped": skipped}
 

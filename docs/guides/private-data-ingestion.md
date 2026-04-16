@@ -34,11 +34,11 @@ docker compose run --rm pipeline
 
 Private sequence retrieval is prepared automatically during the workflow:
 
-- Private phage FASTA records are merged into the main phage FASTA and indexed with the same preprocessing/indexing step as public PhageScope phages.
+- Private phage FASTA records are kept in a dedicated private FASTA and indexed separately from the public PhageScope FASTA.
 - Private host FASTA records are split to per-`Host_ID` files, added to `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
 
-To remove private data from the database simply empty `private_data/` (or remove the
-subdirectory) and re-run the pipeline — it rebuilds from scratch.
+When private source directories are removed from `private_data/`, rerunning the pipeline
+re-synchronizes the manifest and removes stale private records from the database.
 
 ## Required files per source directory
 
@@ -46,7 +46,7 @@ subdirectory) and re-run the pipeline — it rebuilds from scratch.
 |------|----------|
 | `metadata.csv` | ✅ |
 | `phage.fasta` | ✅ |
-| `host.fasta` | ✅ |
+| `host.fasta` | Optional (recommended) |
 
 ## `metadata.csv` columns
 
@@ -66,13 +66,19 @@ Optional columns: any extra columns are preserved in `private_entity_attributes`
 
 - The sequence identifier is the **first whitespace-delimited token** of each `>` header line.
 - `Phage_ID` values must each appear as an identifier in `phage.fasta`.
-- `Host_ID` values must each appear as an identifier in `host.fasta`.
+- If `host.fasta` is provided, `Host_ID` values must each appear as an identifier in it.
+- If `host.fasta` is missing, host genomes are fetched from NCBI using `Host_name`, then stored as private host FASTA files and linked in `dim_hosts`.
 - Duplicate FASTA identifiers in the same file are rejected.
 
 ## Duplicate row policy
 
 Rows that are duplicated on (`Phage_ID`, `Host_ID`, `Source_DB`) are accepted but
 deduplicated at ingestion (first occurrence kept).
+
+## Database synchronization notes
+
+- `fact_phages.source_type` distinguishes public (`public`) vs private (`private`) phages.
+- `private_phage_host_associations` stores `Phage_ID`, `Host_ID`, `Source_DB`, and `source_type` so private links can be traced back to their source dataset during resynchronization.
 
 ## Running `validate-private` without Docker
 
