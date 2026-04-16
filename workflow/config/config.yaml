@@ -47,7 +47,10 @@ protein_fasta_merged_output: "/data/intermediate/fasta/proteins/" # Used in sequ
 
 # Host genomes
 host_genomes_intermediate: "/data/intermediate/fasta/hosts"
+private_host_genomes_intermediate: "/data/intermediate/fasta/hosts/private"
 host_fasta_mapping: "/data/processed/sequences/host_fasta_mapping.json"
+private_host_mapping: "/data/intermediate/fasta/private/private_host_fasta_mapping.json"
+private_phage_fasta: "/data/intermediate/fasta/private/private_phages.fasta"
 host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
 assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"

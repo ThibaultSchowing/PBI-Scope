@@ -3,9 +3,14 @@
 from pathlib import Path
 
 import duckdb
+import json
 import pandas as pd
 
-from pbi.private_data import ingest_private_sources_into_db, validate_private_source
+from pbi.private_data import (
+    ingest_private_sources_into_db,
+    prepare_private_sequence_artifacts,
+    validate_private_source,
+)
 
 
 def _write_text(path: Path, content: str):
@@ -180,3 +185,110 @@ def test_private_ingestion_non_blocking_one_invalid_source(tmp_path):
 
     attrs_count = conn.execute("SELECT COUNT(*) FROM private_entity_attributes").fetchone()[0]
     assert attrs_count == 1
+
+
+def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(tmp_path):
+    source = _create_private_source(
+        tmp_path,
+        "Project_A",
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "H1",
+                "Host_name": "Host One",
+                "Source_DB": "Project_A",
+                "interaction": "virulent",
+            }
+        ],
+        ["P1"],
+        ["H1"],
+    )
+    manifest = {
+        "sources": [
+            {
+                "source_db": "Project_A",
+                "source_dir": str(source),
+                "is_valid": True,
+            }
+        ]
+    }
+
+    private_phage_fasta = tmp_path / "private" / "private_phages.fasta"
+    private_host_dir = tmp_path / "private" / "hosts"
+    private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
+
+    stats = prepare_private_sequence_artifacts(
+        manifest=manifest,
+        private_phage_fasta_path=private_phage_fasta,
+        private_host_dir=private_host_dir,
+        private_host_mapping_path=private_host_mapping,
+    )
+
+    assert stats["sources_processed"] == 1
+    assert stats["phages_written"] == 1
+    assert stats["hosts_written"] == 1
+
+    phage_content = private_phage_fasta.read_text(encoding="utf-8")
+    assert ">P1 desc" in phage_content
+
+    with private_host_mapping.open("r", encoding="utf-8") as handle:
+        mapping = json.load(handle)
+    assert "H1" in mapping
+    mapped_path = Path(mapping["H1"])
+    assert mapped_path.exists()
+    assert ">H1 desc" in mapped_path.read_text(encoding="utf-8")
+
+
+def test_prepare_private_sequence_artifacts_skips_invalid_sources(tmp_path):
+    valid_source = _create_private_source(
+        tmp_path,
+        "Valid_Source",
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "H1",
+                "Host_name": "Host One",
+                "Source_DB": "Valid_Source",
+                "interaction": "temperate",
+            }
+        ],
+        ["P1"],
+        ["H1"],
+    )
+    invalid_source = _create_private_source(
+        tmp_path,
+        "Invalid_Source",
+        [
+            {
+                "Phage_ID": "PX",
+                "Host_ID": "HX",
+                "Host_name": "Host X",
+                "Source_DB": "Invalid_Source",
+                "interaction": "virulent",
+            }
+        ],
+        ["PX"],
+        ["HX"],
+    )
+
+    manifest = {
+        "sources": [
+            {"source_db": "Valid_Source", "source_dir": str(valid_source), "is_valid": True},
+            {"source_db": "Invalid_Source", "source_dir": str(invalid_source), "is_valid": False},
+        ]
+    }
+
+    private_phage_fasta = tmp_path / "private" / "private_phages.fasta"
+    private_host_dir = tmp_path / "private" / "hosts"
+    private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
+
+    stats = prepare_private_sequence_artifacts(
+        manifest=manifest,
+        private_phage_fasta_path=private_phage_fasta,
+        private_host_dir=private_host_dir,
+        private_host_mapping_path=private_host_mapping,
+    )
+
+    assert stats["sources_processed"] == 1
+    assert ">P1 desc" in private_phage_fasta.read_text(encoding="utf-8")
+    assert "PX" not in private_phage_fasta.read_text(encoding="utf-8")

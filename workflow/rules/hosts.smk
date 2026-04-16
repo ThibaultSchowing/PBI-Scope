@@ -68,7 +68,8 @@ rule create_host_mapping:
     on-demand loading of individual host genome files for efficient memory usage.
     """
     input:
-        metadata = config["host_metadata_output"]
+        metadata = config["host_metadata_output"],
+        private_mapping = config["private_host_mapping"]
     output:
         mapping = config["host_fasta_mapping"]
     params:
@@ -107,11 +108,30 @@ rule create_host_mapping:
         if not host_mapping:
             raise ValueError("❌ No valid host FASTA files found!")
         
+        # Merge private host mapping entries (if any)
+        private_mapping_path = Path(input.private_mapping)
+        private_added = 0
+        private_conflicts = 0
+        if private_mapping_path.exists():
+            with private_mapping_path.open("r") as f:
+                private_mapping = json.load(f)
+            for host_id, fasta_path in private_mapping.items():
+                if host_id in host_mapping:
+                    private_conflicts += 1
+                    continue
+                fasta_file = Path(fasta_path)
+                if fasta_file.exists() and fasta_file.stat().st_size > 0:
+                    host_mapping[host_id] = str(fasta_file)
+                    private_added += 1
+
         # Write mapping to JSON file
         with open(output.mapping, 'w') as f:
             json.dump(host_mapping, f, indent=2)
         
         print(f"✅ Created mapping for {valid_count} host FASTA files", file=open(log[0], 'a'))
+        print(f"✅ Added {private_added} private host FASTA files", file=open(log[0], 'a'))
+        if private_conflicts > 0:
+            print(f"⚠️ Skipped {private_conflicts} conflicting private Host_ID entries", file=open(log[0], 'a'))
         if missing_count > 0:
             print(f"⚠️ {missing_count} host files were missing or empty", file=open(log[0], 'a'))
 

@@ -32,6 +32,11 @@ pbi validate-private
 docker compose run --rm pipeline
 ```
 
+Private sequence retrieval is prepared automatically during the workflow:
+
+- Private phage FASTA records are merged into the main phage FASTA and indexed with the same preprocessing/indexing step as public PhageScope phages.
+- Private host FASTA records are split to per-`Host_ID` files, added to `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
+
 To remove private data from the database simply empty `private_data/` (or remove the
 subdirectory) and re-run the pipeline — it rebuilds from scratch.
 
@@ -143,4 +148,3 @@ Use this template inside each private source directory:
 ## Optional custom columns
 - <column_name>: <description>
 ```
-
