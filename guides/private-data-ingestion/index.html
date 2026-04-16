@@ -1577,6 +1577,11 @@ directory at the repository root.</p>
 </ol>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
 </code></pre></div>
+<p>Private sequence retrieval is prepared automatically during the workflow:</p>
+<ul>
+<li>Private phage FASTA records are merged into the main phage FASTA and indexed with the same preprocessing/indexing step as public PhageScope phages.</li>
+<li>Private host FASTA records are split to per-<code>Host_ID</code> files, added to <code>host_fasta_mapping.json</code>, and indexed with the same host indexing workflow.</li>
+</ul>
 <p>To remove private data from the database simply empty <code>private_data/</code> (or remove the
 subdirectory) and re-run the pipeline — it rebuilds from scratch.</p>
 <h2 id="required-files-per-source-directory">Required files per source directory<a class="headerlink" href="#required-files-per-source-directory" title="Permanent link">&para;</a></h2>
