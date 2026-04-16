@@ -445,23 +445,26 @@ def create_star_schema_duckdb():
     # Normalize provenance labels to avoid NULL/blank source_type values.
     # Public rows default to 'public'; rows linked to private interactions are
     # enforced as 'private'.
+    # Note: some CSV ingestion paths may materialize missing values as the
+    # literal string 'nan', so that sentinel is normalized as well.
     has_private_interactions = _table_exists(conn, "private_interactions")
     if has_private_interactions:
         conn.execute(
             """
+            WITH private_keys AS (
+                SELECT DISTINCT Phage_ID, Source_DB
+                FROM private_interactions
+            )
             UPDATE fact_phages AS fp
             SET source_type = CASE
-                WHEN EXISTS (
-                    SELECT 1
-                    FROM private_interactions pi
-                    WHERE pi.Phage_ID = fp.Phage_ID
-                      AND pi.Source_DB = fp.Source_DB
+                WHEN (fp.Phage_ID, fp.Source_DB) IN (
+                    SELECT Phage_ID, Source_DB FROM private_keys
                 ) THEN 'private'
                 ELSE 'public'
             END
             WHERE source_type IS NULL
                OR trim(source_type) = ''
-               OR lower(source_type) = 'nan'
+               OR lower(trim(source_type)) = 'nan'
             """
         )
     else:
@@ -471,7 +474,7 @@ def create_star_schema_duckdb():
             SET source_type = 'public'
             WHERE source_type IS NULL
                OR trim(source_type) = ''
-               OR lower(source_type) = 'nan'
+               OR lower(trim(source_type)) = 'nan'
             """
         )
 

@@ -625,8 +625,9 @@ def prepare_private_sequence_artifacts(
 
             if not host_fasta_path.exists():
                 raise FileNotFoundError(
-                    f"Missing required host FASTA for private source '{src.get('source_db', source_dir.name)}': "
-                    f"{host_fasta_path}"
+                    f"host.fasta is mandatory for private source '{src.get('source_db', source_dir.name)}' but is missing: "
+                    f"{host_fasta_path}. Please add source_dir/host.fasta with identifiers matching all Host_ID values "
+                    "from metadata.csv."
                 )
 
             found_hosts: Set[str] = set()
