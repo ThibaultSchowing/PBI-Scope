@@ -24,6 +24,7 @@ database_validation_report_output: "/data/processed/reports/database_validation.
 # Private data ingestion (mounted read-only in the pipeline container)
 private_ingestion_enabled: false
 # One or multiple roots. Each immediate subdirectory is one private source_db.
+# Example: ["/private-data", "/mnt/project-private"]
 private_data_roots: []
 
 

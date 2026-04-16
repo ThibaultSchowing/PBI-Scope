@@ -11,7 +11,10 @@ import pandas as pd
 
 
 MANDATORY_COLUMNS = ["Phage_ID", "Host_ID", "Host_name", "Source_DB", "interaction"]
+# Canonical private interaction categories accepted by the ingestion contract.
+# Values are normalized to lowercase before validation.
 ALLOWED_INTERACTIONS = {"temperate", "virulent"}
+MAX_ERROR_EXAMPLES = 20
 
 
 @dataclass
@@ -30,11 +33,23 @@ class PrivateSourceValidation:
 
 
 def _extract_fasta_identifier(header_line: str) -> str:
+    if not header_line.startswith(">"):
+        raise ValueError("FASTA header must start with '>'")
     header = header_line[1:].strip()
+    # Empty identifiers are ignored by callers to keep error messages actionable elsewhere.
     return header.split()[0] if header else ""
 
 
 def parse_fasta_ids(fasta_path: Path) -> tuple[Set[str], Set[str]]:
+    """
+    Parse FASTA identifiers using the first token of each header line.
+
+    Args:
+        fasta_path: Path to FASTA file.
+
+    Returns:
+        Tuple (all_ids, duplicate_ids), where both items are sets of IDs.
+    """
     ids: Set[str] = set()
     duplicates: Set[str] = set()
 
@@ -96,7 +111,8 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
         invalid_rows = df.index[df[col].astype(str).str.len() == 0].tolist()
         if invalid_rows:
             errors.append(
-                f"metadata.csv column '{col}' has empty values at rows {[row + 2 for row in invalid_rows[:20]]}"
+                f"metadata.csv column '{col}' has empty values at rows "
+                f"{[row + 2 for row in invalid_rows[:MAX_ERROR_EXAMPLES]]}"
             )
 
     unique_sources = sorted(set(v for v in df["Source_DB"].astype(str).tolist() if v))
@@ -112,7 +128,8 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
         invalid_values = sorted(set(df.loc[invalid_interaction_mask, "interaction"].tolist()))
         errors.append(
             "Invalid interaction values "
-            f"{invalid_values}. Allowed values: {sorted(ALLOWED_INTERACTIONS)}. Rows: {invalid_rows[:20]}"
+            f"{invalid_values}. Allowed values: {sorted(ALLOWED_INTERACTIONS)}. "
+            f"Rows: {invalid_rows[:MAX_ERROR_EXAMPLES]}"
         )
     df["interaction"] = normalized_interactions
 
@@ -120,9 +137,15 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
     host_ids, host_duplicates = parse_fasta_ids(required["host.fasta"])
 
     if phage_duplicates:
-        errors.append(f"Duplicate FASTA identifiers in phage.fasta: {sorted(phage_duplicates)[:20]}")
+        errors.append(
+            f"Duplicate FASTA identifiers in phage.fasta: "
+            f"{sorted(phage_duplicates)[:MAX_ERROR_EXAMPLES]}"
+        )
     if host_duplicates:
-        errors.append(f"Duplicate FASTA identifiers in host.fasta: {sorted(host_duplicates)[:20]}")
+        errors.append(
+            f"Duplicate FASTA identifiers in host.fasta: "
+            f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
+        )
 
     csv_phage_ids = set(df["Phage_ID"].tolist())
     csv_host_ids = set(df["Host_ID"].tolist())
@@ -130,9 +153,9 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
     missing_phages = sorted(csv_phage_ids - phage_ids)
     missing_hosts = sorted(csv_host_ids - host_ids)
     if missing_phages:
-        errors.append(f"Phage_ID not found in phage.fasta: {missing_phages[:20]}")
+        errors.append(f"Phage_ID not found in phage.fasta: {missing_phages[:MAX_ERROR_EXAMPLES]}")
     if missing_hosts:
-        errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:20]}")
+        errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:MAX_ERROR_EXAMPLES]}")
 
     duplicated_rows = int(df.duplicated(subset=["Phage_ID", "Host_ID", "Source_DB"]).sum())
     if duplicated_rows:
@@ -245,7 +268,7 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS private_entity_attributes (
-            source_db VARCHAR,
+            Source_DB VARCHAR,
             source_type VARCHAR,
             entity_type VARCHAR,
             entity_id VARCHAR,
@@ -425,7 +448,7 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
                     "attribute_value",
                     "value_type",
                 ]
-            ].rename(columns={"Source_DB": "source_db"})
+            ]
             if not attrs.empty:
                 conn.register("private_attrs_df", attrs)
                 conn.execute(

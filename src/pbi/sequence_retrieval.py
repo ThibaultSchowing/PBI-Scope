@@ -776,8 +776,8 @@ class SequenceRetriever:
                 """
             ).fetchdf()
             stats['database']['source_breakdown'] = source_breakdown.to_dict(orient='records')
-        except Exception:
-            pass
+        except Exception as e:
+            logging.debug(f"Could not compute source breakdown stats: {e}")
         
         logging.info(f"📊 Database Stats:")
         logging.info(f"   Phages: {stats['database']['phages']:,}")
