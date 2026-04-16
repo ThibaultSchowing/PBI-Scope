@@ -36,8 +36,10 @@ def _resolve_repo_root() -> Path:
         if (candidate / "src" / "pbi" / "private_data.py").exists():
             return candidate
 
-    # Fallback keeps previous behavior semantics if discovery fails.
-    return script_path.parents[3]
+    raise RuntimeError(
+        "Could not resolve repository root for prepare_private_sequences.py; "
+        "expected to find src/pbi/private_data.py from scriptdir, __file__, or current working directory."
+    )
 
 
 REPO_ROOT = _resolve_repo_root()
