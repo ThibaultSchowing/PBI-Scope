@@ -39,6 +39,7 @@ nav:
       - How It Works: guides/how-it-works.md
       - Analysis Container: guides/analysis-guide.md
       - Pipeline Execution: guides/pipeline-execution.md
+      - Private Data Ingestion: guides/private-data-ingestion.md
       - Schema Contracts: guides/schema-contracts.md
       - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md

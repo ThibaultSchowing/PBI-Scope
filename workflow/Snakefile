@@ -18,6 +18,15 @@ for path_key in config:
         # Replace /data prefix with BASE_DATA_DIR
         config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
 
+# Optional private ingestion settings from environment variables
+private_ingestion_env = os.getenv("PRIVATE_INGESTION_ENABLED")
+if private_ingestion_env is not None:
+    config["private_ingestion_enabled"] = private_ingestion_env.strip().lower() in ("1", "true", "yes", "on")
+
+private_roots_env = os.getenv("PRIVATE_DATA_ROOTS")
+if private_roots_env:
+    config["private_data_roots"] = [p.strip() for p in private_roots_env.split(",") if p.strip()]
+
 
 # List here the features for which reports will be generated.
 # These features correspond to the keys in the config file that contain URLs for metadata.

@@ -10,12 +10,17 @@ services:
       - pbi-data:/data
       # Mount cache directory to persist Snakemake metadata and conda environments
       - pbi-cache:/cache
+      # Optional private data mount (read-only). Override with your local path:
+      # - /absolute/path/to/private_root:/private-data:ro
     environment:
       - SNAKEMAKE_OUTPUT_CACHE=/cache
       - SNAKEMAKE_CONDA_PREFIX=/cache/conda
       - NCBI_EMAIL=${NCBI_EMAIL} # Pass NCBI email for Entrez API usage from environment variable
       - NCBI_API_KEY=${NCBI_API_KEY} # Pass NCBI API key for higher rate limits (optional) from environment variable
       - PBI_DATA_DIR=/data
+      # Optional private ingestion settings (can also be set directly in workflow/config/config.yaml)
+      # - PRIVATE_INGESTION_ENABLED=true
+      # - PRIVATE_DATA_ROOTS=/private-data
     networks:
       - pbi-network
 
