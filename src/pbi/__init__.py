@@ -1,18 +1,22 @@
 """
-PBI - Phage Bioinformatics Interface
+PBI - Phage Bioinformatics Interface.
 
-A package for interacting with phage genomics databases created by the workflow pipeline.
-
-Main classes:
-    - SequenceRetriever: Retrieve sequences from indexed FASTA files using SQL queries
-    - NegativeExampleGenerator: Generate negative training examples for ML
-    - DatabaseManager: (future) Database connection management utilities
+Main classes are exposed lazily so lightweight submodules (e.g. ``pbi.private_data``)
+can be imported in environments that do not install the full runtime stack.
 """
 
-# Import main classes for easy access
-from .sequence_retrieval import SequenceRetriever
-from .negative_examples import NegativeExampleGenerator
-from .streaming_dataset import PhageHostStreamingDataset, PhageHostIndexedDataset, phage_host_collate_fn
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .negative_examples import NegativeExampleGenerator
+    from .sequence_retrieval import SequenceRetriever
+    from .streaming_dataset import (
+        PhageHostIndexedDataset,
+        PhageHostStreamingDataset,
+        phage_host_collate_fn,
+    )
 
 # Package metadata
 __version__ = "0.2.0"
@@ -26,6 +30,28 @@ __all__ = [
     'PhageHostIndexedDataset',
     'phage_host_collate_fn',
 ]
+
+
+def __getattr__(name):
+    if name == "SequenceRetriever":
+        from .sequence_retrieval import SequenceRetriever
+        return SequenceRetriever
+    if name == "NegativeExampleGenerator":
+        from .negative_examples import NegativeExampleGenerator
+        return NegativeExampleGenerator
+    if name in {"PhageHostStreamingDataset", "PhageHostIndexedDataset", "phage_host_collate_fn"}:
+        from .streaming_dataset import (
+            PhageHostIndexedDataset,
+            PhageHostStreamingDataset,
+            phage_host_collate_fn,
+        )
+        exports = {
+            "PhageHostStreamingDataset": PhageHostStreamingDataset,
+            "PhageHostIndexedDataset": PhageHostIndexedDataset,
+            "phage_host_collate_fn": phage_host_collate_fn,
+        }
+        return exports[name]
+    raise AttributeError(f"module 'pbi' has no attribute {name!r}")
 
 # Optional: Add convenience functions
 def get_default_paths():

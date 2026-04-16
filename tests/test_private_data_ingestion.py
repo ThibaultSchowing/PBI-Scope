@@ -389,3 +389,62 @@ def test_prepare_private_sequence_artifacts_skips_invalid_sources(tmp_path):
     assert stats["sources_processed"] == 1
     assert ">P1 desc" in private_phage_fasta.read_text(encoding="utf-8")
     assert "PX" not in private_phage_fasta.read_text(encoding="utf-8")
+
+
+def test_ingest_private_sources_resyncs_deleted_sources_and_prevents_duplicates(tmp_path):
+    source_a = _create_private_source(
+        tmp_path,
+        "Source_A",
+        [
+            {
+                "Phage_ID": "PA",
+                "Host_ID": "HA",
+                "Host_name": "Host A",
+                "Source_DB": "Source_A",
+                "interaction": "virulent",
+            }
+        ],
+        ["PA"],
+        ["HA"],
+    )
+    source_b = _create_private_source(
+        tmp_path,
+        "Source_B",
+        [
+            {
+                "Phage_ID": "PB",
+                "Host_ID": "HB",
+                "Host_name": "Host B",
+                "Source_DB": "Source_B",
+                "interaction": "temperate",
+            }
+        ],
+        ["PB"],
+        ["HB"],
+    )
+
+    conn = duckdb.connect(":memory:")
+    _prepare_minimal_db(conn)
+
+    first_run = ingest_private_sources_into_db(conn, [str(source_a), str(source_b)])
+    assert len(first_run["ingested"]) == 2
+    assert conn.execute("SELECT COUNT(*) FROM fact_phages WHERE source_type = 'private'").fetchone()[0] == 2
+
+    # Rerun with only source_a (simulates source_b deleted from private_data folder)
+    second_run = ingest_private_sources_into_db(conn, [str(source_a)])
+    assert len(second_run["ingested"]) == 1
+
+    private_rows = conn.execute(
+        "SELECT Phage_ID, Source_DB FROM fact_phages WHERE source_type = 'private' ORDER BY Phage_ID"
+    ).fetchall()
+    assert private_rows == [("PA", "Source_A")]
+
+    interaction_rows = conn.execute(
+        "SELECT Phage_ID, Source_DB FROM private_interactions ORDER BY Phage_ID"
+    ).fetchall()
+    assert interaction_rows == [("PA", "Source_A")]
+
+    host_rows = conn.execute(
+        "SELECT Host_ID, source_type FROM dim_hosts WHERE source_type = 'private' ORDER BY Host_ID"
+    ).fetchall()
+    assert host_rows == [("HA", "private")]

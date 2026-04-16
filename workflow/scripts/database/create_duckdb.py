@@ -69,7 +69,7 @@ def create_star_schema_duckdb():
         Lifestyle,
         Cluster,
         Subcluster,
-        'phagescope' as source_type
+        'public' as source_type
     FROM read_csv('{phage_data}', 
                   header=true, 
                   all_varchar=true, 

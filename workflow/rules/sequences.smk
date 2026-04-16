@@ -22,8 +22,7 @@ rule merge_phage_fasta:
         expand(
             config["phage_fasta_merged_output"] + "{source}.fasta",
             source=PHAGE_FASTA_SOURCES
-        ),
-        config["private_phage_fasta"]
+        )
     output:
         config["all_phages_fasta"]
     log:
@@ -110,6 +109,37 @@ rule index_phage_sequences:
     script:
         "../scripts/sequences/index_sequences.py"
 
+rule index_private_phage_sequences:
+    input:
+        config["private_phage_fasta"]
+    output:
+        config["private_phage_fasta"] + ".fai"
+    log:
+        "logs/index_private_phage_sequences.log"
+    conda:
+        "../envs/sequences.yaml"
+    run:
+        from pathlib import Path
+        import pyfaidx
+
+        private_fasta = Path(input[0])
+        output_index = Path(output[0])
+        output_index.parent.mkdir(parents=True, exist_ok=True)
+
+        if private_fasta.exists() and private_fasta.stat().st_size > 0:
+            pyfaidx.Fasta(
+                str(private_fasta),
+                split_char="\x00",
+                rebuild=True,
+                read_long_names=True,
+            )
+            if not output_index.exists():
+                raise FileNotFoundError(f"Expected index not created: {output_index}")
+        else:
+            output_index.write_text("", encoding="utf-8")
+            with open(log[0], "a", encoding="utf-8") as handle:
+                handle.write("No private phage sequences detected; wrote empty private index.\n")
+
 rule index_protein_sequences:
     input:
         config["all_proteins_fasta"]
@@ -125,4 +155,5 @@ rule index_protein_sequences:
 rule all_sequences:
     input:
         config["all_phages_fasta"] + ".fai",
+        config["private_phage_fasta"] + ".fai",
         config["all_proteins_fasta"] + ".fai"

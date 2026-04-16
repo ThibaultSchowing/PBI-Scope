@@ -1,6 +1,17 @@
 # Rules are executed from the snakefile in the workflow directory and the paths are relative to this directory
 # so, ../data/ points to the data directory at the root of the project
 
+from pathlib import Path
+
+
+def _private_root_dependency(wildcards):
+    root = config.get("private_data_root", "")
+    if not root:
+        return []
+    root_path = Path(root)
+    return [str(root_path)] if root_path.exists() else []
+
+
 rule create_duckdb:
     input:
         phage_data=config["phage_metadata_merged_output"], 
@@ -25,6 +36,8 @@ rule create_duckdb:
         "../scripts/database/create_duckdb.py"   
 
 rule prepare_private_sources:
+    input:
+        private_root=_private_root_dependency
     output:
         manifest=config["private_manifest_output"]
     conda:
