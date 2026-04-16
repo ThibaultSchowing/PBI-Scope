@@ -9,8 +9,11 @@ data/
 
 # Private data directory — the directory is tracked but its contents are gitignored.
 # Place your private phage/host datasets here (one subdirectory per source).
+# Exception: test_private/ is committed to the repository as a worked example.
 private_data/*
 !private_data/.gitkeep
+!private_data/test_private/
+!private_data/test_private/**
 
 # Pipeline logs/reports directory — the directory is tracked but generated files are gitignored.
 # HTML reports and log files written by the pipeline container will appear here.
