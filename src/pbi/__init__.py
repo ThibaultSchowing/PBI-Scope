@@ -103,6 +103,7 @@ def quick_connect():
         >>> df = retriever.get_phage_sequences("SELECT Phage_ID FROM fact_phages LIMIT 10")
     """
     paths = get_default_paths()
+    from .sequence_retrieval import SequenceRetriever
     
     # Prefer host mapping file (new approach), fallback to single file (legacy)
     host_mapping = str(paths['host_mapping']) if paths['host_mapping'].exists() else None
