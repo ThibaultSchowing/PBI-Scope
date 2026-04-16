@@ -442,6 +442,39 @@ def create_star_schema_duckdb():
         except Exception as e:
             logging.warning(f"⚠️  Private ingestion failed, continuing with PhageScope-only database: {e}")
 
+    # Normalize provenance labels to avoid NULL/blank source_type values.
+    # Public rows default to 'public'; rows linked to private interactions are
+    # enforced as 'private'.
+    has_private_interactions = _table_exists(conn, "private_interactions")
+    if has_private_interactions:
+        conn.execute(
+            """
+            UPDATE fact_phages AS fp
+            SET source_type = CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM private_interactions pi
+                    WHERE pi.Phage_ID = fp.Phage_ID
+                      AND pi.Source_DB = fp.Source_DB
+                ) THEN 'private'
+                ELSE 'public'
+            END
+            WHERE source_type IS NULL
+               OR trim(source_type) = ''
+               OR lower(source_type) = 'nan'
+            """
+        )
+    else:
+        conn.execute(
+            """
+            UPDATE fact_phages
+            SET source_type = 'public'
+            WHERE source_type IS NULL
+               OR trim(source_type) = ''
+               OR lower(source_type) = 'nan'
+            """
+        )
+
     # CREATE PERFORMANCE INDEXES
     logging.info("Creating indexes")
 
