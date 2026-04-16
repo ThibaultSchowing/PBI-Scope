@@ -1625,7 +1625,7 @@ re-synchronizes the manifest and removes stale private records from the database
 </tr>
 <tr>
 <td><code>host.fasta</code></td>
-<td>Optional (recommended)</td>
+<td>✅</td>
 </tr>
 </tbody>
 </table>
@@ -1666,8 +1666,7 @@ re-synchronizes the manifest and removes stale private records from the database
 <ul>
 <li>The sequence identifier is the <strong>first whitespace-delimited token</strong> of each <code>&gt;</code> header line.</li>
 <li><code>Phage_ID</code> values must each appear as an identifier in <code>phage.fasta</code>.</li>
-<li>If <code>host.fasta</code> is provided, <code>Host_ID</code> values must each appear as an identifier in it.</li>
-<li>If <code>host.fasta</code> is missing, host genomes are fetched from NCBI using <code>Host_name</code>, then stored as private host FASTA files and linked in <code>dim_hosts</code>.</li>
+<li><code>Host_ID</code> values must each appear as an identifier in <code>host.fasta</code>.</li>
 <li>Duplicate FASTA identifiers in the same file are rejected.</li>
 </ul>
 <h2 id="duplicate-row-policy">Duplicate row policy<a class="headerlink" href="#duplicate-row-policy" title="Permanent link">&para;</a></h2>
