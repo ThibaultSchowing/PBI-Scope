@@ -102,6 +102,7 @@ def quick_connect():
         >>> retriever = pbi.quick_connect()
         >>> df = retriever.get_phage_sequences("SELECT Phage_ID FROM fact_phages LIMIT 10")
     """
+    from .sequence_retrieval import SequenceRetriever
     paths = get_default_paths()
     
     # Prefer host mapping file (new approach), fallback to single file (legacy)
