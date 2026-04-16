@@ -12,7 +12,33 @@ from typing import Dict, Optional
 
 logging.basicConfig(level=logging.INFO)
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+def _resolve_repo_root() -> Path:
+    """Find repository root even when Snakemake executes a temporary script copy."""
+    candidates = []
+
+    snakemake_ctx = globals().get("snakemake")
+    scriptdir = getattr(snakemake_ctx, "scriptdir", None) if snakemake_ctx else None
+    if scriptdir:
+        scriptdir_path = Path(scriptdir).resolve()
+        candidates.extend([scriptdir_path, *scriptdir_path.parents])
+
+    script_path = Path(__file__).resolve()
+    candidates.extend([script_path.parent, *script_path.parents])
+
+    cwd = Path.cwd().resolve()
+    candidates.extend([cwd, *cwd.parents])
+
+    for candidate in dict.fromkeys(candidates):
+        if (candidate / "src" / "pbi" / "private_data.py").exists():
+            return candidate
+
+    raise RuntimeError(
+        "Could not resolve repository root for prepare_private_sequences.py; "
+        "expected to find src/pbi/private_data.py from scriptdir, __file__, or current working directory."
+    )
+
+
+REPO_ROOT = _resolve_repo_root()
 SRC_PATH = REPO_ROOT / "src"
 SCRIPTS_SEQUENCES_PATH = REPO_ROOT / "workflow" / "scripts" / "sequences"
 
@@ -180,4 +206,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
