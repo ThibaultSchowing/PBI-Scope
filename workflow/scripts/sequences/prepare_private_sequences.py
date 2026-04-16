@@ -39,7 +39,7 @@ def _download_host_genome_by_name(
     same NCBI resolution logic is applied as for the main PhageScope pipeline.
     """
     try:
-        from assembly_resolver import AssemblyResolver  # noqa: PLC0415 — runtime import
+        from assembly_resolver import AssemblyResolver  # noqa: E402 - runtime import
     except ImportError:
         logging.warning(
             "⚠️  Could not import assembly_resolver — NCBI host fallback skipped for %s (%s)",
@@ -85,7 +85,7 @@ def _download_host_genome_by_name(
 
     try:
         logging.info(
-            "   Downloading %s for %s (%s)…",
+            "   Downloading %s for %s (%s)...",
             best.assembly_accession,
             host_id,
             host_name,
