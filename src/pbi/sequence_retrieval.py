@@ -765,6 +765,19 @@ class SequenceRetriever:
             except Exception as e:
                 logging.warning(f"Host data configured but tables not found. Run host genome workflow first. Error: {e}")
                 self._has_host_data = False  # Disable host support if tables don't exist
+
+        try:
+            source_breakdown = self.conn.execute(
+                """
+                SELECT source_type, Source_DB, COUNT(*) AS count
+                FROM fact_phages
+                GROUP BY source_type, Source_DB
+                ORDER BY source_type, count DESC
+                """
+            ).fetchdf()
+            stats['database']['source_breakdown'] = source_breakdown.to_dict(orient='records')
+        except Exception:
+            pass
         
         logging.info(f"📊 Database Stats:")
         logging.info(f"   Phages: {stats['database']['phages']:,}")
@@ -781,6 +794,67 @@ class SequenceRetriever:
             logging.info(f"   Hosts: {stats['fasta']['hosts']:,}")
         
         return stats
+
+    def get_phages(
+        self,
+        source_type: Optional[str] = None,
+        source_db: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> pd.DataFrame:
+        """Return phage metadata with optional provenance filters."""
+        filters = []
+        params = []
+        if source_type:
+            filters.append("source_type = ?")
+            params.append(source_type)
+        if source_db:
+            filters.append("Source_DB = ?")
+            params.append(source_db)
+
+        query = "SELECT * FROM fact_phages"
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
+        query += " ORDER BY Phage_ID"
+        if limit:
+            query += f" LIMIT {int(limit)}"
+
+        return self.conn.execute(query, params).fetchdf()
+
+    def get_interactions(
+        self,
+        source_type: Optional[str] = None,
+        source_db: Optional[str] = None,
+        limit: Optional[int] = None,
+    ) -> pd.DataFrame:
+        """Return phage-host interactions with optional provenance filters."""
+        if not self._has_host_data:
+            raise ValueError("Host data not available - run host genome download workflow first")
+
+        filters = []
+        params = []
+        if source_type:
+            filters.append("p.source_type = ?")
+            params.append(source_type)
+        if source_db:
+            filters.append("p.Source_DB = ?")
+            params.append(source_db)
+
+        query = """
+        SELECT DISTINCT
+            pha.Phage_ID,
+            pha.Host_ID,
+            p.Source_DB,
+            p.source_type
+        FROM phage_host_associations pha
+        JOIN fact_phages p ON p.Phage_ID = pha.Phage_ID
+        """
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
+        query += " ORDER BY pha.Phage_ID, pha.Host_ID"
+        if limit:
+            query += f" LIMIT {int(limit)}"
+
+        return self.conn.execute(query, params).fetchdf()
 
     
     def get_host_sequences(self, query: str, limit: Optional[int] = None) -> pd.DataFrame:
@@ -924,6 +998,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
+            p.source_type as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
@@ -1188,6 +1263,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
+            p.source_type as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
@@ -1483,6 +1559,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
+            p.source_type as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,

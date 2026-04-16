@@ -17,8 +17,14 @@ merged_csv_output: "/data/intermediate/csv/merged/"
 # Databases files
 duckdb_output: "/data/processed/databases/phage_database.duckdb"
 optimized_duckdb_output: "/data/processed/databases/phage_database_optimized.duckdb"
+private_manifest_output: "/data/intermediate/private/private_manifest.json"
 
 database_validation_report_output: "/data/processed/reports/database_validation.html"
+
+# Private data ingestion (mounted read-only in the pipeline container)
+private_ingestion_enabled: false
+# One or multiple roots. Each immediate subdirectory is one private source_db.
+private_data_roots: []
 
 
 # -----------------------------------
