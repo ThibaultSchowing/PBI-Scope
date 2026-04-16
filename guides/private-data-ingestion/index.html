@@ -773,6 +773,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#database-synchronization-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database synchronization notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-validate-private-without-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1475,6 +1486,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#database-synchronization-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database synchronization notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#running-validate-private-without-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1579,11 +1601,11 @@ directory at the repository root.</p>
 </code></pre></div>
 <p>Private sequence retrieval is prepared automatically during the workflow:</p>
 <ul>
-<li>Private phage FASTA records are merged into the main phage FASTA and indexed with the same preprocessing/indexing step as public PhageScope phages.</li>
+<li>Private phage FASTA records are kept in a dedicated private FASTA and indexed separately from the public PhageScope FASTA.</li>
 <li>Private host FASTA records are split to per-<code>Host_ID</code> files, added to <code>host_fasta_mapping.json</code>, and indexed with the same host indexing workflow.</li>
 </ul>
-<p>To remove private data from the database simply empty <code>private_data/</code> (or remove the
-subdirectory) and re-run the pipeline — it rebuilds from scratch.</p>
+<p>When private source directories are removed from <code>private_data/</code>, rerunning the pipeline
+re-synchronizes the manifest and removes stale private records from the database.</p>
 <h2 id="required-files-per-source-directory">Required files per source directory<a class="headerlink" href="#required-files-per-source-directory" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1603,7 +1625,7 @@ subdirectory) and re-run the pipeline — it rebuilds from scratch.</p>
 </tr>
 <tr>
 <td><code>host.fasta</code></td>
-<td>✅</td>
+<td>Optional (recommended)</td>
 </tr>
 </tbody>
 </table>
@@ -1644,12 +1666,18 @@ subdirectory) and re-run the pipeline — it rebuilds from scratch.</p>
 <ul>
 <li>The sequence identifier is the <strong>first whitespace-delimited token</strong> of each <code>&gt;</code> header line.</li>
 <li><code>Phage_ID</code> values must each appear as an identifier in <code>phage.fasta</code>.</li>
-<li><code>Host_ID</code> values must each appear as an identifier in <code>host.fasta</code>.</li>
+<li>If <code>host.fasta</code> is provided, <code>Host_ID</code> values must each appear as an identifier in it.</li>
+<li>If <code>host.fasta</code> is missing, host genomes are fetched from NCBI using <code>Host_name</code>, then stored as private host FASTA files and linked in <code>dim_hosts</code>.</li>
 <li>Duplicate FASTA identifiers in the same file are rejected.</li>
 </ul>
 <h2 id="duplicate-row-policy">Duplicate row policy<a class="headerlink" href="#duplicate-row-policy" title="Permanent link">&para;</a></h2>
 <p>Rows that are duplicated on (<code>Phage_ID</code>, <code>Host_ID</code>, <code>Source_DB</code>) are accepted but
 deduplicated at ingestion (first occurrence kept).</p>
+<h2 id="database-synchronization-notes">Database synchronization notes<a class="headerlink" href="#database-synchronization-notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>fact_phages.source_type</code> distinguishes public (<code>public</code>) vs private (<code>private</code>) phages.</li>
+<li><code>private_phage_host_associations</code> stores <code>Phage_ID</code>, <code>Host_ID</code>, <code>Source_DB</code>, and <code>source_type</code> so private links can be traced back to their source dataset during resynchronization.</li>
+</ul>
 <h2 id="running-validate-private-without-docker">Running <code>validate-private</code> without Docker<a class="headerlink" href="#running-validate-private-without-docker" title="Permanent link">&para;</a></h2>
 <p>The <code>pbi</code> package installs a standalone CLI tool that runs entirely locally:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Install the package (needed once)</span>
