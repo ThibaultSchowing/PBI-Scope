@@ -4,12 +4,26 @@ import os
 PHAGE_FASTA_SOURCES = list(config["phage_fasta_urls"].keys())
 PROTEIN_FASTA_SOURCES = list(config["protein_fasta_urls"].keys())
 
+rule prepare_private_sequences:
+    input:
+        manifest=config["private_manifest_output"]
+    output:
+        private_phages=config["private_phage_fasta"],
+        private_host_mapping=config["private_host_mapping"]
+    params:
+        private_host_dir=config["private_host_genomes_intermediate"]
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/sequences/prepare_private_sequences.py"
+
 rule merge_phage_fasta:
     input:
         expand(
             config["phage_fasta_merged_output"] + "{source}.fasta",
             source=PHAGE_FASTA_SOURCES
-        )
+        ),
+        config["private_phage_fasta"]
     output:
         config["all_phages_fasta"]
     log:

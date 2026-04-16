@@ -4,7 +4,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 import duckdb
 import pandas as pd
@@ -68,10 +68,10 @@ def parse_fasta_ids(fasta_path: Path) -> tuple[Set[str], Set[str]]:
 
 
 def _required_files(source_dir: Path) -> Dict[str, Path]:
+    # host.fasta is optional; its absence triggers NCBI host retrieval during sequence preparation.
     return {
         "metadata.csv": source_dir / "metadata.csv",
         "phage.fasta": source_dir / "phage.fasta",
-        "host.fasta": source_dir / "host.fasta",
     }
 
 
@@ -134,28 +134,36 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
     df["interaction"] = normalized_interactions
 
     phage_ids, phage_duplicates = parse_fasta_ids(required["phage.fasta"])
-    host_ids, host_duplicates = parse_fasta_ids(required["host.fasta"])
-
     if phage_duplicates:
         errors.append(
             f"Duplicate FASTA identifiers in phage.fasta: "
             f"{sorted(phage_duplicates)[:MAX_ERROR_EXAMPLES]}"
-        )
-    if host_duplicates:
-        errors.append(
-            f"Duplicate FASTA identifiers in host.fasta: "
-            f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
         )
 
     csv_phage_ids = set(df["Phage_ID"].tolist())
     csv_host_ids = set(df["Host_ID"].tolist())
 
     missing_phages = sorted(csv_phage_ids - phage_ids)
-    missing_hosts = sorted(csv_host_ids - host_ids)
     if missing_phages:
         errors.append(f"Phage_ID not found in phage.fasta: {missing_phages[:MAX_ERROR_EXAMPLES]}")
-    if missing_hosts:
-        errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:MAX_ERROR_EXAMPLES]}")
+
+    # host.fasta is optional — validate it only when present.
+    host_fasta_path = source_dir / "host.fasta"
+    if host_fasta_path.exists():
+        host_ids, host_duplicates = parse_fasta_ids(host_fasta_path)
+        if host_duplicates:
+            errors.append(
+                f"Duplicate FASTA identifiers in host.fasta: "
+                f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
+            )
+        missing_hosts = sorted(csv_host_ids - host_ids)
+        if missing_hosts:
+            errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:MAX_ERROR_EXAMPLES]}")
+    else:
+        warnings.append(
+            "host.fasta is absent — host sequences will be fetched from NCBI using Host_name values. "
+            "Provide host.fasta to skip NCBI retrieval."
+        )
 
     duplicated_rows = int(df.duplicated(subset=["Phage_ID", "Host_ID", "Source_DB"]).sum())
     if duplicated_rows:
@@ -469,3 +477,172 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
         )
 
     return {"ingested": ingested, "skipped": skipped}
+
+
+def _iter_fasta_records(fasta_path: Path) -> Iterable[Tuple[str, str, str]]:
+    """Yield FASTA records as (id_token, full_header_without_>, sequence)."""
+    header: Optional[str] = None
+    seq_parts: List[str] = []
+
+    with fasta_path.open("r", encoding="utf-8") as handle:
+        for raw_line in handle:
+            line = raw_line.rstrip("\n\r")
+            if not line:
+                continue
+            if line.startswith(">"):
+                if header is not None:
+                    seq = "".join(seq_parts)
+                    record_id = header.split()[0] if header else ""
+                    if record_id:
+                        yield record_id, header, seq
+                header = line[1:].strip()
+                seq_parts = []
+            else:
+                seq_parts.append(line)
+
+    if header is not None:
+        seq = "".join(seq_parts)
+        record_id = header.split()[0] if header else ""
+        if record_id:
+            yield record_id, header, seq
+
+
+def _write_fasta_record(handle, header: str, sequence: str, line_width: int = 80) -> None:
+    handle.write(f">{header}\n")
+    for i in range(0, len(sequence), line_width):
+        handle.write(sequence[i:(i + line_width)] + "\n")
+
+
+def prepare_private_sequence_artifacts(
+    manifest: Dict,
+    private_phage_fasta_path: Path,
+    private_host_dir: Path,
+    private_host_mapping_path: Path,
+) -> Dict:
+    """
+    Build sequence artifacts used by retrieval for private datasets.
+
+    Outputs:
+      - merged private phage FASTA (to be merged/indexed with global phage FASTA)
+      - per-host private FASTA files
+      - Host_ID -> FASTA path mapping JSON for private hosts
+
+    When host.fasta is absent for a source, the affected Host_ID → Host_name pairs
+    are collected in ``stats["missing_host_names"]`` so callers can trigger NCBI
+    host genome retrieval as a fallback.
+    """
+    private_phage_fasta_path = Path(private_phage_fasta_path)
+    private_host_dir = Path(private_host_dir)
+    private_host_mapping_path = Path(private_host_mapping_path)
+
+    private_phage_fasta_path.parent.mkdir(parents=True, exist_ok=True)
+    private_host_dir.mkdir(parents=True, exist_ok=True)
+    private_host_mapping_path.parent.mkdir(parents=True, exist_ok=True)
+
+    valid_sources = [
+        src for src in manifest.get("sources", [])
+        if src.get("is_valid", False) and src.get("source_dir")
+    ]
+
+    host_mapping: Dict[str, str] = {}
+    host_hashes: Dict[str, str] = {}
+    seen_phage_hashes: Dict[str, str] = {}
+    # Host_ID -> Host_name for hosts whose sequence must be downloaded from NCBI
+    missing_host_names: Dict[str, str] = {}
+
+    stats: Dict = {
+        "sources_processed": 0,
+        "phages_written": 0,
+        "hosts_written": 0,
+        "phage_duplicates_identical": 0,
+        "phage_duplicates_conflicting": 0,
+        "host_duplicates_identical": 0,
+        "host_duplicates_conflicting": 0,
+        "missing_phage_ids": 0,
+        "missing_host_ids": 0,
+        # Populated with {Host_ID: Host_name} when host.fasta is absent
+        "missing_host_names": missing_host_names,
+    }
+
+    with private_phage_fasta_path.open("w", encoding="utf-8") as phage_out:
+        for src in valid_sources:
+            source_dir = Path(src["source_dir"])
+            metadata_path = source_dir / "metadata.csv"
+            phage_fasta_path = source_dir / "phage.fasta"
+            host_fasta_path = source_dir / "host.fasta"
+
+            if not (metadata_path.exists() and phage_fasta_path.exists()):
+                continue
+
+            stats["sources_processed"] += 1
+            df = pd.read_csv(metadata_path, dtype=str, keep_default_na=False)
+            for col in df.columns:
+                if pd.api.types.is_string_dtype(df[col]):
+                    df[col] = df[col].str.strip()
+
+            wanted_phages = set(df["Phage_ID"].tolist())
+            wanted_hosts = set(df["Host_ID"].tolist())
+
+            found_phages: Set[str] = set()
+            for rec_id, header, sequence in _iter_fasta_records(phage_fasta_path):
+                if rec_id not in wanted_phages:
+                    continue
+                found_phages.add(rec_id)
+                seq_hash = hashlib.sha256(sequence.encode("utf-8")).hexdigest()
+                existing_hash = seen_phage_hashes.get(rec_id)
+                if existing_hash is None:
+                    _write_fasta_record(phage_out, header, sequence)
+                    seen_phage_hashes[rec_id] = seq_hash
+                    stats["phages_written"] += 1
+                elif existing_hash == seq_hash:
+                    stats["phage_duplicates_identical"] += 1
+                else:
+                    stats["phage_duplicates_conflicting"] += 1
+
+            stats["missing_phage_ids"] += len(wanted_phages - found_phages)
+
+            if not host_fasta_path.exists():
+                # host.fasta is optional; collect these hosts for NCBI fallback.
+                host_name_map = (
+                    df[["Host_ID", "Host_name"]]
+                    .drop_duplicates()
+                    .set_index("Host_ID")["Host_name"]
+                    .to_dict()
+                )
+                for host_id, host_name in host_name_map.items():
+                    if host_id not in host_mapping and host_id not in missing_host_names:
+                        missing_host_names[host_id] = str(host_name)
+                stats["missing_host_ids"] += len(wanted_hosts)
+                continue
+
+            found_hosts: Set[str] = set()
+            for rec_id, header, sequence in _iter_fasta_records(host_fasta_path):
+                if rec_id not in wanted_hosts:
+                    continue
+                found_hosts.add(rec_id)
+
+                host_file = private_host_dir / f"{rec_id}.fna"
+                seq_hash = hashlib.sha256(sequence.encode("utf-8")).hexdigest()
+
+                if rec_id in host_mapping:
+                    existing_seq_hash = host_hashes.get(rec_id)
+                    if existing_seq_hash == seq_hash:
+                        stats["host_duplicates_identical"] += 1
+                    else:
+                        stats["host_duplicates_conflicting"] += 1
+                    continue
+
+                with host_file.open("w", encoding="utf-8") as host_out:
+                    _write_fasta_record(host_out, header, sequence)
+                host_mapping[rec_id] = str(host_file)
+                host_hashes[rec_id] = seq_hash
+                stats["hosts_written"] += 1
+
+            stats["missing_host_ids"] += len(wanted_hosts - found_hosts)
+
+    private_host_mapping_path.write_text(
+        json.dumps(dict(sorted(host_mapping.items())), indent=2),
+        encoding="utf-8",
+    )
+
+    return stats
