@@ -14,40 +14,30 @@ if str(SRC_PATH) not in sys.path:
 from pbi.private_data import build_private_manifest, write_private_manifest  # noqa: E402
 
 
-def _normalize_roots(raw_roots):
-    if raw_roots is None:
-        return []
-    if isinstance(raw_roots, str):
-        return [r.strip() for r in raw_roots.split(",") if r.strip()]
-    if isinstance(raw_roots, (list, tuple)):
-        roots = []
-        for item in raw_roots:
-            if isinstance(item, str):
-                roots.extend([r.strip() for r in item.split(",") if r.strip()])
-        return roots
-    return []
-
-
 def main():
     output_path = Path(snakemake.output[0])
-    enabled = bool(snakemake.config.get("private_ingestion_enabled", False))
-    roots = _normalize_roots(snakemake.config.get("private_data_roots", []))
 
-    if not enabled:
+    # Single root directory — each immediate subdirectory is one private source_db.
+    # An empty or missing root simply produces an empty manifest (no ingestion).
+    raw_root = snakemake.config.get("private_data_root", "")
+    root_path = Path(raw_root) if raw_root else None
+
+    if not root_path or not root_path.is_dir():
         manifest = {
-            "roots": roots,
+            "roots": [str(root_path)] if root_path else [],
             "sources_found": 0,
             "sources_valid": 0,
             "sources_invalid": 0,
             "sources": [],
-            "enabled": False,
         }
         write_private_manifest(manifest, output_path)
-        logging.info("Private ingestion disabled; wrote empty manifest")
+        logging.info(
+            "Private data root '%s' is absent or empty; wrote empty manifest",
+            root_path,
+        )
         return
 
-    manifest = build_private_manifest(roots)
-    manifest["enabled"] = True
+    manifest = build_private_manifest([str(root_path)])
     write_private_manifest(manifest, output_path)
     logging.info(
         "Prepared private manifest with %d sources (%d valid, %d invalid)",

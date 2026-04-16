@@ -1,14 +1,14 @@
 # Private Data Ingestion
 
-PBI supports optional ingestion of private datasets mounted at runtime (not committed to git).
+PBI supports optional ingestion of private datasets placed inside the `private_data/`
+directory at the repository root.
 
-## Directory Contract
+## Quick start
 
-Provide one or more **private roots**.  
-Each immediate subdirectory is treated as one private source (`source_db`):
+1. Create a subdirectory for each private source inside `private_data/`:
 
 ```text
-<private_root>/
+private_data/
   Project_A/
     metadata.csv
     phage.fasta
@@ -19,84 +19,128 @@ Each immediate subdirectory is treated as one private source (`source_db`):
     host.fasta
 ```
 
-## Required files
+2. Validate before running the pipeline:
 
-- `metadata.csv`
-- `phage.fasta`
-- `host.fasta`
+```bash
+# From the repository root (requires `pip install -e .`)
+pbi validate-private
+```
+
+3. Run the pipeline as usual. Private sources are detected automatically.
+
+```bash
+docker compose run --rm pipeline
+```
+
+To remove private data from the database simply empty `private_data/` (or remove the
+subdirectory) and re-run the pipeline — it rebuilds from scratch.
+
+## Required files per source directory
+
+| File | Required |
+|------|----------|
+| `metadata.csv` | ✅ |
+| `phage.fasta` | ✅ |
+| `host.fasta` | ✅ |
 
 ## `metadata.csv` columns
 
 Required (case-sensitive):
 
-- `Phage_ID`
-- `Host_ID`
-- `Host_name`
-- `Source_DB` (must match directory name exactly)
-- `interaction` (`temperate` or `virulent`, case-insensitive input, stored lowercase)
+| Column | Description |
+|--------|-------------|
+| `Phage_ID` | Unique phage identifier matching `phage.fasta` |
+| `Host_ID` | Unique host identifier matching `host.fasta` |
+| `Host_name` | Human-readable host species name |
+| `Source_DB` | Must match the subdirectory name exactly |
+| `interaction` | `temperate` or `virulent` (case-insensitive, stored lowercase) |
 
-Optional:
-
-- Any extra columns are allowed and preserved in `private_entity_attributes`.
+Optional columns: any extra columns are preserved in `private_entity_attributes`.
 
 ## FASTA identifier matching rules
 
-- For both `phage.fasta` and `host.fasta`, the sequence identifier is the **first whitespace-delimited token** of each header line (`>` record).
-- `Phage_ID` values must exist in `phage.fasta` identifiers.
-- `Host_ID` values must exist in `host.fasta` identifiers.
-- Duplicate FASTA identifiers are rejected.
+- The sequence identifier is the **first whitespace-delimited token** of each `>` header line.
+- `Phage_ID` values must each appear as an identifier in `phage.fasta`.
+- `Host_ID` values must each appear as an identifier in `host.fasta`.
+- Duplicate FASTA identifiers in the same file are rejected.
 
 ## Duplicate row policy
 
-- Duplicate rows on (`Phage_ID`, `Host_ID`, `Source_DB`) are accepted but deduplicated at ingestion.
+Rows that are duplicated on (`Phage_ID`, `Host_ID`, `Source_DB`) are accepted but
+deduplicated at ingestion (first occurrence kept).
 
-## Validate before pipeline run
+## Running `validate-private` without Docker
 
-```bash
-pbi validate-private --path /mnt/private_data
-```
-
-You can pass multiple roots:
+The `pbi` package installs a standalone CLI tool that runs entirely locally:
 
 ```bash
-pbi validate-private --path /mnt/private_data --path /mnt/other_private_root
+# Install the package (needed once)
+pip install -e .
+
+# From the repository root — automatically uses ./private_data/
+pbi validate-private
+
+# Or point to an arbitrary root
+pbi validate-private --path /some/other/directory
 ```
 
-Validation output is grouped by source directory with actionable errors.
+No Docker required; no pipeline run triggered.
 
-## Pipeline configuration
+## Container integration (automatic)
 
-In `workflow/config/config.yaml`:
+`docker-compose.yml` always mounts `./private_data` at `/private-data` inside the
+container (read-only). The pipeline configuration uses:
 
-- `private_ingestion_enabled: true|false`
-- `private_data_roots: []` (list of root paths)
+```yaml
+private_data_root: "/private-data"
+```
 
-When enabled, PBI discovers all source directories under the configured roots and writes a manifest used for deterministic rebuilds.
+No additional environment variables or config changes are needed.
 
-## Runtime behavior and failure handling
+## Logs and reports
+
+All HTML reports and log files are written to `./pipeline_logs/` at the repository root
+(bind-mounted inside the container). Open the `.html` files directly in a browser:
+
+```text
+pipeline_logs/
+  reports/
+    database_validation.html
+    phage_metadata_report.html
+    ...
+  logs/
+    host_download.log
+    host_download_failures.log
+    ...
+```
+
+## Failure handling
 
 - Private ingestion is non-blocking.
-- If a source fails validation/ingestion, that source is skipped.
-- PhageScope data still builds and the final database is produced.
-- End-of-run logs include private source ingestion/skipping summary.
+- Invalid or failed private sources are skipped; PhageScope data is always produced.
+- End-of-run logs include an ingestion summary (sources ingested / skipped).
 
-## README template for private sources
+## README template
 
-Use this template in each private source directory:
+Use this template inside each private source directory:
 
 ```text
 # <Source_DB>
 
 ## Files
-- metadata.csv
-- phage.fasta
-- host.fasta
+- metadata.csv    — phage-host interaction table
+- phage.fasta     — phage sequences (FASTA)
+- host.fasta      — host sequences (FASTA)
 
-## Notes
-- Source_DB in metadata.csv must be "<Source_DB>"
-- interaction values: temperate | virulent
-- FASTA IDs must match metadata IDs (first token in FASTA headers)
+## metadata.csv column notes
+- Source_DB must equal "<Source_DB>" (directory name)
+- interaction: temperate | virulent
+
+## FASTA IDs
+- Identifiers are the first whitespace-delimited token of each '>' header line.
+- All Phage_ID / Host_ID values in metadata.csv must appear in the respective FASTA.
 
 ## Optional custom columns
-- <column_name>: <meaning>
+- <column_name>: <description>
 ```
+

@@ -414,9 +414,11 @@ def create_star_schema_duckdb():
             logging.warning(f"⚠️  Could not create dim_phage_host_links table: {e}")
 
     # 11. INGEST PRIVATE SOURCES (NON-BLOCKING)
+    # Driven entirely by the manifest produced by prepare_private_sources.
+    # If the manifest is empty (no valid sources) nothing is ingested and
+    # the PhageScope-only database is produced unchanged.
     private_ingestion_summary = {"ingested": [], "skipped": []}
-    private_enabled = bool(snakemake.config.get("private_ingestion_enabled", False))
-    if private_enabled and private_manifest_path and os.path.exists(private_manifest_path):
+    if private_manifest_path and os.path.exists(private_manifest_path):
         try:
             import json
 
@@ -427,15 +429,16 @@ def create_star_schema_duckdb():
                 for source in manifest.get("sources", [])
                 if source.get("is_valid", False) and source.get("source_dir")
             ]
-            private_ingestion_summary = ingest_private_sources_into_db(conn, valid_source_dirs)
-            for skipped_source in private_ingestion_summary["skipped"]:
-                logging.warning(
-                    "⚠️  Skipped private source '%s': %s",
-                    skipped_source.get("source_db", "unknown"),
-                    "; ".join(skipped_source.get("errors", [])),
-                )
-            if _table_exists(conn, "dim_hosts"):
-                host_count = conn.execute("SELECT COUNT(*) FROM dim_hosts").fetchone()[0]
+            if valid_source_dirs:
+                private_ingestion_summary = ingest_private_sources_into_db(conn, valid_source_dirs)
+                for skipped_source in private_ingestion_summary["skipped"]:
+                    logging.warning(
+                        "⚠️  Skipped private source '%s': %s",
+                        skipped_source.get("source_db", "unknown"),
+                        "; ".join(skipped_source.get("errors", [])),
+                    )
+                if _table_exists(conn, "dim_hosts"):
+                    host_count = conn.execute("SELECT COUNT(*) FROM dim_hosts").fetchone()[0]
         except Exception as e:
             logging.warning(f"⚠️  Private ingestion failed, continuing with PhageScope-only database: {e}")
 
@@ -801,11 +804,13 @@ def create_star_schema_duckdb():
         logging.info(f"   • Assembly Metadata: {assembly_metadata_count:,}")
     if phage_host_links_count > 0:
         logging.info(f"   • Phage-Host Links: {phage_host_links_count:,}")
-    if private_enabled:
+    n_ingested = len(private_ingestion_summary["ingested"])
+    n_skipped = len(private_ingestion_summary["skipped"])
+    if n_ingested or n_skipped:
         logging.info(
             "   • Private Sources: %d ingested / %d skipped",
-            len(private_ingestion_summary["ingested"]),
-            len(private_ingestion_summary["skipped"]),
+            n_ingested,
+            n_skipped,
         )
 
 if __name__ == "__main__":

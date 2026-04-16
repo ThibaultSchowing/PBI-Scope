@@ -6,6 +6,16 @@ __pycache__/
 # directories and notebook stuff
 data/
 *.csv
+
+# Private data directory — the directory is tracked but its contents are gitignored.
+# Place your private phage/host datasets here (one subdirectory per source).
+private_data/*
+!private_data/.gitkeep
+
+# Pipeline logs/reports directory — the directory is tracked but generated files are gitignored.
+# HTML reports and log files written by the pipeline container will appear here.
+pipeline_logs/*
+!pipeline_logs/.gitkeep
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 notebooks/exports/

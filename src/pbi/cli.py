@@ -6,9 +6,26 @@ from pathlib import Path
 
 from .private_data import validate_private_roots
 
+# Default private data root relative to the current working directory.
+_DEFAULT_PRIVATE_ROOT = "private_data"
+
 
 def _cmd_validate_private(args: argparse.Namespace) -> int:
-    roots = args.path or []
+    roots = list(args.path) if args.path else []
+
+    if not roots:
+        default = Path(_DEFAULT_PRIVATE_ROOT)
+        if default.is_dir():
+            roots = [str(default)]
+            print(f"No --path given; using default: {default.resolve()}")
+        else:
+            print(
+                f"No --path given and default directory '{_DEFAULT_PRIVATE_ROOT}' not found. "
+                "Please run this command from the repository root or pass --path explicitly.",
+                file=sys.stderr,
+            )
+            return 2
+
     summary = validate_private_roots(roots)
 
     print("Private dataset validation summary")
@@ -34,6 +51,9 @@ def _cmd_validate_private(args: argparse.Namespace) -> int:
             )
         print("")
 
+    if summary["sources_found"] == 0:
+        print("No private sources found. Add subdirectories under the private data root.")
+
     return 0 if summary["sources_invalid"] == 0 else 1
 
 
@@ -48,10 +68,12 @@ def build_parser() -> argparse.ArgumentParser:
     validate_private.add_argument(
         "--path",
         action="append",
-        required=True,
+        required=False,
+        default=None,
         help=(
             "Private data root directory containing one subdirectory per source. "
-            "Can be provided multiple times."
+            "Can be provided multiple times. "
+            f"Defaults to ./{_DEFAULT_PRIVATE_ROOT}/ when run from the repository root."
         ),
     )
     validate_private.set_defaults(func=_cmd_validate_private)
