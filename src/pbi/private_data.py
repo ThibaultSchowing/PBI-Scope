@@ -275,6 +275,19 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
     ingested = []
     skipped = []
 
+    def _delete_private_rows_for_sources(table_name: str, source_dbs: List[str]) -> None:
+        if not source_dbs:
+            return
+        placeholders = ", ".join(["?"] * len(source_dbs))
+        conn.execute(
+            f"""
+            DELETE FROM {table_name}
+            WHERE source_type = 'private'
+              AND Source_DB IN ({placeholders})
+            """,
+            source_dbs,
+        )
+
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS private_entity_attributes (
@@ -326,33 +339,9 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
         validations.append(validation)
 
     current_source_dbs = sorted({validation.source_db for validation in validations})
-
-    if current_source_dbs:
-        placeholders = ", ".join(["?"] * len(current_source_dbs))
-        conn.execute(
-            f"""
-            DELETE FROM fact_phages
-            WHERE source_type = 'private'
-              AND Source_DB IN ({placeholders})
-            """,
-            current_source_dbs,
-        )
-        conn.execute(
-            f"""
-            DELETE FROM private_interactions
-            WHERE source_type = 'private'
-              AND Source_DB IN ({placeholders})
-            """,
-            current_source_dbs,
-        )
-        conn.execute(
-            f"""
-            DELETE FROM private_entity_attributes
-            WHERE source_type = 'private'
-              AND Source_DB IN ({placeholders})
-            """,
-            current_source_dbs,
-        )
+    _delete_private_rows_for_sources("fact_phages", current_source_dbs)
+    _delete_private_rows_for_sources("private_interactions", current_source_dbs)
+    _delete_private_rows_for_sources("private_entity_attributes", current_source_dbs)
 
     existing_private_sources = {
         row[0]
@@ -362,32 +351,9 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
         if row[0]
     }
     stale_source_dbs = sorted(existing_private_sources - set(current_source_dbs))
-    if stale_source_dbs:
-        placeholders = ", ".join(["?"] * len(stale_source_dbs))
-        conn.execute(
-            f"""
-            DELETE FROM fact_phages
-            WHERE source_type = 'private'
-              AND Source_DB IN ({placeholders})
-            """,
-            stale_source_dbs,
-        )
-        conn.execute(
-            f"""
-            DELETE FROM private_interactions
-            WHERE source_type = 'private'
-              AND Source_DB IN ({placeholders})
-            """,
-            stale_source_dbs,
-        )
-        conn.execute(
-            f"""
-            DELETE FROM private_entity_attributes
-            WHERE source_type = 'private'
-              AND Source_DB IN ({placeholders})
-            """,
-            stale_source_dbs,
-        )
+    _delete_private_rows_for_sources("fact_phages", stale_source_dbs)
+    _delete_private_rows_for_sources("private_interactions", stale_source_dbs)
+    _delete_private_rows_for_sources("private_entity_attributes", stale_source_dbs)
 
     for validation in validations:
         df = validation.metadata_df.drop_duplicates(subset=["Phage_ID", "Host_ID", "Source_DB"]).copy()

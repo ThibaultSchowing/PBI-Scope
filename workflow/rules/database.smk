@@ -4,7 +4,7 @@
 from pathlib import Path
 
 
-def _private_root_dependency(wildcards):
+def private_root_dependency(wildcards):
     root = config.get("private_data_root", "")
     if not root:
         return []
@@ -37,7 +37,7 @@ rule create_duckdb:
 
 rule prepare_private_sources:
     input:
-        private_root=_private_root_dependency
+        private_root=private_root_dependency
     output:
         manifest=config["private_manifest_output"]
     conda:
