@@ -313,11 +313,12 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
         )
         """
     )
+    conn.execute("DROP TABLE IF EXISTS private_phage_host_associations")
     conn.execute(
         """
         -- Materialized helper table used by create_duckdb views and downstream
         -- joins that need source-aware private phage-host links.
-        CREATE TABLE IF NOT EXISTS private_phage_host_associations (
+        CREATE TABLE private_phage_host_associations (
             Phage_ID VARCHAR,
             Host_ID VARCHAR,
             Source_DB VARCHAR,
@@ -452,7 +453,6 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
 
     # Recompute the association table from canonical private_interactions to keep
     # link rows exactly in sync after source additions/removals/updates.
-    conn.execute("DELETE FROM private_phage_host_associations")
     conn.execute(
         """
         INSERT INTO private_phage_host_associations
