@@ -66,6 +66,7 @@ setup(
     # Command-line scripts (optional)
     entry_points={
         "console_scripts": [
+            "pbi=pbi.cli:main",
             "pbi-retrieve=pbi.sequence_retrieval:main",  # If you add a main() function
         ],
     },

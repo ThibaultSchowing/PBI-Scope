@@ -338,6 +338,13 @@ pip install -e ".[dev]"
 # Verify installation
 python -c "import pbi; print(pbi.__version__)"
 
+# Validate private dataset roots before full pipeline run
+# (run from the repository root — defaults to ./private_data/)
+pbi validate-private
+
+# Or point to an explicit root
+pbi validate-private --path /path/to/private_root
+
 # Uninstall
 pip uninstall pbi
 ```

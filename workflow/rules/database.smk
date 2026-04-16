@@ -15,13 +15,22 @@ rule create_duckdb:
         # Host metadata files (ensure database is created after host downloads)
         host_metadata=config["host_metadata_output"],
         assembly_metadata=config["assembly_metadata_output"],
-        phage_host_links=config["phage_host_links_output"]
+        phage_host_links=config["phage_host_links_output"],
+        private_manifest=config["private_manifest_output"]
     output:
         db=config["duckdb_output"]
     conda:
         "../envs/base_env.yaml"
     script:
         "../scripts/database/create_duckdb.py"   
+
+rule prepare_private_sources:
+    output:
+        manifest=config["private_manifest_output"]
+    conda:
+        "../envs/base_env.yaml"
+    script:
+        "../scripts/database/prepare_private_sources.py"
 
 rule optimize_database:
     input:

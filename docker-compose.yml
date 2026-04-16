@@ -10,12 +10,18 @@ services:
       - pbi-data:/data
       # Mount cache directory to persist Snakemake metadata and conda environments
       - pbi-cache:/cache
+      # Private datasets (read-only). Place subdirectories here, one per private source.
+      # Leave the directory empty to run without private data.
+      - ./private_data:/private-data:ro
+      # Pipeline logs and HTML reports — accessible directly from the repository root.
+      - ./pipeline_logs:/pipeline-logs
     environment:
       - SNAKEMAKE_OUTPUT_CACHE=/cache
       - SNAKEMAKE_CONDA_PREFIX=/cache/conda
       - NCBI_EMAIL=${NCBI_EMAIL} # Pass NCBI email for Entrez API usage from environment variable
       - NCBI_API_KEY=${NCBI_API_KEY} # Pass NCBI API key for higher rate limits (optional) from environment variable
       - PBI_DATA_DIR=/data
+      - PBI_LOGS_DIR=/pipeline-logs
     networks:
       - pbi-network
 
