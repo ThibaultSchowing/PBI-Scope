@@ -844,7 +844,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB,
-            p.source_type
+            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as source_type
         FROM phage_host_associations pha
         JOIN fact_phages p ON p.Phage_ID = pha.Phage_ID
         """
@@ -998,7 +998,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
-            p.source_type as Phage_Source_Type,
+            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
@@ -1263,7 +1263,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
-            p.source_type as Phage_Source_Type,
+            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
@@ -1559,7 +1559,7 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
-            p.source_type as Phage_Source_Type,
+            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,

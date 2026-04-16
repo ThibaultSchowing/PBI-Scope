@@ -70,10 +70,10 @@ def parse_fasta_ids(fasta_path: Path) -> tuple[Set[str], Set[str]]:
 
 
 def _required_files(source_dir: Path) -> Dict[str, Path]:
-    # host.fasta is optional; its absence triggers NCBI host retrieval during sequence preparation.
     return {
         "metadata.csv": source_dir / "metadata.csv",
         "phage.fasta": source_dir / "phage.fasta",
+        "host.fasta": source_dir / "host.fasta",
     }
 
 
@@ -149,23 +149,15 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
     if missing_phages:
         errors.append(f"Phage_ID not found in phage.fasta: {missing_phages[:MAX_ERROR_EXAMPLES]}")
 
-    # host.fasta is optional — validate it only when present.
-    host_fasta_path = source_dir / "host.fasta"
-    if host_fasta_path.exists():
-        host_ids, host_duplicates = parse_fasta_ids(host_fasta_path)
-        if host_duplicates:
-            errors.append(
-                f"Duplicate FASTA identifiers in host.fasta: "
-                f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
-            )
-        missing_hosts = sorted(csv_host_ids - host_ids)
-        if missing_hosts:
-            errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:MAX_ERROR_EXAMPLES]}")
-    else:
-        warnings.append(
-            "host.fasta is absent — host sequences will be fetched from NCBI using Host_name values. "
-            "Provide host.fasta to skip NCBI retrieval."
+    host_ids, host_duplicates = parse_fasta_ids(required["host.fasta"])
+    if host_duplicates:
+        errors.append(
+            f"Duplicate FASTA identifiers in host.fasta: "
+            f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
         )
+    missing_hosts = sorted(csv_host_ids - host_ids)
+    if missing_hosts:
+        errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:MAX_ERROR_EXAMPLES]}")
 
     duplicated_rows = int(df.duplicated(subset=["Phage_ID", "Host_ID", "Source_DB"]).sum())
     if duplicated_rows:
@@ -563,9 +555,8 @@ def prepare_private_sequence_artifacts(
       - per-host private FASTA files
       - Host_ID -> FASTA path mapping JSON for private hosts
 
-    When host.fasta is absent for a source, the affected Host_ID → Host_name pairs
-    are collected in ``stats["missing_host_names"]`` so callers can trigger NCBI
-    host genome retrieval as a fallback.
+    ``host.fasta`` is mandatory for private datasets and must contain all
+    ``Host_ID`` values declared in ``metadata.csv``.
     """
     private_phage_fasta_path = Path(private_phage_fasta_path)
     private_host_dir = Path(private_host_dir)
@@ -583,9 +574,6 @@ def prepare_private_sequence_artifacts(
     host_mapping: Dict[str, str] = {}
     host_hashes: Dict[str, str] = {}
     seen_phage_hashes: Dict[str, str] = {}
-    # Host_ID -> Host_name for hosts whose sequence must be downloaded from NCBI
-    missing_host_names: Dict[str, str] = {}
-
     stats: Dict = {
         "sources_processed": 0,
         "phages_written": 0,
@@ -596,8 +584,6 @@ def prepare_private_sequence_artifacts(
         "host_duplicates_conflicting": 0,
         "missing_phage_ids": 0,
         "missing_host_ids": 0,
-        # Populated with {Host_ID: Host_name} when host.fasta is absent
-        "missing_host_names": missing_host_names,
     }
 
     with private_phage_fasta_path.open("w", encoding="utf-8") as phage_out:
@@ -638,18 +624,11 @@ def prepare_private_sequence_artifacts(
             stats["missing_phage_ids"] += len(wanted_phages - found_phages)
 
             if not host_fasta_path.exists():
-                # host.fasta is optional; collect these hosts for NCBI fallback.
-                host_name_map = (
-                    df[["Host_ID", "Host_name"]]
-                    .drop_duplicates()
-                    .set_index("Host_ID")["Host_name"]
-                    .to_dict()
+                raise FileNotFoundError(
+                    f"host.fasta is mandatory for private source '{src.get('source_db', source_dir.name)}' but is missing: "
+                    f"{host_fasta_path}. Please add source_dir/host.fasta with identifiers matching all Host_ID values "
+                    "from metadata.csv."
                 )
-                for host_id, host_name in host_name_map.items():
-                    if host_id not in host_mapping and host_id not in missing_host_names:
-                        missing_host_names[host_id] = str(host_name)
-                stats["missing_host_ids"] += len(wanted_hosts)
-                continue
 
             found_hosts: Set[str] = set()
             for rec_id, header, sequence in _iter_fasta_records(host_fasta_path):

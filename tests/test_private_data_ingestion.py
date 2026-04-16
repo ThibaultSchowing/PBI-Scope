@@ -141,8 +141,8 @@ def test_validate_private_source_id_mismatch(tmp_path):
     assert any("Host_ID not found" in e for e in result.errors)
 
 
-def test_validate_private_source_missing_host_fasta_is_valid_with_warning(tmp_path):
-    """host.fasta is optional — source must still be valid when it is absent."""
+def test_validate_private_source_missing_host_fasta_is_invalid(tmp_path):
+    """host.fasta is mandatory for private sources."""
     source = tmp_path / "Project_B"
     source.mkdir()
     pd.DataFrame(
@@ -160,9 +160,9 @@ def test_validate_private_source_missing_host_fasta_is_valid_with_warning(tmp_pa
     # Intentionally no host.fasta
 
     result = validate_private_source(source)
-    assert result.is_valid, result.errors
-    assert any("host.fasta is absent" in w for w in result.warnings)
-    assert not any("host.fasta" in e for e in result.errors)
+    assert not result.is_valid
+    assert any("Missing required files" in e for e in result.errors)
+    assert any("host.fasta" in e for e in result.errors)
 
 
 def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
@@ -187,8 +187,8 @@ def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
     assert any("Host_ID not found in host.fasta" in e for e in result.errors)
 
 
-def test_prepare_private_sequence_artifacts_missing_host_fasta_returns_missing_host_names(tmp_path):
-    """Sources without host.fasta should populate stats['missing_host_names']."""
+def test_prepare_private_sequence_artifacts_requires_host_fasta(tmp_path):
+    """Sources without host.fasta should be skipped via manifest validity."""
     source = tmp_path / "Project_NoHost"
     source.mkdir()
     pd.DataFrame(
@@ -205,15 +205,7 @@ def test_prepare_private_sequence_artifacts_missing_host_fasta_returns_missing_h
     _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
     # No host.fasta
 
-    manifest = {
-        "sources": [
-            {
-                "source_db": "Project_NoHost",
-                "source_dir": str(source),
-                "is_valid": True,
-            }
-        ]
-    }
+    manifest = {"sources": [{"source_db": "Project_NoHost", "source_dir": str(source), "is_valid": False}]}
 
     private_phage_fasta = tmp_path / "private" / "private_phages.fasta"
     private_host_dir = tmp_path / "private" / "hosts"
@@ -226,15 +218,12 @@ def test_prepare_private_sequence_artifacts_missing_host_fasta_returns_missing_h
         private_host_mapping_path=private_host_mapping,
     )
 
-    assert stats["sources_processed"] == 1
-    assert stats["phages_written"] == 1
+    assert stats["sources_processed"] == 0
+    assert stats["phages_written"] == 0
     assert stats["hosts_written"] == 0
-    missing = stats["missing_host_names"]
-    assert "H1" in missing
-    assert missing["H1"] == "Bacteroides dorei"
 
-    # Phage FASTA should be present; host mapping should be empty
-    assert ">P1 desc" in private_phage_fasta.read_text(encoding="utf-8")
+    # Phage FASTA should be present but empty; host mapping should be empty
+    assert private_phage_fasta.read_text(encoding="utf-8") == ""
     with private_host_mapping.open("r", encoding="utf-8") as handle:
         mapping = json.load(handle)
     assert mapping == {}

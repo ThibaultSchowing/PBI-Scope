@@ -46,7 +46,7 @@ re-synchronizes the manifest and removes stale private records from the database
 |------|----------|
 | `metadata.csv` | ✅ |
 | `phage.fasta` | ✅ |
-| `host.fasta` | Optional (recommended) |
+| `host.fasta` | ✅ |
 
 ## `metadata.csv` columns
 
@@ -66,8 +66,7 @@ Optional columns: any extra columns are preserved in `private_entity_attributes`
 
 - The sequence identifier is the **first whitespace-delimited token** of each `>` header line.
 - `Phage_ID` values must each appear as an identifier in `phage.fasta`.
-- If `host.fasta` is provided, `Host_ID` values must each appear as an identifier in it.
-- If `host.fasta` is missing, host genomes are fetched from NCBI using `Host_name`, then stored as private host FASTA files and linked in `dim_hosts`.
+- `Host_ID` values must each appear as an identifier in `host.fasta`.
 - Duplicate FASTA identifiers in the same file are rejected.
 
 ## Duplicate row policy
