@@ -100,8 +100,8 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
         return PrivateSourceValidation(source_dir, source_db, errors, warnings, stats)
 
     df = df.copy()
-    for col in df.columns:
-        df[col] = df[col].map(lambda x: x.strip() if isinstance(x, str) else x)
+    for col in df.select_dtypes(include=["object", "string"]).columns:
+        df[col] = df[col].str.strip()
 
     stats["rows"] = len(df)
     if len(df) == 0:
