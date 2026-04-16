@@ -543,17 +543,54 @@ def validate_database():
         else:
             logging.info("⚠️  dim_hosts table not present (expected if host genomes haven't been downloaded yet)")
         
-        # 4. Check indexes exist
+        # 4. Collect private data statistics (optional tables)
+        logging.info("Collecting private data statistics...")
+        private_data = {}
+        for priv_table in ('private_interactions', 'private_phage_host_associations', 'private_entity_attributes'):
+            if priv_table in table_names:
+                row_count = conn.execute(f"SELECT COUNT(*) FROM {priv_table}").fetchone()[0]
+                private_data[priv_table] = {'row_count': row_count}
+
+        if 'private_interactions' in private_data:
+            per_source = conn.execute("""
+                SELECT Source_DB, COUNT(*) as cnt
+                FROM private_interactions
+                GROUP BY Source_DB ORDER BY cnt DESC
+            """).fetchall()
+            private_data['private_interactions']['per_source'] = dict(per_source)
+
+            lifestyle_dist = conn.execute("""
+                SELECT interaction, COUNT(*) as cnt
+                FROM private_interactions
+                GROUP BY interaction ORDER BY cnt DESC
+            """).fetchall()
+            private_data['private_interactions']['lifestyle_distribution'] = dict(lifestyle_dist)
+
+        if 'fact_phages' in table_names:
+            priv_phage_count = conn.execute(
+                "SELECT COUNT(*) FROM fact_phages WHERE source_type = 'private'"
+            ).fetchone()[0]
+            private_data['private_phage_count'] = priv_phage_count
+
+        if 'dim_hosts' in table_names:
+            priv_host_count = conn.execute(
+                "SELECT COUNT(*) FROM dim_hosts WHERE source_type = 'private'"
+            ).fetchone()[0]
+            private_data['private_host_count'] = priv_host_count
+
+        validation_results['private_data'] = private_data
+
+        # 5. Check indexes exist
         logging.info("Checking indexes...")
         indexes = conn.execute("SELECT name FROM sqlite_master WHERE type='index'").fetchall()
         validation_results['indexes'] = [idx[0] for idx in indexes]
         
-        # 5. Check views exist
+        # 6. Check views exist
         logging.info("Checking views...")
         views = conn.execute("SELECT name FROM sqlite_master WHERE type='view'").fetchall()
         validation_results['views'] = [view[0] for view in views]
         
-        # 6. Overall summary
+        # 7. Overall summary
         total_phages = validation_results['tables'].get('fact_phages', {}).get('row_count', 0)
         total_proteins = validation_results['tables'].get('dim_proteins', {}).get('row_count', 0)
         total_terminators = validation_results['tables'].get('dim_terminators', {}).get('row_count', 0)
@@ -1076,6 +1113,75 @@ def generate_html_report(results, report_path):
             <p><strong>Indexes:</strong> """ + ', '.join(results.get('indexes', ['None found'])) + """</p>
             <p><strong>Views:</strong> """ + ', '.join(results.get('views', ['None found'])) + """</p>
         </div>
+    """
+
+    # Private data section
+    private_data = results.get('private_data', {})
+    priv_phage_count = private_data.get('private_phage_count', 0)
+    priv_host_count = private_data.get('private_host_count', 0)
+    priv_interactions = private_data.get('private_interactions', {})
+    priv_interaction_count = priv_interactions.get('row_count', 0)
+    priv_per_source = priv_interactions.get('per_source', {})
+    priv_lifestyle = priv_interactions.get('lifestyle_distribution', {})
+
+    if priv_phage_count or priv_interaction_count:
+        html_content += f"""
+        <div class="section">
+            <h2>🔒 Private Data Overview</h2>
+            <p style="color: #6c757d;">Private data is ingested from local sources and merged with the public PhageScope database.</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Private Phages</div>
+                    <div class="stat-value">{priv_phage_count:,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Private Hosts</div>
+                    <div class="stat-value">{priv_host_count:,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Private Interactions</div>
+                    <div class="stat-value">{priv_interaction_count:,}</div>
+                </div>
+            </div>
+        """
+
+        if priv_per_source:
+            max_count = max(priv_per_source.values(), default=1)
+            html_content += """
+            <h3 style="margin-top: 20px;">Interactions per Private Source</h3>
+            <div class="chart-container">
+            """
+            for source_db, count in sorted(priv_per_source.items(), key=lambda x: -x[1]):
+                bar_width = max(4, int(count / max_count * 300))
+                html_content += f"""
+                <div class="bar">
+                    <span class="bar-label">{source_db}</span>
+                    <div class="bar-fill" style="width: {bar_width}px;"></div>
+                    <span class="bar-value">{count:,}</span>
+                </div>
+                """
+            html_content += "</div>"
+
+        if priv_lifestyle:
+            html_content += """
+            <h3 style="margin-top: 20px;">Lifestyle / Interaction Distribution</h3>
+            <table>
+                <tr><th>Interaction Type</th><th>Count</th></tr>
+            """
+            for lifestyle, count in sorted(priv_lifestyle.items(), key=lambda x: -x[1]):
+                html_content += f"<tr><td>{lifestyle}</td><td>{count:,}</td></tr>"
+            html_content += "</table>"
+
+        html_content += "</div>"
+    else:
+        html_content += """
+        <div class="section">
+            <h2>🔒 Private Data Overview</h2>
+            <p style="color: #6c757d;">No private data was ingested for this database build.</p>
+        </div>
+        """
+
+    html_content += """
     </body>
     </html>
     """
