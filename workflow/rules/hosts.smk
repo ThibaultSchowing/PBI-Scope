@@ -9,6 +9,8 @@ This Snakefile handles:
 
 import os
 
+PRIVATE_CONFLICT_EXAMPLE_LIMIT = 20
+
 rule download_host_genomes:
     """
     Download host bacterial genomes from NCBI RefSeq
@@ -119,7 +121,7 @@ rule create_host_mapping:
             for host_id, fasta_path in private_mapping.items():
                 if host_id in host_mapping:
                     private_conflicts += 1
-                    if len(conflict_ids) < 20:
+                    if len(conflict_ids) < PRIVATE_CONFLICT_EXAMPLE_LIMIT:
                         conflict_ids.append(host_id)
                     continue
                 fasta_file = Path(fasta_path)
