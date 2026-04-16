@@ -51,7 +51,10 @@ def __getattr__(name):
             "phage_host_collate_fn": phage_host_collate_fn,
         }
         return exports[name]
-    raise AttributeError(f"module 'pbi' has no attribute {name!r}")
+    raise AttributeError(
+        f"module 'pbi' has no attribute {name!r}. "
+        f"Available attributes: {', '.join(__all__)}"
+    )
 
 # Optional: Add convenience functions
 def get_default_paths():

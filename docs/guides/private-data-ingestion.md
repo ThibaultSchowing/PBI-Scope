@@ -74,6 +74,11 @@ Optional columns: any extra columns are preserved in `private_entity_attributes`
 Rows that are duplicated on (`Phage_ID`, `Host_ID`, `Source_DB`) are accepted but
 deduplicated at ingestion (first occurrence kept).
 
+## Database synchronization notes
+
+- `fact_phages.source_type` distinguishes public (`public`) vs private (`private`) phages.
+- `private_phage_host_associations` stores `Phage_ID`, `Host_ID`, `Source_DB`, and `source_type` so private links can be traced back to their source dataset during resynchronization.
+
 ## Running `validate-private` without Docker
 
 The `pbi` package installs a standalone CLI tool that runs entirely locally:
