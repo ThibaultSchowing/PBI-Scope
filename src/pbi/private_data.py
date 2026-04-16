@@ -502,7 +502,7 @@ def _iter_fasta_records(fasta_path: Path) -> Iterable[Tuple[str, str, str]]:
 def _write_fasta_record(handle, header: str, sequence: str, line_width: int = 80) -> None:
     handle.write(f">{header}\n")
     for i in range(0, len(sequence), line_width):
-        handle.write(sequence[i:i + line_width] + "\n")
+        handle.write(sequence[i:(i + line_width)] + "\n")
 
 
 def prepare_private_sequence_artifacts(
@@ -533,6 +533,7 @@ def prepare_private_sequence_artifacts(
     ]
 
     host_mapping: Dict[str, str] = {}
+    host_hashes: Dict[str, str] = {}
     seen_phage_hashes: Dict[str, str] = {}
 
     stats = {
@@ -594,12 +595,7 @@ def prepare_private_sequence_artifacts(
                 seq_hash = hashlib.sha256(sequence.encode("utf-8")).hexdigest()
 
                 if rec_id in host_mapping:
-                    existing_file = Path(host_mapping[rec_id])
-                    existing_seq_hash = None
-                    if existing_file.exists():
-                        for _, _, existing_sequence in _iter_fasta_records(existing_file):
-                            existing_seq_hash = hashlib.sha256(existing_sequence.encode("utf-8")).hexdigest()
-                            break
+                    existing_seq_hash = host_hashes.get(rec_id)
                     if existing_seq_hash == seq_hash:
                         stats["host_duplicates_identical"] += 1
                     else:
@@ -609,6 +605,7 @@ def prepare_private_sequence_artifacts(
                 with host_file.open("w", encoding="utf-8") as host_out:
                     _write_fasta_record(host_out, header, sequence)
                 host_mapping[rec_id] = str(host_file)
+                host_hashes[rec_id] = seq_hash
                 stats["hosts_written"] += 1
 
             stats["missing_host_ids"] += len(wanted_hosts - found_hosts)

@@ -112,12 +112,15 @@ rule create_host_mapping:
         private_mapping_path = Path(input.private_mapping)
         private_added = 0
         private_conflicts = 0
+        conflict_ids = []
         if private_mapping_path.exists():
             with private_mapping_path.open("r") as f:
                 private_mapping = json.load(f)
             for host_id, fasta_path in private_mapping.items():
                 if host_id in host_mapping:
                     private_conflicts += 1
+                    if len(conflict_ids) < 20:
+                        conflict_ids.append(host_id)
                     continue
                 fasta_file = Path(fasta_path)
                 if fasta_file.exists() and fasta_file.stat().st_size > 0:
@@ -132,6 +135,7 @@ rule create_host_mapping:
         print(f"✅ Added {private_added} private host FASTA files", file=open(log[0], 'a'))
         if private_conflicts > 0:
             print(f"⚠️ Skipped {private_conflicts} conflicting private Host_ID entries", file=open(log[0], 'a'))
+            print(f"   Conflicting Host_ID examples: {', '.join(conflict_ids)}", file=open(log[0], 'a'))
         if missing_count > 0:
             print(f"⚠️ {missing_count} host files were missing or empty", file=open(log[0], 'a'))
 
