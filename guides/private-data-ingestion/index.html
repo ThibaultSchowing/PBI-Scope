@@ -10,27 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/archive/development/fixes/OOM_FIX_SUMMARY/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/private-data-ingestion/">
       
       
+        <link rel="prev" href="../pipeline-execution/">
+      
+      
+        <link rel="next" href="../schema-contracts/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>OOM Fix and Data Storage Clarification - Summary - PBI Documentation</title>
+        <title>Private Data Ingestion - PBI Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oom-fix-and-data-storage-clarification-summary" class="md-skip">
+        <a href="#private-data-ingestion" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +96,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+    <a href="../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OOM Fix and Data Storage Clarification - Summary
+              Private Data Ingestion
             
           </span>
         </div>
@@ -225,7 +229,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -242,11 +246,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../../guides/overview/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
           
   
   
@@ -266,7 +272,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../database/overview/" class="md-tabs__link">
+        <a href="../../database/overview/" class="md-tabs__link">
           
   
   
@@ -286,7 +292,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../api/overview/" class="md-tabs__link">
+        <a href="../../api/overview/" class="md-tabs__link">
           
   
   
@@ -306,7 +312,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../reference/commands/" class="md-tabs__link">
+        <a href="../../reference/commands/" class="md-tabs__link">
           
   
   
@@ -326,7 +332,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../developer/code-structure/" class="md-tabs__link">
+        <a href="../../developer/code-structure/" class="md-tabs__link">
           
   
   
@@ -344,7 +350,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../future-steps/" class="md-tabs__link">
+      <a href="../../future-steps/" class="md-tabs__link">
         
   
   
@@ -363,7 +369,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../changelog/" class="md-tabs__link">
+      <a href="../../changelog/" class="md-tabs__link">
         
   
   
@@ -398,7 +404,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+    <a href="../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -428,7 +434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -452,28 +458,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -491,7 +500,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -509,7 +518,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/overview/" class="md-nav__link">
+      <a href="../overview/" class="md-nav__link">
         
   
   
@@ -537,7 +546,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -565,7 +574,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/how-it-works/" class="md-nav__link">
+      <a href="../how-it-works/" class="md-nav__link">
         
   
   
@@ -593,7 +602,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/analysis-guide/" class="md-nav__link">
+      <a href="../analysis-guide/" class="md-nav__link">
         
   
   
@@ -621,7 +630,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/pipeline-execution/" class="md-nav__link">
+      <a href="../pipeline-execution/" class="md-nav__link">
         
   
   
@@ -646,10 +655,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../../guides/private-data-ingestion/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Private Data Ingestion
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -665,6 +701,136 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-files-per-source-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required files per source directory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metadatacsv-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata.csv columns
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fasta-identifier-matching-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FASTA identifier matching rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#duplicate-row-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Duplicate row policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-validate-private-without-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running validate-private without Docker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-integration-automatic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container integration (automatic)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs-and-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logs and reports
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failure-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#readme-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        README template
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -677,7 +843,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/schema-contracts/" class="md-nav__link">
+      <a href="../schema-contracts/" class="md-nav__link">
         
   
   
@@ -705,7 +871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/pbi-package/" class="md-nav__link">
+      <a href="../pbi-package/" class="md-nav__link">
         
   
   
@@ -733,7 +899,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/machine-learning/" class="md-nav__link">
+      <a href="../machine-learning/" class="md-nav__link">
         
   
   
@@ -761,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/docker-guide/" class="md-nav__link">
+      <a href="../docker-guide/" class="md-nav__link">
         
   
   
@@ -850,7 +1016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../database/overview/" class="md-nav__link">
+      <a href="../../database/overview/" class="md-nav__link">
         
   
   
@@ -878,7 +1044,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../database/host-resolution/" class="md-nav__link">
+      <a href="../../database/host-resolution/" class="md-nav__link">
         
   
   
@@ -967,7 +1133,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../api/overview/" class="md-nav__link">
+      <a href="../../api/overview/" class="md-nav__link">
         
   
   
@@ -1056,7 +1222,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../reference/commands/" class="md-nav__link">
+      <a href="../../reference/commands/" class="md-nav__link">
         
   
   
@@ -1145,7 +1311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../developer/code-structure/" class="md-nav__link">
+      <a href="../../developer/code-structure/" class="md-nav__link">
         
   
   
@@ -1180,7 +1346,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../future-steps/" class="md-nav__link">
+      <a href="../../future-steps/" class="md-nav__link">
         
   
   
@@ -1207,7 +1373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../changelog/" class="md-nav__link">
+      <a href="../../changelog/" class="md-nav__link">
         
   
   
@@ -1254,10 +1420,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#problem-statement" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Problem Statement
+        Quick start
       
     </span>
   </a>
@@ -1265,116 +1431,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#solution-overview" class="md-nav__link">
+  <a href="#required-files-per-source-directory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Solution Overview
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Solution Overview">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-chunked-merging-to-prevent-oom-errors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Chunked Merging to Prevent OOM Errors
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="1. Chunked Merging to Prevent OOM Errors">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#changes-made" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Changes Made:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#before-oom-prone" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Before (OOM-prone):
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#after-memory-efficient" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        After (Memory-efficient):
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-data-storage-clarification" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Data Storage Clarification
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Data Storage Clarification">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#data-organization-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Organization Structure:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#documentation-updates" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation Updates:
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Testing
+        Required files per source directory
       
     </span>
   </a>
@@ -1382,10 +1442,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#benefits" class="md-nav__link">
+  <a href="#metadatacsv-columns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Benefits
+        metadata.csv columns
       
     </span>
   </a>
@@ -1393,10 +1453,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#performance-implications" class="md-nav__link">
+  <a href="#fasta-identifier-matching-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Performance Implications
+        FASTA identifier matching rules
       
     </span>
   </a>
@@ -1404,10 +1464,65 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-notes" class="md-nav__link">
+  <a href="#duplicate-row-policy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Migration Notes
+        Duplicate row policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-validate-private-without-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running validate-private without Docker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-integration-automatic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container integration (automatic)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logs-and-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logs and reports
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failure-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#readme-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        README template
       
     </span>
   </a>
@@ -1434,111 +1549,159 @@
   
 
 
-<h1 id="oom-fix-and-data-storage-clarification-summary">OOM Fix and Data Storage Clarification - Summary<a class="headerlink" href="#oom-fix-and-data-storage-clarification-summary" title="Permanent link">&para;</a></h1>
-<h2 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h2>
-<p>The PBI pipeline was experiencing two main issues:</p>
+<h1 id="private-data-ingestion">Private Data Ingestion<a class="headerlink" href="#private-data-ingestion" title="Permanent link">&para;</a></h1>
+<p>PBI supports optional ingestion of private datasets placed inside the <code>private_data/</code>
+directory at the repository root.</p>
+<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Out-of-Memory (OOM) Errors</strong>: The merge scripts for protein metadata were generating OOM errors when processing large datasets</li>
-<li><strong>Cache/Data Storage Confusion</strong>: It was unclear where different data types (raw, intermediate, processed) were stored, and Snakemake metadata warnings suggested cache issues</li>
+<li>Create a subdirectory for each private source inside <code>private_data/</code>:</li>
 </ol>
-<h2 id="solution-overview">Solution Overview<a class="headerlink" href="#solution-overview" title="Permanent link">&para;</a></h2>
-<h3 id="1-chunked-merging-to-prevent-oom-errors">1. Chunked Merging to Prevent OOM Errors<a class="headerlink" href="#1-chunked-merging-to-prevent-oom-errors" title="Permanent link">&para;</a></h3>
-<p><strong>Root Cause</strong>: All merge scripts were using <code>pd.concat(dfs, ignore_index=True)</code> which loads all dataframes into memory simultaneously before concatenating them. With large metadata files from 14+ databases, this could easily exceed available memory.</p>
-<p><strong>Solution</strong>: Implemented a chunked merge strategy that writes dataframes to the output CSV file sequentially using append mode.</p>
-<h4 id="changes-made">Changes Made:<a class="headerlink" href="#changes-made" title="Permanent link">&para;</a></h4>
-<ol>
-<li><strong>New utility function</strong> in <code>workflow/scripts/preprocessing/mergers/utils.py</code>:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">merge_dataframes_chunked</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="sd">&#39;&#39;&#39;Merge multiple DataFrames by writing them in chunks to avoid OOM errors.&#39;&#39;&#39;</span>
-</code></pre></div></li>
-</ol>
-<p>This function:
-   - Writes the first dataframe with headers
-   - Appends subsequent dataframes without headers
-   - Never loads all data into memory at once
-   - Provides logging for progress tracking</p>
-<ol>
-<li><strong>Updated all 9 metadata merge scripts</strong> to use the new chunked merge:</li>
-<li><code>merge_annotated_proteins_metadata.py</code></li>
-<li><code>merge_phage_metadata.py</code></li>
-<li><code>merge_antimicrobial_resistance_gene_metadata.py</code></li>
-<li><code>merge_crispr_array_metadata.py</code></li>
-<li><code>merge_phage_anti_crispr_metadata.py</code></li>
-<li><code>merge_phage_transmembrane_protein_metadata.py</code></li>
-<li><code>merge_phage_trna_tmrna_metadata.py</code></li>
-<li><code>merge_phage_virulent_factor_metadata.py</code></li>
-<li><code>merge_transcription_terminator_metadata.py</code></li>
-</ol>
-<h4 id="before-oom-prone">Before (OOM-prone):<a class="headerlink" href="#before-oom-prone" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Loads all dataframes into memory</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">merged_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">merged_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>private_data/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  Project_A/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    metadata.csv
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    phage.fasta
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    host.fasta
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  Experiment_1/
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    metadata.csv
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    phage.fasta
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    host.fasta
 </code></pre></div>
-<h4 id="after-memory-efficient">After (Memory-efficient):<a class="headerlink" href="#after-memory-efficient" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Writes dataframes sequentially to disk</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">total_rows</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">merge_dataframes_chunked</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="2-data-storage-clarification">2. Data Storage Clarification<a class="headerlink" href="#2-data-storage-clarification" title="Permanent link">&para;</a></h3>
-<p><strong>Issue</strong>: The problem statement showed corrupted Snakemake metadata warnings, indicating confusion about what data is cached and where.</p>
-<p><strong>Solution</strong>: Added comprehensive documentation to <code>DOCKER.md</code> explaining the data organization.</p>
-<h4 id="data-organization-structure">Data Organization Structure:<a class="headerlink" href="#data-organization-structure" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Docker Volumes:
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>├─ pbi-data (main data volume, ~60-80 GB)
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>│  ├─ /data/raw/              # Downloaded archives and extracted files
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>│  ├─ /data/intermediate/     # Processing artifacts and merged files
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>│  └─ /data/processed/        # Final database and sequences (API uses this)
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>│
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>└─ pbi-cache (Snakemake cache, ~2-3 GB)
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>   └─ /app/workflow/.snakemake/  # Conda envs, metadata, logs
-</code></pre></div>
-<h4 id="documentation-updates">Documentation Updates:<a class="headerlink" href="#documentation-updates" title="Permanent link">&para;</a></h4>
 <ol>
-<li><strong>Added "Data Storage Organization" section</strong> explaining:</li>
-<li><strong>Raw Data</strong>: Downloaded files from external sources</li>
-<li><strong>Intermediate Data</strong>: Temporary processing files (CSVs, merged FASTA by source)</li>
-<li><strong>Processed Data</strong>: Final optimized outputs (database, indexed sequences)</li>
-<li>
-<p><strong>Cache Volume</strong>: Snakemake metadata and conda environments</p>
-</li>
-<li>
-<p><strong>Explained corrupted metadata warnings</strong>: These occur when the pipeline is interrupted and are harmless - Snakemake will rebuild affected files.</p>
-</li>
-<li>
-<p><strong>Updated pipeline execution description</strong> to mention:</p>
-</li>
-<li>Chunked processing to avoid OOM errors</li>
-<li>Specific paths where data is stored</li>
-<li>Cache persistence across runs</li>
+<li>Validate before running the pipeline:</li>
 </ol>
-<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<p>Created comprehensive test suite in <code>tests/test_chunked_merge.py</code>:</p>
-<ul>
-<li>✅ Basic chunked merge with multiple dataframes</li>
-<li>✅ Empty dataframe list handling</li>
-<li>✅ Large dataframes (5000 rows total)</li>
-<li>✅ Column order preservation</li>
-</ul>
-<p>All tests pass successfully.</p>
-<h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># From the repository root (requires `pip install -e .`)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pbi<span class="w"> </span>validate-private
+</code></pre></div>
 <ol>
-<li><strong>Memory Efficiency</strong>: The pipeline can now handle datasets of any size without OOM errors</li>
-<li><strong>Better Understanding</strong>: Clear documentation about where data is stored helps with debugging and maintenance</li>
-<li><strong>Maintained Functionality</strong>: The output files are identical to before, just generated more efficiently</li>
-<li><strong>Minimal Changes</strong>: Only the merging mechanism changed; all validation, column conversion, and other logic remains the same</li>
+<li>Run the pipeline as usual. Private sources are detected automatically.</li>
 </ol>
-<h2 id="performance-implications">Performance Implications<a class="headerlink" href="#performance-implications" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
+</code></pre></div>
+<p>To remove private data from the database simply empty <code>private_data/</code> (or remove the
+subdirectory) and re-run the pipeline — it rebuilds from scratch.</p>
+<h2 id="required-files-per-source-directory">Required files per source directory<a class="headerlink" href="#required-files-per-source-directory" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>metadata.csv</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>phage.fasta</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>host.fasta</code></td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h2 id="metadatacsv-columns"><code>metadata.csv</code> columns<a class="headerlink" href="#metadatacsv-columns" title="Permanent link">&para;</a></h2>
+<p>Required (case-sensitive):</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Phage_ID</code></td>
+<td>Unique phage identifier matching <code>phage.fasta</code></td>
+</tr>
+<tr>
+<td><code>Host_ID</code></td>
+<td>Unique host identifier matching <code>host.fasta</code></td>
+</tr>
+<tr>
+<td><code>Host_name</code></td>
+<td>Human-readable host species name</td>
+</tr>
+<tr>
+<td><code>Source_DB</code></td>
+<td>Must match the subdirectory name exactly</td>
+</tr>
+<tr>
+<td><code>interaction</code></td>
+<td><code>temperate</code> or <code>virulent</code> (case-insensitive, stored lowercase)</td>
+</tr>
+</tbody>
+</table>
+<p>Optional columns: any extra columns are preserved in <code>private_entity_attributes</code>.</p>
+<h2 id="fasta-identifier-matching-rules">FASTA identifier matching rules<a class="headerlink" href="#fasta-identifier-matching-rules" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Memory Usage</strong>: Reduced from O(n) where n = total data size to O(k) where k = largest individual file</li>
-<li><strong>Disk I/O</strong>: Slightly increased due to sequential writes, but this is negligible compared to memory savings</li>
-<li><strong>Speed</strong>: Marginal difference in processing time; the bottleneck was never concatenation speed but memory availability</li>
+<li>The sequence identifier is the <strong>first whitespace-delimited token</strong> of each <code>&gt;</code> header line.</li>
+<li><code>Phage_ID</code> values must each appear as an identifier in <code>phage.fasta</code>.</li>
+<li><code>Host_ID</code> values must each appear as an identifier in <code>host.fasta</code>.</li>
+<li>Duplicate FASTA identifiers in the same file are rejected.</li>
 </ul>
-<h2 id="migration-notes">Migration Notes<a class="headerlink" href="#migration-notes" title="Permanent link">&para;</a></h2>
+<h2 id="duplicate-row-policy">Duplicate row policy<a class="headerlink" href="#duplicate-row-policy" title="Permanent link">&para;</a></h2>
+<p>Rows that are duplicated on (<code>Phage_ID</code>, <code>Host_ID</code>, <code>Source_DB</code>) are accepted but
+deduplicated at ingestion (first occurrence kept).</p>
+<h2 id="running-validate-private-without-docker">Running <code>validate-private</code> without Docker<a class="headerlink" href="#running-validate-private-without-docker" title="Permanent link">&para;</a></h2>
+<p>The <code>pbi</code> package installs a standalone CLI tool that runs entirely locally:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Install the package (needed once)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># From the repository root — automatically uses ./private_data/</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>pbi<span class="w"> </span>validate-private
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Or point to an arbitrary root</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>pbi<span class="w"> </span>validate-private<span class="w"> </span>--path<span class="w"> </span>/some/other/directory
+</code></pre></div>
+<p>No Docker required; no pipeline run triggered.</p>
+<h2 id="container-integration-automatic">Container integration (automatic)<a class="headerlink" href="#container-integration-automatic" title="Permanent link">&para;</a></h2>
+<p><code>docker-compose.yml</code> always mounts <code>./private_data</code> at <code>/private-data</code> inside the
+container (read-only). The pipeline configuration uses:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">private_data_root</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/private-data&quot;</span>
+</code></pre></div>
+<p>No additional environment variables or config changes are needed.</p>
+<h2 id="logs-and-reports">Logs and reports<a class="headerlink" href="#logs-and-reports" title="Permanent link">&para;</a></h2>
+<p>All HTML reports and log files are written to <code>./pipeline_logs/</code> at the repository root
+(bind-mounted inside the container). Open the <code>.html</code> files directly in a browser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pipeline_logs/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  reports/
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    database_validation.html
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    phage_metadata_report.html
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    ...
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  logs/
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    host_download.log
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    host_download_failures.log
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    ...
+</code></pre></div>
+<h2 id="failure-handling">Failure handling<a class="headerlink" href="#failure-handling" title="Permanent link">&para;</a></h2>
 <ul>
-<li>No action required for existing users</li>
-<li>The chunked merge is backward compatible</li>
-<li>Output files have identical format and content</li>
-<li>Existing workflows and downstream processing are unaffected</li>
+<li>Private ingestion is non-blocking.</li>
+<li>Invalid or failed private sources are skipped; PhageScope data is always produced.</li>
+<li>End-of-run logs include an ingestion summary (sources ingested / skipped).</li>
 </ul>
+<h2 id="readme-template">README template<a class="headerlink" href="#readme-template" title="Permanent link">&para;</a></h2>
+<p>Use this template inside each private source directory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># &lt;Source_DB&gt;
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>## Files
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>- metadata.csv    — phage-host interaction table
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>- phage.fasta     — phage sequences (FASTA)
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>- host.fasta      — host sequences (FASTA)
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>## metadata.csv column notes
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>- Source_DB must equal &quot;&lt;Source_DB&gt;&quot; (directory name)
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>- interaction: temperate | virulent
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>## FASTA IDs
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>- Identifiers are the first whitespace-delimited token of each &#39;&gt;&#39; header line.
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>- All Phage_ID / Host_ID values in metadata.csv must appear in the respective FASTA.
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>## Optional custom columns
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>- &lt;column_name&gt;: &lt;description&gt;
+</code></pre></div>
 
 
 
@@ -1610,10 +1773,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
