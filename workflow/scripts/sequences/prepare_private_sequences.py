@@ -17,7 +17,7 @@ def _resolve_repo_root() -> Path:
     candidates = []
 
     snakemake_ctx = globals().get("snakemake")
-    scriptdir = getattr(snakemake_ctx, "scriptdir", None)
+    scriptdir = getattr(snakemake_ctx, "scriptdir", None) if snakemake_ctx else None
     if scriptdir:
         scriptdir_path = Path(scriptdir).resolve()
         candidates.extend([scriptdir_path, *scriptdir_path.parents])
@@ -28,11 +28,7 @@ def _resolve_repo_root() -> Path:
     cwd = Path.cwd().resolve()
     candidates.extend([cwd, *cwd.parents])
 
-    seen = set()
-    for candidate in candidates:
-        if candidate in seen:
-            continue
-        seen.add(candidate)
+    for candidate in dict.fromkeys(candidates):
         if (candidate / "src" / "pbi" / "private_data.py").exists():
             return candidate
 
