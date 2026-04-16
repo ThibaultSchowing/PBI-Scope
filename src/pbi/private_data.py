@@ -274,8 +274,11 @@ def write_private_manifest(manifest: Dict, output_path: Path) -> None:
 def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs: Iterable[str]) -> Dict:
     ingested = []
     skipped = []
+    allowed_source_tables = {"fact_phages", "private_interactions", "private_entity_attributes"}
 
     def _delete_private_rows_for_sources(table_name: str, source_dbs: List[str]) -> None:
+        if table_name not in allowed_source_tables:
+            raise ValueError(f"Unsupported table for private-source cleanup: {table_name}")
         if not source_dbs:
             return
         placeholders = ", ".join(["?"] * len(source_dbs))
