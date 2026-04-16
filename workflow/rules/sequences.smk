@@ -136,6 +136,7 @@ rule index_private_phage_sequences:
             if not output_index.exists():
                 raise FileNotFoundError(f"Expected index not created: {output_index}")
         else:
+            # Keep DAG outputs stable for private-data-disabled runs.
             output_index.write_text("", encoding="utf-8")
             with open(log[0], "a", encoding="utf-8") as handle:
                 handle.write("No private phage sequences detected; wrote empty private index.\n")
