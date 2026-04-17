@@ -595,8 +595,11 @@ class SequenceRetriever:
             matches = []
 
             # Preserve path suffix when remapping a stale /private-data mount.
-            if path.is_absolute() and len(path.parts) > 2 and path.parts[1] == "private-data":
-                remapped = root / Path(*path.parts[2:])
+            mapped_norm = str(path).replace("\\", "/")
+            private_data_prefix = "/private-data/"
+            if private_data_prefix in mapped_norm:
+                remapped_suffix = mapped_norm.split(private_data_prefix, 1)[1]
+                remapped = root / Path(remapped_suffix)
                 if remapped.exists():
                     matches.append(remapped)
 
@@ -611,9 +614,8 @@ class SequenceRetriever:
                 matches.append(intermediate)
 
             if not matches:
-                # Last resort: recursive lookup for <source_db>/phage.fasta.
-                # Exclude hidden directories (e.g. .pbi) to avoid stale cache picks.
-                for candidate in sorted(root.glob(f"**/{source_db}/phage.fasta")):
+                # Last resort: shallow lookup for */<source_db>/phage.fasta.
+                for candidate in sorted(root.glob(f"*/{source_db}/phage.fasta")):
                     try:
                         relative_parts = candidate.relative_to(root).parts
                     except ValueError:
