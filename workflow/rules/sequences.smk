@@ -13,8 +13,8 @@ rule prepare_private_sequences:
          so that pyfaidx can create the .fai index file next to it.
       2. Indexes the copied phage FASTA with pyfaidx.
       3. Writes a JSON mapping  source_db → phage.fasta path  (private_phage_mapping).
-      4. Normalises private host sequences into per-host .fna files (in private_host_dir)
-         and writes a JSON mapping  Host_ID → host.fna path  (private_host_mapping).
+      4. Writes a JSON mapping  Host_ID → host.fna path  (private_host_mapping),
+         pointing directly at each source's hosts/<Host_ID>.fna — no copy needed.
 
     The private phage FASTA files are intentionally kept separate from all_phages.fasta.
     SequenceRetriever uses private_phage_mapping to look up sequences for private phages
@@ -26,7 +26,6 @@ rule prepare_private_sequences:
         private_phage_mapping=config["private_phage_mapping"],
         private_host_mapping=config["private_host_mapping"]
     params:
-        private_host_dir=config["private_host_genomes_intermediate"],
         private_phage_dir=config["private_phage_genomes_intermediate"]
     conda:
         "../envs/sequences.yaml"

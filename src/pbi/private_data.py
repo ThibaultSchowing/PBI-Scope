@@ -168,19 +168,8 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
     if missing_phages:
         errors.append(f"Phage_ID not found in phage.fasta: {missing_phages[:MAX_ERROR_EXAMPLES]}")
 
-    merged_host_fasta = source_dir / "host.fasta"
     host_dir = source_dir / "hosts"
-    if merged_host_fasta.exists():
-        host_ids, host_duplicates = parse_fasta_ids(merged_host_fasta)
-        if host_duplicates:
-            errors.append(
-                f"Duplicate FASTA identifiers in host.fasta: "
-                f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
-            )
-        missing_hosts = sorted(csv_host_ids - host_ids)
-        if missing_hosts:
-            errors.append(f"Host_ID not found in host.fasta: {missing_hosts[:MAX_ERROR_EXAMPLES]}")
-    elif host_dir.exists() and host_dir.is_dir():
+    if host_dir.exists() and host_dir.is_dir():
         missing_hosts = []
         invalid_host_files = []
         for host_id in sorted(csv_host_ids):
@@ -208,7 +197,7 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
                 f"{invalid_host_files[:MAX_ERROR_EXAMPLES]}"
             )
     else:
-        errors.append("Missing required host sequences: provide host.fasta or hosts/<Host_ID>.fna files")
+        errors.append("Missing required host sequences: provide a hosts/<Host_ID>.fna file for each Host_ID")
 
     duplicated_rows = int(df.duplicated(subset=["Phage_ID", "Host_ID", "Source_DB"]).sum())
     if duplicated_rows:
@@ -272,7 +261,7 @@ def validate_private_roots(roots: Iterable[str], include_dataframe: bool = False
 
 def _source_fingerprint(source_dir: Path) -> str:
     hasher = hashlib.sha256()
-    for file_name in ("metadata.csv", "phage.fasta", "host.fasta"):
+    for file_name in ("metadata.csv", "phage.fasta"):
         path = source_dir / file_name
         if not path.exists():
             continue
@@ -280,6 +269,14 @@ def _source_fingerprint(source_dir: Path) -> str:
         with path.open("rb") as handle:
             for chunk in iter(lambda: handle.read(1024 * 1024), b""):
                 hasher.update(chunk)
+    hosts_dir = source_dir / "hosts"
+    if hosts_dir.is_dir():
+        for host_file in sorted(hosts_dir.iterdir()):
+            if host_file.is_file():
+                hasher.update(host_file.name.encode("utf-8"))
+                with host_file.open("rb") as handle:
+                    for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                        hasher.update(chunk)
     return hasher.hexdigest()
 
 
@@ -605,7 +602,6 @@ def prepare_private_sequence_artifacts(
     manifest: Dict,
     private_phage_dir: Path,
     private_phage_mapping_path: Path,
-    private_host_dir: Path,
     private_host_mapping_path: Path,
 ) -> Dict:
     """
@@ -615,18 +611,16 @@ def prepare_private_sequence_artifacts(
       1. Copies the source ``phage.fasta`` (filtering to wanted Phage_IDs) into a
          per-source writable directory (``private_phage_dir/<source_db>/phage.fasta``)
          and indexes it with pyfaidx so that SequenceRetriever can open it on-demand.
-      2. Registers host sequences from the source:
-         - when ``hosts/`` exists, files are used in-place (no copy)
-         - when legacy ``host.fasta`` exists, records are split into per-host ``.fna``
-           files inside ``private_host_dir``.
+      2. Registers host sequences from the source ``hosts/`` directory directly,
+         mapping each ``Host_ID`` to ``<source_dir>/hosts/<Host_ID>.fna`` (no copy).
 
     Outputs written to disk:
       - ``private_phage_mapping_path``  (JSON) – maps ``source_db`` to the path of
         the copied phage FASTA.  SequenceRetriever uses this to route private-phage
         sequence lookups without mixing private data into ``all_phages.fasta``.
       - ``private_host_mapping_path``  (JSON) – maps ``Host_ID`` to the path of the
-        per-host ``.fna`` file.  Merged into the global ``host_fasta_mapping.json``
-        by the ``create_host_mapping`` Snakemake rule.
+        per-host ``.fna`` file inside the source ``hosts/`` directory.  Merged into
+        the global ``host_fasta_mapping.json`` by the ``create_host_mapping`` rule.
 
     Args:
         manifest: Parsed private manifest JSON (``{"sources": [...]}``)
@@ -634,7 +628,6 @@ def prepare_private_sequence_artifacts(
             Each source gets its own sub-directory:
             ``private_phage_dir/<source_db>/phage.fasta``.
         private_phage_mapping_path: Output path for the phage mapping JSON.
-        private_host_dir: Writable directory for per-host ``.fna`` files.
         private_host_mapping_path: Output path for the host mapping JSON.
 
     Returns:
@@ -644,12 +637,10 @@ def prepare_private_sequence_artifacts(
 
     private_phage_dir = Path(private_phage_dir)
     private_phage_mapping_path = Path(private_phage_mapping_path)
-    private_host_dir = Path(private_host_dir)
     private_host_mapping_path = Path(private_host_mapping_path)
 
     private_phage_dir.mkdir(parents=True, exist_ok=True)
     private_phage_mapping_path.parent.mkdir(parents=True, exist_ok=True)
-    private_host_dir.mkdir(parents=True, exist_ok=True)
     private_host_mapping_path.parent.mkdir(parents=True, exist_ok=True)
 
     valid_sources = [
@@ -676,7 +667,6 @@ def prepare_private_sequence_artifacts(
         source_db = src.get("source_db") or source_dir.name
         metadata_path = source_dir / "metadata.csv"
         phage_fasta_path = source_dir / "phage.fasta"
-        host_fasta_path = source_dir / "host.fasta"
         host_dir_path = source_dir / "hosts"
 
         if not (metadata_path.exists() and phage_fasta_path.exists()):
@@ -724,62 +714,36 @@ def prepare_private_sequence_artifacts(
         stats["missing_phage_ids"] += len(wanted_phages - found_phages)
 
         # ── Host sequences ─────────────────────────────────────────────────────
-        if host_fasta_path.exists():
-            logger.info("Using merged host.fasta for private source '%s'", source_db)
-        elif host_dir_path.exists() and host_dir_path.is_dir():
-            logger.info("Using hosts/ directory for private source '%s'", source_db)
-        else:
+        # Host FASTA files live in the source's hosts/ directory.
+        # Map each Host_ID directly to its file — no copying needed.
+        if not (host_dir_path.exists() and host_dir_path.is_dir()):
             raise FileNotFoundError(
-                f"Missing host sequences for private source '{source_db}': "
-                f"expected {host_fasta_path} or hosts/<Host_ID>.fna files."
+                f"Missing hosts/ directory for private source '{source_db}': "
+                f"expected {host_dir_path}"
             )
 
+        logger.info("Using hosts/ directory for private source '%s'", source_db)
         found_hosts: Set[str] = set()
-        if host_fasta_path.exists():
-            for rec_id, header, sequence in _iter_fasta_records(host_fasta_path):
-                if rec_id not in wanted_hosts:
-                    continue
-                found_hosts.add(rec_id)
+        for host_id in sorted(wanted_hosts):
+            source_host_file = _resolve_host_file(host_dir_path, host_id)
+            if source_host_file is None:
+                continue
 
-                host_file = private_host_dir / f"{rec_id}.fna"
-                seq_hash = hashlib.sha256(sequence.encode("utf-8")).hexdigest()
+            found_hosts.add(host_id)
+            seq_hash = _hash_file(source_host_file)
 
-                if rec_id in host_mapping:
-                    existing_seq_hash = host_hashes.get(rec_id)
-                    if existing_seq_hash == seq_hash:
-                        stats["host_duplicates_identical"] += 1
-                    else:
-                        stats["host_duplicates_conflicting"] += 1
-                    continue
+            if host_id in host_mapping:
+                existing_seq_hash = host_hashes.get(host_id)
+                if existing_seq_hash == seq_hash:
+                    stats["host_duplicates_identical"] += 1
+                else:
+                    stats["host_duplicates_conflicting"] += 1
+                continue
 
-                with host_file.open("w", encoding="utf-8") as host_out:
-                    _write_fasta_record(host_out, header, sequence)
-                host_mapping[rec_id] = str(host_file)
-                host_hashes[rec_id] = seq_hash
-                stats["hosts_written"] += 1
-        else:
-            for host_id in sorted(wanted_hosts):
-                source_host_file = _resolve_host_file(host_dir_path, host_id)
-                if source_host_file is None:
-                    continue
-
-                found_hosts.add(host_id)
-                seq_hash = _hash_file(source_host_file)
-
-                if host_id in host_mapping:
-                    existing_seq_hash = host_hashes.get(host_id)
-                    if existing_seq_hash == seq_hash:
-                        stats["host_duplicates_identical"] += 1
-                    else:
-                        stats["host_duplicates_conflicting"] += 1
-                    continue
-
-                # Host files are provided by private sources in hosts/<Host_ID>.fna.
-                # Keep that location as the canonical mapping target to avoid
-                # unnecessary duplication under private_data/private_hosts.
-                host_mapping[host_id] = str(source_host_file)
-                host_hashes[host_id] = seq_hash
-                stats["hosts_written"] += 1
+            # Point directly at the source file — no copy under any intermediate dir.
+            host_mapping[host_id] = str(source_host_file)
+            host_hashes[host_id] = seq_hash
+            stats["hosts_written"] += 1
 
         stats["missing_host_ids"] += len(wanted_hosts - found_hosts)
 

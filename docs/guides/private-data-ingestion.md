@@ -12,11 +12,14 @@ private_data/
   Project_A/
     metadata.csv
     phage.fasta
-    host.fasta
+    hosts/
+      HOST_ID_1.fna
+      HOST_ID_2.fna
   Experiment_1/
     metadata.csv
     phage.fasta
-    host.fasta
+    hosts/
+      HOST_ID_A.fna
 ```
 
 2. Validate before running the pipeline:
@@ -40,8 +43,9 @@ Private sequence retrieval is prepared automatically during the workflow:
   `source_db → phage.fasta path`.  `SequenceRetriever` uses this mapping to route
   private-phage lookups at retrieval time — private phages are **never merged** into
   `all_phages.fasta`, so removing a private source has no impact on public data.
-- Private host FASTA records are normalized to one FASTA per `Host_ID`, added to
-  `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
+- Private host FASTA files live in each source's `hosts/` directory (one `.fna` file
+  per `Host_ID`).  They are mapped in-place — no copying is performed.  The per-host
+  paths are merged into `host_fasta_mapping.json` and indexed by the host indexing workflow.
 
 When private source directories are removed from `private_data/`, rerunning the pipeline
 re-synchronizes the manifest and removes stale private records from the database.
@@ -52,8 +56,7 @@ re-synchronizes the manifest and removes stale private records from the database
 |------|----------|
 | `metadata.csv` | ✅ |
 | `phage.fasta` | ✅ |
-| `host.fasta` | ✅ (legacy) |
-| `hosts/<Host_ID>.fna` | ✅ (recommended; one file per host) |
+| `hosts/<Host_ID>.fna` | ✅ (one file per host) |
 
 ## `metadata.csv` columns
 
@@ -62,7 +65,7 @@ Required (case-sensitive):
 | Column | Description |
 |--------|-------------|
 | `Phage_ID` | Unique phage identifier matching `phage.fasta` |
-| `Host_ID` | Unique host identifier matching `host.fasta` |
+| `Host_ID` | Unique host identifier matching the filename in `hosts/` |
 | `Host_name` | Human-readable host species name |
 | `Source_DB` | Must match the subdirectory name exactly |
 | `interaction` | `temperate` or `virulent` (case-insensitive, stored lowercase) |
@@ -73,7 +76,7 @@ Optional columns: any extra columns are preserved in `private_entity_attributes`
 
 - The sequence identifier is the **first whitespace-delimited token** of each `>` header line.
 - `Phage_ID` values must each appear as an identifier in `phage.fasta`.
-- `Host_ID` values must each appear as an identifier in `host.fasta`, or have a matching file in `hosts/` (for example `hosts/GCF_000005845.2.fna`).
+- `Host_ID` values must each have a matching file in `hosts/` (for example `hosts/HOST_ID_1.fna`).
 - Duplicate FASTA identifiers in the same file are rejected.
 
 ## Duplicate row policy
