@@ -90,7 +90,7 @@ def get_default_paths():
         'phage_fasta': base_path / 'sequences' / 'all_phages.fasta',
         'protein_fasta': base_path / 'sequences' / 'all_proteins.fasta',
         'host_mapping': base_path / 'sequences' / 'host_fasta_mapping.json',
-        'private_phage_mapping': private_base_path / '.pbi' / 'private_phage_mapping.json',
+        'private_phage_mapping': private_base_path / 'private_phage_mapping.json',
         # Legacy path for backward compatibility
         'host_fasta': base_path / 'sequences' / 'all_hosts.fasta',
     }

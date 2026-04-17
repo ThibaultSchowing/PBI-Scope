@@ -65,8 +65,8 @@ def test_pbi_package_path_configuration():
         f"Expected '/data/processed/sequences/all_phages.fasta', got {paths['phage_fasta']}"
     assert str(paths['protein_fasta']) == '/data/processed/sequences/all_proteins.fasta', \
         f"Expected '/data/processed/sequences/all_proteins.fasta', got {paths['protein_fasta']}"
-    assert str(paths['private_phage_mapping']) == '/private-data/.pbi/private_phage_mapping.json', \
-        f"Expected '/private-data/.pbi/private_phage_mapping.json', got {paths['private_phage_mapping']}"
+    assert str(paths['private_phage_mapping']) == '/private-data/private_phage_mapping.json', \
+        f"Expected '/private-data/private_phage_mapping.json', got {paths['private_phage_mapping']}"
     
     print("   ✓ Docker mode uses DATA_PATH environment variable")
     

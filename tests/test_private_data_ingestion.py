@@ -24,19 +24,15 @@ def _create_private_source(
     metadata_rows: list[dict],
     phage_ids: list[str],
     host_ids: list[str],
-    use_host_directory: bool = False,
 ):
     source_dir = root / name
     source_dir.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(metadata_rows).to_csv(source_dir / "metadata.csv", index=False)
     _write_text(source_dir / "phage.fasta", "".join([f">{pid} desc\nATGC\n" for pid in phage_ids]))
-    if use_host_directory:
-        hosts_dir = source_dir / "hosts"
-        hosts_dir.mkdir(parents=True, exist_ok=True)
-        for hid in host_ids:
-            _write_text(hosts_dir / f"{hid}.fna", f">{hid} desc\nATGC\n")
-    else:
-        _write_text(source_dir / "host.fasta", "".join([f">{hid} desc\nATGC\n" for hid in host_ids]))
+    hosts_dir = source_dir / "hosts"
+    hosts_dir.mkdir(parents=True, exist_ok=True)
+    for hid in host_ids:
+        _write_text(hosts_dir / f"{hid}.fna", f">{hid} desc\nATGC\n")
     return source_dir
 
 
@@ -76,7 +72,6 @@ def test_validate_private_source_success(tmp_path):
         ],
         ["P1"],
         ["H1"],
-        use_host_directory=True,
     )
     result = validate_private_source(source)
     assert result.is_valid
@@ -142,30 +137,6 @@ def test_validate_private_source_id_mismatch(tmp_path):
         ],
         ["P2"],
         ["H2"],
-        use_host_directory=False,
-    )
-    result = validate_private_source(source)
-    assert not result.is_valid
-    assert any("Phage_ID not found" in e for e in result.errors)
-    assert any("Host_ID not found in host.fasta" in e for e in result.errors)
-
-
-def test_validate_private_source_id_mismatch_hosts_directory_layout(tmp_path):
-    source = _create_private_source(
-        tmp_path,
-        "Project_A",
-        [
-            {
-                "Phage_ID": "P1",
-                "Host_ID": "H1",
-                "Host_name": "Host One",
-                "Source_DB": "Project_A",
-                "interaction": "virulent",
-            }
-        ],
-        ["P2"],
-        ["H2"],
-        use_host_directory=True,
     )
     result = validate_private_source(source)
     assert not result.is_valid
@@ -174,7 +145,7 @@ def test_validate_private_source_id_mismatch_hosts_directory_layout(tmp_path):
 
 
 def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
-    """Private sources must provide host.fasta or hosts/<Host_ID>.fna files."""
+    """Private sources must provide a hosts/<Host_ID>.fna file for each Host_ID."""
     source = tmp_path / "Project_B"
     source.mkdir()
     pd.DataFrame(
@@ -189,38 +160,15 @@ def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
         ]
     ).to_csv(source / "metadata.csv", index=False)
     _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
-    # Intentionally no host.fasta and no hosts/ directory
+    # Intentionally no hosts/ directory
 
     result = validate_private_source(source)
     assert not result.is_valid
     assert any("Missing required host sequences" in e for e in result.errors)
 
 
-def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
-    """When host.fasta IS provided it must still contain all declared Host_IDs."""
-    source = _create_private_source(
-        tmp_path,
-        "Project_A",
-        [
-            {
-                "Phage_ID": "P1",
-                "Host_ID": "H1",
-                "Host_name": "Host One",
-                "Source_DB": "Project_A",
-                "interaction": "virulent",
-            }
-        ],
-        phage_ids=["P1"],
-        host_ids=["H_WRONG"],  # host.fasta has wrong ID
-        use_host_directory=False,
-    )
-    result = validate_private_source(source)
-    assert not result.is_valid
-    assert any("Host_ID not found in host.fasta" in e for e in result.errors)
-
-
-def test_prepare_private_sequence_artifacts_requires_host_fasta(tmp_path):
-    """Sources without host.fasta should be skipped via manifest validity."""
+def test_prepare_private_sequence_artifacts_requires_host_directory(tmp_path):
+    """Sources without a hosts/ directory should be skipped via manifest validity."""
     source = tmp_path / "Project_NoHost"
     source.mkdir()
     pd.DataFrame(
@@ -235,20 +183,18 @@ def test_prepare_private_sequence_artifacts_requires_host_fasta(tmp_path):
         ]
     ).to_csv(source / "metadata.csv", index=False)
     _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
-    # No host.fasta
+    # No hosts/ directory
 
     manifest = {"sources": [{"source_db": "Project_NoHost", "source_dir": str(source), "is_valid": False}]}
 
     private_phage_dir = tmp_path / "private" / "phages"
     private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
-    private_host_dir = tmp_path / "private" / "hosts"
     private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
         private_phage_dir=private_phage_dir,
         private_phage_mapping_path=private_phage_mapping,
-        private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
 
@@ -320,7 +266,6 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
         ],
         ["P1"],
         ["H1"],
-        use_host_directory=True,
     )
     manifest = {
         "sources": [
@@ -334,14 +279,12 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
 
     private_phage_dir = tmp_path / "private" / "phages"
     private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
-    private_host_dir = tmp_path / "private" / "hosts"
     private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
         private_phage_dir=private_phage_dir,
         private_phage_mapping_path=private_phage_mapping,
-        private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
 
@@ -363,8 +306,7 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
         hmapping = json.load(handle)
     assert "H1" in hmapping
     mapped_path = Path(hmapping["H1"])
-    # When private source provides hosts/<Host_ID>.fna, mapping should point to
-    # that file directly instead of a duplicate copy under private/.pbi/hosts.
+    # Mapping points directly to the source's hosts/ file — no intermediate copy.
     assert mapped_path == source / "hosts" / "H1.fna"
     assert mapped_path.exists()
     assert ">H1 desc" in mapped_path.read_text(encoding="utf-8")
@@ -411,14 +353,12 @@ def test_prepare_private_sequence_artifacts_skips_invalid_sources(tmp_path):
 
     private_phage_dir = tmp_path / "private" / "phages"
     private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
-    private_host_dir = tmp_path / "private" / "hosts"
     private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
         private_phage_dir=private_phage_dir,
         private_phage_mapping_path=private_phage_mapping,
-        private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
 

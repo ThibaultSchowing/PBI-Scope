@@ -469,11 +469,10 @@ class SequenceRetriever:
 
     def _resolve_host_fasta_path(self, host_id: str, mapped_path: str) -> str:
         """
-        Resolve host FASTA path from mapping, with fallback for legacy/stale .pbi paths.
+        Resolve host FASTA path from mapping, with fallback search for stale paths.
 
-        This keeps backward compatibility when a mapping points to
-        ``.../.pbi/hosts/<Host_ID>.fna`` but the canonical host file is now provided
-        directly under ``private_data/<source>/hosts/<Host_ID>.fna``.
+        If the mapped path no longer exists (e.g. the private-data mount point changed),
+        this searches ``<root>/*/hosts/<filename>`` under known private-data roots.
         """
         path = Path(mapped_path)
         if path.exists():
@@ -496,13 +495,6 @@ class SequenceRetriever:
             Path.cwd() / "private_data",
         ])
 
-        # If mapping looks like "<private_root>/.pbi/hosts/<Host_ID>.fna",
-        # recover "<private_root>" and search "<private_root>/*/hosts/<file>".
-        if ".pbi" in path.parts:
-            pbi_idx = path.parts.index(".pbi")
-            if pbi_idx > 0:
-                candidate_roots.insert(0, Path(*path.parts[:pbi_idx]))
-
         seen = set()
         for root in candidate_roots:
             root_str = str(root.expanduser().resolve(strict=False))
@@ -513,17 +505,6 @@ class SequenceRetriever:
                 continue
             if root.is_file():
                 continue
-
-            direct_candidate = root / "hosts" / path.name
-            if direct_candidate.exists():
-                logging.warning(
-                    "⚠️ Resolved missing host mapping path for %s: %s -> %s",
-                    host_id,
-                    mapped_path,
-                    direct_candidate,
-                )
-                self._host_mapping[host_id] = str(direct_candidate)
-                return str(direct_candidate)
 
             matches = sorted(root.glob(f"*/hosts/{path.name}"))
             if matches:
