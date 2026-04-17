@@ -73,19 +73,24 @@ def get_default_paths():
     # Check if DATA_PATH environment variable is set (Docker/container mode)
     data_path = os.environ.get('DATA_PATH')
     
+    private_data_path = os.environ.get('PBI_PRIVATE_DATA_DIR')
+
     if data_path:
         # Container mode: use DATA_PATH directly
         base_path = Path(data_path)
+        private_base_path = Path(private_data_path) if private_data_path else Path('/private-data')
     else:
         # Local mode: use project-relative path
         project_root = Path(__file__).parent.parent.parent
         base_path = project_root / 'data' / 'processed'
+        private_base_path = Path(private_data_path) if private_data_path else project_root / 'private_data'
     
     return {
         'database': base_path / 'databases' / 'phage_database_optimized.duckdb',
         'phage_fasta': base_path / 'sequences' / 'all_phages.fasta',
         'protein_fasta': base_path / 'sequences' / 'all_proteins.fasta',
         'host_mapping': base_path / 'sequences' / 'host_fasta_mapping.json',
+        'private_phage_mapping': private_base_path / '.pbi' / 'private_phage_mapping.json',
         # Legacy path for backward compatibility
         'host_fasta': base_path / 'sequences' / 'all_hosts.fasta',
     }
@@ -114,5 +119,10 @@ def quick_connect():
         str(paths['phage_fasta']),
         str(paths['protein_fasta']),
         host_fasta_path=host_fasta,
-        host_mapping_path=host_mapping
+        host_mapping_path=host_mapping,
+        private_phage_mapping_path=(
+            str(paths['private_phage_mapping'])
+            if paths['private_phage_mapping'].exists()
+            else None
+        ),
     )

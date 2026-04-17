@@ -31,8 +31,9 @@ def test_snakemake_path_configuration():
     print(f"   all_phages_fasta: {original_fasta}")
     print(f"   duckdb_output: {original_db}")
     
-    assert original_reports.startswith('/data'), "Expected original config to have /data paths"
-    print("   ✓ Original config has /data paths")
+    assert original_fasta.startswith('/data'), "Expected sequence paths to have /data prefix in raw config"
+    assert original_db.startswith('/data'), "Expected database paths to have /data prefix in raw config"
+    print("   ✓ Original sequence/database config paths have /data prefix")
     
     # Test 1: Default behavior (local mode)
     print("\n2. Testing default behavior (PBI_DATA_DIR unset)...")
@@ -40,6 +41,7 @@ def test_snakemake_path_configuration():
         del os.environ['PBI_DATA_DIR']
     
     BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+    BASE_PRIVATE_DATA_DIR = os.getenv('PBI_PRIVATE_DATA_DIR', 'private_data')
     print(f"   BASE_DATA_DIR: {BASE_DATA_DIR}")
     
     # Reload config
@@ -48,12 +50,16 @@ def test_snakemake_path_configuration():
     
     # Apply transformation (using dynamic discovery like Snakefile)
     for path_key in config:
-        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
-            config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
+        if isinstance(config[path_key], str):
+            if config[path_key].startswith('/private-data'):
+                config[path_key] = config[path_key].replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
+            elif config[path_key].startswith('/data'):
+                config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
-    assert config['reports_output'] == 'data/processed/reports/', f"Expected 'data/processed/reports/', got {config['reports_output']}"
+    assert config['reports_output'] == '/pipeline-logs/reports/', f"Expected '/pipeline-logs/reports/', got {config['reports_output']}"
     assert config['all_phages_fasta'] == 'data/processed/sequences/all_phages.fasta', f"Expected 'data/processed/sequences/all_phages.fasta', got {config['all_phages_fasta']}"
     assert config['duckdb_output'] == 'data/processed/databases/phage_database.duckdb', f"Expected 'data/processed/databases/phage_database.duckdb', got {config['duckdb_output']}"
+    assert config['private_manifest_output'] == 'private_data/.pbi/private_manifest.json', f"Expected 'private_data/.pbi/private_manifest.json', got {config['private_manifest_output']}"
     
     print(f"   reports_output: {config['reports_output']}")
     print(f"   all_phages_fasta: {config['all_phages_fasta']}")
@@ -63,7 +69,9 @@ def test_snakemake_path_configuration():
     # Test 2: Docker mode
     print("\n3. Testing Docker mode (PBI_DATA_DIR=/data)...")
     os.environ['PBI_DATA_DIR'] = '/data'
+    os.environ['PBI_PRIVATE_DATA_DIR'] = '/private-data'
     BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+    BASE_PRIVATE_DATA_DIR = os.getenv('PBI_PRIVATE_DATA_DIR', 'private_data')
     print(f"   BASE_DATA_DIR: {BASE_DATA_DIR}")
     
     # Reload config
@@ -72,12 +80,16 @@ def test_snakemake_path_configuration():
     
     # Apply transformation (using dynamic discovery like Snakefile)
     for path_key in config:
-        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
-            config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
+        if isinstance(config[path_key], str):
+            if config[path_key].startswith('/private-data'):
+                config[path_key] = config[path_key].replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
+            elif config[path_key].startswith('/data'):
+                config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
-    assert config['reports_output'] == '/data/processed/reports/', f"Expected '/data/processed/reports/', got {config['reports_output']}"
+    assert config['reports_output'] == '/pipeline-logs/reports/', f"Expected '/pipeline-logs/reports/', got {config['reports_output']}"
     assert config['all_phages_fasta'] == '/data/processed/sequences/all_phages.fasta', f"Expected '/data/processed/sequences/all_phages.fasta', got {config['all_phages_fasta']}"
     assert config['duckdb_output'] == '/data/processed/databases/phage_database.duckdb', f"Expected '/data/processed/databases/phage_database.duckdb', got {config['duckdb_output']}"
+    assert config['private_manifest_output'] == '/private-data/.pbi/private_manifest.json', f"Expected '/private-data/.pbi/private_manifest.json', got {config['private_manifest_output']}"
     
     print(f"   reports_output: {config['reports_output']}")
     print(f"   all_phages_fasta: {config['all_phages_fasta']}")
@@ -87,7 +99,9 @@ def test_snakemake_path_configuration():
     # Test 3: Custom path
     print("\n4. Testing custom path (PBI_DATA_DIR=/custom/path)...")
     os.environ['PBI_DATA_DIR'] = '/custom/path'
+    os.environ['PBI_PRIVATE_DATA_DIR'] = '/custom/private'
     BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+    BASE_PRIVATE_DATA_DIR = os.getenv('PBI_PRIVATE_DATA_DIR', 'private_data')
     print(f"   BASE_DATA_DIR: {BASE_DATA_DIR}")
     
     # Reload config
@@ -96,12 +110,16 @@ def test_snakemake_path_configuration():
     
     # Apply transformation (using dynamic discovery like Snakefile)
     for path_key in config:
-        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
-            config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
+        if isinstance(config[path_key], str):
+            if config[path_key].startswith('/private-data'):
+                config[path_key] = config[path_key].replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
+            elif config[path_key].startswith('/data'):
+                config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
-    assert config['reports_output'] == '/custom/path/processed/reports/', f"Expected '/custom/path/processed/reports/', got {config['reports_output']}"
+    assert config['reports_output'] == '/pipeline-logs/reports/', f"Expected '/pipeline-logs/reports/', got {config['reports_output']}"
     assert config['all_phages_fasta'] == '/custom/path/processed/sequences/all_phages.fasta', f"Expected '/custom/path/processed/sequences/all_phages.fasta', got {config['all_phages_fasta']}"
     assert config['duckdb_output'] == '/custom/path/processed/databases/phage_database.duckdb', f"Expected '/custom/path/processed/databases/phage_database.duckdb', got {config['duckdb_output']}"
+    assert config['private_manifest_output'] == '/custom/private/.pbi/private_manifest.json', f"Expected '/custom/private/.pbi/private_manifest.json', got {config['private_manifest_output']}"
     
     print(f"   reports_output: {config['reports_output']}")
     print(f"   all_phages_fasta: {config['all_phages_fasta']}")
@@ -116,8 +134,11 @@ def test_snakemake_path_configuration():
     BASE_DATA_DIR = 'data'
     # Apply transformation (using dynamic discovery like Snakefile)
     for path_key in config:
-        if isinstance(config[path_key], str) and config[path_key].startswith('/data'):
-            config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
+        if isinstance(config[path_key], str):
+            if config[path_key].startswith('/private-data'):
+                config[path_key] = config[path_key].replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
+            elif config[path_key].startswith('/data'):
+                config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
     
     # Verify specific paths are transformed correctly
     test_cases = [

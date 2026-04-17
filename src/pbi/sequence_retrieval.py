@@ -29,6 +29,18 @@ def _fasta_key_function(header: str) -> str:
     return parts[0] if parts else header
 
 
+def _should_rebuild_fai(fasta_path: Union[str, Path]) -> bool:
+    """Return True when FASTA index is missing or older than the FASTA file."""
+    fasta_path = Path(fasta_path)
+    index_path = Path(str(fasta_path) + '.fai')
+    if not index_path.exists():
+        return True
+    try:
+        return index_path.stat().st_mtime < fasta_path.stat().st_mtime
+    except OSError:
+        return True
+
+
 def _load_protein_fasta(path: str) -> "Fasta":
     """
     Load a protein FASTA file using full headers as keys.
@@ -438,9 +450,7 @@ class SequenceRetriever:
                     except Exception as e:
                         logging.debug(f"Error closing evicted host FASTA for {oldest_id}: {e}")
             
-            # Check if .fai index exists; rebuild if missing
-            index_path = Path(str(fasta_path) + '.fai')
-            rebuild = not index_path.exists()
+            rebuild = _should_rebuild_fai(fasta_path)
             if rebuild:
                 logging.info(f"Creating index for {fasta_path}")
             
@@ -492,8 +502,7 @@ class SequenceRetriever:
                         pass
 
             fasta_path = self._private_phage_mapping[source_db]
-            index_path = Path(str(fasta_path) + ".fai")
-            rebuild = not index_path.exists()
+            rebuild = _should_rebuild_fai(fasta_path)
             if rebuild:
                 logging.info("Creating index for private phage FASTA: %s", fasta_path)
 

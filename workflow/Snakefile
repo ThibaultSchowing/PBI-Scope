@@ -10,6 +10,7 @@ import os
 
 # Get base data directory from environment or default to relative path
 BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+BASE_PRIVATE_DATA_DIR = os.getenv('PBI_PRIVATE_DATA_DIR', 'private_data')
 
 # Get base logs/reports directory. Defaults to the same place as data when running locally
 # without Docker (so reports land under data/). The Docker container sets this to /pipeline-logs
@@ -21,6 +22,8 @@ for path_key in config:
     if isinstance(config[path_key], str):
         if config[path_key].startswith('/pipeline-logs'):
             config[path_key] = config[path_key].replace('/pipeline-logs', BASE_LOGS_DIR, 1)
+        elif config[path_key].startswith('/private-data'):
+            config[path_key] = config[path_key].replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
         elif config[path_key].startswith('/data'):
             # Replace /data prefix with BASE_DATA_DIR
             config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
