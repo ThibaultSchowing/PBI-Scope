@@ -145,7 +145,7 @@ def test_validate_private_source_id_mismatch(tmp_path):
     result = validate_private_source(source)
     assert not result.is_valid
     assert any("Phage_ID not found" in e for e in result.errors)
-    assert any("Host_ID not found" in e for e in result.errors)
+    assert any("Host_ID missing corresponding FASTA file in hosts/" in e for e in result.errors)
 
 
 def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
