@@ -184,13 +184,13 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
             if host_file is None:
                 missing_hosts.append(host_id)
                 continue
-            host_ids, host_duplicates = parse_fasta_ids(host_file)
+            file_host_ids, host_duplicates = parse_fasta_ids(host_file)
             if host_duplicates:
                 errors.append(
                     f"Duplicate FASTA identifiers in hosts/{host_file.name}: "
                     f"{sorted(host_duplicates)[:MAX_ERROR_EXAMPLES]}"
                 )
-            if host_id not in host_ids:
+            if host_id not in file_host_ids:
                 invalid_host_files.append(f"{host_id} -> {host_file.name}")
         if missing_hosts:
             errors.append(

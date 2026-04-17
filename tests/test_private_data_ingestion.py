@@ -24,7 +24,7 @@ def _create_private_source(
     metadata_rows: list[dict],
     phage_ids: list[str],
     host_ids: list[str],
-    use_host_directory: bool = True,
+    use_host_directory: bool = False,
 ):
     source_dir = root / name
     source_dir.mkdir(parents=True, exist_ok=True)
@@ -76,6 +76,7 @@ def test_validate_private_source_success(tmp_path):
         ],
         ["P1"],
         ["H1"],
+        use_host_directory=True,
     )
     result = validate_private_source(source)
     assert result.is_valid
@@ -145,7 +146,10 @@ def test_validate_private_source_id_mismatch(tmp_path):
     result = validate_private_source(source)
     assert not result.is_valid
     assert any("Phage_ID not found" in e for e in result.errors)
-    assert any("Host_ID missing corresponding FASTA file in hosts/" in e for e in result.errors)
+    assert any(
+        ("Host_ID not found in host.fasta" in e) or ("Host_ID missing corresponding FASTA file in hosts/" in e)
+        for e in result.errors
+    )
 
 
 def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
@@ -295,6 +299,7 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
         ],
         ["P1"],
         ["H1"],
+        use_host_directory=True,
     )
     manifest = {
         "sources": [
