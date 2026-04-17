@@ -587,6 +587,14 @@ def _write_fasta_record(handle, header: str, sequence: str, line_width: int = 80
         handle.write(sequence[i:(i + line_width)] + "\n")
 
 
+def _hash_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(chunk_size), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def prepare_private_sequence_artifacts(
     manifest: Dict,
     private_phage_fasta_path: Path,
@@ -710,7 +718,7 @@ def prepare_private_sequence_artifacts(
                         continue
 
                     found_hosts.add(host_id)
-                    seq_hash = hashlib.sha256(source_host_file.read_bytes()).hexdigest()
+                    seq_hash = _hash_file(source_host_file)
                     host_file = private_host_dir / f"{host_id}.fna"
 
                     if host_id in host_mapping:
