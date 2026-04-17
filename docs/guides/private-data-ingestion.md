@@ -34,8 +34,14 @@ docker compose run --rm pipeline
 
 Private sequence retrieval is prepared automatically during the workflow:
 
-- Private phage FASTA records are materialized in a dedicated private FASTA (`private_phages.fasta` + `.fai`) and also merged into the global `all_phages.fasta` used by `SequenceRetriever`.
-- Private host FASTA records are normalized to one FASTA per `Host_ID`, added to `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
+- Each private source's `phage.fasta` is **copied** to a writable per-source directory
+  (`/data/intermediate/fasta/private/phages/<source_db>/phage.fasta`) and indexed with
+  pyfaidx (`.fai`).  A JSON mapping (`private_phage_mapping.json`) records
+  `source_db → phage.fasta path`.  `SequenceRetriever` uses this mapping to route
+  private-phage lookups at retrieval time — private phages are **never merged** into
+  `all_phages.fasta`, so removing a private source has no impact on public data.
+- Private host FASTA records are normalized to one FASTA per `Host_ID`, added to
+  `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
 
 When private source directories are removed from `private_data/`, rerunning the pipeline
 re-synchronizes the manifest and removes stale private records from the database.

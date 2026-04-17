@@ -524,7 +524,7 @@ class SequenceRetriever:
             source_type == "private"
             or (
                 self._private_phage_mapping is not None
-                and source_db in (self._private_phage_mapping or {})
+                and source_db in self._private_phage_mapping
             )
         )
 
