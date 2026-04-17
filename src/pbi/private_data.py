@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Tuple
@@ -616,8 +615,10 @@ def prepare_private_sequence_artifacts(
       1. Copies the source ``phage.fasta`` (filtering to wanted Phage_IDs) into a
          per-source writable directory (``private_phage_dir/<source_db>/phage.fasta``)
          and indexes it with pyfaidx so that SequenceRetriever can open it on-demand.
-      2. Normalises host sequences from the source's ``hosts/`` directory (or legacy
-         ``host.fasta``) into per-host ``.fna`` files inside ``private_host_dir``.
+      2. Registers host sequences from the source:
+         - when ``hosts/`` exists, files are used in-place (no copy)
+         - when legacy ``host.fasta`` exists, records are split into per-host ``.fna``
+           files inside ``private_host_dir``.
 
     Outputs written to disk:
       - ``private_phage_mapping_path``  (JSON) – maps ``source_db`` to the path of
@@ -764,7 +765,6 @@ def prepare_private_sequence_artifacts(
 
                 found_hosts.add(host_id)
                 seq_hash = _hash_file(source_host_file)
-                host_file = private_host_dir / f"{host_id}.fna"
 
                 if host_id in host_mapping:
                     existing_seq_hash = host_hashes.get(host_id)
@@ -774,8 +774,10 @@ def prepare_private_sequence_artifacts(
                         stats["host_duplicates_conflicting"] += 1
                     continue
 
-                shutil.copy2(source_host_file, host_file)
-                host_mapping[host_id] = str(host_file)
+                # Host files are provided by private sources in hosts/<Host_ID>.fna.
+                # Keep that location as the canonical mapping target to avoid
+                # unnecessary duplication under private_data/.pbi/hosts.
+                host_mapping[host_id] = str(source_host_file)
                 host_hashes[host_id] = seq_hash
                 stats["hosts_written"] += 1
 
