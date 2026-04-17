@@ -19,8 +19,9 @@ MANDATORY_COLUMNS = ["Phage_ID", "Host_ID", "Host_name", "Source_DB", "interacti
 # Values are normalized to lowercase before validation.
 ALLOWED_INTERACTIONS = {"temperate", "virulent"}
 MAX_ERROR_EXAMPLES = 20
-# Extension precedence for per-host files. When multiple files exist for the
-# same Host_ID, the first extension in this tuple wins.
+# Extension precedence for per-host files. ``.fna`` comes first because it is
+# the canonical extension emitted by the host-download workflow; when multiple
+# files exist for the same Host_ID, the first extension in this tuple wins.
 HOST_FASTA_EXTENSIONS = (".fna", ".fasta", ".fa")
 
 logger = logging.getLogger(__name__)
@@ -203,7 +204,8 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
             )
         if invalid_host_files:
             errors.append(
-                "Host FASTA files in hosts/ do not contain matching Host_ID headers: "
+                "Host FASTA files in hosts/ do not contain expected Host_ID headers "
+                "(expected Host_ID -> file): "
                 f"{invalid_host_files[:MAX_ERROR_EXAMPLES]}"
             )
     else:

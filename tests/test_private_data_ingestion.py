@@ -142,14 +142,35 @@ def test_validate_private_source_id_mismatch(tmp_path):
         ],
         ["P2"],
         ["H2"],
+        use_host_directory=False,
     )
     result = validate_private_source(source)
     assert not result.is_valid
     assert any("Phage_ID not found" in e for e in result.errors)
-    assert any(
-        ("Host_ID not found in host.fasta" in e) or ("Host_ID missing corresponding FASTA file in hosts/" in e)
-        for e in result.errors
+    assert any("Host_ID not found in host.fasta" in e for e in result.errors)
+
+
+def test_validate_private_source_id_mismatch_hosts_directory_layout(tmp_path):
+    source = _create_private_source(
+        tmp_path,
+        "Project_A",
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "H1",
+                "Host_name": "Host One",
+                "Source_DB": "Project_A",
+                "interaction": "virulent",
+            }
+        ],
+        ["P2"],
+        ["H2"],
+        use_host_directory=True,
     )
+    result = validate_private_source(source)
+    assert not result.is_valid
+    assert any("Phage_ID not found" in e for e in result.errors)
+    assert any("Host_ID missing corresponding FASTA file in hosts/" in e for e in result.errors)
 
 
 def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
