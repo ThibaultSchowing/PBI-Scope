@@ -108,8 +108,13 @@ No Docker required; no pipeline run triggered.
 
 ## Container integration (automatic)
 
-`docker-compose.yml` mounts `./private_data` at `/private-data` inside the
-container (writable). The pipeline configuration uses:
+`docker-compose.yml` mounts `./private_data` at `/private-data` for both:
+
+- `pipeline` (writable) so private sources can be validated and indexed
+- `analysis` (read-only) so notebooks can read private host FASTAs and
+  `private_phage_mapping.json`
+
+The pipeline configuration uses:
 
 ```yaml
 private_data_root: "/private-data"

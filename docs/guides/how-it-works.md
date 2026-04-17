@@ -153,16 +153,17 @@ The `SequenceRetriever` uses this file to efficiently retrieve individual host s
 
 ```python
 def quick_connect():
-    paths = get_default_paths()  # Reads DATA_PATH env var or uses project-relative defaults
+    paths = get_default_paths()  # Reads DATA_PATH + PBI_PRIVATE_DATA_DIR
     return SequenceRetriever(
         db_path=paths['database'],
         phage_fasta_path=paths['phage_fasta'],
         protein_fasta_path=paths['protein_fasta'],
-        host_mapping_path=paths['host_mapping']  # Uses host_fasta_mapping.json
+        host_mapping_path=paths['host_mapping'],  # Uses host_fasta_mapping.json
+        private_phage_mapping_path=paths['private_phage_mapping'],
     )
 ```
 
-In Docker, the `DATA_PATH` environment variable is set to `/data/processed`, so `quick_connect()` automatically finds all files.
+In Docker, `DATA_PATH=/data/processed` and `PBI_PRIVATE_DATA_DIR=/private-data`, so `quick_connect()` can route both public and private sequence lookups.
 
 ---
 
