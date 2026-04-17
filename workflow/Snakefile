@@ -87,7 +87,6 @@ rule all:
         config["database_validation_report_output"],
         # Sequence indexing files
         config["all_phages_fasta"] + ".fai",
-        config["private_phage_fasta"] + ".fai",
         config["all_proteins_fasta"] + ".fai",
         # Host genome files
         config["host_index_complete_flag"],
