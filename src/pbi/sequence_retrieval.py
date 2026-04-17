@@ -499,16 +499,13 @@ class SequenceRetriever:
         # If mapping looks like "<private_root>/.pbi/hosts/<Host_ID>.fna",
         # recover "<private_root>" and search "<private_root>/*/hosts/<file>".
         if ".pbi" in path.parts:
-            try:
-                pbi_idx = path.parts.index(".pbi")
-                if pbi_idx > 0:
-                    candidate_roots.insert(0, Path(*path.parts[:pbi_idx]))
-            except ValueError:
-                pass
+            pbi_idx = path.parts.index(".pbi")
+            if pbi_idx > 0:
+                candidate_roots.insert(0, Path(*path.parts[:pbi_idx]))
 
         seen = set()
         for root in candidate_roots:
-            root_str = str(root)
+            root_str = str(root.expanduser().resolve(strict=False))
             if root_str in seen:
                 continue
             seen.add(root_str)
