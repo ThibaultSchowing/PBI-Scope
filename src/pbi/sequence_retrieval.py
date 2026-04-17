@@ -560,6 +560,10 @@ class SequenceRetriever:
         If the mapped path no longer exists (e.g. ``/private-data`` moved to another
         mount path), this searches common private-data roots for a matching
         ``<source_db>/phage.fasta`` and updates the in-memory mapping.
+
+        Returns:
+            Resolved existing FASTA path when found; otherwise returns ``mapped_path``
+            unchanged.
         """
         path = Path(mapped_path)
         if path.exists():
@@ -595,7 +599,7 @@ class SequenceRetriever:
             matches = []
 
             # Preserve path suffix when remapping a stale /private-data mount.
-            mapped_norm = str(path).replace("\\", "/")
+            mapped_norm = path.as_posix()
             private_data_prefix = "/private-data/"
             if private_data_prefix in mapped_norm:
                 remapped_suffix = mapped_norm.split(private_data_prefix, 1)[1]
@@ -615,6 +619,7 @@ class SequenceRetriever:
 
             if not matches:
                 # Last resort: shallow lookup for */<source_db>/phage.fasta.
+                # Keep sorted order so fallback resolution is deterministic.
                 for candidate in sorted(root.glob(f"*/{source_db}/phage.fasta")):
                     try:
                         relative_parts = candidate.relative_to(root).parts
