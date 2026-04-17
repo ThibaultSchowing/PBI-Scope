@@ -501,7 +501,9 @@ class SequenceRetriever:
             Path.cwd() / "private_data",
         ])
 
-        expected_source = path.parent.parent.name if path.parent.name == "hosts" else None
+        expected_source = None
+        if len(path.parts) >= 3 and path.parent.name == "hosts":
+            expected_source = path.parent.parent.name or None
 
         seen = set()
         for root in candidate_roots:
@@ -529,6 +531,7 @@ class SequenceRetriever:
                     (p for p in root.iterdir() if p.is_dir() and not p.name.startswith(".")),
                     key=lambda p: p.name,
                 ):
+                    # Deterministic ordering keeps resolution stable across runs.
                     candidate = source_dir / "hosts" / path.name
                     if candidate.exists():
                         matches.append(candidate)
@@ -616,6 +619,8 @@ class SequenceRetriever:
             Sequence string, or ``None`` if not found.
         """
         normalized_source_type = _normalize_source_type(source_type)
+        # Mapping membership is treated as authoritative for private routing even if
+        # source_type is missing/mislabelled in upstream metadata.
         is_private = normalized_source_type == "private" or (
             self._private_phage_mapping is not None
             and source_db in self._private_phage_mapping

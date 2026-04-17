@@ -15,7 +15,7 @@ def _write_fasta(path: Path, header: str, sequence: str) -> None:
     Fasta(str(path), rebuild=True)
 
 
-def test_private_host_path_resolution_prefers_expected_source_and_source_type_is_normalized(
+def test_private_sequence_retrieval_consistency(
     tmp_path,
     monkeypatch,
 ):
