@@ -22,7 +22,8 @@ rule merge_phage_fasta:
         expand(
             config["phage_fasta_merged_output"] + "{source}.fasta",
             source=PHAGE_FASTA_SOURCES
-        )
+        ),
+        private_phages=config["private_phage_fasta"]
     output:
         config["all_phages_fasta"]
     log:

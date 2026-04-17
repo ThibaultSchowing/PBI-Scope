@@ -24,12 +24,19 @@ def _create_private_source(
     metadata_rows: list[dict],
     phage_ids: list[str],
     host_ids: list[str],
+    use_host_directory: bool = True,
 ):
     source_dir = root / name
     source_dir.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(metadata_rows).to_csv(source_dir / "metadata.csv", index=False)
     _write_text(source_dir / "phage.fasta", "".join([f">{pid} desc\nATGC\n" for pid in phage_ids]))
-    _write_text(source_dir / "host.fasta", "".join([f">{hid} desc\nATGC\n" for hid in host_ids]))
+    if use_host_directory:
+        hosts_dir = source_dir / "hosts"
+        hosts_dir.mkdir(parents=True, exist_ok=True)
+        for hid in host_ids:
+            _write_text(hosts_dir / f"{hid}.fna", f">{hid} desc\nATGC\n")
+    else:
+        _write_text(source_dir / "host.fasta", "".join([f">{hid} desc\nATGC\n" for hid in host_ids]))
     return source_dir
 
 
@@ -141,8 +148,8 @@ def test_validate_private_source_id_mismatch(tmp_path):
     assert any("Host_ID not found" in e for e in result.errors)
 
 
-def test_validate_private_source_missing_host_fasta_is_invalid(tmp_path):
-    """host.fasta is mandatory for private sources."""
+def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
+    """Private sources must provide host.fasta or hosts/<Host_ID>.fna files."""
     source = tmp_path / "Project_B"
     source.mkdir()
     pd.DataFrame(
@@ -157,12 +164,11 @@ def test_validate_private_source_missing_host_fasta_is_invalid(tmp_path):
         ]
     ).to_csv(source / "metadata.csv", index=False)
     _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
-    # Intentionally no host.fasta
+    # Intentionally no host.fasta and no hosts/ directory
 
     result = validate_private_source(source)
     assert not result.is_valid
-    assert any("Missing required files" in e for e in result.errors)
-    assert any("host.fasta" in e for e in result.errors)
+    assert any("Missing required host sequences" in e for e in result.errors)
 
 
 def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
@@ -181,6 +187,7 @@ def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
         ],
         phage_ids=["P1"],
         host_ids=["H_WRONG"],  # host.fasta has wrong ID
+        use_host_directory=False,
     )
     result = validate_private_source(source)
     assert not result.is_valid
