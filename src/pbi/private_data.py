@@ -19,6 +19,8 @@ MANDATORY_COLUMNS = ["Phage_ID", "Host_ID", "Host_name", "Source_DB", "interacti
 # Values are normalized to lowercase before validation.
 ALLOWED_INTERACTIONS = {"temperate", "virulent"}
 MAX_ERROR_EXAMPLES = 20
+# Extension precedence for per-host files. When multiple files exist for the
+# same Host_ID, the first extension in this tuple wins.
 HOST_FASTA_EXTENSIONS = (".fna", ".fasta", ".fa")
 
 logger = logging.getLogger(__name__)
@@ -82,7 +84,7 @@ def _required_files(source_dir: Path) -> Dict[str, Path]:
 
 
 def _host_candidates(host_dir: Path, host_id: str) -> List[Path]:
-    """Return candidate per-host FASTA file paths for supported extensions."""
+    """Return all candidate per-host FASTA paths for supported extensions."""
     return [host_dir / f"{host_id}{ext}" for ext in HOST_FASTA_EXTENSIONS]
 
 
@@ -732,7 +734,7 @@ def prepare_private_sequence_artifacts(
                             stats["host_duplicates_conflicting"] += 1
                         continue
 
-                    shutil.copyfile(source_host_file, host_file)
+                    shutil.copy2(source_host_file, host_file)
                     host_mapping[host_id] = str(host_file)
                     host_hashes[host_id] = seq_hash
                     stats["hosts_written"] += 1
