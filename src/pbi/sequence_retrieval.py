@@ -434,7 +434,6 @@ class SequenceRetriever:
             raise KeyError(f"Host ID '{host_id}' not found in mapping")
         
         fasta_path = self._host_mapping[host_id]
-        fasta_path = self._resolve_host_fasta_path(host_id, fasta_path)
         
         # Load the fasta file with LRU cache management
         with self._host_lock:
@@ -442,6 +441,8 @@ class SequenceRetriever:
                 # Move to end (most recently used)
                 self._host_fasta_cache.move_to_end(host_id)
                 return self._host_fasta_cache[host_id]
+
+            fasta_path = self._resolve_host_fasta_path(host_id, fasta_path)
             
             # Evict oldest entry if cache is full
             if len(self._host_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
