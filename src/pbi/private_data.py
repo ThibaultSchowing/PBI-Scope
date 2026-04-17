@@ -82,10 +82,12 @@ def _required_files(source_dir: Path) -> Dict[str, Path]:
 
 
 def _host_candidates(host_dir: Path, host_id: str) -> List[Path]:
+    """Return candidate per-host FASTA file paths for supported extensions."""
     return [host_dir / f"{host_id}{ext}" for ext in HOST_FASTA_EXTENSIONS]
 
 
 def _resolve_host_file(host_dir: Path, host_id: str) -> Optional[Path]:
+    """Return the first existing per-host FASTA path, or None when absent."""
     for candidate in _host_candidates(host_dir, host_id):
         if candidate.exists():
             return candidate
@@ -588,6 +590,7 @@ def _write_fasta_record(handle, header: str, sequence: str, line_width: int = 80
 
 
 def _hash_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    """Compute a SHA-256 digest for a file using chunked reads."""
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(chunk_size), b""):
