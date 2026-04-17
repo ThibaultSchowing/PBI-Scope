@@ -1601,8 +1601,8 @@ directory at the repository root.</p>
 </code></pre></div>
 <p>Private sequence retrieval is prepared automatically during the workflow:</p>
 <ul>
-<li>Each private source's <code>phage.fasta</code> is <strong>copied</strong> to a writable per-source directory
-  (<code>/data/intermediate/fasta/private/phages/&lt;source_db&gt;/phage.fasta</code>) and indexed with
+<li>Each private source's <code>phage.fasta</code> is <strong>copied</strong> to a writable private directory
+  (<code>/private-data/.pbi/phages/&lt;source_db&gt;/phage.fasta</code>) and indexed with
   pyfaidx (<code>.fai</code>).  A JSON mapping (<code>private_phage_mapping.json</code>) records
   <code>source_db → phage.fasta path</code>.  <code>SequenceRetriever</code> uses this mapping to route
   private-phage lookups at retrieval time — private phages are <strong>never merged</strong> into
@@ -1700,8 +1700,8 @@ deduplicated at ingestion (first occurrence kept).</p>
 </code></pre></div>
 <p>No Docker required; no pipeline run triggered.</p>
 <h2 id="container-integration-automatic">Container integration (automatic)<a class="headerlink" href="#container-integration-automatic" title="Permanent link">&para;</a></h2>
-<p><code>docker-compose.yml</code> always mounts <code>./private_data</code> at <code>/private-data</code> inside the
-container (read-only). The pipeline configuration uses:</p>
+<p><code>docker-compose.yml</code> mounts <code>./private_data</code> at <code>/private-data</code> inside the
+container (writable). The pipeline configuration uses:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">private_data_root</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/private-data&quot;</span>
 </code></pre></div>
 <p>No additional environment variables or config changes are needed.</p>
