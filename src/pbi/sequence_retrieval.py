@@ -553,6 +553,89 @@ class SequenceRetriever:
 
         return mapped_path
 
+    def _resolve_private_phage_fasta_path(self, source_db: str, mapped_path: str) -> str:
+        """
+        Resolve private phage FASTA path from mapping, with fallback for stale mounts.
+
+        If the mapped path no longer exists (e.g. ``/private-data`` moved to another
+        mount path), this searches common private-data roots for a matching
+        ``<source_db>/phage.fasta`` and updates the in-memory mapping.
+        """
+        path = Path(mapped_path)
+        if path.exists():
+            return str(path)
+
+        # Handle relative mapping entries against CWD.
+        if not path.is_absolute():
+            cwd_candidate = Path.cwd() / path
+            if cwd_candidate.exists():
+                return str(cwd_candidate)
+
+        candidate_roots = []
+        env_private_root = os.getenv("PBI_PRIVATE_DATA_DIR")
+        if env_private_root:
+            candidate_roots.append(Path(env_private_root))
+        candidate_roots.extend(
+            [
+                Path("/private-data"),
+                Path(__file__).resolve().parents[2] / "private_data",
+                Path.cwd() / "private_data",
+            ]
+        )
+
+        seen = set()
+        for root in candidate_roots:
+            root_str = str(root.expanduser().resolve(strict=False))
+            if root_str in seen:
+                continue
+            seen.add(root_str)
+            if not root.exists() or root.is_file():
+                continue
+
+            matches = []
+
+            # Preserve path suffix when remapping a stale /private-data mount.
+            if path.is_absolute() and len(path.parts) > 2 and path.parts[1] == "private-data":
+                remapped = root / Path(*path.parts[2:])
+                if remapped.exists():
+                    matches.append(remapped)
+
+            # Common layout for source-mounted private datasets.
+            preferred = root / source_db / "phage.fasta"
+            if preferred.exists():
+                matches.append(preferred)
+
+            # Common layout for copied/indexed per-source private phage FASTAs.
+            intermediate = root / "private_phage_genomes_intermediate" / source_db / "phage.fasta"
+            if intermediate.exists():
+                matches.append(intermediate)
+
+            if not matches:
+                # Last resort: recursive lookup for <source_db>/phage.fasta.
+                # Exclude hidden directories (e.g. .pbi) to avoid stale cache picks.
+                for candidate in sorted(root.glob(f"**/{source_db}/phage.fasta")):
+                    try:
+                        relative_parts = candidate.relative_to(root).parts
+                    except ValueError:
+                        continue
+                    if any(part.startswith(".") for part in relative_parts):
+                        continue
+                    matches.append(candidate)
+                    break
+
+            if matches:
+                resolved = matches[0]
+                logging.warning(
+                    "⚠️ Resolved missing private phage mapping path for source %s: %s -> %s",
+                    source_db,
+                    mapped_path,
+                    resolved,
+                )
+                self._private_phage_mapping[source_db] = str(resolved)
+                return str(resolved)
+
+        return mapped_path
+
     def _get_private_phage_fasta(self, source_db: str) -> "Fasta":
         """
         Load (and LRU-cache) the phage FASTA for a private source.
@@ -591,6 +674,7 @@ class SequenceRetriever:
                         pass
 
             fasta_path = self._private_phage_mapping[source_db]
+            fasta_path = self._resolve_private_phage_fasta_path(source_db, fasta_path)
             rebuild = _should_rebuild_fai(fasta_path)
             if rebuild:
                 logging.info("Creating index for private phage FASTA: %s", fasta_path)
