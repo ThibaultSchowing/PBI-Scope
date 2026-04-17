@@ -35,7 +35,7 @@ docker compose run --rm pipeline
 Private sequence retrieval is prepared automatically during the workflow:
 
 - Each private source's `phage.fasta` is **copied** to a writable private directory
-  (`/private-data/.pbi/phages/<source_db>/phage.fasta`) and indexed with
+  (`/private-data/phages/<source_db>/phage.fasta`) and indexed with
   pyfaidx (`.fai`).  A JSON mapping (`private_phage_mapping.json`) records
   `source_db → phage.fasta path`.  `SequenceRetriever` uses this mapping to route
   private-phage lookups at retrieval time — private phages are **never merged** into

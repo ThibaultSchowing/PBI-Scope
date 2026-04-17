@@ -776,7 +776,7 @@ def prepare_private_sequence_artifacts(
 
                 # Host files are provided by private sources in hosts/<Host_ID>.fna.
                 # Keep that location as the canonical mapping target to avoid
-                # unnecessary duplication under private_data/.pbi/hosts.
+                # unnecessary duplication under private_data/private_hosts.
                 host_mapping[host_id] = str(source_host_file)
                 host_hashes[host_id] = seq_hash
                 stats["hosts_written"] += 1

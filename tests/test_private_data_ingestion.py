@@ -364,7 +364,7 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
     assert "H1" in hmapping
     mapped_path = Path(hmapping["H1"])
     # When private source provides hosts/<Host_ID>.fna, mapping should point to
-    # that file directly instead of a duplicate copy under private/.pbi/hosts.
+    # that file directly instead of a duplicate copy under private/private_hosts.
     assert mapped_path == source / "hosts" / "H1.fna"
     assert mapped_path.exists()
     assert ">H1 desc" in mapped_path.read_text(encoding="utf-8")

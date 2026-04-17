@@ -11,7 +11,7 @@ echo "📁 Creating data directories..."
 mkdir -p data/raw/{phage_fasta_compressed,phage_fasta_extracted,protein_fasta_compressed,protein_fasta_extracted}
 mkdir -p data/intermediate/{csv/merged,fasta/phages,fasta/proteins}
 mkdir -p data/processed/{databases,sequences,reports}
-mkdir -p private_data/.pbi/{hosts,phages}
+mkdir -p private_data/{private_hosts,phages}
 
 # Set environment to use local relative paths
 export PBI_DATA_DIR="data"

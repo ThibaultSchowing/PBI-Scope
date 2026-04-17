@@ -59,7 +59,7 @@ def test_snakemake_path_configuration():
     assert config['reports_output'] == '/pipeline-logs/reports/', f"Expected '/pipeline-logs/reports/', got {config['reports_output']}"
     assert config['all_phages_fasta'] == 'data/processed/sequences/all_phages.fasta', f"Expected 'data/processed/sequences/all_phages.fasta', got {config['all_phages_fasta']}"
     assert config['duckdb_output'] == 'data/processed/databases/phage_database.duckdb', f"Expected 'data/processed/databases/phage_database.duckdb', got {config['duckdb_output']}"
-    assert config['private_manifest_output'] == 'private_data/.pbi/private_manifest.json', f"Expected 'private_data/.pbi/private_manifest.json', got {config['private_manifest_output']}"
+    assert config['private_manifest_output'] == 'private_data/private_manifest.json', f"Expected 'private_data/private_manifest.json', got {config['private_manifest_output']}"
     
     print(f"   reports_output: {config['reports_output']}")
     print(f"   all_phages_fasta: {config['all_phages_fasta']}")
@@ -89,7 +89,7 @@ def test_snakemake_path_configuration():
     assert config['reports_output'] == '/pipeline-logs/reports/', f"Expected '/pipeline-logs/reports/', got {config['reports_output']}"
     assert config['all_phages_fasta'] == '/data/processed/sequences/all_phages.fasta', f"Expected '/data/processed/sequences/all_phages.fasta', got {config['all_phages_fasta']}"
     assert config['duckdb_output'] == '/data/processed/databases/phage_database.duckdb', f"Expected '/data/processed/databases/phage_database.duckdb', got {config['duckdb_output']}"
-    assert config['private_manifest_output'] == '/private-data/.pbi/private_manifest.json', f"Expected '/private-data/.pbi/private_manifest.json', got {config['private_manifest_output']}"
+    assert config['private_manifest_output'] == '/private-data/private_manifest.json', f"Expected '/private-data/private_manifest.json', got {config['private_manifest_output']}"
     
     print(f"   reports_output: {config['reports_output']}")
     print(f"   all_phages_fasta: {config['all_phages_fasta']}")
@@ -119,7 +119,7 @@ def test_snakemake_path_configuration():
     assert config['reports_output'] == '/pipeline-logs/reports/', f"Expected '/pipeline-logs/reports/', got {config['reports_output']}"
     assert config['all_phages_fasta'] == '/custom/path/processed/sequences/all_phages.fasta', f"Expected '/custom/path/processed/sequences/all_phages.fasta', got {config['all_phages_fasta']}"
     assert config['duckdb_output'] == '/custom/path/processed/databases/phage_database.duckdb', f"Expected '/custom/path/processed/databases/phage_database.duckdb', got {config['duckdb_output']}"
-    assert config['private_manifest_output'] == '/custom/private/.pbi/private_manifest.json', f"Expected '/custom/private/.pbi/private_manifest.json', got {config['private_manifest_output']}"
+    assert config['private_manifest_output'] == '/custom/private/private_manifest.json', f"Expected '/custom/private/private_manifest.json', got {config['private_manifest_output']}"
     
     print(f"   reports_output: {config['reports_output']}")
     print(f"   all_phages_fasta: {config['all_phages_fasta']}")
