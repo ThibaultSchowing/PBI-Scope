@@ -1582,11 +1582,14 @@ directory at the repository root.</p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  Project_A/
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    metadata.csv
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    phage.fasta
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    host.fasta
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  Experiment_1/
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    metadata.csv
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    phage.fasta
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    host.fasta
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    hosts/
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      HOST_ID_1.fna
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>      HOST_ID_2.fna
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  Experiment_1/
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    metadata.csv
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    phage.fasta
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    hosts/
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>      HOST_ID_A.fna
 </code></pre></div>
 <ol>
 <li>Validate before running the pipeline:</li>
@@ -1602,13 +1605,14 @@ directory at the repository root.</p>
 <p>Private sequence retrieval is prepared automatically during the workflow:</p>
 <ul>
 <li>Each private source's <code>phage.fasta</code> is <strong>copied</strong> to a writable private directory
-  (<code>/private-data/.pbi/phages/&lt;source_db&gt;/phage.fasta</code>) and indexed with
+  (<code>/private-data/phages/&lt;source_db&gt;/phage.fasta</code>) and indexed with
   pyfaidx (<code>.fai</code>).  A JSON mapping (<code>private_phage_mapping.json</code>) records
   <code>source_db → phage.fasta path</code>.  <code>SequenceRetriever</code> uses this mapping to route
   private-phage lookups at retrieval time — private phages are <strong>never merged</strong> into
   <code>all_phages.fasta</code>, so removing a private source has no impact on public data.</li>
-<li>Private host FASTA records are normalized to one FASTA per <code>Host_ID</code>, added to
-  <code>host_fasta_mapping.json</code>, and indexed with the same host indexing workflow.</li>
+<li>Private host FASTA files live in each source's <code>hosts/</code> directory (one <code>.fna</code> file
+  per <code>Host_ID</code>).  They are mapped in-place — no copying is performed.  The per-host
+  paths are merged into <code>host_fasta_mapping.json</code> and indexed by the host indexing workflow.</li>
 </ul>
 <p>When private source directories are removed from <code>private_data/</code>, rerunning the pipeline
 re-synchronizes the manifest and removes stale private records from the database.</p>
@@ -1630,12 +1634,8 @@ re-synchronizes the manifest and removes stale private records from the database
 <td>✅</td>
 </tr>
 <tr>
-<td><code>host.fasta</code></td>
-<td>✅ (legacy)</td>
-</tr>
-<tr>
 <td><code>hosts/&lt;Host_ID&gt;.fna</code></td>
-<td>✅ (recommended; one file per host)</td>
+<td>✅ (one file per host)</td>
 </tr>
 </tbody>
 </table>
@@ -1655,7 +1655,7 @@ re-synchronizes the manifest and removes stale private records from the database
 </tr>
 <tr>
 <td><code>Host_ID</code></td>
-<td>Unique host identifier matching <code>host.fasta</code></td>
+<td>Unique host identifier matching the filename in <code>hosts/</code></td>
 </tr>
 <tr>
 <td><code>Host_name</code></td>
@@ -1676,7 +1676,7 @@ re-synchronizes the manifest and removes stale private records from the database
 <ul>
 <li>The sequence identifier is the <strong>first whitespace-delimited token</strong> of each <code>&gt;</code> header line.</li>
 <li><code>Phage_ID</code> values must each appear as an identifier in <code>phage.fasta</code>.</li>
-<li><code>Host_ID</code> values must each appear as an identifier in <code>host.fasta</code>, or have a matching file in <code>hosts/</code> (for example <code>hosts/GCF_000005845.2.fna</code>).</li>
+<li><code>Host_ID</code> values must each have a matching file in <code>hosts/</code> (for example <code>hosts/HOST_ID_1.fna</code>).</li>
 <li>Duplicate FASTA identifiers in the same file are rejected.</li>
 </ul>
 <h2 id="duplicate-row-policy">Duplicate row policy<a class="headerlink" href="#duplicate-row-policy" title="Permanent link">&para;</a></h2>
