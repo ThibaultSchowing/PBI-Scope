@@ -34,6 +34,7 @@ def test_pbi_package_path_configuration():
     print(f"   database: {paths['database']}")
     print(f"   phage_fasta: {paths['phage_fasta']}")
     print(f"   protein_fasta: {paths['protein_fasta']}")
+    print(f"   private_phage_mapping: {paths['private_phage_mapping']}")
     
     # In local mode, paths should be relative to project root
     assert 'data/processed' in str(paths['database']), \
@@ -55,6 +56,7 @@ def test_pbi_package_path_configuration():
     print(f"   database: {paths['database']}")
     print(f"   phage_fasta: {paths['phage_fasta']}")
     print(f"   protein_fasta: {paths['protein_fasta']}")
+    print(f"   private_phage_mapping: {paths['private_phage_mapping']}")
     
     # In Docker mode, paths should use DATA_PATH
     assert str(paths['database']) == '/data/processed/databases/phage_database_optimized.duckdb', \
@@ -63,6 +65,8 @@ def test_pbi_package_path_configuration():
         f"Expected '/data/processed/sequences/all_phages.fasta', got {paths['phage_fasta']}"
     assert str(paths['protein_fasta']) == '/data/processed/sequences/all_proteins.fasta', \
         f"Expected '/data/processed/sequences/all_proteins.fasta', got {paths['protein_fasta']}"
+    assert str(paths['private_phage_mapping']) == '/private-data/.pbi/private_phage_mapping.json', \
+        f"Expected '/private-data/.pbi/private_phage_mapping.json', got {paths['private_phage_mapping']}"
     
     print("   ✓ Docker mode uses DATA_PATH environment variable")
     
@@ -78,6 +82,7 @@ def test_pbi_package_path_configuration():
     print(f"   database: {paths['database']}")
     print(f"   phage_fasta: {paths['phage_fasta']}")
     print(f"   protein_fasta: {paths['protein_fasta']}")
+    print(f"   private_phage_mapping: {paths['private_phage_mapping']}")
     
     # Custom path should be used
     assert str(paths['database']) == '/custom/data/databases/phage_database_optimized.duckdb', \
@@ -89,7 +94,7 @@ def test_pbi_package_path_configuration():
     
     # Test 4: Verify all expected keys are present
     print("\n4. Testing path dictionary structure...")
-    expected_keys = ['database', 'phage_fasta', 'protein_fasta', 'host_mapping', 'host_fasta']
+    expected_keys = ['database', 'phage_fasta', 'protein_fasta', 'host_mapping', 'private_phage_mapping', 'host_fasta']
     
     for key in expected_keys:
         assert key in paths, f"Expected key '{key}' not found in paths dictionary"

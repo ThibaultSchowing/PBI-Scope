@@ -22,14 +22,12 @@ merged_csv_output: "/data/intermediate/csv/merged/"
 duckdb_output: "/data/processed/databases/phage_database.duckdb"
 optimized_duckdb_output: "/data/processed/databases/phage_database_optimized.duckdb"
 
-# TODO create/move the creation of this file in the private data directory (after private_data_root i imagine) 
-# to keep private data completely separate from public data and outputs
-private_manifest_output: "/data/intermediate/private/private_manifest.json" 
+private_manifest_output: "/private-data/.pbi/private_manifest.json"
 
 database_validation_report_output: "/pipeline-logs/reports/database_validation.html"
 
 # Private data ingestion
-# The pipeline container mounts ./private_data (repo root) at /private-data read-only.
+# The pipeline container mounts ./private_data (repo root) at /private-data.
 # Place one subdirectory per private dataset inside private_data/.
 # If the directory is empty the pipeline runs without private data.
 # Set to "" or a non-existent path to fully disable.
@@ -50,15 +48,15 @@ protein_fasta_merged_output: "/data/intermediate/fasta/proteins/" # Used in sequ
 
 # Host genomes
 host_genomes_intermediate: "/data/intermediate/fasta/hosts"
-private_host_genomes_intermediate: "/data/intermediate/fasta/hosts/private" # Todo: disable. Hosts are now mandatory for phage-host linking, so private hosts should be ingested via the main host genome ingestion process and not treated separately.
+private_host_genomes_intermediate: "/private-data/.pbi/hosts"
 host_fasta_mapping: "/data/processed/sequences/host_fasta_mapping.json"
-private_host_mapping: "/data/intermediate/fasta/private/private_host_fasta_mapping.json"
+private_host_mapping: "/private-data/.pbi/private_host_fasta_mapping.json"
 # Per-source private phage FASTA copies live under this directory:
-#   /data/intermediate/fasta/private/phages/<source_db>/phage.fasta  (+ .fai index)
+#   /private-data/.pbi/phages/<source_db>/phage.fasta  (+ .fai index)
 # The mapping JSON (source_db → phage.fasta path) is written at the path below and
 # consumed by SequenceRetriever to route private-phage sequence lookups.
-private_phage_mapping: "/data/intermediate/fasta/private/private_phage_mapping.json"
-private_phage_genomes_intermediate: "/data/intermediate/fasta/private/phages"
+private_phage_mapping: "/private-data/.pbi/private_phage_mapping.json"
+private_phage_genomes_intermediate: "/private-data/.pbi/phages"
 host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
 assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"
