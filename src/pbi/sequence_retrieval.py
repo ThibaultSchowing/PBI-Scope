@@ -585,11 +585,11 @@ class SequenceRetriever:
 
         seen = set()
         for root in candidate_roots:
-            root_str = str(root.expanduser().resolve(strict=False))
+            root_str = str(root.expanduser().absolute())
             if root_str in seen:
                 continue
             seen.add(root_str)
-            if not root.exists() or root.is_file():
+            if not root.exists() or not root.is_dir():
                 continue
 
             matches = []
