@@ -214,10 +214,18 @@ class SequenceRetriever:
                 for _source_key in self._private_phage_mapping.keys():
                     _normalized_source = _normalize_source_db(_source_key)
                     if _normalized_source:
-                        self._private_phage_source_lookup.setdefault(
-                            _normalized_source.lower(),
-                            _source_key,
-                        )
+                        _norm_key = _normalized_source.lower()
+                        _existing = self._private_phage_source_lookup.get(_norm_key)
+                        if _existing is not None and _existing != _source_key:
+                            logging.warning(
+                                "⚠️ Duplicate normalized private source key '%s' for '%s' and '%s'; using '%s'",
+                                _norm_key,
+                                _existing,
+                                _source_key,
+                                _existing,
+                            )
+                        else:
+                            self._private_phage_source_lookup[_norm_key] = _source_key
                 logging.info(
                     f"📂 Loaded private phage mapping for "
                     f"{len(self._private_phage_mapping)} sources: {list(self._private_phage_mapping.keys())}"
