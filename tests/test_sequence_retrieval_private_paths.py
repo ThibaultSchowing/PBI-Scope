@@ -257,3 +257,108 @@ def test_private_phage_mapping_stale_path_resolution(tmp_path, monkeypatch):
     assert row["Phage_ID"] == "PRIV_PHAGE"
     assert row["Phage_Sequence"] == "ATAT"
     assert row["Host_Sequence"] == "AAAA"
+
+
+def test_private_phage_retrieval_tolerates_source_db_whitespace_and_case(tmp_path, monkeypatch):
+    private_root = tmp_path / "private_data"
+    monkeypatch.setenv("PBI_PRIVATE_DATA_DIR", str(private_root))
+
+    public_phage_fasta = tmp_path / "all_phages.fasta"
+    protein_fasta = tmp_path / "all_proteins.fasta"
+    _write_fasta(public_phage_fasta, "PUB_PHAGE", "GGGG")
+    _write_fasta(protein_fasta, "PROT_1", "MKKL")
+
+    private_source_dir = private_root / "test_private"
+    private_phage_fasta = private_source_dir / "phage.fasta"
+    _write_fasta(private_phage_fasta, "PRIV_PHAGE", "ATAT")
+
+    private_phage_mapping = tmp_path / "private_phage_mapping.json"
+    private_phage_mapping.write_text(
+        json.dumps({"test_private": "/private-data/test_private/phage.fasta"}),
+        encoding="utf-8",
+    )
+
+    private_host = private_source_dir / "hosts" / "HOST_PRIVATE.fna"
+    _write_fasta(private_host, "HOST_PRIVATE", "AAAA")
+    host_mapping = tmp_path / "host_fasta_mapping.json"
+    host_mapping.write_text(
+        json.dumps({"HOST_PRIVATE": str(private_host)}),
+        encoding="utf-8",
+    )
+
+    db_path = tmp_path / "test.duckdb"
+    conn = duckdb.connect(str(db_path))
+    conn.execute(
+        """
+        CREATE TABLE fact_phages (
+            Phage_ID VARCHAR,
+            Source_DB VARCHAR,
+            Length INTEGER,
+            GC_content DOUBLE,
+            Taxonomy VARCHAR,
+            Completeness VARCHAR,
+            Host VARCHAR,
+            Lifestyle VARCHAR,
+            Cluster VARCHAR,
+            Subcluster VARCHAR,
+            source_type VARCHAR
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE phage_host_associations (
+            Phage_ID VARCHAR,
+            Host_ID VARCHAR
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE dim_hosts (
+            Host_ID VARCHAR,
+            Species_Name VARCHAR,
+            Assembly_Level VARCHAR,
+            Genome_Length BIGINT,
+            GC_Content DOUBLE,
+            RefSeq_Category VARCHAR
+        )
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO fact_phages VALUES
+            ('PRIV_PHAGE', '  TEST_PRIVATE  ', 1000, 0.5, NULL, NULL, NULL, NULL, NULL, NULL, 'private')
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO phage_host_associations VALUES
+            ('PRIV_PHAGE', 'HOST_PRIVATE')
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO dim_hosts VALUES
+            ('HOST_PRIVATE', 'Private host', NULL, NULL, NULL, NULL)
+        """
+    )
+    conn.close()
+
+    retriever = SequenceRetriever(
+        str(db_path),
+        str(public_phage_fasta),
+        str(protein_fasta),
+        host_mapping_path=str(host_mapping),
+        private_phage_mapping_path=str(private_phage_mapping),
+        preload=False,
+    )
+
+    pairs = retriever.get_phage_host_pairs()
+    retriever.close()
+
+    assert len(pairs) == 1
+    row = pairs.iloc[0]
+    assert row["Phage_ID"] == "PRIV_PHAGE"
+    assert row["Phage_Sequence"] == "ATAT"
+    assert row["Host_Sequence"] == "AAAA"
