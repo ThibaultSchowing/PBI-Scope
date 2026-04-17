@@ -5,13 +5,29 @@ PHAGE_FASTA_SOURCES = list(config["phage_fasta_urls"].keys())
 PROTEIN_FASTA_SOURCES = list(config["protein_fasta_urls"].keys())
 
 rule prepare_private_sequences:
+    """
+    Prepare sequence artifacts for private datasets.
+
+    For each valid private source the rule:
+      1. Copies (and filters) the source phage.fasta to a writable per-source directory
+         so that pyfaidx can create the .fai index file next to it.
+      2. Indexes the copied phage FASTA with pyfaidx.
+      3. Writes a JSON mapping  source_db → phage.fasta path  (private_phage_mapping).
+      4. Normalises private host sequences into per-host .fna files (in private_host_dir)
+         and writes a JSON mapping  Host_ID → host.fna path  (private_host_mapping).
+
+    The private phage FASTA files are intentionally kept separate from all_phages.fasta.
+    SequenceRetriever uses private_phage_mapping to look up sequences for private phages
+    at retrieval time, routing by source_type from the database.
+    """
     input:
         manifest=config["private_manifest_output"]
     output:
-        private_phages=config["private_phage_fasta"],
+        private_phage_mapping=config["private_phage_mapping"],
         private_host_mapping=config["private_host_mapping"]
     params:
-        private_host_dir=config["private_host_genomes_intermediate"]
+        private_host_dir=config["private_host_genomes_intermediate"],
+        private_phage_dir=config["private_phage_genomes_intermediate"]
     conda:
         "../envs/sequences.yaml"
     script:
@@ -109,38 +125,6 @@ rule index_phage_sequences:
     script:
         "../scripts/sequences/index_sequences.py"
 
-rule index_private_phage_sequences:
-    input:
-        config["private_phage_fasta"]
-    output:
-        config["private_phage_fasta"] + ".fai"
-    log:
-        "logs/index_private_phage_sequences.log"
-    conda:
-        "../envs/sequences.yaml"
-    run:
-        from pathlib import Path
-        import pyfaidx
-
-        private_fasta = Path(input[0])
-        output_index = Path(output[0])
-        output_index.parent.mkdir(parents=True, exist_ok=True)
-
-        if private_fasta.exists() and private_fasta.stat().st_size > 0:
-            pyfaidx.Fasta(
-                str(private_fasta),
-                split_char="\x00",
-                rebuild=True,
-                read_long_names=True,
-            )
-            if not output_index.exists():
-                raise FileNotFoundError(f"Expected index not created: {output_index}")
-        else:
-            # Keep DAG outputs stable for private-data-disabled runs.
-            output_index.write_text("", encoding="utf-8")
-            with open(log[0], "a", encoding="utf-8") as handle:
-                handle.write("No private phage sequences detected; wrote empty private index.\n")
-
 rule index_protein_sequences:
     input:
         config["all_proteins_fasta"]
@@ -156,5 +140,4 @@ rule index_protein_sequences:
 rule all_sequences:
     input:
         config["all_phages_fasta"] + ".fai",
-        config["private_phage_fasta"] + ".fai",
         config["all_proteins_fasta"] + ".fai"

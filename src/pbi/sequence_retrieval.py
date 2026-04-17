@@ -129,16 +129,22 @@ class SequenceRetriever:
     
     def __init__(self, db_path: str, phage_fasta_path: str, protein_fasta_path: str, 
                  host_fasta_path: Optional[str] = None, host_mapping_path: Optional[str] = None,
+                 private_phage_mapping_path: Optional[str] = None,
                  preload: bool = True):
         """
         Initialize SequenceRetriever with lazy FASTA loading
         
         Args:
             db_path: Path to DuckDB database
-            phage_fasta_path: Path to indexed phage FASTA file
+            phage_fasta_path: Path to indexed phage FASTA file (public sequences only)
             protein_fasta_path: Path to indexed protein FASTA file
             host_fasta_path: Path to indexed host FASTA file (DEPRECATED - use host_mapping_path)
             host_mapping_path: Path to JSON mapping file for individual host FASTA files
+            private_phage_mapping_path: Path to JSON mapping ``source_db → phage.fasta`` for
+                private datasets.  When provided, SequenceRetriever routes private-phage
+                sequence lookups to the matching per-source FASTA instead of the public
+                ``phage_fasta_path``.  Pass the value of ``config["private_phage_mapping"]``
+                from the Snakemake config.
             preload: If True, load FASTA files in background thread (default: True)
         """
         # Validate paths
@@ -162,6 +168,26 @@ class SequenceRetriever:
         if not protein_index.exists():
             raise FileNotFoundError(f"Protein FASTA index not found: {protein_index}")
         
+        # Initialize private phage mapping (source_db → per-source phage.fasta path).
+        # Private phages are NOT in all_phages.fasta; they live in per-source FASTA
+        # files under /data/intermediate/fasta/private/phages/<source_db>/phage.fasta.
+        import json as _json
+        self._private_phage_mapping: Optional[Dict[str, str]] = None
+        self._private_phage_fasta_cache: OrderedDict = OrderedDict()
+        self._private_phage_lock = threading.Lock()
+
+        if private_phage_mapping_path:
+            _ppm = Path(private_phage_mapping_path)
+            if _ppm.exists():
+                with _ppm.open("r") as _f:
+                    self._private_phage_mapping = _json.load(_f)
+                logging.info(
+                    f"📂 Loaded private phage mapping for "
+                    f"{len(self._private_phage_mapping)} sources: {list(self._private_phage_mapping.keys())}"
+                )
+            else:
+                logging.debug(f"Private phage mapping not found: {private_phage_mapping_path}")
+
         # Initialize host data handling
         self._host_fasta_path = host_fasta_path  # Legacy single-file mode
         self._host_mapping_path = host_mapping_path  # New mapping mode
@@ -427,7 +453,107 @@ class SequenceRetriever:
             self._host_fasta_cache[host_id] = fasta_obj
         
         return self._host_fasta_cache[host_id]
-    
+
+    def _get_private_phage_fasta(self, source_db: str) -> "Fasta":
+        """
+        Load (and LRU-cache) the phage FASTA for a private source.
+
+        Private phage FASTAs live in per-source directories under
+        ``private_phage_genomes_intermediate/<source_db>/phage.fasta``.
+        The mapping from ``source_db`` to the concrete FASTA path was built by
+        ``prepare_private_sequence_artifacts`` and is loaded at construction time.
+
+        Args:
+            source_db: Source database identifier (e.g. ``"test_private"``).
+
+        Returns:
+            ``pyfaidx.Fasta`` object keyed by first-token of the FASTA header
+            (same convention as the public phage FASTA).
+
+        Raises:
+            KeyError: If *source_db* is not in the private phage mapping.
+            FileNotFoundError: If the FASTA file no longer exists on disk.
+        """
+        if self._private_phage_mapping is None or source_db not in self._private_phage_mapping:
+            raise KeyError(f"Private phage source '{source_db}' not found in private_phage_mapping")
+
+        with self._private_phage_lock:
+            if source_db in self._private_phage_fasta_cache:
+                self._private_phage_fasta_cache.move_to_end(source_db)
+                return self._private_phage_fasta_cache[source_db]
+
+            # Evict oldest entry when the cache is full (same limit as host cache)
+            if len(self._private_phage_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
+                oldest_id, oldest_fasta = self._private_phage_fasta_cache.popitem(last=False)
+                if hasattr(oldest_fasta, "close"):
+                    try:
+                        oldest_fasta.close()
+                    except Exception:
+                        pass
+
+            fasta_path = self._private_phage_mapping[source_db]
+            index_path = Path(str(fasta_path) + ".fai")
+            rebuild = not index_path.exists()
+            if rebuild:
+                logging.info("Creating index for private phage FASTA: %s", fasta_path)
+
+            fasta_obj = Fasta(fasta_path, rebuild=rebuild, key_function=_fasta_key_function)
+            self._private_phage_fasta_cache[source_db] = fasta_obj
+
+        return self._private_phage_fasta_cache[source_db]
+
+    def _get_phage_sequence(
+        self, phage_id: str, source_db: Optional[str] = None, source_type: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        Retrieve a single phage sequence, routing private phages to their source FASTA.
+
+        If *source_type* is ``"private"`` and a private phage mapping is configured,
+        the sequence is fetched from the per-source ``phage.fasta``.  Otherwise the
+        public ``all_phages.fasta`` is used.
+
+        Args:
+            phage_id: Phage identifier (first token of the FASTA header).
+            source_db: Source database name.  Required when routing private phages.
+            source_type: ``"private"`` or ``"public"`` (or ``None`` for unknown).
+
+        Returns:
+            Sequence string, or ``None`` if not found.
+        """
+        is_private = (
+            source_type == "private"
+            or (
+                self._private_phage_mapping is not None
+                and source_db in self._private_phage_mapping
+            )
+        )
+
+        if is_private and self._private_phage_mapping and source_db:
+            try:
+                fasta_obj = self._get_private_phage_fasta(source_db)
+                return str(fasta_obj[phage_id][:].seq)
+            except (KeyError, Exception) as exc:
+                logging.debug("Private phage %s not found in source %s: %s", phage_id, source_db, exc)
+                return None
+        else:
+            try:
+                return str(self.phage_fasta[phage_id][:].seq)
+            except KeyError:
+                # If private mapping is present but source_db was not provided, scan all
+                # private sources as a last-resort fallback.
+                if self._private_phage_mapping:
+                    for sdb in self._private_phage_mapping:
+                        try:
+                            fasta_obj = self._get_private_phage_fasta(sdb)
+                            if phage_id in fasta_obj:
+                                logging.debug(
+                                    "Found private phage %s in fallback source %s", phage_id, sdb
+                                )
+                                return str(fasta_obj[phage_id][:].seq)
+                        except Exception:
+                            pass
+                return None
+
     def get_host_sequence(self, host_id: str, contig_mode: str = "first") -> str:
         """
         Get sequence for a specific host ID.
@@ -633,9 +759,22 @@ class SequenceRetriever:
             >>> # For a typical single-contig phage this is the same as:
             >>> seq = str(retriever.phage_fasta["NC_000866"][:].seq)
         """
-        try:
-            seq = str(self.phage_fasta[phage_id][:].seq)
-        except KeyError:
+        # Query the DB for source info so private phages are routed to their FASTA.
+        source_db: Optional[str] = None
+        source_type_val: Optional[str] = None
+        if self._private_phage_mapping:
+            try:
+                row = self.conn.execute(
+                    "SELECT Source_DB, source_type FROM fact_phages WHERE Phage_ID = ? LIMIT 1",
+                    [phage_id],
+                ).fetchone()
+                if row:
+                    source_db, source_type_val = row
+            except Exception:
+                pass
+
+        seq = self._get_phage_sequence(phage_id, source_db=source_db, source_type=source_type_val)
+        if seq is None:
             raise KeyError(f"Phage ID '{phage_id}' not found in phage FASTA.")
 
         # Phage FASTA is keyed by accession – one key → one record.
@@ -986,9 +1125,10 @@ class SequenceRetriever:
                     f"{mode_name} must be 'first' or 'concat', got '{mode_val}'."
                 )
 
-        # Ensure FASTA files are loaded (phage always needs to be loaded)
+        # Ensure public phage FASTA is loaded (only strictly needed for public phages,
+        # but we load it eagerly since most datasets have at least some public phages).
         _ = self.phage_fasta
-        # For legacy mode, ensure host FASTA is loaded
+        # For legacy host mode, ensure host FASTA is loaded
         if not self._use_host_mapping:
             _ = self.host_fasta
 
@@ -1045,13 +1185,19 @@ class SequenceRetriever:
         phage_seqs = {}
         host_seqs = {}
 
-        # Fetch phage sequences
+        # Build per-phage source lookup so private phages are routed to their
+        # per-source FASTA rather than all_phages.fasta.
+        phage_source_db = dict(zip(result['Phage_ID'], result['Phage_Source']))
+        phage_source_type = dict(zip(result['Phage_ID'], result['Phage_Source_Type']))
+
+        # Fetch phage sequences (routes public → all_phages.fasta, private → per-source FASTA)
         for phage_id in phage_ids:
-            try:
-                seq = self.phage_fasta[phage_id][:].seq
-                phage_seqs[phage_id] = str(seq)
-            except KeyError:
-                phage_seqs[phage_id] = None
+            seq = self._get_phage_sequence(
+                phage_id,
+                source_db=phage_source_db.get(phage_id),
+                source_type=phage_source_type.get(phage_id),
+            )
+            phage_seqs[phage_id] = seq
 
         # Fetch host sequences (unique only)
         for host_id in set(host_ids):
@@ -1672,6 +1818,10 @@ class SequenceRetriever:
     def _fetch_phage_sequences(self, phage_ids: list) -> pd.DataFrame:
         """
         Fetch phage sequences for given Phage IDs.
+
+        When a private phage mapping is configured, the source database and
+        source type are looked up from the DB so that private phages are routed
+        to their per-source FASTA rather than all_phages.fasta.
         
         Args:
             phage_ids: List of Phage IDs to retrieve sequences for
@@ -1685,19 +1835,35 @@ class SequenceRetriever:
         
         logging.info(f"🔍 Fetching sequences for {len(phage_ids):,} phages")
         
-        # Read sequences from the FASTA index
+        # Resolve per-phage source information for routing private vs. public lookups.
+        phage_source_db: Dict[str, str] = {}
+        phage_source_type: Dict[str, str] = {}
+        if self._private_phage_mapping and phage_ids:
+            try:
+                placeholders = ", ".join(["?" for _ in phage_ids])
+                source_df = self.conn.execute(
+                    f"SELECT Phage_ID, Source_DB, source_type FROM fact_phages "
+                    f"WHERE Phage_ID IN ({placeholders})",
+                    phage_ids,
+                ).fetchdf()
+                phage_source_db = dict(zip(source_df["Phage_ID"], source_df["Source_DB"]))
+                phage_source_type = dict(zip(source_df["Phage_ID"], source_df["source_type"]))
+            except Exception as exc:
+                logging.debug("Could not query phage source info: %s", exc)
+
+        # Read sequences, routing private phages to their per-source FASTA.
         sequences = []
         missing_ids = []
         
         for phage_id in phage_ids:
-            try:
-                # Fetch sequence from indexed FASTA
-                seq = self.phage_fasta[phage_id][:].seq
-                sequences.append({
-                    'Phage_ID': phage_id,
-                    'Sequence': str(seq)
-                })
-            except KeyError:
+            seq = self._get_phage_sequence(
+                phage_id,
+                source_db=phage_source_db.get(phage_id),
+                source_type=phage_source_type.get(phage_id),
+            )
+            if seq is not None:
+                sequences.append({'Phage_ID': phage_id, 'Sequence': seq})
+            else:
                 missing_ids.append(phage_id)
                 logging.warning(f"⚠️  Phage ID '{phage_id}' not found in FASTA")
         

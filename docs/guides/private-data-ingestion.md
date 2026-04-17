@@ -34,8 +34,14 @@ docker compose run --rm pipeline
 
 Private sequence retrieval is prepared automatically during the workflow:
 
-- Private phage FASTA records are kept in a dedicated private FASTA and indexed separately from the public PhageScope FASTA.
-- Private host FASTA records are split to per-`Host_ID` files, added to `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
+- Each private source's `phage.fasta` is **copied** to a writable per-source directory
+  (`/data/intermediate/fasta/private/phages/<source_db>/phage.fasta`) and indexed with
+  pyfaidx (`.fai`).  A JSON mapping (`private_phage_mapping.json`) records
+  `source_db → phage.fasta path`.  `SequenceRetriever` uses this mapping to route
+  private-phage lookups at retrieval time — private phages are **never merged** into
+  `all_phages.fasta`, so removing a private source has no impact on public data.
+- Private host FASTA records are normalized to one FASTA per `Host_ID`, added to
+  `host_fasta_mapping.json`, and indexed with the same host indexing workflow.
 
 When private source directories are removed from `private_data/`, rerunning the pipeline
 re-synchronizes the manifest and removes stale private records from the database.
@@ -46,7 +52,8 @@ re-synchronizes the manifest and removes stale private records from the database
 |------|----------|
 | `metadata.csv` | ✅ |
 | `phage.fasta` | ✅ |
-| `host.fasta` | ✅ |
+| `host.fasta` | ✅ (legacy) |
+| `hosts/<Host_ID>.fna` | ✅ (recommended; one file per host) |
 
 ## `metadata.csv` columns
 
@@ -66,7 +73,7 @@ Optional columns: any extra columns are preserved in `private_entity_attributes`
 
 - The sequence identifier is the **first whitespace-delimited token** of each `>` header line.
 - `Phage_ID` values must each appear as an identifier in `phage.fasta`.
-- `Host_ID` values must each appear as an identifier in `host.fasta`.
+- `Host_ID` values must each appear as an identifier in `host.fasta`, or have a matching file in `hosts/` (for example `hosts/GCF_000005845.2.fna`).
 - Duplicate FASTA identifiers in the same file are rejected.
 
 ## Duplicate row policy
@@ -140,7 +147,8 @@ Use this template inside each private source directory:
 ## Files
 - metadata.csv    — phage-host interaction table
 - phage.fasta     — phage sequences (FASTA)
-- host.fasta      — host sequences (FASTA)
+- hosts/          — recommended per-host FASTA files (`<Host_ID>.fna`)
+- host.fasta      — optional legacy single host FASTA
 
 ## metadata.csv column notes
 - Source_DB must equal "<Source_DB>" (directory name)

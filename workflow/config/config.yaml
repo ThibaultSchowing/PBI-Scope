@@ -52,8 +52,13 @@ protein_fasta_merged_output: "/data/intermediate/fasta/proteins/" # Used in sequ
 host_genomes_intermediate: "/data/intermediate/fasta/hosts"
 private_host_genomes_intermediate: "/data/intermediate/fasta/hosts/private" # Todo: disable. Hosts are now mandatory for phage-host linking, so private hosts should be ingested via the main host genome ingestion process and not treated separately.
 host_fasta_mapping: "/data/processed/sequences/host_fasta_mapping.json"
-private_host_mapping: "/data/intermediate/fasta/private/private_host_fasta_mapping.json" # Todo: disable or move file to private data directory. Hosts are now mandatory for phage-host linking, so private hosts should be ingested via the main host genome ingestion process and not treated separately.
-private_phage_fasta: "/data/intermediate/fasta/private/private_phages.fasta" # Todo: clarify. What is this supposed to be ? Private data can have many phages. 
+private_host_mapping: "/data/intermediate/fasta/private/private_host_fasta_mapping.json"
+# Per-source private phage FASTA copies live under this directory:
+#   /data/intermediate/fasta/private/phages/<source_db>/phage.fasta  (+ .fai index)
+# The mapping JSON (source_db → phage.fasta path) is written at the path below and
+# consumed by SequenceRetriever to route private-phage sequence lookups.
+private_phage_mapping: "/data/intermediate/fasta/private/private_phage_mapping.json"
+private_phage_genomes_intermediate: "/data/intermediate/fasta/private/phages"
 host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
 assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"

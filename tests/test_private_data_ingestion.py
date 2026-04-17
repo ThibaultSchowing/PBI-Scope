@@ -24,12 +24,19 @@ def _create_private_source(
     metadata_rows: list[dict],
     phage_ids: list[str],
     host_ids: list[str],
+    use_host_directory: bool = False,
 ):
     source_dir = root / name
     source_dir.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(metadata_rows).to_csv(source_dir / "metadata.csv", index=False)
     _write_text(source_dir / "phage.fasta", "".join([f">{pid} desc\nATGC\n" for pid in phage_ids]))
-    _write_text(source_dir / "host.fasta", "".join([f">{hid} desc\nATGC\n" for hid in host_ids]))
+    if use_host_directory:
+        hosts_dir = source_dir / "hosts"
+        hosts_dir.mkdir(parents=True, exist_ok=True)
+        for hid in host_ids:
+            _write_text(hosts_dir / f"{hid}.fna", f">{hid} desc\nATGC\n")
+    else:
+        _write_text(source_dir / "host.fasta", "".join([f">{hid} desc\nATGC\n" for hid in host_ids]))
     return source_dir
 
 
@@ -69,6 +76,7 @@ def test_validate_private_source_success(tmp_path):
         ],
         ["P1"],
         ["H1"],
+        use_host_directory=True,
     )
     result = validate_private_source(source)
     assert result.is_valid
@@ -134,15 +142,39 @@ def test_validate_private_source_id_mismatch(tmp_path):
         ],
         ["P2"],
         ["H2"],
+        use_host_directory=False,
     )
     result = validate_private_source(source)
     assert not result.is_valid
     assert any("Phage_ID not found" in e for e in result.errors)
-    assert any("Host_ID not found" in e for e in result.errors)
+    assert any("Host_ID not found in host.fasta" in e for e in result.errors)
 
 
-def test_validate_private_source_missing_host_fasta_is_invalid(tmp_path):
-    """host.fasta is mandatory for private sources."""
+def test_validate_private_source_id_mismatch_hosts_directory_layout(tmp_path):
+    source = _create_private_source(
+        tmp_path,
+        "Project_A",
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "H1",
+                "Host_name": "Host One",
+                "Source_DB": "Project_A",
+                "interaction": "virulent",
+            }
+        ],
+        ["P2"],
+        ["H2"],
+        use_host_directory=True,
+    )
+    result = validate_private_source(source)
+    assert not result.is_valid
+    assert any("Phage_ID not found" in e for e in result.errors)
+    assert any("Host_ID missing corresponding FASTA file in hosts/" in e for e in result.errors)
+
+
+def test_validate_private_source_missing_host_sequences_is_invalid(tmp_path):
+    """Private sources must provide host.fasta or hosts/<Host_ID>.fna files."""
     source = tmp_path / "Project_B"
     source.mkdir()
     pd.DataFrame(
@@ -157,12 +189,11 @@ def test_validate_private_source_missing_host_fasta_is_invalid(tmp_path):
         ]
     ).to_csv(source / "metadata.csv", index=False)
     _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
-    # Intentionally no host.fasta
+    # Intentionally no host.fasta and no hosts/ directory
 
     result = validate_private_source(source)
     assert not result.is_valid
-    assert any("Missing required files" in e for e in result.errors)
-    assert any("host.fasta" in e for e in result.errors)
+    assert any("Missing required host sequences" in e for e in result.errors)
 
 
 def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
@@ -181,6 +212,7 @@ def test_validate_private_source_with_host_fasta_still_validates_ids(tmp_path):
         ],
         phage_ids=["P1"],
         host_ids=["H_WRONG"],  # host.fasta has wrong ID
+        use_host_directory=False,
     )
     result = validate_private_source(source)
     assert not result.is_valid
@@ -207,13 +239,15 @@ def test_prepare_private_sequence_artifacts_requires_host_fasta(tmp_path):
 
     manifest = {"sources": [{"source_db": "Project_NoHost", "source_dir": str(source), "is_valid": False}]}
 
-    private_phage_fasta = tmp_path / "private" / "private_phages.fasta"
+    private_phage_dir = tmp_path / "private" / "phages"
+    private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
     private_host_dir = tmp_path / "private" / "hosts"
     private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
-        private_phage_fasta_path=private_phage_fasta,
+        private_phage_dir=private_phage_dir,
+        private_phage_mapping_path=private_phage_mapping,
         private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
@@ -222,11 +256,9 @@ def test_prepare_private_sequence_artifacts_requires_host_fasta(tmp_path):
     assert stats["phages_written"] == 0
     assert stats["hosts_written"] == 0
 
-    # Phage FASTA should be present but empty; host mapping should be empty
-    assert private_phage_fasta.read_text(encoding="utf-8") == ""
-    with private_host_mapping.open("r", encoding="utf-8") as handle:
-        mapping = json.load(handle)
-    assert mapping == {}
+    # Phage mapping and host mapping should both be empty JSON objects
+    assert json.loads(private_phage_mapping.read_text(encoding="utf-8")) == {}
+    assert json.loads(private_host_mapping.read_text(encoding="utf-8")) == {}
     valid_source = _create_private_source(
         tmp_path,
         "Valid_Source",
@@ -288,6 +320,7 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
         ],
         ["P1"],
         ["H1"],
+        use_host_directory=True,
     )
     manifest = {
         "sources": [
@@ -299,13 +332,15 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
         ]
     }
 
-    private_phage_fasta = tmp_path / "private" / "private_phages.fasta"
+    private_phage_dir = tmp_path / "private" / "phages"
+    private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
     private_host_dir = tmp_path / "private" / "hosts"
     private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
-        private_phage_fasta_path=private_phage_fasta,
+        private_phage_dir=private_phage_dir,
+        private_phage_mapping_path=private_phage_mapping,
         private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
@@ -314,13 +349,20 @@ def test_prepare_private_sequence_artifacts_generates_private_fasta_and_mapping(
     assert stats["phages_written"] == 1
     assert stats["hosts_written"] == 1
 
-    phage_content = private_phage_fasta.read_text(encoding="utf-8")
-    assert ">P1 desc" in phage_content
+    # The phage mapping JSON should point to the per-source phage FASTA copy
+    with private_phage_mapping.open("r", encoding="utf-8") as handle:
+        pmapping = json.load(handle)
+    assert "Project_A" in pmapping
+    phage_fasta_path = Path(pmapping["Project_A"])
+    assert phage_fasta_path.exists()
+    assert ">P1 desc" in phage_fasta_path.read_text(encoding="utf-8")
+    # Index file must exist next to the phage FASTA
+    assert Path(str(phage_fasta_path) + ".fai").exists()
 
     with private_host_mapping.open("r", encoding="utf-8") as handle:
-        mapping = json.load(handle)
-    assert "H1" in mapping
-    mapped_path = Path(mapping["H1"])
+        hmapping = json.load(handle)
+    assert "H1" in hmapping
+    mapped_path = Path(hmapping["H1"])
     assert mapped_path.exists()
     assert ">H1 desc" in mapped_path.read_text(encoding="utf-8")
 
@@ -364,20 +406,26 @@ def test_prepare_private_sequence_artifacts_skips_invalid_sources(tmp_path):
         ]
     }
 
-    private_phage_fasta = tmp_path / "private" / "private_phages.fasta"
+    private_phage_dir = tmp_path / "private" / "phages"
+    private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
     private_host_dir = tmp_path / "private" / "hosts"
     private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
-        private_phage_fasta_path=private_phage_fasta,
+        private_phage_dir=private_phage_dir,
+        private_phage_mapping_path=private_phage_mapping,
         private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
 
     assert stats["sources_processed"] == 1
-    assert ">P1 desc" in private_phage_fasta.read_text(encoding="utf-8")
-    assert "PX" not in private_phage_fasta.read_text(encoding="utf-8")
+    with private_phage_mapping.open("r", encoding="utf-8") as handle:
+        pmapping = json.load(handle)
+    assert "Valid_Source" in pmapping
+    phage_fasta_path = Path(pmapping["Valid_Source"])
+    assert ">P1 desc" in phage_fasta_path.read_text(encoding="utf-8")
+    assert "Invalid_Source" not in pmapping
 
 
 def test_ingest_private_sources_resyncs_deleted_sources_and_prevents_duplicates(tmp_path):

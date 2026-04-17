@@ -22,9 +22,10 @@ from pbi.private_data import prepare_private_sequence_artifacts  # noqa: E402
 
 def main():
     manifest_path = Path(snakemake.input.manifest)  # noqa: F821
-    private_phage_fasta = Path(snakemake.output.private_phages)  # noqa: F821
+    private_phage_mapping = Path(snakemake.output.private_phage_mapping)  # noqa: F821
     private_host_mapping = Path(snakemake.output.private_host_mapping)  # noqa: F821
     private_host_dir = Path(snakemake.params.private_host_dir)  # noqa: F821
+    private_phage_dir = Path(snakemake.params.private_phage_dir)  # noqa: F821
 
     if not manifest_path.exists():
         manifest = {"sources": []}
@@ -34,7 +35,8 @@ def main():
 
     stats = prepare_private_sequence_artifacts(
         manifest=manifest,
-        private_phage_fasta_path=private_phage_fasta,
+        private_phage_dir=private_phage_dir,
+        private_phage_mapping_path=private_phage_mapping,
         private_host_dir=private_host_dir,
         private_host_mapping_path=private_host_mapping,
     )
