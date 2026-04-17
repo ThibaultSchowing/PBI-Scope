@@ -37,7 +37,8 @@ rule create_duckdb:
 
 rule prepare_private_sources:
     input:
-        private_root=private_root_dependency
+        # list of directories in private_data_root, [] if empty
+        private_root=private_root_dependency 
     output:
         manifest=config["private_manifest_output"]
     conda:

@@ -21,7 +21,10 @@ merged_csv_output: "/data/intermediate/csv/merged/"
 # Databases files
 duckdb_output: "/data/processed/databases/phage_database.duckdb"
 optimized_duckdb_output: "/data/processed/databases/phage_database_optimized.duckdb"
-private_manifest_output: "/data/intermediate/private/private_manifest.json"
+
+# TODO create/move the creation of this file in the private data directory (after private_data_root i imagine) 
+# to keep private data completely separate from public data and outputs
+private_manifest_output: "/data/intermediate/private/private_manifest.json" 
 
 database_validation_report_output: "/pipeline-logs/reports/database_validation.html"
 
@@ -47,10 +50,10 @@ protein_fasta_merged_output: "/data/intermediate/fasta/proteins/" # Used in sequ
 
 # Host genomes
 host_genomes_intermediate: "/data/intermediate/fasta/hosts"
-private_host_genomes_intermediate: "/data/intermediate/fasta/hosts/private"
+private_host_genomes_intermediate: "/data/intermediate/fasta/hosts/private" # Todo: disable. Hosts are now mandatory for phage-host linking, so private hosts should be ingested via the main host genome ingestion process and not treated separately.
 host_fasta_mapping: "/data/processed/sequences/host_fasta_mapping.json"
-private_host_mapping: "/data/intermediate/fasta/private/private_host_fasta_mapping.json"
-private_phage_fasta: "/data/intermediate/fasta/private/private_phages.fasta"
+private_host_mapping: "/data/intermediate/fasta/private/private_host_fasta_mapping.json" # Todo: disable or move file to private data directory. Hosts are now mandatory for phage-host linking, so private hosts should be ingested via the main host genome ingestion process and not treated separately.
+private_phage_fasta: "/data/intermediate/fasta/private/private_phages.fasta" # Todo: clarify. What is this supposed to be ? Private data can have many phages. 
 host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
 host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
 assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"
@@ -61,7 +64,7 @@ host_resolution_cache_output: "/data/intermediate/csv/merged/host_token_resoluti
 host_download_log: "/pipeline-logs/logs/host_download.log"
 host_failure_log: "/pipeline-logs/logs/host_download_failures.log"
 host_fasta_qc_log: "/pipeline-logs/logs/host_fasta_qc.csv"
-host_status_report: "/data/intermediate/csv/merged/host_status_report.csv"
+host_status_report: "/data/intermediate/csv/merged/host_status_report.csv" # Todo move to /pipeline-logs too
 
 # Host download settings
 ncbi_email: "phage.pipeline@example.com"  # Fallback only — set NCBI_EMAIL env variable instead (see .env.example)

@@ -38,11 +38,11 @@ progress:
   
 # Failure tracking
 failures:
-  log_file: "data/failed_downloads.txt"
+  log_file: "data/failed_downloads.txt" # Todo: change to mounted log directory (/pipeline-logs)
   categorize: true               # Categorize failures by type
   
 # Logging
 logging:
   level: "INFO"                  # DEBUG, INFO, WARNING, ERROR
   format: "%(asctime)s - %(levelname)s - %(message)s"
-  file: "data/logs/genome_download.log"
+  file: "data/logs/genome_download.log" # Todo: change to mounted log directory (/pipeline-logs)

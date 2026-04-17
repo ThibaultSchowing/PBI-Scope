@@ -10,6 +10,7 @@ import os
 
 # Get base data directory from environment or default to relative path
 BASE_DATA_DIR = os.getenv('PBI_DATA_DIR', 'data')
+
 # Get base logs/reports directory. Defaults to the same place as data when running locally
 # without Docker (so reports land under data/). The Docker container sets this to /pipeline-logs
 # which is bind-mounted to ./pipeline_logs/ at the repository root.
