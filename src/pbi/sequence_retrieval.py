@@ -36,6 +36,16 @@ def _normalize_source_type(source_type: Optional[str]) -> str:
     return "private" if normalized == "private" else "public"
 
 
+def _normalize_source_db(source_db: Optional[object]) -> Optional[str]:
+    """Normalize source DB labels and discard empty/NaN-like values."""
+    if source_db is None:
+        return None
+    normalized = str(source_db).strip()
+    if not normalized or normalized.lower() == "nan":
+        return None
+    return normalized
+
+
 def _should_rebuild_fai(fasta_path: Union[str, Path]) -> bool:
     """Return True when FASTA index is missing or older than the FASTA file."""
     fasta_path = Path(fasta_path)
@@ -192,6 +202,7 @@ class SequenceRetriever:
         # files under /data/intermediate/fasta/private/phages/<source_db>/phage.fasta.
         import json as _json
         self._private_phage_mapping: Optional[Dict[str, str]] = None
+        self._private_phage_source_lookup: Dict[str, str] = {}
         self._private_phage_fasta_cache: OrderedDict = OrderedDict()
         self._private_phage_lock = threading.Lock()
 
@@ -200,6 +211,21 @@ class SequenceRetriever:
             if _ppm.exists():
                 with _ppm.open("r") as _f:
                     self._private_phage_mapping = _json.load(_f)
+                for _source_key in self._private_phage_mapping.keys():
+                    _normalized_source = _normalize_source_db(_source_key)
+                    if _normalized_source:
+                        _norm_key = _normalized_source.lower()
+                        _existing = self._private_phage_source_lookup.get(_norm_key)
+                        if _existing is not None and _existing != _source_key:
+                            logging.warning(
+                                "⚠️ Duplicate normalized private source key '%s' for '%s' and '%s'; using '%s'",
+                                _norm_key,
+                                _existing,
+                                _source_key,
+                                _existing,
+                            )
+                        else:
+                            self._private_phage_source_lookup[_norm_key] = _source_key
                 logging.info(
                     f"📂 Loaded private phage mapping for "
                     f"{len(self._private_phage_mapping)} sources: {list(self._private_phage_mapping.keys())}"
@@ -643,6 +669,15 @@ class SequenceRetriever:
 
         return mapped_path
 
+    def _resolve_private_source_db(self, source_db: Optional[object]) -> Optional[str]:
+        """Resolve a DB-provided source label to a canonical private mapping key."""
+        normalized_source = _normalize_source_db(source_db)
+        if normalized_source is None or not self._private_phage_mapping:
+            return None
+        if normalized_source in self._private_phage_mapping:
+            return normalized_source
+        return self._private_phage_source_lookup.get(normalized_source.lower())
+
     def _get_private_phage_fasta(self, source_db: str) -> "Fasta":
         """
         Load (and LRU-cache) the phage FASTA for a private source.
@@ -663,13 +698,18 @@ class SequenceRetriever:
             KeyError: If *source_db* is not in the private phage mapping.
             FileNotFoundError: If the FASTA file no longer exists on disk.
         """
-        if self._private_phage_mapping is None or source_db not in self._private_phage_mapping:
+        resolved_source_db = self._resolve_private_source_db(source_db)
+        if (
+            self._private_phage_mapping is None
+            or resolved_source_db is None
+            or resolved_source_db not in self._private_phage_mapping
+        ):
             raise KeyError(f"Private phage source '{source_db}' not found in private_phage_mapping")
 
         with self._private_phage_lock:
-            if source_db in self._private_phage_fasta_cache:
-                self._private_phage_fasta_cache.move_to_end(source_db)
-                return self._private_phage_fasta_cache[source_db]
+            if resolved_source_db in self._private_phage_fasta_cache:
+                self._private_phage_fasta_cache.move_to_end(resolved_source_db)
+                return self._private_phage_fasta_cache[resolved_source_db]
 
             # Evict oldest entry when the cache is full (same limit as host cache)
             if len(self._private_phage_fasta_cache) >= MAX_HOST_FASTA_CACHE_SIZE:
@@ -680,16 +720,16 @@ class SequenceRetriever:
                     except Exception:
                         pass
 
-            fasta_path = self._private_phage_mapping[source_db]
-            fasta_path = self._resolve_private_phage_fasta_path(source_db, fasta_path)
+            fasta_path = self._private_phage_mapping[resolved_source_db]
+            fasta_path = self._resolve_private_phage_fasta_path(resolved_source_db, fasta_path)
             rebuild = _should_rebuild_fai(fasta_path)
             if rebuild:
                 logging.info("Creating index for private phage FASTA: %s", fasta_path)
 
             fasta_obj = Fasta(fasta_path, rebuild=rebuild, key_function=_fasta_key_function)
-            self._private_phage_fasta_cache[source_db] = fasta_obj
+            self._private_phage_fasta_cache[resolved_source_db] = fasta_obj
 
-        return self._private_phage_fasta_cache[source_db]
+        return self._private_phage_fasta_cache[resolved_source_db]
 
     def _get_phage_sequence(
         self, phage_id: str, source_db: Optional[str] = None, source_type: Optional[str] = None
@@ -710,38 +750,40 @@ class SequenceRetriever:
             Sequence string, or ``None`` if not found.
         """
         normalized_source_type = _normalize_source_type(source_type)
+        resolved_source_db = self._resolve_private_source_db(source_db)
         # Mapping membership is treated as authoritative for private routing even if
         # source_type is missing/mislabelled in upstream metadata.
-        is_private = normalized_source_type == "private" or (
-            self._private_phage_mapping is not None
-            and source_db in self._private_phage_mapping
-        )
+        is_private = normalized_source_type == "private" or resolved_source_db is not None
 
-        if is_private and self._private_phage_mapping and source_db:
+        if is_private and self._private_phage_mapping and resolved_source_db:
             try:
-                fasta_obj = self._get_private_phage_fasta(source_db)
+                fasta_obj = self._get_private_phage_fasta(resolved_source_db)
                 return str(fasta_obj[phage_id][:].seq)
             except (KeyError, Exception) as exc:
-                logging.debug("Private phage %s not found in source %s: %s", phage_id, source_db, exc)
-                return None
-        else:
-            try:
-                return str(self.phage_fasta[phage_id][:].seq)
-            except KeyError:
-                # If private mapping is present but source_db was not provided, scan all
-                # private sources as a last-resort fallback.
-                if self._private_phage_mapping:
-                    for sdb in self._private_phage_mapping:
-                        try:
-                            fasta_obj = self._get_private_phage_fasta(sdb)
-                            if phage_id in fasta_obj:
-                                logging.debug(
-                                    "Found private phage %s in fallback source %s", phage_id, sdb
-                                )
-                                return str(fasta_obj[phage_id][:].seq)
-                        except Exception:
-                            pass
-                return None
+                logging.debug(
+                    "Private phage %s not found in source %s: %s",
+                    phage_id,
+                    resolved_source_db,
+                    exc,
+                )
+
+        try:
+            return str(self.phage_fasta[phage_id][:].seq)
+        except KeyError:
+            # If private mapping is present but source_db was missing/misaligned, scan all
+            # private sources as a last-resort fallback.
+            if self._private_phage_mapping:
+                for sdb in self._private_phage_mapping:
+                    try:
+                        fasta_obj = self._get_private_phage_fasta(sdb)
+                        if phage_id in fasta_obj:
+                            logging.debug(
+                                "Found private phage %s in fallback source %s", phage_id, sdb
+                            )
+                            return str(fasta_obj[phage_id][:].seq)
+                    except Exception:
+                        pass
+            return None
 
     def get_host_sequence(self, host_id: str, contig_mode: str = "first") -> str:
         """
