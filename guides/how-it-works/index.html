@@ -1986,15 +1986,16 @@
 <p>The <code>SequenceRetriever</code> uses this file to efficiently retrieve individual host sequences without loading all host FASTA data into memory.</p>
 <h3 id="how-quick_connect-works">How <code>quick_connect()</code> Works<a class="headerlink" href="#how-quick_connect-works" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">quick_connect</span><span class="p">():</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">paths</span> <span class="o">=</span> <span class="n">get_default_paths</span><span class="p">()</span>  <span class="c1"># Reads DATA_PATH env var or uses project-relative defaults</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">paths</span> <span class="o">=</span> <span class="n">get_default_paths</span><span class="p">()</span>  <span class="c1"># Reads DATA_PATH + PBI_PRIVATE_DATA_DIR</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">return</span> <span class="n">SequenceRetriever</span><span class="p">(</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">db_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">],</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">phage_fasta_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;phage_fasta&#39;</span><span class="p">],</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">protein_fasta_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;protein_fasta&#39;</span><span class="p">],</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">host_mapping_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;host_mapping&#39;</span><span class="p">]</span>  <span class="c1"># Uses host_fasta_mapping.json</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="p">)</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">host_mapping_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;host_mapping&#39;</span><span class="p">],</span>  <span class="c1"># Uses host_fasta_mapping.json</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="n">private_phage_mapping_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;private_phage_mapping&#39;</span><span class="p">],</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="p">)</span>
 </code></pre></div>
-<p>In Docker, the <code>DATA_PATH</code> environment variable is set to <code>/data/processed</code>, so <code>quick_connect()</code> automatically finds all files.</p>
+<p>In Docker, <code>DATA_PATH=/data/processed</code> and <code>PBI_PRIVATE_DATA_DIR=/private-data</code>, so <code>quick_connect()</code> can route both public and private sequence lookups.</p>
 <hr />
 <h2 id="host-resolution-process">Host Resolution Process<a class="headerlink" href="#host-resolution-process" title="Permanent link">&para;</a></h2>
 <p>Host genome resolution is a multi-stage process because phage metadata contains complex, semicolon-separated host fields like:</p>

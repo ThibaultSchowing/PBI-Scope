@@ -1700,8 +1700,13 @@ deduplicated at ingestion (first occurrence kept).</p>
 </code></pre></div>
 <p>No Docker required; no pipeline run triggered.</p>
 <h2 id="container-integration-automatic">Container integration (automatic)<a class="headerlink" href="#container-integration-automatic" title="Permanent link">&para;</a></h2>
-<p><code>docker-compose.yml</code> mounts <code>./private_data</code> at <code>/private-data</code> inside the
-container (writable). The pipeline configuration uses:</p>
+<p><code>docker-compose.yml</code> mounts <code>./private_data</code> at <code>/private-data</code> for both:</p>
+<ul>
+<li><code>pipeline</code> (writable) so private sources can be validated and indexed</li>
+<li><code>analysis</code> (read-only) so notebooks can read private host FASTAs and
+  <code>private_phage_mapping.json</code></li>
+</ul>
+<p>The pipeline configuration uses:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">private_data_root</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/private-data&quot;</span>
 </code></pre></div>
 <p>No additional environment variables or config changes are needed.</p>
