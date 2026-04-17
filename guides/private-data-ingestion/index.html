@@ -1601,8 +1601,14 @@ directory at the repository root.</p>
 </code></pre></div>
 <p>Private sequence retrieval is prepared automatically during the workflow:</p>
 <ul>
-<li>Private phage FASTA records are kept in a dedicated private FASTA and indexed separately from the public PhageScope FASTA.</li>
-<li>Private host FASTA records are split to per-<code>Host_ID</code> files, added to <code>host_fasta_mapping.json</code>, and indexed with the same host indexing workflow.</li>
+<li>Each private source's <code>phage.fasta</code> is <strong>copied</strong> to a writable per-source directory
+  (<code>/data/intermediate/fasta/private/phages/&lt;source_db&gt;/phage.fasta</code>) and indexed with
+  pyfaidx (<code>.fai</code>).  A JSON mapping (<code>private_phage_mapping.json</code>) records
+  <code>source_db → phage.fasta path</code>.  <code>SequenceRetriever</code> uses this mapping to route
+  private-phage lookups at retrieval time — private phages are <strong>never merged</strong> into
+  <code>all_phages.fasta</code>, so removing a private source has no impact on public data.</li>
+<li>Private host FASTA records are normalized to one FASTA per <code>Host_ID</code>, added to
+  <code>host_fasta_mapping.json</code>, and indexed with the same host indexing workflow.</li>
 </ul>
 <p>When private source directories are removed from <code>private_data/</code>, rerunning the pipeline
 re-synchronizes the manifest and removes stale private records from the database.</p>
@@ -1625,7 +1631,11 @@ re-synchronizes the manifest and removes stale private records from the database
 </tr>
 <tr>
 <td><code>host.fasta</code></td>
-<td>✅</td>
+<td>✅ (legacy)</td>
+</tr>
+<tr>
+<td><code>hosts/&lt;Host_ID&gt;.fna</code></td>
+<td>✅ (recommended; one file per host)</td>
 </tr>
 </tbody>
 </table>
@@ -1666,7 +1676,7 @@ re-synchronizes the manifest and removes stale private records from the database
 <ul>
 <li>The sequence identifier is the <strong>first whitespace-delimited token</strong> of each <code>&gt;</code> header line.</li>
 <li><code>Phage_ID</code> values must each appear as an identifier in <code>phage.fasta</code>.</li>
-<li><code>Host_ID</code> values must each appear as an identifier in <code>host.fasta</code>.</li>
+<li><code>Host_ID</code> values must each appear as an identifier in <code>host.fasta</code>, or have a matching file in <code>hosts/</code> (for example <code>hosts/GCF_000005845.2.fna</code>).</li>
 <li>Duplicate FASTA identifiers in the same file are rejected.</li>
 </ul>
 <h2 id="duplicate-row-policy">Duplicate row policy<a class="headerlink" href="#duplicate-row-policy" title="Permanent link">&para;</a></h2>
@@ -1721,18 +1731,19 @@ container (read-only). The pipeline configuration uses:</p>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>## Files
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>- metadata.csv    — phage-host interaction table
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>- phage.fasta     — phage sequences (FASTA)
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>- host.fasta      — host sequences (FASTA)
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>## metadata.csv column notes
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>- Source_DB must equal &quot;&lt;Source_DB&gt;&quot; (directory name)
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>- interaction: temperate | virulent
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>## FASTA IDs
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>- Identifiers are the first whitespace-delimited token of each &#39;&gt;&#39; header line.
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>- All Phage_ID / Host_ID values in metadata.csv must appear in the respective FASTA.
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>## Optional custom columns
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>- &lt;column_name&gt;: &lt;description&gt;
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>- hosts/          — recommended per-host FASTA files (`&lt;Host_ID&gt;.fna`)
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>- host.fasta      — optional legacy single host FASTA
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>## metadata.csv column notes
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>- Source_DB must equal &quot;&lt;Source_DB&gt;&quot; (directory name)
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>- interaction: temperate | virulent
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>## FASTA IDs
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>- Identifiers are the first whitespace-delimited token of each &#39;&gt;&#39; header line.
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>- All Phage_ID / Host_ID values in metadata.csv must appear in the respective FASTA.
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>## Optional custom columns
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>- &lt;column_name&gt;: &lt;description&gt;
 </code></pre></div>
 
 
