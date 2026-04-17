@@ -5,6 +5,7 @@ from pyfaidx import Fasta
 from typing import Dict, List, Optional, Union
 import pandas as pd
 import logging
+import os
 from pathlib import Path
 import threading
 import time
@@ -433,6 +434,7 @@ class SequenceRetriever:
             raise KeyError(f"Host ID '{host_id}' not found in mapping")
         
         fasta_path = self._host_mapping[host_id]
+        fasta_path = self._resolve_host_fasta_path(host_id, fasta_path)
         
         # Load the fasta file with LRU cache management
         with self._host_lock:
@@ -463,6 +465,81 @@ class SequenceRetriever:
             self._host_fasta_cache[host_id] = fasta_obj
         
         return self._host_fasta_cache[host_id]
+
+    def _resolve_host_fasta_path(self, host_id: str, mapped_path: str) -> str:
+        """
+        Resolve host FASTA path from mapping, with fallback for legacy/stale .pbi paths.
+
+        This keeps backward compatibility when a mapping points to
+        ``.../.pbi/hosts/<Host_ID>.fna`` but the canonical host file is now provided
+        directly under ``private_data/<source>/hosts/<Host_ID>.fna``.
+        """
+        path = Path(mapped_path)
+        if path.exists():
+            return str(path)
+
+        # Handle relative mapping entries against CWD.
+        if not path.is_absolute():
+            cwd_candidate = Path.cwd() / path
+            if cwd_candidate.exists():
+                return str(cwd_candidate)
+
+        # Build fallback roots where private source folders may be available.
+        candidate_roots = []
+        env_private_root = os.getenv("PBI_PRIVATE_DATA_DIR")
+        if env_private_root:
+            candidate_roots.append(Path(env_private_root))
+        candidate_roots.extend([
+            Path("/private-data"),
+            Path(__file__).resolve().parents[2] / "private_data",
+            Path.cwd() / "private_data",
+        ])
+
+        # If mapping looks like "<private_root>/.pbi/hosts/<Host_ID>.fna",
+        # recover "<private_root>" and search "<private_root>/*/hosts/<file>".
+        if ".pbi" in path.parts:
+            try:
+                pbi_idx = path.parts.index(".pbi")
+                if pbi_idx > 0:
+                    candidate_roots.insert(0, Path(*path.parts[:pbi_idx]))
+            except ValueError:
+                pass
+
+        seen = set()
+        for root in candidate_roots:
+            root_str = str(root)
+            if root_str in seen:
+                continue
+            seen.add(root_str)
+            if not root.exists():
+                continue
+            if root.is_file():
+                continue
+
+            direct_candidate = root / "hosts" / path.name
+            if direct_candidate.exists():
+                logging.warning(
+                    "⚠️ Resolved missing host mapping path for %s: %s -> %s",
+                    host_id,
+                    mapped_path,
+                    direct_candidate,
+                )
+                self._host_mapping[host_id] = str(direct_candidate)
+                return str(direct_candidate)
+
+            matches = sorted(root.glob(f"*/hosts/{path.name}"))
+            if matches:
+                resolved = matches[0]
+                logging.warning(
+                    "⚠️ Resolved missing host mapping path for %s: %s -> %s",
+                    host_id,
+                    mapped_path,
+                    resolved,
+                )
+                self._host_mapping[host_id] = str(resolved)
+                return str(resolved)
+
+        return mapped_path
 
     def _get_private_phage_fasta(self, source_db: str) -> "Fasta":
         """
