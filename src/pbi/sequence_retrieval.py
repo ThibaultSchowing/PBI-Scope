@@ -30,6 +30,12 @@ def _fasta_key_function(header: str) -> str:
     return parts[0] if parts else header
 
 
+def _normalize_source_type(source_type: Optional[str]) -> str:
+    """Normalize source type to canonical public/private labels."""
+    normalized = str(source_type).strip().lower() if source_type is not None else ""
+    return "private" if normalized == "private" else "public"
+
+
 def _should_rebuild_fai(fasta_path: Union[str, Path]) -> bool:
     """Return True when FASTA index is missing or older than the FASTA file."""
     fasta_path = Path(fasta_path)
@@ -495,6 +501,8 @@ class SequenceRetriever:
             Path.cwd() / "private_data",
         ])
 
+        expected_source = path.parent.parent.name if path.parent.name == "hosts" else None
+
         seen = set()
         for root in candidate_roots:
             root_str = str(root.expanduser().resolve(strict=False))
@@ -506,7 +514,29 @@ class SequenceRetriever:
             if root.is_file():
                 continue
 
-            matches = sorted(root.glob(f"*/hosts/{path.name}"))
+            matches = []
+
+            # Prefer the source folder from the stale path to avoid accidental picks
+            # from hidden cache folders (e.g. .pbi) when both contain same filename.
+            if expected_source:
+                preferred = root / expected_source / "hosts" / path.name
+                if preferred.exists():
+                    matches.append(preferred)
+
+            if not matches:
+                # Then scan non-hidden source folders.
+                for source_dir in sorted(
+                    (p for p in root.iterdir() if p.is_dir() and not p.name.startswith(".")),
+                    key=lambda p: p.name,
+                ):
+                    candidate = source_dir / "hosts" / path.name
+                    if candidate.exists():
+                        matches.append(candidate)
+
+            if not matches:
+                # Last-resort compatibility path: include hidden directories.
+                matches = sorted(root.glob(f"*/hosts/{path.name}"))
+
             if matches:
                 resolved = matches[0]
                 logging.warning(
@@ -585,12 +615,10 @@ class SequenceRetriever:
         Returns:
             Sequence string, or ``None`` if not found.
         """
-        is_private = (
-            source_type == "private"
-            or (
-                self._private_phage_mapping is not None
-                and source_db in self._private_phage_mapping
-            )
+        normalized_source_type = _normalize_source_type(source_type)
+        is_private = normalized_source_type == "private" or (
+            self._private_phage_mapping is not None
+            and source_db in self._private_phage_mapping
         )
 
         if is_private and self._private_phage_mapping and source_db:
@@ -1048,7 +1076,10 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB,
-            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as source_type
+            CASE
+                WHEN LOWER(TRIM(COALESCE(p.source_type, ''))) = 'private' THEN 'private'
+                ELSE 'public'
+            END as source_type
         FROM phage_host_associations pha
         JOIN fact_phages p ON p.Phage_ID = pha.Phage_ID
         """
@@ -1203,7 +1234,10 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
-            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as Phage_Source_Type,
+            CASE
+                WHEN LOWER(TRIM(COALESCE(p.source_type, ''))) = 'private' THEN 'private'
+                ELSE 'public'
+            END as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
@@ -1276,13 +1310,30 @@ class SequenceRetriever:
         result['Phage_Sequence'] = result['Phage_ID'].map(phage_seqs)
         result['Host_Sequence'] = result['Host_ID'].map(host_seqs)
 
+        missing_phage_ids = sorted(
+            result.loc[result['Phage_Sequence'].isna(), 'Phage_ID'].drop_duplicates().tolist()
+        )
+        missing_host_ids = sorted(
+            result.loc[result['Host_Sequence'].isna(), 'Host_ID'].drop_duplicates().tolist()
+        )
+
         # Filter out rows with missing sequences
         before_count = len(result)
         result = result.dropna(subset=['Phage_Sequence', 'Host_Sequence'])
         after_count = len(result)
 
         if before_count > after_count:
-            logging.warning(f"⚠️  Removed {before_count - after_count} pairs with missing sequences")
+            logging.warning(
+                "⚠️  Removed %d pairs with missing sequences "
+                "(%d phages missing, %d hosts missing)",
+                before_count - after_count,
+                len(missing_phage_ids),
+                len(missing_host_ids),
+            )
+            if missing_phage_ids:
+                logging.warning("   Missing phage IDs (sample): %s", ", ".join(missing_phage_ids[:5]))
+            if missing_host_ids:
+                logging.warning("   Missing host IDs (sample): %s", ", ".join(missing_host_ids[:5]))
 
         logging.info(f"✅ Retrieved {len(result):,} complete phage-host pairs with sequences")
 
@@ -1474,7 +1525,10 @@ class SequenceRetriever:
             pha.Phage_ID,
             pha.Host_ID,
             p.Source_DB as Phage_Source,
-            COALESCE(NULLIF(NULLIF(LOWER(TRIM(p.source_type)), 'nan'), ''), 'public') as Phage_Source_Type,
+            CASE
+                WHEN LOWER(TRIM(COALESCE(p.source_type, ''))) = 'private' THEN 'private'
+                ELSE 'public'
+            END as Phage_Source_Type,
             p.Length as Phage_Length,
             p.GC_content as Phage_GC,
             p.Taxonomy as Phage_Taxonomy,
@@ -1816,8 +1870,15 @@ class SequenceRetriever:
             phage_seqs = {}
             host_seqs = {}
 
+            phage_source_db = dict(zip(batch_df['Phage_ID'], batch_df['Phage_Source']))
+            phage_source_type = dict(zip(batch_df['Phage_ID'], batch_df['Phage_Source_Type']))
+
             for phage_id in batch_df['Phage_ID'].unique():
-                phage_seqs[phage_id] = self._get_sequence_safe(phage_id, 'phage')
+                phage_seqs[phage_id] = self._get_phage_sequence(
+                    phage_id,
+                    source_db=phage_source_db.get(phage_id),
+                    source_type=phage_source_type.get(phage_id),
+                )
 
             for host_id in batch_df['Host_ID'].unique():
                 host_seqs[host_id] = self._get_sequence_safe(
@@ -1828,6 +1889,13 @@ class SequenceRetriever:
             batch_df['Phage_Sequence'] = batch_df['Phage_ID'].map(phage_seqs)
             batch_df['Host_Sequence'] = batch_df['Host_ID'].map(host_seqs)
 
+            missing_phage_ids = sorted(
+                batch_df.loc[batch_df['Phage_Sequence'].isna(), 'Phage_ID'].drop_duplicates().tolist()
+            )
+            missing_host_ids = sorted(
+                batch_df.loc[batch_df['Host_Sequence'].isna(), 'Host_ID'].drop_duplicates().tolist()
+            )
+
             # Filter out rows with missing sequences
             before_count = len(batch_df)
             batch_df = batch_df.dropna(subset=['Phage_Sequence', 'Host_Sequence'])
@@ -1835,8 +1903,16 @@ class SequenceRetriever:
 
             if before_count > after_count:
                 logging.warning(
-                    f"⚠️  Removed {before_count - after_count} pairs with missing sequences from batch"
+                    "⚠️  Removed %d pairs with missing sequences from batch "
+                    "(%d phages missing, %d hosts missing)",
+                    before_count - after_count,
+                    len(missing_phage_ids),
+                    len(missing_host_ids),
                 )
+                if missing_phage_ids:
+                    logging.warning("   Missing phage IDs (sample): %s", ", ".join(missing_phage_ids[:5]))
+                if missing_host_ids:
+                    logging.warning("   Missing host IDs (sample): %s", ", ".join(missing_host_ids[:5]))
 
             if len(batch_df) > 0:
                 yield batch_df
