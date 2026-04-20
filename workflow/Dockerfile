@@ -16,6 +16,10 @@ COPY workflow /app/workflow
 COPY src /app/src
 COPY setup.py /app/
 
+# Normalize source permissions in image to avoid host-umask-dependent failures
+# when running container as a non-root UID/GID from docker-compose.
+RUN chmod -R a+rX /app/workflow /app/src && chmod a+r /app/setup.py
+
 # Copy environment file and create conda environment
 COPY workflow/envs/base_environment.yaml /tmp/base_environment.yaml
 
