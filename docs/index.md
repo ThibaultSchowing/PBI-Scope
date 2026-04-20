@@ -1,166 +1,89 @@
 # Welcome to PBI Documentation
 
-**Phage-Bacteria Interaction Database Pipeline**
+**PBI — Phage Bacteria Interactions (v0.3.0)**
 
 ## What is PBI?
 
-PBI is a bioinformatics pipeline designed to make phage genomic data from [PhageScope](https://phagescope.deepomics.org/database) available in an efficient, structured way for training neural networks and AI models for phage-host interaction prediction. It integrates data from 14+ phage databases via PhageScope and downloads matching bacterial host genomes from NCBI RefSeq.
+PBI is a reproducible Docker-first pipeline that prepares phage-host data for analysis and machine learning.
 
-> **Note**: PBI is a **proof of concept** and is dependent on PhageScope as its primary data source. Future development will aim to provide more precise host strain information when available.
+It combines:
 
-**What you get after running the pipeline:**
+1. **Public phage data** from PhageScope (which itself aggregates multiple phage sources)
+2. **Optional private datasets** from `private_data/`
+3. **Host genome resolution/download** from NCBI RefSeq
 
-- ~873,000 phage genomes with complete metadata
-- ~43 million protein annotations with functional predictions
-- Bacterial host reference genomes from NCBI RefSeq
-- Optimized DuckDB database (~5 GB) for fast analytical queries
-- Indexed FASTA files (~100 GB) with pyfaidx for rapid sequence retrieval
-- Python package (`pbi`) for easy data access and machine learning dataset preparation
+Outputs are stored in a shared data volume and consumed through the `pbi` Python package (recommended).
 
-## Getting Started
+> PBI is **not PhageScope-only** anymore. Private source ingestion is part of the standard workflow when source folders are present.
 
-The recommended (and primary) way to run PBI is via Docker. See the [Installation Guide](guides/installation.md) for step-by-step instructions on setting up Docker, cloning the repository, running the pipeline container, and connecting to the analysis container via SSH port forwarding.
+## Start Here
 
 <div class="grid cards" markdown>
 
--   **[Installation Guide](guides/installation.md)**
+- **[Installation Guide](guides/installation.md)**
 
-    ---
+  Docker setup, first run, and analysis access.
 
-    How to install Docker, clone the repository, configure the pipeline, run the containers, and connect to the Jupyter Lab analysis environment via SSH port forwarding.
+- **[Story — One Read Overview](guides/storytelling.md)**
 
--   **[How It Works](guides/how-it-works.md)**
+  End-to-end narrative of what the tool does and in which order.
 
-    ---
+- **[Private Data Ingestion](guides/private-data-ingestion.md)**
 
-    Explanation of the pipeline internals, the `pbi` Python package (including key files like `host_fasta_mapping.json`), and the overall architecture.
+  Required files, validation rules, and mandatory host sequence requirements.
 
--   **[Analysis Container Usage](guides/analysis-guide.md)**
+- **[Analysis Container Usage](guides/analysis-guide.md)**
 
-    ---
-
-    How to explore the database, retrieve sequences, and prepare machine learning datasets using the Jupyter Lab analysis container. Includes links to the three demo notebooks.
-
--   **[API Usage](api/overview.md)**
-
-    ---
-
-    REST API reference. ⚠️ **Work In Progress** — the API is not yet updated for host management and is not the recommended way to interact with data.
+  VS Code Dev Containers (preferred) and Jupyter Lab workflow.
 
 </div>
 
-## Pipeline Overview
+## Pipeline overview
 
-The PBI pipeline follows a systematic data flow from download to analysis-ready outputs:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    PBI Data Flow                                │
-│                                                                 │
-│  ┌──────────────┐          ┌──────────────────────────────┐     │
-│  │  PhageScope  │────────> │  Stage 1: Phage Metadata     │     │
-│  │  (14+ DBs)   │          │  Download & merge metadata   │     │
-│  └──────────────┘          │  + FASTA sequences           │     │
-│                            │     ~4 hours first run       │     │
-│                            └──────────────┬───────────────┘     │
-│                                           │                     │
-│                                           ▼                     │
-│  ┌──────────────┐          ┌──────────────────────────────┐     │
-│  │  NCBI RefSeq │────────> │  Stage 2: Host Resolution    │     │
-│  │ (Bacterial   │          │  Parse host fields, resolve  │     │
-│  │  genomes)    │          │  to assemblies, download     │     │
-│  └──────────────┘          │     ~18-24 hours first run   │     │
-│                            └──────────────┬───────────────┘     │
-│                                           │                     │
-│                                           ▼                     │
-│                    ┌──────────────────────────────────────┐     │
-│                    │  Final Outputs (in pbi-data volume)  │     │
-│                    │  ├─ DuckDB Database  (~5 GB)         │     │
-│                    │  ├─ Phage FASTA + index (~40 GB)     │     │
-│                    │  ├─ Protein FASTA + index (~60 GB)   │     │
-│                    │  ├─ Host FASTA files + JSON (~90 GB) │     │
-│                    │  └─ HTML Validation Reports          │     │
-│                    └─────────────────┬────────────────────┘     │
-│                                      │                          │
-│              ┌───────────────────────┴────────────────────┐     │
-│              ▼                                            ▼     │
-│     ┌─────────────────┐                    ┌─────────────────┐  │
-│     │ Analysis Service│                    │   REST API      │  │
-│     │  (Jupyter Lab)  │                    │  (FastAPI)      │  │
-│     │  Port 8888      │                    │  Port 8000      │  │
-│     └─────────────────┘                    └─────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+```text
++----------------------+        +----------------------------+
+| public phage data    |------->| Stage 1: download + merge  |
+| (PhageScope)         |        | public phage metadata/FASTA|
++----------------------+        +--------------+-------------+
+                                              |
++----------------------+        +-------------v--------------+
+| private_data/*       |------->| Stage 2: validate private  |
+| (optional sources)   |        | metadata/phage/host files  |
++----------------------+        +--------------+-------------+
+                                              |
++----------------------+        +-------------v--------------+
+| NCBI RefSeq          |------->| Stage 3: resolve/download  |
+| (host genomes)       |        | host assemblies            |
++----------------------+        +--------------+-------------+
+                                              |
+                                  +-----------v-----------+
+                                  | Stage 4: build outputs|
+                                  | DuckDB + indexed FASTA|
+                                  | reports + logs         |
+                                  +-----------+-----------+
+                                              |
+                    +-------------------------+-------------------------+
+                    |                                                   |
+          +---------v---------+                               +---------v---------+
+          | analysis container|                               | api container      |
+          | pbi package (main)|                               | legacy / limited   |
+          +-------------------+                               +-------------------+
 ```
 
-## Database Schema
+## Current status
 
-The database uses a **star schema** with phage metadata at the center and host genomes linked via a separate dimension table. See the [Database Overview](database/overview.md) for full details.
+| Subject | Status | Notes |
+|---|---|---|
+| Pipeline orchestration | ✅ Stable | Snakemake workflow in production use |
+| Public data integration | ✅ Stable | Public phage content from PhageScope |
+| Private data handling | ✅ Stable | Dedicated ingestion/validation path; see [Private Data Ingestion](guides/private-data-ingestion.md) |
+| Host genome resolution | ✅ Stable | Multi-token host parsing + NCBI assembly resolution |
+| Analysis workflow | ✅ Stable | Analysis container is the main interface |
+| REST API | ⚠️ Not supported for sequence retrieval | Too slow for sequence-heavy usage; planned redesign for exploration-only API |
+| Documentation | 🔄 Updated for v0.3.0 | Structure simplified and aligned with current infrastructure |
 
-```
-                     dim_proteins ──┐
-                  dim_terminators ──┤
-                  dim_anti_crispr ──┤
-             dim_virulent_factors ──┤
-       dim_transmembrane_proteins ──┤──▶ fact_phages (central)
-                   dim_trna_tmrna ──┤
-dim_antimicrobial_resistance_genes ─┤
-                  dim_crispr_array ─┘
-                       dim_hosts  ──▶ (linked via phage_host_links.csv
-                                       and host_fasta_mapping.json)
-```
+## Need help?
 
-All phage dimension tables link to `fact_phages` via **`Phage_ID`**. Host genomes are stored as separate FASTA files and indexed via `host_fasta_mapping.json` for fast retrieval.
-
-## Documentation
-
-<div class="grid cards" markdown>
-
--   **[Guides](guides/overview.md)**
-
-    ---
-
-    Installation, how it works, analysis container usage, and pipeline execution
-
--   **[Database](database/overview.md)**
-
-    ---
-
-    Schema documentation, tables, host data, and data sources
-
--   **[API Reference](api/overview.md)**
-
-    ---
-
-    REST API endpoints — currently untested
-
--   **[Developer Guide](developer/code-structure.md)**
-
-    ---
-
-    Architecture, code structure, and contributing
-
-</div>
-
-## Current Status
-
-| Component | Status | Description |
-|-----------|--------|-------------|
-| **Pipeline** | ✅ Complete | Snakemake workflow with 14+ data sources |
-| **Phage Database** | ✅ Complete | Optimized DuckDB with star schema |
-| **Host Genomes** | ✅ Complete | NCBI RefSeq downloads with multi-host support |
-| **Sequences** | ✅ Complete | Indexed FASTA files (phages, proteins, hosts) |
-| **Docker** | ✅ Complete | Production-ready containers |
-| **Python Package** | 🔧 Active Development | Core functionality available |
-| **REST API** | 🚧 Work In Progress | Basic endpoints implemented; not tested, not updated for host management |
-| **Documentation** | 🔧 Active Development | Continuously improving |
-
-## Need Help?
-
-- Browse the [guides](guides/overview.md) for detailed instructions
-- Report issues on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)
-- Check the [troubleshooting sections](guides/installation.md#troubleshooting) in our guides
-
----
-
-_PBI is a proof of concept built with Snakemake, DuckDB, and FastAPI. It is under active development._
-
+- Use the [Guides overview](guides/overview.md)
+- Read [How it works](guides/how-it-works.md)
+- Open issues on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)

@@ -1,7 +1,8 @@
 """
 FastAPI application for PBI database queries.
 
-This API provides endpoints for querying the phage database and retrieving sequences.
+The API is currently maintained for lightweight metadata/database exploration.
+High-volume sequence retrieval should use the pbi package in the analysis container.
 """
 
 import logging
@@ -88,8 +89,8 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI app with lifespan
 app = FastAPI(
     title="PBI Database API",
-    description="API for querying phage bioinformatics database and retrieving sequences",
-    version="0.1.0",
+    description="API for querying the Phage Bacteria Interactions database",
+    version="0.3.0",
     lifespan=lifespan
 )
 
@@ -119,7 +120,7 @@ async def root():
     """Root endpoint with API information."""
     return {
         "name": "PBI Database API",
-        "version": "0.1.0",
+        "version": "0.3.0",
         "status": "running",
         "endpoints": {
             "health": "/health",

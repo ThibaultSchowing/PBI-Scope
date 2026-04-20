@@ -1,8 +1,8 @@
 """
-PBI - Phage Bioinformatics Interface.
+PBI - Phage Bacteria Interactions.
 
-Main classes are exposed lazily so lightweight submodules (e.g. ``pbi.private_data``)
-can be imported in environments that do not install the full runtime stack.
+Main classes are exposed lazily so lightweight submodules (for example
+``pbi.private_data``) can be imported without loading the full runtime stack.
 """
 
 from __future__ import annotations
@@ -19,10 +19,10 @@ if TYPE_CHECKING:
     )
 
 # Package metadata
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__ = "Thibault Schowing, CI4CB"
 
-# Define what gets imported with "from pbi import *"
+# Public exports used by `from pbi import *`
 __all__ = [
     'SequenceRetriever',
     'NegativeExampleGenerator',
@@ -33,6 +33,7 @@ __all__ = [
 
 
 def __getattr__(name):
+    # Lazy imports keep optional dependencies from loading at import time.
     if name == "SequenceRetriever":
         from .sequence_retrieval import SequenceRetriever
         return SequenceRetriever
@@ -56,35 +57,33 @@ def __getattr__(name):
         f"Available attributes: {', '.join(__all__)}"
     )
 
-# Optional: Add convenience functions
+
 def get_default_paths():
     """
-    Get default paths for database and FASTA files
-    
-    Checks DATA_PATH environment variable first (for Docker containers),
-    then falls back to project-relative paths (for local development).
-    
+    Get default paths for database and FASTA files.
+
+    Checks DATA_PATH first (container mode), then falls back to local project
+    paths for development mode.
+
     Returns:
-        dict: Paths to database and FASTA files
+        dict: Paths to database and FASTA files.
     """
     import os
     from pathlib import Path
-    
-    # Check if DATA_PATH environment variable is set (Docker/container mode)
+
     data_path = os.environ.get('DATA_PATH')
-    
     private_data_path = os.environ.get('PBI_PRIVATE_DATA_DIR')
 
     if data_path:
-        # Container mode: use DATA_PATH directly
+        # Container mode
         base_path = Path(data_path)
         private_base_path = Path(private_data_path) if private_data_path else Path('/private-data')
     else:
-        # Local mode: use project-relative path
+        # Local mode
         project_root = Path(__file__).parent.parent.parent
         base_path = project_root / 'data' / 'processed'
         private_base_path = Path(private_data_path) if private_data_path else project_root / 'private_data'
-    
+
     return {
         'database': base_path / 'databases' / 'phage_database_optimized.duckdb',
         'phage_fasta': base_path / 'sequences' / 'all_phages.fasta',
@@ -95,25 +94,21 @@ def get_default_paths():
         'host_fasta': base_path / 'sequences' / 'all_hosts.fasta',
     }
 
+
 def quick_connect():
     """
-    Quick connection to default database with all sequence files
-    
+    Return a SequenceRetriever initialized with default data paths.
+
     Returns:
-        SequenceRetriever: Connected retriever instance
-    
-    Example:
-        >>> import pbi
-        >>> retriever = pbi.quick_connect()
-        >>> df = retriever.get_phage_sequences("SELECT Phage_ID FROM fact_phages LIMIT 10")
+        SequenceRetriever: Connected retriever instance.
     """
     from .sequence_retrieval import SequenceRetriever
     paths = get_default_paths()
-    
-    # Prefer host mapping file (new approach), fallback to single file (legacy)
+
+    # Prefer host mapping (current approach), fallback to legacy single-host FASTA.
     host_mapping = str(paths['host_mapping']) if paths['host_mapping'].exists() else None
     host_fasta = str(paths['host_fasta']) if paths['host_fasta'].exists() else None
-    
+
     return SequenceRetriever(
         str(paths['database']),
         str(paths['phage_fasta']),

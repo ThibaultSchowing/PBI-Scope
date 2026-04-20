@@ -1,54 +1,23 @@
 # Changelog
 
-All notable changes to the PBI project will be documented in this file.
+All notable changes to this project are documented here.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Added
-- Comprehensive documentation restructuring
-- Dedicated Docker guide with troubleshooting
-- Local installation guide with step-by-step instructions
-- Database overview with schema documentation
-- API reference with work-in-progress status
-- Command reference/cheatsheet for common operations
-- Guides overview for navigation
+## [0.3.0] - 2026-04-20
 
 ### Changed
-- Reorganized documentation structure for clarity
-- Moved old documentation to archive for review
-- Improved index page with clear status and roadmap
 
-### Fixed
-- Documentation navigation and discoverability
+- Updated project naming consistency to **Phage Bacteria Interactions** across code/docs.
+- Refreshed documentation structure and core pages for current infrastructure.
+- Added one-read storytelling page describing end-to-end flow.
+- Clarified private data ingestion behavior and mandatory host sequence requirements.
+- Updated home/current-status sections with dedicated private-data status.
+- Documented current API limitation (not supported for sequence-heavy retrieval).
+- Added VS Code Dev Containers recommendation in analysis workflow docs.
 
-## [0.1.0] - 2024
+## [0.2.0]
 
-### Added
-- Initial database integration from PhageScope
-- 9-table star schema with DuckDB
-- Snakemake pipeline for data processing
-- Basic API with FastAPI
-- Docker support for pipeline and API
-- Validation reports and data quality checks
-- FASTA sequence indexing with pyfaidx
+- Introduced private source ingestion and host mapping improvements.
 
-### Features
-- ~873,000 phage genomes integrated
-- ~43 million protein annotations
-- Support for 14+ phage databases
-- Optimized analytical queries
-- REST API endpoints for data access
+## [0.1.0]
 
----
-
-## Version History Summary
-
-- **v0.1.0** (2024): Initial release with database integration and basic API
-- **Unreleased**: Documentation improvements and refinements
-
-## Upcoming
-
-See the [project status and roadmap](index.md) for planned features.
+- Initial public release with pipeline, DuckDB integration, and API prototype.

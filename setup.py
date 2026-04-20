@@ -18,7 +18,7 @@ setup(
     version=version,
     author="Thibault Schowing",
     author_email="thibault.schowing@heig-vd.ch",
-    description="Phage Bacteria Interaction (PBI) Library for sequence retrieval and analysis",
+    description="Phage Bacteria Interactions (PBI) library for sequence retrieval and analysis",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ThibaultSchowing/PBI",
