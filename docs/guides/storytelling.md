@@ -53,4 +53,4 @@ The recommended interface is the analysis container with the `pbi` package.
 - [Installation](installation.md)
 - [Analysis container](analysis-guide.md)
 - [Private data ingestion](private-data-ingestion.md)
-- [Notebooks README](../../notebooks/README.md)
+- [Notebooks README](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md)
