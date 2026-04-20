@@ -10,27 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/archive/development/fixes/CSV_PARSING_FIX_SUMMARY/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/storytelling/">
       
       
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../how-it-works/">
       
       
         
       
       
-      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>CSV Parsing Fix Summary - PBI Documentation</title>
+        <title>Story (One Read) - PBI Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#csv-parsing-fix-summary" class="md-skip">
+        <a href="#pbi-story-one-read-walkthrough" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +96,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+    <a href="../.." title="PBI Documentation" class="md-header__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CSV Parsing Fix Summary
+              Story (One Read)
             
           </span>
         </div>
@@ -225,7 +229,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -242,11 +246,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../../guides/overview/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
           
   
   
@@ -266,7 +272,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../database/overview/" class="md-tabs__link">
+        <a href="../../database/overview/" class="md-tabs__link">
           
   
   
@@ -286,7 +292,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../api/overview/" class="md-tabs__link">
+        <a href="../../api/overview/" class="md-tabs__link">
           
   
   
@@ -306,7 +312,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../reference/commands/" class="md-tabs__link">
+        <a href="../../reference/commands/" class="md-tabs__link">
           
   
   
@@ -326,7 +332,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../../developer/code-structure/" class="md-tabs__link">
+        <a href="../../developer/code-structure/" class="md-tabs__link">
           
   
   
@@ -344,7 +350,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../future-steps/" class="md-tabs__link">
+      <a href="../../future-steps/" class="md-tabs__link">
         
   
   
@@ -363,7 +369,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../changelog/" class="md-tabs__link">
+      <a href="../../changelog/" class="md-tabs__link">
         
   
   
@@ -398,7 +404,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
+    <a href="../.." title="PBI Documentation" class="md-nav__button md-logo" aria-label="PBI Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -428,7 +434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -452,28 +458,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -491,7 +500,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -509,7 +518,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/overview/" class="md-nav__link">
+      <a href="../overview/" class="md-nav__link">
         
   
   
@@ -537,7 +546,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -562,10 +571,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../../guides/storytelling/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -581,6 +617,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-phagescope-brings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1) What PhageScope brings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-why-docker-is-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2) Why Docker is central
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-the-pipeline-does-in-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3) What the pipeline does (in order)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-resulting-data-product" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4) Resulting data product
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-how-users-work-with-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5) How users work with it
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-where-to-go-next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6) Where to go next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -593,7 +715,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/how-it-works/" class="md-nav__link">
+      <a href="../how-it-works/" class="md-nav__link">
         
   
   
@@ -621,7 +743,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/analysis-guide/" class="md-nav__link">
+      <a href="../analysis-guide/" class="md-nav__link">
         
   
   
@@ -649,7 +771,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/pipeline-execution/" class="md-nav__link">
+      <a href="../pipeline-execution/" class="md-nav__link">
         
   
   
@@ -677,7 +799,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/private-data-ingestion/" class="md-nav__link">
+      <a href="../private-data-ingestion/" class="md-nav__link">
         
   
   
@@ -705,7 +827,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/schema-contracts/" class="md-nav__link">
+      <a href="../schema-contracts/" class="md-nav__link">
         
   
   
@@ -733,7 +855,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/pbi-package/" class="md-nav__link">
+      <a href="../pbi-package/" class="md-nav__link">
         
   
   
@@ -761,7 +883,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/machine-learning/" class="md-nav__link">
+      <a href="../machine-learning/" class="md-nav__link">
         
   
   
@@ -789,7 +911,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../guides/docker-guide/" class="md-nav__link">
+      <a href="../docker-guide/" class="md-nav__link">
         
   
   
@@ -878,7 +1000,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../database/overview/" class="md-nav__link">
+      <a href="../../database/overview/" class="md-nav__link">
         
   
   
@@ -906,7 +1028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../database/host-resolution/" class="md-nav__link">
+      <a href="../../database/host-resolution/" class="md-nav__link">
         
   
   
@@ -995,7 +1117,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../api/overview/" class="md-nav__link">
+      <a href="../../api/overview/" class="md-nav__link">
         
   
   
@@ -1084,7 +1206,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../reference/commands/" class="md-nav__link">
+      <a href="../../reference/commands/" class="md-nav__link">
         
   
   
@@ -1173,7 +1295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../developer/code-structure/" class="md-nav__link">
+      <a href="../../developer/code-structure/" class="md-nav__link">
         
   
   
@@ -1208,7 +1330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../future-steps/" class="md-nav__link">
+      <a href="../../future-steps/" class="md-nav__link">
         
   
   
@@ -1235,7 +1357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../changelog/" class="md-nav__link">
+      <a href="../../changelog/" class="md-nav__link">
         
   
   
@@ -1282,10 +1404,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#problem-statement" class="md-nav__link">
+  <a href="#1-what-phagescope-brings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Problem Statement
+        1) What PhageScope brings
       
     </span>
   </a>
@@ -1293,10 +1415,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#root-cause" class="md-nav__link">
+  <a href="#2-why-docker-is-central" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Root Cause
+        2) Why Docker is central
       
     </span>
   </a>
@@ -1304,38 +1426,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#solution" class="md-nav__link">
+  <a href="#3-what-the-pipeline-does-in-order" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Solution
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Solution">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#changes-made" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Changes Made
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#benefits" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Benefits
+        3) What the pipeline does (in order)
       
     </span>
   </a>
@@ -1343,10 +1437,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#impact-on-existing-data" class="md-nav__link">
+  <a href="#4-resulting-data-product" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Impact on Existing Data
+        4) Resulting data product
       
     </span>
   </a>
@@ -1354,49 +1448,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
+  <a href="#5-how-users-work-with-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Example">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#before-quote_minimal-problematic" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Before (QUOTE_MINIMAL - problematic)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#after-quote_nonnumeric-fixed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        After (QUOTE_NONNUMERIC - fixed)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verification
+        5) How users work with it
       
     </span>
   </a>
@@ -1404,10 +1459,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#6-where-to-go-next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        6) Where to go next
       
     </span>
   </a>
@@ -1434,81 +1489,54 @@
   
 
 
-<h1 id="csv-parsing-fix-summary">CSV Parsing Fix Summary<a class="headerlink" href="#csv-parsing-fix-summary" title="Permanent link">&para;</a></h1>
-<h2 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h2>
-<p>After dockerization, the pipeline was failing during the report generation step with errors like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ERROR:root:Error during report generation: Error tokenizing data. C error: Expected 10 fields in line 441639, saw 11
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>ERROR:root:Error during report generation: Error tokenizing data. C error: Expected 26 fields in line 32474, saw 27
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>ERROR:root:Error during report generation: Error tokenizing data. C error: Expected 8 fields in line 3912548, saw 9
-</code></pre></div>
-<h2 id="root-cause">Root Cause<a class="headerlink" href="#root-cause" title="Permanent link">&para;</a></h2>
-<p>The errors occurred because CSV files were being written with pandas' default quoting behavior (<code>QUOTE_MINIMAL</code>), which only quotes fields when they contain special characters. In some edge cases, particularly after data processing in the Docker environment, fields with commas were not being properly quoted, leading to CSV parsing errors where the parser would interpret commas within fields as field delimiters.</p>
-<p>For example:
-- <strong>Problematic</strong>: <code>Mycobacterium smegmatis, strain MC2 155</code> (unquoted - parser sees this as 2 fields)
-- <strong>Correct</strong>: <code>"Mycobacterium smegmatis, strain MC2 155"</code> (quoted - parser sees this as 1 field)</p>
-<h2 id="solution">Solution<a class="headerlink" href="#solution" title="Permanent link">&para;</a></h2>
-<p>The fix implements consistent CSV quoting using <code>csv.QUOTE_NONNUMERIC</code> for both writing and reading CSV files:</p>
-<h3 id="changes-made">Changes Made<a class="headerlink" href="#changes-made" title="Permanent link">&para;</a></h3>
+<h1 id="pbi-story-one-read-walkthrough">PBI Story — one read walkthrough<a class="headerlink" href="#pbi-story-one-read-walkthrough" title="Permanent link">&para;</a></h1>
+<p>This page explains the full PBI flow in execution order.</p>
+<p>For setup and commands, use the <a href="../installation/">Installation Guide</a>.</p>
+<h2 id="1-what-phagescope-brings">1) What PhageScope brings<a class="headerlink" href="#1-what-phagescope-brings" title="Permanent link">&para;</a></h2>
+<p>PhageScope aggregates several public phage resources into consistent exports. PBI uses those exports as its main <strong>public</strong> phage input (metadata and FASTA).</p>
+<h2 id="2-why-docker-is-central">2) Why Docker is central<a class="headerlink" href="#2-why-docker-is-central" title="Permanent link">&para;</a></h2>
+<p>PBI relies on Docker to keep paths, environments, and large intermediate data consistent.</p>
+<ul>
+<li><code>pipeline</code> builds data</li>
+<li><code>analysis</code> reads data for notebooks/scripts</li>
+<li><code>api</code> is legacy and limited</li>
+</ul>
+<p>Named volumes and bind mounts keep outputs persistent and auditable.</p>
+<h2 id="3-what-the-pipeline-does-in-order">3) What the pipeline does (in order)<a class="headerlink" href="#3-what-the-pipeline-does-in-order" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong><code>workflow/scripts/preprocessing/mergers/utils.py</code></strong></li>
-<li>Modified <code>merge_dataframes_chunked()</code> to use <code>quoting=csv.QUOTE_NONNUMERIC</code> when writing CSV files</li>
-<li>
-<p>Ensures all non-numeric fields are quoted</p>
-</li>
-<li>
-<p><strong><code>workflow/scripts/utils/generate_reports.py</code></strong></p>
-</li>
-<li>Added <code>quoting=csv.QUOTE_NONNUMERIC</code> to all <code>pd.read_csv()</code> calls</li>
-<li>
-<p>Ensures consistent reading of quoted CSV files</p>
-</li>
-<li>
-<p><strong>Test Coverage</strong></p>
-</li>
-<li>Added <code>tests/test_csv_quoting.py</code> with comprehensive tests for CSV quoting behavior</li>
-<li>Updated <code>tests/test_chunked_merge.py</code> to use proper quoting when reading CSV files</li>
+<li><strong>Download public phage data</strong> from PhageScope sources</li>
+<li><strong>Merge and normalize metadata</strong> with schema contracts</li>
+<li><strong>Build merged FASTA files</strong> for phages and proteins + create indexes</li>
+<li><strong>Validate private sources</strong> (if folders exist in <code>private_data/</code>)</li>
+<li><strong>Prepare private mappings</strong> (private phages and hosts)</li>
+<li><strong>Parse host fields</strong> from phage metadata</li>
+<li><strong>Resolve hosts</strong> to NCBI assemblies</li>
+<li><strong>Download host FASTAs</strong> from NCBI RefSeq</li>
+<li><strong>Create DuckDB database</strong> and optimize analytical access</li>
+<li><strong>Store reports and logs</strong> (validation, quality, failure logs)</li>
 </ol>
-<h2 id="benefits">Benefits<a class="headerlink" href="#benefits" title="Permanent link">&para;</a></h2>
+<h2 id="4-resulting-data-product">4) Resulting data product<a class="headerlink" href="#4-resulting-data-product" title="Permanent link">&para;</a></h2>
+<p>After completion, PBI provides:</p>
 <ul>
-<li><strong>Robustness</strong>: All string fields are now consistently quoted, preventing tokenization errors</li>
-<li><strong>Data Integrity</strong>: Commas, quotes, and newlines in data fields are properly preserved</li>
-<li><strong>Predictability</strong>: CSV format is more consistent and easier to debug</li>
-<li><strong>Performance</strong>: Numeric fields remain unquoted for better readability and storage efficiency</li>
+<li>DuckDB database for metadata exploration</li>
+<li>Indexed phage/protein FASTA files</li>
+<li>Host FASTA mapping for host retrieval</li>
+<li>Private phage mapping when private sources are present</li>
+<li>Pipeline logs and reports for traceability</li>
 </ul>
-<h2 id="impact-on-existing-data">Impact on Existing Data<a class="headerlink" href="#impact-on-existing-data" title="Permanent link">&para;</a></h2>
+<h2 id="5-how-users-work-with-it">5) How users work with it<a class="headerlink" href="#5-how-users-work-with-it" title="Permanent link">&para;</a></h2>
+<p>The recommended interface is the analysis container with the <code>pbi</code> package.</p>
 <ul>
-<li><strong>Backward Compatibility</strong>: The fix is fully backward compatible</li>
-<li><strong>File Size</strong>: Minimal increase in CSV file size due to quoting overhead (typically &lt;5%)</li>
-<li><strong>Performance</strong>: No noticeable performance impact on reading/writing operations</li>
+<li>Use VS Code Dev Containers for full IDE workflow (preferred)</li>
+<li>Use Jupyter Lab for notebook-first workflow</li>
 </ul>
-<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
-<h3 id="before-quote_minimal-problematic">Before (QUOTE_MINIMAL - problematic)<a class="headerlink" href="#before-quote_minimal-problematic" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Phage_ID,Host,Length
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>NC_000866,Escherichia coli,48502
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>NC_001895,Mycobacterium smegmatis, strain MC2 155,172786
-</code></pre></div>
-In this example, the second data row would be parsed as having 4 fields instead of 3.</p>
-<h3 id="after-quote_nonnumeric-fixed">After (QUOTE_NONNUMERIC - fixed)<a class="headerlink" href="#after-quote_nonnumeric-fixed" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&quot;Phage_ID&quot;,&quot;Host&quot;,&quot;Length&quot;
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&quot;NC_000866&quot;,&quot;Escherichia coli&quot;,48502
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>&quot;NC_001895&quot;,&quot;Mycobacterium smegmatis, strain MC2 155&quot;,172786
-</code></pre></div>
-Now all string fields are quoted, ensuring correct parsing.</p>
-<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h2>
-<p>All tests pass successfully:
-- ✅ CSV quoting with commas
-- ✅ CSV quoting with quotes<br />
-- ✅ CSV quoting with newlines
-- ✅ CSV quoting with mixed types
-- ✅ Read/write compatibility
-- ✅ Chunked merge functionality
-- ✅ Code review (no issues)
-- ✅ Security scan (no vulnerabilities)</p>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<p>No action is required from users. The fix is automatically applied when:
-1. Merging metadata CSV files from multiple databases
-2. Generating HTML profiling reports</p>
-<p>The pipeline will now handle data with special characters (commas, quotes, newlines) correctly without tokenization errors.</p>
+<h2 id="6-where-to-go-next">6) Where to go next<a class="headerlink" href="#6-where-to-go-next" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../installation/">Installation</a></li>
+<li><a href="../analysis-guide/">Analysis container</a></li>
+<li><a href="../private-data-ingestion/">Private data ingestion</a></li>
+<li><a href="https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md">Notebooks README</a></li>
+</ul>
 
 
 
@@ -1580,10 +1608,10 @@ Now all string fields are quoted, ensuring correct parsing.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

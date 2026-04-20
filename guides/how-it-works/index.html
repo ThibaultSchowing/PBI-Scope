@@ -6,14 +6,14 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+        <meta name="description" content="Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation">
       
       
       
         <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/how-it-works/">
       
       
-        <link rel="prev" href="../installation/">
+        <link rel="prev" href="../storytelling/">
       
       
         <link rel="next" href="../analysis-guide/">
@@ -571,6 +571,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../storytelling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -634,10 +662,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-big-picture" class="md-nav__link">
+  <a href="#data-inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Big Picture
+        Data inputs
       
     </span>
   </a>
@@ -645,222 +673,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-snakemake-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The Snakemake Pipeline
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Snakemake Pipeline">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#pipeline-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pipeline Stages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#key-scripts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Scripts
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-pbi-python-package" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The pbi Python Package
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The pbi Python Package">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#main-classes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Main Classes
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Main Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#sequenceretriever" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SequenceRetriever
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#negativeexamplegenerator" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NegativeExampleGenerator
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phagehoststreamingdataset-phagehostindexeddataset" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PhageHostStreamingDataset / PhageHostIndexedDataset
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#key-data-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Data Files
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Data Files">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-host_fasta_mappingjson-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The host_fasta_mapping.json File
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-quick_connect-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How quick_connect() Works
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#host-resolution-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Resolution Process
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Host Resolution Process">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#resolution-stages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resolution Stages
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-rest-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The REST API
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The REST API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-the-api-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How the API Works
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Services
+        Pipeline stages
       
     </span>
   </a>
@@ -868,10 +684,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#data-flow-summary" class="md-nav__link">
+  <a href="#main-outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data Flow Summary
+        Main outputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-host-data-is-handled-outside-duckdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why host data is handled outside DuckDB
       
     </span>
   </a>
@@ -1555,10 +1393,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-big-picture" class="md-nav__link">
+  <a href="#data-inputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Big Picture
+        Data inputs
       
     </span>
   </a>
@@ -1566,222 +1404,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-snakemake-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The Snakemake Pipeline
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Snakemake Pipeline">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#pipeline-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pipeline Stages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#key-scripts" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Scripts
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-pbi-python-package" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The pbi Python Package
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The pbi Python Package">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#main-classes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Main Classes
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Main Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#sequenceretriever" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SequenceRetriever
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#negativeexamplegenerator" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        NegativeExampleGenerator
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phagehoststreamingdataset-phagehostindexeddataset" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        PhageHostStreamingDataset / PhageHostIndexedDataset
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#key-data-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Data Files
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Data Files">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-host_fasta_mappingjson-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The host_fasta_mapping.json File
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#how-quick_connect-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How quick_connect() Works
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#host-resolution-process" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Resolution Process
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Host Resolution Process">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#resolution-stages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Resolution Stages
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-rest-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The REST API
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The REST API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-the-api-works" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How the API Works
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Services
+        Pipeline stages
       
     </span>
   </a>
@@ -1789,10 +1415,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#data-flow-summary" class="md-nav__link">
+  <a href="#main-outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data Flow Summary
+        Main outputs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-host-data-is-handled-outside-duckdb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why host data is handled outside DuckDB
       
     </span>
   </a>
@@ -1820,299 +1468,38 @@
 
 
 <h1 id="how-pbi-works">How PBI Works<a class="headerlink" href="#how-pbi-works" title="Permanent link">&para;</a></h1>
-<p>This page explains the internal architecture of PBI: the Snakemake pipeline, the <code>pbi</code> Python package, key data files, and the REST API.</p>
-<h2 id="the-big-picture">The Big Picture<a class="headerlink" href="#the-big-picture" title="Permanent link">&para;</a></h2>
-<p>PBI is a data pipeline that:</p>
-<ol>
-<li>Downloads phage genomic data from <a href="https://phagescope.deepomics.org/database">PhageScope</a> (which aggregates 14+ databases)</li>
-<li>Parses host information from phage metadata and resolves it to NCBI RefSeq assemblies</li>
-<li>Downloads bacterial reference genomes from NCBI</li>
-<li>Merges everything into an optimized DuckDB database and indexed FASTA files</li>
-<li>Exposes this data through a Python package (<code>pbi</code>) and optionally a REST API</li>
-</ol>
-<p>The ultimate goal is to provide phage-host interaction data in an efficient, structured format for training neural networks and AI models.</p>
-<hr />
-<h2 id="the-snakemake-pipeline">The Snakemake Pipeline<a class="headerlink" href="#the-snakemake-pipeline" title="Permanent link">&para;</a></h2>
-<p><strong>Location</strong>: <code>workflow/</code></p>
-<p>The pipeline is orchestrated by <a href="https://snakemake.readthedocs.io/">Snakemake</a>, a workflow manager that tracks file dependencies and only re-runs steps when inputs change.</p>
-<h3 id="pipeline-stages">Pipeline Stages<a class="headerlink" href="#pipeline-stages" title="Permanent link">&para;</a></h3>
+<p>PBI orchestrates a full phage-host data pipeline using Snakemake and Docker.</p>
+<h2 id="data-inputs">Data inputs<a class="headerlink" href="#data-inputs" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Public phage input</strong>: PhageScope exports</li>
+<li><strong>Optional private input</strong>: <code>private_data/&lt;Source_DB&gt;/</code></li>
+<li><strong>Host genome source</strong>: NCBI RefSeq</li>
+</ul>
+<h2 id="pipeline-stages">Pipeline stages<a class="headerlink" href="#pipeline-stages" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>workflow/Snakefile
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>     │
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>     ├── rules/phagescope.smk   → Download phage metadata (CSV) + FASTA archives
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>     │                             from PhageScope API for each of the 14+ databases
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>     │
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>     ├── rules/database.smk     → Merge CSV files, create and optimize DuckDB database,
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>     │                             generate HTML validation reports
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>     │
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>     ├── rules/sequences.smk    → Merge and index phage/protein FASTA files with pyfaidx
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>     │
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>     └── rules/hosts.smk        → Parse host fields → resolve to NCBI assemblies →
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                                   download host FASTA files → build host_fasta_mapping.json
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   |
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   +-- phagescope.smk  -&gt; download public phage metadata/FASTA
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>   +-- database.smk    -&gt; merge metadata + build/optimize DuckDB
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>   +-- sequences.smk   -&gt; build/index phage &amp; protein FASTA
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>   +-- hosts.smk       -&gt; parse host fields, resolve assemblies, download host FASTA
 </code></pre></div>
-<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
-<p><strong><code>workflow/config/config.yaml</code></strong> — main pipeline configuration:
-- PhageScope API endpoints and database list
-- Output paths (all under <code>/data/</code> in Docker)
-- NCBI credentials (<code>email</code>, <code>api_key</code>)
-- Download parameters (concurrency, retries, timeouts)</p>
-<h3 id="key-scripts">Key Scripts<a class="headerlink" href="#key-scripts" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Script</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>workflow/scripts/preprocessing/mergers/</code></td>
-<td>Merge per-database CSV files into unified metadata</td>
-</tr>
-<tr>
-<td><code>workflow/scripts/database/create_duckdb.py</code></td>
-<td>Create the star-schema DuckDB database</td>
-</tr>
-<tr>
-<td><code>workflow/scripts/database/optimize_duckdb.py</code></td>
-<td>Add indexes and views for query performance</td>
-</tr>
-<tr>
-<td><code>workflow/scripts/database/validate_db.py</code></td>
-<td>Generate HTML validation reports</td>
-</tr>
-<tr>
-<td><code>workflow/scripts/sequences/</code></td>
-<td>FASTA merging, indexing, host genome downloads</td>
-</tr>
-<tr>
-<td><code>workflow/scripts/sequences/download_host_genomes_robust.py</code></td>
-<td>Multi-host parsing and NCBI download</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="the-pbi-python-package">The <code>pbi</code> Python Package<a class="headerlink" href="#the-pbi-python-package" title="Permanent link">&para;</a></h2>
-<p><strong>Location</strong>: <code>src/pbi/</code></p>
-<p>The <code>pbi</code> package is the primary way to interact with PBI data in Python. It handles database connections, sequence retrieval, and machine learning dataset preparation.</p>
-<h3 id="main-classes">Main Classes<a class="headerlink" href="#main-classes" title="Permanent link">&para;</a></h3>
-<h4 id="sequenceretriever"><code>SequenceRetriever</code><a class="headerlink" href="#sequenceretriever" title="Permanent link">&para;</a></h4>
-<p>The central class for accessing the database and FASTA files.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">quick_connect</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># In Docker (paths auto-detected via DATA_PATH environment variable)</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">retriever</span> <span class="o">=</span> <span class="n">quick_connect</span><span class="p">()</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Manual initialization</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">SequenceRetriever</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">retriever</span> <span class="o">=</span> <span class="n">SequenceRetriever</span><span class="p">(</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">db_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/databases/phage_database_optimized.duckdb&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">phage_fasta_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/sequences/all_phages.fasta&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">protein_fasta_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/sequences/all_proteins.fasta&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">host_mapping_path</span><span class="o">=</span><span class="s2">&quot;/data/processed/sequences/host_fasta_mapping.json&quot;</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">)</span>
-</code></pre></div>
-<p><strong>Key methods:</strong>
-- <code>get_phage_metadata(where=None, limit=None)</code> — query phage metadata
-- <code>get_host_metadata(where=None)</code> — query host metadata
-- <code>get_phage_host_pairs(where=None, limit=None, host_contig_mode='concat')</code> — get linked phage-host pairs
-- <code>get_sequences_by_ids(ids, sequence_type='phage')</code> — retrieve FASTA sequences
-- <code>get_stats()</code> — database and file statistics
-- <code>export_fasta(df, path, id_col)</code> — export sequences to FASTA</p>
-<h4 id="negativeexamplegenerator"><code>NegativeExampleGenerator</code><a class="headerlink" href="#negativeexamplegenerator" title="Permanent link">&para;</a></h4>
-<p>Generates negative training examples (non-interacting phage-host pairs) for machine learning.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">NegativeExampleGenerator</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">neg_gen</span> <span class="o">=</span> <span class="n">NegativeExampleGenerator</span><span class="p">(</span><span class="n">retriever</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">neg_gen</span><span class="o">.</span><span class="n">generate_balanced_dataset</span><span class="p">(</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">positive_pairs</span><span class="o">=</span><span class="n">pairs</span><span class="p">,</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">strategy</span><span class="o">=</span><span class="s1">&#39;mixed&#39;</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">positive_ratio</span><span class="o">=</span><span class="mf">0.5</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
-</code></pre></div>
-<h4 id="phagehoststreamingdataset-phagehostindexeddataset"><code>PhageHostStreamingDataset</code> / <code>PhageHostIndexedDataset</code><a class="headerlink" href="#phagehoststreamingdataset-phagehostindexeddataset" title="Permanent link">&para;</a></h4>
-<p>PyTorch-compatible dataset classes for memory-efficient streaming through large datasets.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">PhageHostStreamingDataset</span><span class="p">,</span> <span class="n">PhageHostIndexedDataset</span><span class="p">,</span> <span class="n">phage_host_collate_fn</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">dataset</span> <span class="o">=</span> <span class="n">PhageHostStreamingDataset</span><span class="p">(</span><span class="n">retriever</span><span class="p">,</span> <span class="n">where_clause</span><span class="o">=</span><span class="s2">&quot;p.Lifestyle = &#39;Lytic&#39;&quot;</span><span class="p">)</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">collate_fn</span><span class="o">=</span><span class="n">phage_host_collate_fn</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="key-data-files">Key Data Files<a class="headerlink" href="#key-data-files" title="Permanent link">&para;</a></h3>
-<p>The <code>pbi</code> package works with these key files produced by the pipeline:</p>
-<table>
-<thead>
-<tr>
-<th>File</th>
-<th>Location</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>phage_database_optimized.duckdb</code></td>
-<td><code>/data/processed/databases/</code></td>
-<td>Main DuckDB database with all phage metadata</td>
-</tr>
-<tr>
-<td><code>all_phages.fasta</code> + <code>.fai</code></td>
-<td><code>/data/processed/sequences/</code></td>
-<td>All phage genome sequences, indexed with pyfaidx</td>
-</tr>
-<tr>
-<td><code>all_proteins.fasta</code> + <code>.fai</code></td>
-<td><code>/data/processed/sequences/</code></td>
-<td>All protein sequences, indexed with pyfaidx</td>
-</tr>
-<tr>
-<td><code>host_fasta_mapping.json</code></td>
-<td><code>/data/processed/sequences/</code></td>
-<td>Maps host assembly IDs to their FASTA file paths</td>
-</tr>
-<tr>
-<td>Individual host FASTA files</td>
-<td><code>/data/processed/sequences/hosts/</code></td>
-<td>One FASTA file per downloaded host assembly</td>
-</tr>
-</tbody>
-</table>
-<h4 id="the-host_fasta_mappingjson-file">The <code>host_fasta_mapping.json</code> File<a class="headerlink" href="#the-host_fasta_mappingjson-file" title="Permanent link">&para;</a></h4>
-<p>This JSON file is the key index for host genome access. It maps each host assembly accession to the path of its downloaded FASTA file:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;GCF_000005845.2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/processed/sequences/hosts/Escherichia_coli_GCF_000005845.2.fna&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;GCF_000006945.2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/data/processed/sequences/hosts/Salmonella_enterica_GCF_000006945.2.fna&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="err">...</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">}</span>
-</code></pre></div>
-<p>The <code>SequenceRetriever</code> uses this file to efficiently retrieve individual host sequences without loading all host FASTA data into memory.</p>
-<h3 id="how-quick_connect-works">How <code>quick_connect()</code> Works<a class="headerlink" href="#how-quick_connect-works" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">quick_connect</span><span class="p">():</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">paths</span> <span class="o">=</span> <span class="n">get_default_paths</span><span class="p">()</span>  <span class="c1"># Reads DATA_PATH + PBI_PRIVATE_DATA_DIR</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">return</span> <span class="n">SequenceRetriever</span><span class="p">(</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">db_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">],</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">phage_fasta_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;phage_fasta&#39;</span><span class="p">],</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">protein_fasta_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;protein_fasta&#39;</span><span class="p">],</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">host_mapping_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;host_mapping&#39;</span><span class="p">],</span>  <span class="c1"># Uses host_fasta_mapping.json</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="n">private_phage_mapping_path</span><span class="o">=</span><span class="n">paths</span><span class="p">[</span><span class="s1">&#39;private_phage_mapping&#39;</span><span class="p">],</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="p">)</span>
-</code></pre></div>
-<p>In Docker, <code>DATA_PATH=/data/processed</code> and <code>PBI_PRIVATE_DATA_DIR=/private-data</code>, so <code>quick_connect()</code> can route both public and private sequence lookups.</p>
-<hr />
-<h2 id="host-resolution-process">Host Resolution Process<a class="headerlink" href="#host-resolution-process" title="Permanent link">&para;</a></h2>
-<p>Host genome resolution is a multi-stage process because phage metadata contains complex, semicolon-separated host fields like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>NA;GCA 900066335.1;UBA9502;Blautia obeum
-</code></pre></div>
-<h3 id="resolution-stages">Resolution Stages<a class="headerlink" href="#resolution-stages" title="Permanent link">&para;</a></h3>
-<ol>
-<li>
-<p><strong>Parsing</strong> (<code>phage_host_candidates.csv</code>): Each host field is split into tokens, classified as assembly accession, species name, or other identifier.</p>
-</li>
-<li>
-<p><strong>Resolution</strong> (<code>phage_host_assemblies.csv</code>): Each token is resolved to an NCBI assembly accession via:</p>
-</li>
-<li>Direct assembly lookup (for <code>GCA_</code>/<code>GCF_</code> accessions)</li>
-<li>NCBI Taxonomy + Assembly search (for species names)</li>
-<li>
-<p>Fallback species search (for other identifiers)</p>
-</li>
-<li>
-<p><strong>Download</strong>: Unique assemblies are downloaded from NCBI RefSeq, deduplicated across phages.</p>
-</li>
-<li>
-<p><strong>Mapping</strong>: <code>host_fasta_mapping.json</code> is built, mapping host IDs to downloaded FASTA files.</p>
-</li>
-</ol>
-<p>See the <a href="../../database/host-resolution/">Host Resolution Details</a> page for full documentation.</p>
-<hr />
-<h2 id="the-rest-api">The REST API<a class="headerlink" href="#the-rest-api" title="Permanent link">&para;</a></h2>
-<p><strong>Location</strong>: <code>api/</code></p>
-<p>The REST API is built with <a href="https://fastapi.tiangolo.com/">FastAPI</a> and provides HTTP endpoints for querying the database and retrieving sequences.</p>
-<blockquote>
-<p>⚠️ <strong>Note</strong>: The REST API is currently a <strong>Work In Progress</strong> and is not the recommended way to interact with PBI data. It has not been updated for host management. For analysis and machine learning, use the <a href="../analysis-guide/">analysis container</a> with the <code>pbi</code> Python package directly.</p>
-</blockquote>
-<h3 id="how-the-api-works">How the API Works<a class="headerlink" href="#how-the-api-works" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># api/app.py — simplified structure</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">duckdb</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># On startup, connects to DuckDB and indexes FASTA files</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># Exposes endpoints for health checks, SQL queries, and sequence retrieval</span>
-</code></pre></div>
-<p>Key endpoints:
-- <code>GET /health</code> — health check
-- <code>GET /stats</code> — database statistics
-- <code>POST /query</code> — execute SQL queries
-- <code>POST /phages</code> — retrieve phage sequences
-- <code>POST /phages/fasta</code> — export FASTA format</p>
-<p>See the <a href="../../api/overview/">API Reference</a> for full documentation.</p>
-<hr />
-<h2 id="docker-services">Docker Services<a class="headerlink" href="#docker-services" title="Permanent link">&para;</a></h2>
-<p>The <code>docker-compose.yml</code> defines three services:</p>
-<table>
-<thead>
-<tr>
-<th>Service</th>
-<th>Image</th>
-<th>Purpose</th>
-<th>Port</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>pipeline</code></td>
-<td><code>pbi-pipeline</code></td>
-<td>Runs Snakemake to build the database</td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>analysis</code></td>
-<td><code>pbi-analysis</code></td>
-<td>Jupyter Lab with <code>pbi</code> package pre-installed</td>
-<td>8888</td>
-</tr>
-<tr>
-<td><code>api</code></td>
-<td><code>pbi-api</code></td>
-<td>FastAPI REST server</td>
-<td>8000</td>
-</tr>
-</tbody>
-</table>
-<p>All services share the <code>pbi-data</code> Docker volume (read-only for analysis and API, read-write for pipeline).</p>
-<hr />
-<h2 id="data-flow-summary">Data Flow Summary<a class="headerlink" href="#data-flow-summary" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>PhageScope API (14+ databases)
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>         │
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>         ▼  [phagescope.smk]
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>   Raw CSVs + compressed FASTA archives
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>   /data/raw/
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>         │
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>         ▼  [database.smk + sequences.smk]
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>   Merged metadata + merged FASTA files
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>   /data/intermediate/
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>         │
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>         ▼  [database.smk]
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>   phage_database_optimized.duckdb   ←── all phage/protein metadata
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>   /data/processed/databases/
-<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>         │
-<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>   all_phages.fasta + .fai           ←── phage genome sequences
-<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>   all_proteins.fasta + .fai         ←── protein sequences
-<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>   /data/processed/sequences/
-<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>         │
-<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>NCBI RefSeq
-<a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>         │
-<a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a>         ▼  [hosts.smk]
-<a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a>   Individual host FASTA files       ←── bacterial reference genomes
-<a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a>   host_fasta_mapping.json           ←── index: host_id → FASTA path
-<a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a>   /data/processed/sequences/
-<a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a>         │
-<a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a>         ▼
-<a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a>   pbi Python package (SequenceRetriever)
-<a id="__codelineno-8-28" name="__codelineno-8-28" href="#__codelineno-8-28"></a>         │
-<a id="__codelineno-8-29" name="__codelineno-8-29" href="#__codelineno-8-29"></a>         ├──▶ Jupyter Lab notebooks (analysis container, port 8888)
-<a id="__codelineno-8-30" name="__codelineno-8-30" href="#__codelineno-8-30"></a>         └──▶ REST API (api container, port 8000) [untested]
-</code></pre></div>
+<p>When private source folders are present, validation and private mapping preparation run automatically before final outputs are finalized.</p>
+<h2 id="main-outputs">Main outputs<a class="headerlink" href="#main-outputs" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>phage_database_optimized.duckdb</code></li>
+<li><code>all_phages.fasta(.fai)</code></li>
+<li><code>all_proteins.fasta(.fai)</code></li>
+<li><code>host_fasta_mapping.json</code></li>
+<li><code>private_phage_mapping.json</code> (if private sources exist)</li>
+<li>reports and logs</li>
+</ul>
+<h2 id="access-model">Access model<a class="headerlink" href="#access-model" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Primary</strong>: <code>pbi</code> package in the analysis container</li>
+<li><strong>REST API</strong>: currently not supported for sequence-heavy retrieval (performance limitation)</li>
+</ul>
+<h2 id="why-host-data-is-handled-outside-duckdb">Why host data is handled outside DuckDB<a class="headerlink" href="#why-host-data-is-handled-outside-duckdb" title="Permanent link">&para;</a></h2>
+<p>Host genomes are large and variable; they are stored as individual FASTA files and mapped through JSON/CSV link files for efficient retrieval.</p>
 
 
 

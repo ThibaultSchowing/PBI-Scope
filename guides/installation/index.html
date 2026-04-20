@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+        <meta name="description" content="Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation">
       
       
       
@@ -16,7 +16,7 @@
         <link rel="prev" href="../overview/">
       
       
-        <link rel="next" href="../how-it-works/">
+        <link rel="next" href="../storytelling/">
       
       
         
@@ -606,10 +606,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        Requirements
       
     </span>
   </a>
@@ -617,60 +617,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-install-docker" class="md-nav__link">
+  <a href="#1-clone-and-configure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Install Docker
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 1: Install Docker">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#on-linux-ubuntudebian" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        On Linux (Ubuntu/Debian)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#on-macos" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        On macOS
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#on-windows-wsl2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        On Windows (WSL2)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-clone-the-repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: Clone the Repository
+        1) Clone and configure
       
     </span>
   </a>
@@ -678,10 +628,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-3-configure-the-pipeline" class="md-nav__link">
+  <a href="#2-run-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: Configure the Pipeline
+        2) Run pipeline
       
     </span>
   </a>
@@ -689,99 +639,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-4-build-and-run-the-pipeline-container" class="md-nav__link">
+  <a href="#3-start-analysis-container" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: Build and Run the Pipeline Container
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 4: Build and Run the Pipeline Container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#41-build-the-pipeline-image" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4.1 Build the Pipeline Image
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#42-run-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4.2 Run the Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-connect-to-the-analysis-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 5: Connect to the Analysis Container
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 5: Connect to the Analysis Container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#51-set-up-ssh-port-forwarding-for-remote-servers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.1 Set Up SSH Port Forwarding (for Remote Servers)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#52-build-and-start-the-analysis-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.2 Build and Start the Analysis Container
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#53-access-jupyter-lab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.3 Access Jupyter Lab
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment Variables
+        3) Start analysis container
       
     </span>
   </a>
@@ -789,71 +650,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
+  <a href="#preferred-analysis-access" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Troubleshooting
+        Preferred analysis access
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#no-space-left-on-device" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        "No space left on device"
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-fails-mid-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Fails Mid-Run
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jupyter-lab-not-loading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Jupyter Lab Not Loading
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-runs-again-after-completion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Runs Again After Completion
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#oom-caution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        OOM caution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#private-data-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Private data note
       
     </span>
   </a>
@@ -864,6 +686,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../storytelling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1565,10 +1415,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#system-requirements" class="md-nav__link">
+  <a href="#requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        System Requirements
+        Requirements
       
     </span>
   </a>
@@ -1576,60 +1426,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-install-docker" class="md-nav__link">
+  <a href="#1-clone-and-configure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Install Docker
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 1: Install Docker">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#on-linux-ubuntudebian" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        On Linux (Ubuntu/Debian)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#on-macos" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        On macOS
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#on-windows-wsl2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        On Windows (WSL2)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-clone-the-repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: Clone the Repository
+        1) Clone and configure
       
     </span>
   </a>
@@ -1637,10 +1437,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-3-configure-the-pipeline" class="md-nav__link">
+  <a href="#2-run-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 3: Configure the Pipeline
+        2) Run pipeline
       
     </span>
   </a>
@@ -1648,99 +1448,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-4-build-and-run-the-pipeline-container" class="md-nav__link">
+  <a href="#3-start-analysis-container" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 4: Build and Run the Pipeline Container
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 4: Build and Run the Pipeline Container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#41-build-the-pipeline-image" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4.1 Build the Pipeline Image
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#42-run-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4.2 Run the Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-connect-to-the-analysis-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 5: Connect to the Analysis Container
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 5: Connect to the Analysis Container">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#51-set-up-ssh-port-forwarding-for-remote-servers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.1 Set Up SSH Port Forwarding (for Remote Servers)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#52-build-and-start-the-analysis-container" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.2 Build and Start the Analysis Container
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#53-access-jupyter-lab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5.3 Access Jupyter Lab
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment Variables
+        3) Start analysis container
       
     </span>
   </a>
@@ -1748,71 +1459,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
+  <a href="#preferred-analysis-access" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Troubleshooting
+        Preferred analysis access
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#no-space-left-on-device" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        "No space left on device"
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-fails-mid-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Fails Mid-Run
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#jupyter-lab-not-loading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Jupyter Lab Not Loading
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pipeline-runs-again-after-completion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Runs Again After Completion
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#oom-caution" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        OOM caution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#private-data-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Private data note
       
     </span>
   </a>
@@ -1840,182 +1512,51 @@
 
 
 <h1 id="installation-guide">Installation Guide<a class="headerlink" href="#installation-guide" title="Permanent link">&para;</a></h1>
-<p>This guide explains how to install and configure PBI using Docker, which is the <strong>primary and recommended execution method</strong>. Docker is required to run the full pipeline, as the host genome download step requires significant disk space and benefits from containerization.</p>
-<blockquote>
-<p><strong>Note on local execution</strong>: It is technically possible to run the pipeline locally without Docker (using Snakemake directly), but this is not recommended for the full pipeline due to the large disk space requirements (~225 GB) and complex dependency management. See the <a href="../pipeline-execution/">Pipeline Execution Guide</a> for local execution details.</p>
-</blockquote>
-<h2 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">&para;</a></h2>
+<p>PBI is designed to run with Docker.</p>
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Operating System</strong>: Linux/macOS (Windows via WSL2)</li>
-<li><strong>Docker</strong>: Version 20.10 or later</li>
-<li><strong>Docker Compose</strong>: Version 2.0 or later</li>
-<li><strong>Disk Space</strong>: At least <strong>225 GB</strong> of free disk space (for data, cache, and Docker volumes)</li>
-<li><strong>RAM</strong>: 16 GB minimum (32 GB recommended)</li>
-<li><strong>Internet</strong>: Stable connection for initial data downloads</li>
-<li><strong>Time</strong>:</li>
-<li>First pipeline run (phage metadata only): <strong>~4 hours</strong></li>
-<li>Full pipeline (including host genome resolution + download): <strong>~12–18 hours</strong></li>
+<li>Docker 20.10+</li>
+<li>Docker Compose 2+</li>
+<li>225+ GB free disk</li>
+<li>16 GB RAM minimum (32 GB recommended)</li>
 </ul>
-<blockquote>
-<p><strong>Tip</strong>: Use <code>tmux</code> or another terminal multiplexer to keep your session alive during long pipeline runs, especially when connecting via SSH.</p>
-</blockquote>
-<h2 id="step-1-install-docker">Step 1: Install Docker<a class="headerlink" href="#step-1-install-docker" title="Permanent link">&para;</a></h2>
-<h3 id="on-linux-ubuntudebian">On Linux (Ubuntu/Debian)<a class="headerlink" href="#on-linux-ubuntudebian" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Install Docker</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://get.docker.com<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span><span class="nv">$USER</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>newgrp<span class="w"> </span>docker
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># Install Docker Compose plugin</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>docker-compose-plugin
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Verify</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>docker<span class="w"> </span>--version
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>docker<span class="w"> </span>compose<span class="w"> </span>version
+<h2 id="1-clone-and-configure">1) Clone and configure<a class="headerlink" href="#1-clone-and-configure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI.git
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>PBI
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_EMAIL</span><span class="o">=</span><span class="s2">&quot;your.email@example.com&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_API_KEY</span><span class="o">=</span><span class="s2">&quot;YOUR_KEY&quot;</span>
 </code></pre></div>
-<h3 id="on-macos">On macOS<a class="headerlink" href="#on-macos" title="Permanent link">&para;</a></h3>
-<p>Download and install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a>. Docker Compose is included.</p>
-<h3 id="on-windows-wsl2">On Windows (WSL2)<a class="headerlink" href="#on-windows-wsl2" title="Permanent link">&para;</a></h3>
-<p>Install <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a> with WSL2 backend enabled. Run all commands from within your WSL2 terminal.</p>
-<h2 id="step-2-clone-the-repository">Step 2: Clone the Repository<a class="headerlink" href="#step-2-clone-the-repository" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI.git
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>PBI
+<h2 id="2-run-pipeline">2) Run pipeline<a class="headerlink" href="#2-run-pipeline" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
 </code></pre></div>
-<h2 id="step-3-configure-the-pipeline">Step 3: Configure the Pipeline<a class="headerlink" href="#step-3-configure-the-pipeline" title="Permanent link">&para;</a></h2>
-<p>Before running, set your NCBI credentials as environment variables (required for host genome downloads). Using environment variables keeps sensitive credentials out of version-controlled config files.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_EMAIL</span><span class="o">=</span><span class="s2">&quot;your.email@example.com&quot;</span><span class="w">   </span><span class="c1"># Required by NCBI Terms of Service</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_API_KEY</span><span class="o">=</span><span class="s2">&quot;YOUR_NCBI_API_KEY&quot;</span><span class="w">      </span><span class="c1"># Optional but strongly recommended (10x faster)</span>
-</code></pre></div>
-<p>Alternatively, copy the provided example and create a <code>.env</code> file in the project root (Docker Compose reads it automatically):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># Edit .env and fill in your credentials</span>
-</code></pre></div>
-<blockquote>
-<p><strong>NCBI API Key</strong>: Get a free API key at https://www.ncbi.nlm.nih.gov/account/ — it increases the download rate limit from 3 to 10 requests/second, significantly speeding up the host genome download stage.</p>
-</blockquote>
-<h2 id="step-4-build-and-run-the-pipeline-container">Step 4: Build and Run the Pipeline Container<a class="headerlink" href="#step-4-build-and-run-the-pipeline-container" title="Permanent link">&para;</a></h2>
-<h3 id="41-build-the-pipeline-image">4.1 Build the Pipeline Image<a class="headerlink" href="#41-build-the-pipeline-image" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
-</code></pre></div>
-<h3 id="42-run-the-pipeline">4.2 Run the Pipeline<a class="headerlink" href="#42-run-the-pipeline" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Run in a tmux session to survive SSH disconnections</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>tmux<span class="w"> </span>new<span class="w"> </span>-s<span class="w"> </span>pbi-pipeline
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
-</code></pre></div>
-<p><strong>What happens:</strong></p>
+<p>Pipeline order:</p>
 <ol>
-<li><strong>Stage 1 — Phage data</strong> (~4 hours): Downloads and processes phage metadata and FASTA sequences from 14+ databases via PhageScope</li>
-<li><strong>Stage 2 — Host resolution</strong> (~12–18 hours): Parses host fields from phage metadata, resolves them to NCBI assemblies, downloads reference genomes</li>
+<li>public phage download + merge</li>
+<li>private source validation/ingestion (if present)</li>
+<li>host resolution/download from NCBI</li>
+<li>database + indexes + reports</li>
 </ol>
-<p><strong>Output</strong> (stored in the <code>pbi-data</code> Docker volume):
-- <code>/data/processed/databases/phage_database_optimized.duckdb</code> — Main database
-- <code>/data/processed/sequences/all_phages.fasta</code> (+ <code>.fai</code> index)
-- <code>/data/processed/sequences/all_proteins.fasta</code> (+ <code>.fai</code> index)
-- <code>/data/processed/sequences/host_fasta_mapping.json</code> — Maps host IDs to FASTA file paths
-- <code>/data/processed/reports/</code> — HTML validation and statistics reports</p>
-<h2 id="step-5-connect-to-the-analysis-container">Step 5: Connect to the Analysis Container<a class="headerlink" href="#step-5-connect-to-the-analysis-container" title="Permanent link">&para;</a></h2>
-<p>The analysis container provides a Jupyter Lab environment with direct access to the database and sequences.</p>
-<h3 id="51-set-up-ssh-port-forwarding-for-remote-servers">5.1 Set Up SSH Port Forwarding (for Remote Servers)<a class="headerlink" href="#51-set-up-ssh-port-forwarding-for-remote-servers" title="Permanent link">&para;</a></h3>
-<p>If PBI is running on a remote server, forward port 8888 <strong>before</strong> you start the container:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># On your local machine</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>username@your-server-address
+<h2 id="3-start-analysis-container">3) Start analysis container<a class="headerlink" href="#3-start-analysis-container" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
 </code></pre></div>
-<p>This maps port 8888 on the remote server to your local machine so you can open Jupyter Lab in your browser at <code>http://localhost:8888</code>.</p>
-<h3 id="52-build-and-start-the-analysis-container">5.2 Build and Start the Analysis Container<a class="headerlink" href="#52-build-and-start-the-analysis-container" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Build the analysis image</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Start in detached mode</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
+<p>If remote:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>user@server
 </code></pre></div>
-<h3 id="53-access-jupyter-lab">5.3 Access Jupyter Lab<a class="headerlink" href="#53-access-jupyter-lab" title="Permanent link">&para;</a></h3>
-<p>Open your browser and navigate to:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>http://localhost:8888
-</code></pre></div>
-<p>No password is required (local development mode). Start with the demo notebooks in the <code>notebooks/</code> directory.</p>
-<blockquote>
-<p>⚠️ <strong>Security Warning</strong>: Do not expose port 8888 to untrusted networks. Always use SSH tunneling for remote access.</p>
-</blockquote>
-<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Purpose</th>
-<th>Default</th>
-<th>Required</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>DATA_PATH</code></td>
-<td>Path for API/analysis to find processed data</td>
-<td><code>/data/processed</code></td>
-<td>Set automatically in Docker</td>
-</tr>
-<tr>
-<td><code>NCBI_EMAIL</code></td>
-<td>Your email for NCBI API</td>
-<td>—</td>
-<td>Yes, for genome downloads</td>
-</tr>
-<tr>
-<td><code>NCBI_API_KEY</code></td>
-<td>NCBI API key (increases rate limit)</td>
-<td>—</td>
-<td>Optional but recommended</td>
-</tr>
-</tbody>
-</table>
-<p><code>NCBI_EMAIL</code> and <code>NCBI_API_KEY</code> must be set in your shell <strong>before</strong> running Docker Compose, or placed in a <code>.env</code> file at the project root. Docker Compose reads the <code>.env</code> file automatically and passes both variables into the container. <code>DATA_PATH</code> and other internal variables are configured in <code>docker-compose.yml</code> and set automatically.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Option A: export in your current shell session</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_EMAIL</span><span class="o">=</span><span class="s2">&quot;your.email@example.com&quot;</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">NCBI_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-api-key&quot;</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># Option B: .env file in the project root (persists across sessions)</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># then edit .env with your values</span>
-</code></pre></div>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="no-space-left-on-device">"No space left on device"<a class="headerlink" href="#no-space-left-on-device" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Check disk space</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>df<span class="w"> </span>-h
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Clean Docker system (careful: removes unused images and volumes)</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>docker<span class="w"> </span>system<span class="w"> </span>prune
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="c1"># Clean only the Snakemake cache volume (preserves data)</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>./cleanup_cache.sh
-</code></pre></div>
-<h3 id="pipeline-fails-mid-run">Pipeline Fails Mid-Run<a class="headerlink" href="#pipeline-fails-mid-run" title="Permanent link">&para;</a></h3>
-<p>The pipeline uses Snakemake's file-based checkpointing. If it fails, simply re-run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
-</code></pre></div>
-<p>Already-completed steps and downloaded files will be reused. You can also use:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline<span class="w"> </span>snakemake<span class="w"> </span>--cores<span class="w"> </span><span class="m">4</span><span class="w"> </span>--use-conda<span class="w"> </span>--rerun-incomplete
-</code></pre></div>
-<h3 id="jupyter-lab-not-loading">Jupyter Lab Not Loading<a class="headerlink" href="#jupyter-lab-not-loading" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Check container status</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>docker<span class="w"> </span>ps<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>analysis
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Check logs</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>docker<span class="w"> </span>compose<span class="w"> </span>logs<span class="w"> </span>analysis
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># Restart</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>docker<span class="w"> </span>compose<span class="w"> </span>restart<span class="w"> </span>analysis
-</code></pre></div>
-<h3 id="pipeline-runs-again-after-completion">Pipeline Runs Again After Completion<a class="headerlink" href="#pipeline-runs-again-after-completion" title="Permanent link">&para;</a></h3>
-<p>Ensure that the <code>pbi-data</code> volume is intact:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>pbi-data:/data<span class="w"> </span>alpine<span class="w"> </span>ls<span class="w"> </span>-lh<span class="w"> </span>/data/processed/databases/
-</code></pre></div>
-<p>If the database file is missing, the pipeline needs to re-run.</p>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>Then open <code>http://localhost:8888</code>.</p>
+<h2 id="preferred-analysis-access">Preferred analysis access<a class="headerlink" href="#preferred-analysis-access" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Read <a href="../how-it-works/">How It Works</a> to understand the pipeline and <code>pbi</code> package</li>
-<li>Explore the database with <a href="../analysis-guide/">Analysis Container Usage</a></li>
-<li>Check the <a href="../docker-guide/">Docker Guide</a> for advanced Docker operations</li>
+<li><strong>Preferred</strong>: VS Code + <strong>Dev Containers / VS Code Remote – Containers</strong> attached to the running <code>analysis</code> service.</li>
+<li><strong>Stable fallback</strong>: Jupyter Lab on <code>http://localhost:8888</code>.</li>
 </ul>
+<p>Jupyter works well, but VS Code is preferred because it provides a full IDE workflow.</p>
+<h2 id="oom-caution">OOM caution<a class="headerlink" href="#oom-caution" title="Permanent link">&para;</a></h2>
+<p>For large joins/sequence retrieval, use chunked queries and avoid loading very large tables into memory in a single cell.</p>
+<h2 id="private-data-note">Private data note<a class="headerlink" href="#private-data-note" title="Permanent link">&para;</a></h2>
+<p>If you use <code>private_data/</code> sources, each source must include host FASTA files (<code>hosts/&lt;Host_ID&gt;.fna</code>) matching metadata Host_ID values.
+See <a href="../private-data-ingestion/">Private Data Ingestion</a>.</p>
 
 
 

@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+        <meta name="description" content="Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation">
       
       
       
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#api-work-in-progress" class="md-skip">
+        <a href="#api-status" class="md-skip">
           Skip to content
         </a>
       
@@ -571,6 +571,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../guides/storytelling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../guides/how-it-works/" class="md-nav__link">
         
   
@@ -1036,10 +1064,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#current-status" class="md-nav__link">
+  <a href="#current-position" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current Status
+        Current position
       
     </span>
   </a>
@@ -1047,49 +1075,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#starting-the-api" class="md-nav__link">
+  <a href="#version" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starting the API
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Starting the API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#docker-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker (recommended)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#local-development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Local (development)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#base-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Base URL
+        Version
       
     </span>
   </a>
@@ -1097,321 +1086,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#interactive-documentation" class="md-nav__link">
+  <a href="#recommendation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interactive Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Endpoints
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Endpoints">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#health-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Health &amp; Status
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Health &amp; Status">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-health" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /health
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-stats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /stats
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#data-querying" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Querying
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Querying">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-query" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /query
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-phages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fasta-export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FASTA Export
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="FASTA Export">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-phagesfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteinsfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-schema-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Schema Reference
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Database Schema Reference">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fact-table" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fact Table
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dimension-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dimension Tables
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#query-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Query Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Query Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-phages-by-host" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Get Phages by Host
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-large-phages-with-many-proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Get Large Phages with Many Proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#export-specific-phages-to-fasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Export Specific Phages to FASTA
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#using-python" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using Python
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-in-development-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running in Development Mode
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment Variables
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#error-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Error Handling
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#known-limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Known Limitations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support
+        Recommendation
       
     </span>
   </a>
@@ -1693,10 +1371,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#current-status" class="md-nav__link">
+  <a href="#current-position" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current Status
+        Current position
       
     </span>
   </a>
@@ -1704,49 +1382,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#starting-the-api" class="md-nav__link">
+  <a href="#version" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starting the API
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Starting the API">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#docker-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker (recommended)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#local-development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Local (development)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#base-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Base URL
+        Version
       
     </span>
   </a>
@@ -1754,321 +1393,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#interactive-documentation" class="md-nav__link">
+  <a href="#recommendation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interactive Documentation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#endpoints" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Endpoints
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Endpoints">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#health-status" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Health &amp; Status
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Health &amp; Status">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-health" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /health
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-stats" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        GET /stats
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#data-querying" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Querying
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Querying">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-query" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /query
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-phages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fasta-export" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FASTA Export
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="FASTA Export">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#post-phagesfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /phages/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#post-proteinsfasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        POST /proteins/fasta
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-schema-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Schema Reference
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Database Schema Reference">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fact-table" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fact Table
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dimension-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dimension Tables
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#query-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Query Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Query Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#get-phages-by-host" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Get Phages by Host
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#get-large-phages-with-many-proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Get Large Phages with Many Proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#export-specific-phages-to-fasta" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Export Specific Phages to FASTA
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#using-python" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using Python
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-in-development-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running in Development Mode
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Environment Variables
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#error-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Error Handling
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#known-limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Known Limitations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Support
+        Recommendation
       
     </span>
   </a>
@@ -2095,360 +1423,27 @@
   
 
 
-<h1 id="api-work-in-progress">API — Work In Progress<a class="headerlink" href="#api-work-in-progress" title="Permanent link">&para;</a></h1>
+<h1 id="api-status">API Status<a class="headerlink" href="#api-status" title="Permanent link">&para;</a></h1>
 <div class="admonition warning">
-<p class="admonition-title">🚧 Work In Progress</p>
-<p>The REST API is a <strong>Work In Progress</strong> and will be updated soon.</p>
+<p class="admonition-title">Limited support</p>
+<p>The REST API is currently <strong>not supported for sequence-heavy retrieval</strong>.</p>
+<p>It is kept for lightweight metadata/database exploration only, and will be redesigned later.</p>
+</div>
+<h2 id="current-position">Current position<a class="headerlink" href="#current-position" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The API container exists and basic endpoints are implemented, but the API has <strong>not been tested</strong> and has <strong>not been updated since host management was added</strong> to the pipeline.</li>
-<li>It is currently <strong>not the recommended way</strong> to interact with PBI data.</li>
-<li>For efficient data access and machine learning workflows, use the <a href="../../guides/analysis-guide/">analysis container</a> with the <code>pbi</code> Python package directly (5–50× faster for bulk operations).</li>
+<li>Basic endpoints exist (<code>/health</code>, <code>/stats</code>, <code>/query</code>)</li>
+<li>Sequence endpoints are not recommended for large workloads</li>
+<li>Main supported interface remains the analysis container + <code>pbi</code> package</li>
 </ul>
-</div>
-<p>The PBI API provides a REST interface for querying the phage database and retrieving sequences programmatically. It may be useful for lightweight external integrations where only a few records need to be retrieved. Full documentation and host-related endpoints will be added once the API is updated.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Status</label><label for="__tabbed_1_2">Quick Start</label><label for="__tabbed_1_3">Endpoints</label><label for="__tabbed_1_4">Schema Reference</label><label for="__tabbed_1_5">Examples</label><label for="__tabbed_1_6">Development</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<h2 id="current-status">Current Status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>Status</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Database Connection</td>
-<td>Implemented</td>
-<td>Connects to DuckDB database</td>
-</tr>
-<tr>
-<td>Health Endpoints</td>
-<td>Implemented</td>
-<td><code>/health</code> and <code>/stats</code></td>
-</tr>
-<tr>
-<td>SQL Query Endpoint</td>
-<td>Implemented</td>
-<td><code>/query</code> with basic safety checks</td>
-</tr>
-<tr>
-<td>Phage Retrieval</td>
-<td>Implemented</td>
-<td>Query and ID-based retrieval</td>
-</tr>
-<tr>
-<td>Protein Retrieval</td>
-<td>Implemented</td>
-<td>Query and ID-based retrieval</td>
-</tr>
-<tr>
-<td>FASTA Export</td>
-<td>Implemented</td>
-<td>Export sequences to FASTA format</td>
-</tr>
-<tr>
-<td><strong>Host Endpoints</strong></td>
-<td>❌ <strong>Not yet added</strong></td>
-<td>API not updated for host management</td>
-</tr>
-<tr>
-<td><strong>Testing</strong></td>
-<td>❌ <strong>Not done</strong></td>
-<td>API has not been validated</td>
-</tr>
-<tr>
-<td>Authentication</td>
-<td>Planned</td>
-<td>No auth currently</td>
-</tr>
-<tr>
-<td>Rate Limiting</td>
-<td>Planned</td>
-<td>Not yet implemented</td>
-</tr>
-<tr>
-<td>Batch Operations</td>
-<td>Planned</td>
-<td>Bulk data operations</td>
-</tr>
-</tbody>
-</table>
-<p>See <a href="../../future-steps/">Future Steps</a> for planned API enhancements.</p>
-</div>
-<div class="tabbed-block">
-<h2 id="starting-the-api">Starting the API<a class="headerlink" href="#starting-the-api" title="Permanent link">&para;</a></h2>
-<h3 id="docker-recommended">Docker (recommended)<a class="headerlink" href="#docker-recommended" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Build and start the API container</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>api
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>api
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># API available at http://localhost:8000</span>
-</code></pre></div>
-<h3 id="local-development">Local (development)<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># From the project root</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd</span><span class="w"> </span>api
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>uvicorn<span class="w"> </span>app:app<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Or with auto-reload</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>uvicorn<span class="w"> </span>app:app<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span>--reload
-</code></pre></div>
-<h2 id="base-url">Base URL<a class="headerlink" href="#base-url" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>http://localhost:8000
-</code></pre></div>
-<h2 id="interactive-documentation">Interactive Documentation<a class="headerlink" href="#interactive-documentation" title="Permanent link">&para;</a></h2>
-<p>The API provides <strong>auto-generated interactive documentation</strong>:</p>
-<ul>
-<li><strong>Swagger UI</strong>: <a href="http://localhost:8000/docs">http://localhost:8000/docs</a></li>
-<li><strong>ReDoc</strong>: <a href="http://localhost:8000/redoc">http://localhost:8000/redoc</a></li>
-</ul>
-<p>👉 <strong>We recommend using the Swagger UI</strong> for exploring and testing the API interactively.</p>
-</div>
-<div class="tabbed-block">
-<h2 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h2>
-<h3 id="health-status">Health &amp; Status<a class="headerlink" href="#health-status" title="Permanent link">&para;</a></h3>
-<h4 id="get"><code>GET /</code><a class="headerlink" href="#get" title="Permanent link">&para;</a></h4>
-<p>API information and available endpoints.</p>
-<p><strong>Response:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PBI API&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.1.0&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">&quot;endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">]</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="p">}</span>
-</code></pre></div></p>
-<h4 id="get-health"><code>GET /health</code><a class="headerlink" href="#get-health" title="Permanent link">&para;</a></h4>
-<p>Health check — verifies database connection.</p>
-<p><strong>Response:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;healthy&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;database&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;connected&quot;</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Status Codes:</strong></p>
-<ul>
-<li><code>200</code>: API and database are healthy</li>
-<li><code>503</code>: Database connection failed</li>
-</ul>
-<h4 id="get-stats"><code>GET /stats</code><a class="headerlink" href="#get-stats" title="Permanent link">&para;</a></h4>
-<p>Database statistics.</p>
-<p><strong>Response:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;phages&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">873718</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;proteins&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">43088582</span><span class="p">,</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="nt">&quot;trna_tmrna&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">702607</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="nt">&quot;terminators&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6462417</span><span class="p">,</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">&quot;anti_crispr&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">307329</span><span class="p">,</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">&quot;virulent_factors&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">41609</span><span class="p">,</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="nt">&quot;transmembrane&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4020770</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="p">}</span>
-</code></pre></div></p>
-<hr />
-<h3 id="data-querying">Data Querying<a class="headerlink" href="#data-querying" title="Permanent link">&para;</a></h3>
-<h4 id="post-query"><code>POST /query</code><a class="headerlink" href="#post-query" title="Permanent link">&para;</a></h4>
-<p>Execute a custom SQL query against the database.</p>
-<p>⚠️ <strong>Warning</strong>: Use with caution — custom SQL queries are not fully sanitized.</p>
-<p><strong>Request Body:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT * FROM fact_phages LIMIT 10&quot;</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Response:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">...</span><span class="p">],</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;row_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Example:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/query<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;query&quot;: &quot;SELECT Source_DB, COUNT(*) as count FROM fact_phages GROUP BY Source_DB&quot;}&#39;</span>
-</code></pre></div></p>
-<h4 id="post-phages"><code>POST /phages</code><a class="headerlink" href="#post-phages" title="Permanent link">&para;</a></h4>
-<p>Retrieve phage sequences and metadata.</p>
-<p><strong>Request Body (by query):</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT Phage_ID FROM fact_phages WHERE Length &gt; 100000&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Request Body (by IDs):</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;phage_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;NC_000866&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;NC_001895&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;NC_002014&quot;</span><span class="p">]</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Response:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;phages&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">      </span><span class="nt">&quot;phage_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;NC_000866&quot;</span><span class="p">,</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">      </span><span class="nt">&quot;sequence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ATCG...&quot;</span><span class="p">,</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">      </span><span class="nt">&quot;length&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">48502</span><span class="p">,</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">      </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">}</span>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span><span class="p">],</span>
-<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
-<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="p">}</span>
-</code></pre></div></p>
-<h4 id="post-proteins"><code>POST /proteins</code><a class="headerlink" href="#post-proteins" title="Permanent link">&para;</a></h4>
-<p>Retrieve protein sequences and metadata.</p>
-<p><strong>Request Body:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT Protein_ID FROM dim_proteins WHERE Phage_ID = &#39;NC_000866&#39;&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">&quot;limit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span>
-</code></pre></div></p>
-<hr />
-<h3 id="fasta-export">FASTA Export<a class="headerlink" href="#fasta-export" title="Permanent link">&para;</a></h3>
-<h4 id="post-phagesfasta"><code>POST /phages/fasta</code><a class="headerlink" href="#post-phagesfasta" title="Permanent link">&para;</a></h4>
-<p>Export phage sequences in FASTA format.</p>
-<p><strong>Request Body:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT Phage_ID FROM fact_phages LIMIT 5&quot;</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="p">}</span>
-</code></pre></div></p>
-<p><strong>Response:</strong> (<code>text/plain</code>)
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>&gt;NC_000866 Phage description...
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>ATCGATCGATCG...
-</code></pre></div></p>
-<p><strong>Example:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/phages/fasta<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;query&quot;: &quot;SELECT Phage_ID FROM fact_phages WHERE Length &gt; 100000 LIMIT 10&quot;}&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span>&gt;<span class="w"> </span>large_phages.fasta
-</code></pre></div></p>
-<h4 id="post-proteinsfasta"><code>POST /proteins/fasta</code><a class="headerlink" href="#post-proteinsfasta" title="Permanent link">&para;</a></h4>
-<p>Export protein sequences in FASTA format.</p>
-<p><strong>Request Body:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">&quot;query&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SELECT Protein_ID FROM dim_proteins WHERE Phage_ID = &#39;NC_000866&#39;&quot;</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="p">}</span>
-</code></pre></div></p>
-</div>
-<div class="tabbed-block">
-<h2 id="database-schema-reference">Database Schema Reference<a class="headerlink" href="#database-schema-reference" title="Permanent link">&para;</a></h2>
-<p>For API queries, the following tables are accessible:</p>
-<h3 id="fact-table">Fact Table<a class="headerlink" href="#fact-table" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>fact_phages</code> — Main phage metadata</li>
-</ul>
-<h3 id="dimension-tables">Dimension Tables<a class="headerlink" href="#dimension-tables" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>dim_proteins</code> — Protein annotations</li>
-<li><code>dim_terminators</code> — Transcription terminators</li>
-<li><code>dim_anti_crispr</code> — Anti-CRISPR proteins</li>
-<li><code>dim_virulent_factors</code> — Virulence factors</li>
-<li><code>dim_transmembrane_proteins</code> — Transmembrane predictions</li>
-<li><code>dim_trna_tmrna</code> — tRNA/tmRNA features</li>
-<li><code>dim_crispr_array</code> — CRISPR arrays</li>
-<li><code>dim_antimicrobial_resistance_genes</code> — AMR genes</li>
-</ul>
-<div class="admonition warning">
-<p class="admonition-title">Host data not yet exposed</p>
-<p>Host-phage link files (<code>phage_host_links.csv</code>, <code>host_fasta_mapping.json</code>) are <strong>not yet accessible via the API</strong>. They will be added once the API is updated for host management. In the meantime, use the <code>pbi</code> Python package in the <a href="../../guides/analysis-guide/">analysis container</a>.</p>
-</div>
-<p>See the <a href="../../database/overview/">Database Overview</a> for detailed schema information including host-phage link files.</p>
-</div>
-<div class="tabbed-block">
-<h2 id="query-examples">Query Examples<a class="headerlink" href="#query-examples" title="Permanent link">&para;</a></h2>
-<h3 id="get-phages-by-host">Get Phages by Host<a class="headerlink" href="#get-phages-by-host" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/query<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="s1">    &quot;query&quot;: &quot;SELECT Phage_ID, Host, Length FROM fact_phages WHERE Host LIKE &#39;</span><span class="se">\&#39;</span><span class="s1">&#39;%Staphylococcus%&#39;</span><span class="se">\&#39;</span><span class="s1">&#39; LIMIT 10&quot;</span>
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="s1">  }&#39;</span>
-</code></pre></div>
-<h3 id="get-large-phages-with-many-proteins">Get Large Phages with Many Proteins<a class="headerlink" href="#get-large-phages-with-many-proteins" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/query<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="s1">    &quot;query&quot;: &quot;SELECT f.Phage_ID, f.Length, COUNT(p.Protein_ID) as protein_count FROM fact_phages f JOIN dim_proteins p ON f.Phage_ID = p.Phage_ID WHERE f.Length &gt; 200000 GROUP BY f.Phage_ID, f.Length HAVING COUNT(p.Protein_ID) &gt; 200 LIMIT 20&quot;</span>
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="s1">  }&#39;</span>
-</code></pre></div>
-<h3 id="export-specific-phages-to-fasta">Export Specific Phages to FASTA<a class="headerlink" href="#export-specific-phages-to-fasta" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/phages/fasta<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="s1">    &quot;phage_ids&quot;: [&quot;NC_000866&quot;, &quot;NC_001895&quot;]</span>
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="s1">  }&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>my_phages.fasta
-</code></pre></div>
-<h3 id="using-python">Using Python<a class="headerlink" href="#using-python" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="c1"># Health check</span>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://localhost:8000/health&#39;</span><span class="p">)</span>
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="c1"># Get statistics</span>
-<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://localhost:8000/stats&#39;</span><span class="p">)</span>
-<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
-<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>
-<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="c1"># Query phages</span>
-<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>    <span class="s1">&#39;http://localhost:8000/query&#39;</span><span class="p">,</span>
-<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>    <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="s2">&quot;SELECT * FROM fact_phages LIMIT 5&quot;</span><span class="p">}</span>
-<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="p">)</span>
-<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<h2 id="running-in-development-mode">Running in Development Mode<a class="headerlink" href="#running-in-development-mode" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># With auto-reload</span>
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nb">cd</span><span class="w"> </span>api
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>uvicorn<span class="w"> </span>app:app<span class="w"> </span>--reload<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
-<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
-<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="c1"># With custom database path</span>
-<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="nv">DATABASE_PATH</span><span class="o">=</span>/path/to/database.duckdb<span class="w"> </span>uvicorn<span class="w"> </span>app:app<span class="w"> </span>--reload
-</code></pre></div>
-<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Database path</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_PATH</span><span class="o">=</span>/data/processed/databases/phage_database_optimized.duckdb
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># Phage FASTA path</span>
-<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PHAGE_FASTA</span><span class="o">=</span>/data/processed/sequences/all_phages.fasta
-<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>
-<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="c1"># Protein FASTA path</span>
-<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PROTEIN_FASTA</span><span class="o">=</span>/data/processed/sequences/all_proteins.fasta
-<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>
-<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="c1"># API port</span>
-<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PORT</span><span class="o">=</span><span class="m">8000</span>
-</code></pre></div>
-<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
-<p>The API returns standard HTTP status codes:</p>
-<ul>
-<li><strong>200</strong>: Success</li>
-<li><strong>400</strong>: Bad Request (invalid query, missing parameters)</li>
-<li><strong>404</strong>: Not Found (resource doesn't exist)</li>
-<li><strong>500</strong>: Internal Server Error (database error, unexpected issue)</li>
-<li><strong>503</strong>: Service Unavailable (database connection failed)</li>
-</ul>
-<p><strong>Error Response Format:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Error message here&quot;</span><span class="p">,</span>
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional details about the error&quot;</span>
-<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="p">}</span>
-</code></pre></div></p>
-<h2 id="known-limitations">Known Limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
+<h2 id="version">Version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h2>
+<p>Current API version: <code>0.3.0</code></p>
+<h2 id="recommendation">Recommendation<a class="headerlink" href="#recommendation" title="Permanent link">&para;</a></h2>
+<p>For practical analysis and ML workflows, use:</p>
 <ol>
-<li><strong>No Authentication</strong>: API is open — not suitable for public deployment</li>
-<li><strong>No Rate Limiting</strong>: Can be overwhelmed by many requests</li>
-<li><strong>Query Safety</strong>: Custom SQL queries not fully sanitized</li>
-<li><strong>No Pagination</strong>: Large result sets may cause timeouts</li>
-<li><strong>No Host Endpoints</strong>: API not updated for host management yet</li>
+<li><a href="../../guides/installation/">Installation guide</a></li>
+<li><a href="../../guides/analysis-guide/">Analysis container</a></li>
+<li><a href="../../guides/pbi-package/">PBI package guide</a></li>
 </ol>
-<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
-<p>For API issues or feature requests:</p>
-<ul>
-<li>Open an issue on <a href="https://github.com/ThibaultSchowing/PBI/issues">GitHub</a></li>
-<li>Check the <a href="../../changelog/">changelog</a> for recent updates</li>
-</ul>
-</div>
-</div>
-</div>
-<hr />
-<p><strong>Note</strong>: This API is a Work In Progress. Features and endpoints will change, including the addition of host-related endpoints. Always check the latest documentation at <code>/docs</code> once the API is updated.</p>
 
 
 

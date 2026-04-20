@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+        <meta name="description" content="Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation">
       
       
       
@@ -503,10 +503,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
+  <a href="#start-here" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Getting Started
+        Start Here
       
     </span>
   </a>
@@ -517,29 +517,7 @@
   <a href="#pipeline-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pipeline Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Schema
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation
+        Pipeline overview
       
     </span>
   </a>
@@ -550,7 +528,7 @@
   <a href="#current-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current Status
+        Current status
       
     </span>
   </a>
@@ -561,7 +539,7 @@
   <a href="#need-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Need Help?
+        Need help?
       
     </span>
   </a>
@@ -673,6 +651,34 @@
     
   
     Installation (Docker)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="guides/storytelling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
   
 
     
@@ -1393,10 +1399,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
+  <a href="#start-here" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Getting Started
+        Start Here
       
     </span>
   </a>
@@ -1407,29 +1413,7 @@
   <a href="#pipeline-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pipeline Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Schema
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Documentation
+        Pipeline overview
       
     </span>
   </a>
@@ -1440,7 +1424,7 @@
   <a href="#current-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current Status
+        Current status
       
     </span>
   </a>
@@ -1451,7 +1435,7 @@
   <a href="#need-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Need Help?
+        Need help?
       
     </span>
   </a>
@@ -1479,185 +1463,120 @@
 
 
 <h1 id="welcome-to-pbi-documentation">Welcome to PBI Documentation<a class="headerlink" href="#welcome-to-pbi-documentation" title="Permanent link">&para;</a></h1>
-<p><strong>Phage-Bacteria Interaction Database Pipeline</strong></p>
+<p><strong>PBI — Phage Bacteria Interactions (v0.3.0)</strong></p>
 <h2 id="what-is-pbi">What is PBI?<a class="headerlink" href="#what-is-pbi" title="Permanent link">&para;</a></h2>
-<p>PBI is a bioinformatics pipeline designed to make phage genomic data from <a href="https://phagescope.deepomics.org/database">PhageScope</a> available in an efficient, structured way for training neural networks and AI models for phage-host interaction prediction. It integrates data from 14+ phage databases via PhageScope and downloads matching bacterial host genomes from NCBI RefSeq.</p>
+<p>PBI is a reproducible Docker-first pipeline that prepares phage-host data for analysis and machine learning.</p>
+<p>It combines:</p>
+<ol>
+<li><strong>Public phage data</strong> from PhageScope (which itself aggregates multiple phage sources)</li>
+<li><strong>Optional private datasets</strong> from <code>private_data/</code></li>
+<li><strong>Host genome resolution/download</strong> from NCBI RefSeq</li>
+</ol>
+<p>Outputs are stored in a shared data volume and consumed through the <code>pbi</code> Python package (recommended).</p>
 <blockquote>
-<p><strong>Note</strong>: PBI is a <strong>proof of concept</strong> and is dependent on PhageScope as its primary data source. Future development will aim to provide more precise host strain information when available.</p>
+<p>PBI is <strong>not PhageScope-only</strong> anymore. Private source ingestion is part of the standard workflow when source folders are present.</p>
 </blockquote>
-<p><strong>What you get after running the pipeline:</strong></p>
-<ul>
-<li>~873,000 phage genomes with complete metadata</li>
-<li>~43 million protein annotations with functional predictions</li>
-<li>Bacterial host reference genomes from NCBI RefSeq</li>
-<li>Optimized DuckDB database (~5 GB) for fast analytical queries</li>
-<li>Indexed FASTA files (~100 GB) with pyfaidx for rapid sequence retrieval</li>
-<li>Python package (<code>pbi</code>) for easy data access and machine learning dataset preparation</li>
-</ul>
-<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
-<p>The recommended (and primary) way to run PBI is via Docker. See the <a href="guides/installation/">Installation Guide</a> for step-by-step instructions on setting up Docker, cloning the repository, running the pipeline container, and connecting to the analysis container via SSH port forwarding.</p>
+<h2 id="start-here">Start Here<a class="headerlink" href="#start-here" title="Permanent link">&para;</a></h2>
 <div class="grid cards">
 <ul>
-<li>
-<p><strong><a href="guides/installation/">Installation Guide</a></strong></p>
-<hr />
-<p>How to install Docker, clone the repository, configure the pipeline, run the containers, and connect to the Jupyter Lab analysis environment via SSH port forwarding.</p>
-</li>
-<li>
-<p><strong><a href="guides/how-it-works/">How It Works</a></strong></p>
-<hr />
-<p>Explanation of the pipeline internals, the <code>pbi</code> Python package (including key files like <code>host_fasta_mapping.json</code>), and the overall architecture.</p>
-</li>
-<li>
-<p><strong><a href="guides/analysis-guide/">Analysis Container Usage</a></strong></p>
-<hr />
-<p>How to explore the database, retrieve sequences, and prepare machine learning datasets using the Jupyter Lab analysis container. Includes links to the three demo notebooks.</p>
-</li>
-<li>
-<p><strong><a href="api/overview/">API Usage</a></strong></p>
-<hr />
-<p>REST API reference. ⚠️ <strong>Work In Progress</strong> — the API is not yet updated for host management and is not the recommended way to interact with data.</p>
-</li>
+<li><strong><a href="guides/installation/">Installation Guide</a></strong></li>
 </ul>
-</div>
-<h2 id="pipeline-overview">Pipeline Overview<a class="headerlink" href="#pipeline-overview" title="Permanent link">&para;</a></h2>
-<p>The PBI pipeline follows a systematic data flow from download to analysis-ready outputs:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────┐
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                    PBI Data Flow                                │
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                                                                 │
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  ┌──────────────┐          ┌──────────────────────────────┐     │
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  │  PhageScope  │────────&gt; │  Stage 1: Phage Metadata     │     │
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  │  (14+ DBs)   │          │  Download &amp; merge metadata   │     │
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  └──────────────┘          │  + FASTA sequences           │     │
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│                            │     ~4 hours first run       │     │
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│                            └──────────────┬───────────────┘     │
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│                                           │                     │
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│                                           ▼                     │
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  ┌──────────────┐          ┌──────────────────────────────┐     │
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  │  NCBI RefSeq │────────&gt; │  Stage 2: Host Resolution    │     │
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│  │ (Bacterial   │          │  Parse host fields, resolve  │     │
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  │  genomes)    │          │  to assemblies, download     │     │
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  └──────────────┘          │     ~18-24 hours first run   │     │
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│                            └──────────────┬───────────────┘     │
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│                                           │                     │
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│                                           ▼                     │
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│                    ┌──────────────────────────────────────┐     │
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│                    │  Final Outputs (in pbi-data volume)  │     │
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│                    │  ├─ DuckDB Database  (~5 GB)         │     │
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│                    │  ├─ Phage FASTA + index (~40 GB)     │     │
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│                    │  ├─ Protein FASTA + index (~60 GB)   │     │
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│                    │  ├─ Host FASTA files + JSON (~90 GB) │     │
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│                    │  └─ HTML Validation Reports          │     │
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│                    └─────────────────┬────────────────────┘     │
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│                                      │                          │
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│              ┌───────────────────────┴────────────────────┐     │
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│              ▼                                            ▼     │
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│     ┌─────────────────┐                    ┌─────────────────┐  │
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>│     │ Analysis Service│                    │   REST API      │  │
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│     │  (Jupyter Lab)  │                    │  (FastAPI)      │  │
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>│     │  Port 8888      │                    │  Port 8000      │  │
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>│     └─────────────────┘                    └─────────────────┘  │
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>└─────────────────────────────────────────────────────────────────┘
-</code></pre></div>
-<h2 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h2>
-<p>The database uses a <strong>star schema</strong> with phage metadata at the center and host genomes linked via a separate dimension table. See the <a href="database/overview/">Database Overview</a> for full details.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>                     dim_proteins ──┐
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                  dim_terminators ──┤
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                  dim_anti_crispr ──┤
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>             dim_virulent_factors ──┤
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>       dim_transmembrane_proteins ──┤──▶ fact_phages (central)
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                   dim_trna_tmrna ──┤
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>dim_antimicrobial_resistance_genes ─┤
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>                  dim_crispr_array ─┘
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>                       dim_hosts  ──▶ (linked via phage_host_links.csv
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>                                       and host_fasta_mapping.json)
-</code></pre></div>
-<p>All phage dimension tables link to <code>fact_phages</code> via <strong><code>Phage_ID</code></strong>. Host genomes are stored as separate FASTA files and indexed via <code>host_fasta_mapping.json</code> for fast retrieval.</p>
-<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
-<div class="grid cards">
+<p>Docker setup, first run, and analysis access.</p>
 <ul>
-<li>
-<p><strong><a href="guides/overview/">Guides</a></strong></p>
-<hr />
-<p>Installation, how it works, analysis container usage, and pipeline execution</p>
-</li>
-<li>
-<p><strong><a href="database/overview/">Database</a></strong></p>
-<hr />
-<p>Schema documentation, tables, host data, and data sources</p>
-</li>
-<li>
-<p><strong><a href="api/overview/">API Reference</a></strong></p>
-<hr />
-<p>REST API endpoints — currently untested</p>
-</li>
-<li>
-<p><strong><a href="developer/code-structure/">Developer Guide</a></strong></p>
-<hr />
-<p>Architecture, code structure, and contributing</p>
-</li>
+<li><strong><a href="guides/storytelling/">Story — One Read Overview</a></strong></li>
 </ul>
+<p>End-to-end narrative of what the tool does and in which order.</p>
+<ul>
+<li><strong><a href="guides/private-data-ingestion/">Private Data Ingestion</a></strong></li>
+</ul>
+<p>Required files, validation rules, and mandatory host sequence requirements.</p>
+<ul>
+<li><strong><a href="guides/analysis-guide/">Analysis Container Usage</a></strong></li>
+</ul>
+<p>VS Code Dev Containers (preferred) and Jupyter Lab workflow.</p>
 </div>
-<h2 id="current-status">Current Status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
+<h2 id="pipeline-overview">Pipeline overview<a class="headerlink" href="#pipeline-overview" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>+----------------------+        +----------------------------+
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>| public phage data    |-------&gt;| Stage 1: download + merge  |
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>| (PhageScope)         |        | public phage metadata/FASTA|
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>+----------------------+        +--------------+-------------+
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                                              |
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>+----------------------+        +-------------v--------------+
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>| private_data/*       |-------&gt;| Stage 2: validate private  |
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>| (optional sources)   |        | metadata/phage/host files  |
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>+----------------------+        +--------------+-------------+
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                              |
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>+----------------------+        +-------------v--------------+
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>| NCBI RefSeq          |-------&gt;| Stage 3: resolve/download  |
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>| (host genomes)       |        | host assemblies            |
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>+----------------------+        +--------------+-------------+
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                                              |
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                                  +-----------v-----------+
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>                                  | Stage 4: build outputs|
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                                  | DuckDB + indexed FASTA|
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                                  | reports + logs         |
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                                  +-----------+-----------+
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                                              |
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                    +-------------------------+-------------------------+
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>                    |                                                   |
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>          +---------v---------+                               +---------v---------+
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>          | analysis container|                               | api container      |
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>          | pbi package (main)|                               | legacy / limited   |
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>          +-------------------+                               +-------------------+
+</code></pre></div>
+<h2 id="current-status">Current status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Component</th>
+<th>Subject</th>
 <th>Status</th>
-<th>Description</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Pipeline</strong></td>
-<td>✅ Complete</td>
-<td>Snakemake workflow with 14+ data sources</td>
+<td>Pipeline orchestration</td>
+<td>✅ Stable</td>
+<td>Snakemake workflow in production use</td>
 </tr>
 <tr>
-<td><strong>Phage Database</strong></td>
-<td>✅ Complete</td>
-<td>Optimized DuckDB with star schema</td>
+<td>Public data integration</td>
+<td>✅ Stable</td>
+<td>Public phage content from PhageScope</td>
 </tr>
 <tr>
-<td><strong>Host Genomes</strong></td>
-<td>✅ Complete</td>
-<td>NCBI RefSeq downloads with multi-host support</td>
+<td>Private data handling</td>
+<td>✅ Stable</td>
+<td>Dedicated ingestion/validation path; see <a href="guides/private-data-ingestion/">Private Data Ingestion</a></td>
 </tr>
 <tr>
-<td><strong>Sequences</strong></td>
-<td>✅ Complete</td>
-<td>Indexed FASTA files (phages, proteins, hosts)</td>
+<td>Host genome resolution</td>
+<td>✅ Stable</td>
+<td>Multi-token host parsing + NCBI assembly resolution</td>
 </tr>
 <tr>
-<td><strong>Docker</strong></td>
-<td>✅ Complete</td>
-<td>Production-ready containers</td>
+<td>Analysis workflow</td>
+<td>✅ Stable</td>
+<td>Analysis container is the main interface</td>
 </tr>
 <tr>
-<td><strong>Python Package</strong></td>
-<td>🔧 Active Development</td>
-<td>Core functionality available</td>
+<td>REST API</td>
+<td>⚠️ Not supported for sequence retrieval</td>
+<td>Too slow for sequence-heavy usage; planned redesign for exploration-only API</td>
 </tr>
 <tr>
-<td><strong>REST API</strong></td>
-<td>🚧 Work In Progress</td>
-<td>Basic endpoints implemented; not tested, not updated for host management</td>
-</tr>
-<tr>
-<td><strong>Documentation</strong></td>
-<td>🔧 Active Development</td>
-<td>Continuously improving</td>
+<td>Documentation</td>
+<td>🔄 Updated for v0.3.0</td>
+<td>Structure simplified and aligned with current infrastructure</td>
 </tr>
 </tbody>
 </table>
-<h2 id="need-help">Need Help?<a class="headerlink" href="#need-help" title="Permanent link">&para;</a></h2>
+<h2 id="need-help">Need help?<a class="headerlink" href="#need-help" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Browse the <a href="guides/overview/">guides</a> for detailed instructions</li>
-<li>Report issues on <a href="https://github.com/ThibaultSchowing/PBI/issues">GitHub</a></li>
-<li>Check the <a href="guides/installation/#troubleshooting">troubleshooting sections</a> in our guides</li>
+<li>Use the <a href="guides/overview/">Guides overview</a></li>
+<li>Read <a href="guides/how-it-works/">How it works</a></li>
+<li>Open issues on <a href="https://github.com/ThibaultSchowing/PBI/issues">GitHub</a></li>
 </ul>
-<hr />
-<p><em>PBI is a proof of concept built with Snakemake, DuckDB, and FastAPI. It is under active development.</em></p>
 
 
 

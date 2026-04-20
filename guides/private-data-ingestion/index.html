@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+        <meta name="description" content="Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation">
       
       
       
@@ -574,6 +574,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../storytelling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../how-it-works/" class="md-nav__link">
         
   
@@ -718,10 +746,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#required-per-source" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick start
+        Required per source
       
     </span>
   </a>
@@ -729,10 +757,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#required-files-per-source-directory" class="md-nav__link">
+  <a href="#mandatory-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required files per source directory
+        Mandatory rules
       
     </span>
   </a>
@@ -740,10 +768,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#metadatacsv-columns" class="md-nav__link">
+  <a href="#validate-before-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        metadata.csv columns
+        Validate before pipeline
       
     </span>
   </a>
@@ -751,10 +779,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fasta-identifier-matching-rules" class="md-nav__link">
+  <a href="#runtime-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FASTA identifier matching rules
+        Runtime behavior
       
     </span>
   </a>
@@ -762,10 +790,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#duplicate-row-policy" class="md-nav__link">
+  <a href="#output-mappings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Duplicate row policy
+        Output mappings
       
     </span>
   </a>
@@ -773,65 +801,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#database-synchronization-notes" class="md-nav__link">
+  <a href="#logs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Database synchronization notes
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-validate-private-without-docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running validate-private without Docker
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#container-integration-automatic" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Container integration (automatic)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logs-and-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logs and reports
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#failure-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Failure handling
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#readme-template" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        README template
+        Logs
       
     </span>
   </a>
@@ -1431,10 +1404,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#required-per-source" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick start
+        Required per source
       
     </span>
   </a>
@@ -1442,10 +1415,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#required-files-per-source-directory" class="md-nav__link">
+  <a href="#mandatory-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required files per source directory
+        Mandatory rules
       
     </span>
   </a>
@@ -1453,10 +1426,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#metadatacsv-columns" class="md-nav__link">
+  <a href="#validate-before-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        metadata.csv columns
+        Validate before pipeline
       
     </span>
   </a>
@@ -1464,10 +1437,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fasta-identifier-matching-rules" class="md-nav__link">
+  <a href="#runtime-behavior" class="md-nav__link">
     <span class="md-ellipsis">
       
-        FASTA identifier matching rules
+        Runtime behavior
       
     </span>
   </a>
@@ -1475,10 +1448,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#duplicate-row-policy" class="md-nav__link">
+  <a href="#output-mappings" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Duplicate row policy
+        Output mappings
       
     </span>
   </a>
@@ -1486,65 +1459,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#database-synchronization-notes" class="md-nav__link">
+  <a href="#logs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Database synchronization notes
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-validate-private-without-docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running validate-private without Docker
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#container-integration-automatic" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Container integration (automatic)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#logs-and-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logs and reports
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#failure-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Failure handling
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#readme-template" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        README template
+        Logs
       
     </span>
   </a>
@@ -1572,184 +1490,39 @@
 
 
 <h1 id="private-data-ingestion">Private Data Ingestion<a class="headerlink" href="#private-data-ingestion" title="Permanent link">&para;</a></h1>
-<p>PBI supports optional ingestion of private datasets placed inside the <code>private_data/</code>
-directory at the repository root.</p>
-<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Create a subdirectory for each private source inside <code>private_data/</code>:</li>
-</ol>
+<p>PBI can ingest private sources from <code>private_data/</code> in addition to public PhageScope data.</p>
+<h2 id="required-per-source">Required per source<a class="headerlink" href="#required-per-source" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>private_data/
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  Project_A/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  &lt;Source_DB&gt;/
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    metadata.csv
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    phage.fasta
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    hosts/
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      HOST_ID_1.fna
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>      HOST_ID_2.fna
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  Experiment_1/
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    metadata.csv
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    phage.fasta
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    hosts/
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>      HOST_ID_A.fna
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>      &lt;Host_ID&gt;.fna
 </code></pre></div>
-<ol>
-<li>Validate before running the pipeline:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># From the repository root (requires `pip install -e .`)</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pbi<span class="w"> </span>validate-private
-</code></pre></div>
-<ol>
-<li>Run the pipeline as usual. Private sources are detected automatically.</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
-</code></pre></div>
-<p>Private sequence retrieval is prepared automatically during the workflow:</p>
+<h2 id="mandatory-rules">Mandatory rules<a class="headerlink" href="#mandatory-rules" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Each private source's <code>phage.fasta</code> is <strong>copied</strong> to a writable private directory
-  (<code>/private-data/phages/&lt;source_db&gt;/phage.fasta</code>) and indexed with
-  pyfaidx (<code>.fai</code>).  A JSON mapping (<code>private_phage_mapping.json</code>) records
-  <code>source_db → phage.fasta path</code>.  <code>SequenceRetriever</code> uses this mapping to route
-  private-phage lookups at retrieval time — private phages are <strong>never merged</strong> into
-  <code>all_phages.fasta</code>, so removing a private source has no impact on public data.</li>
-<li>Private host FASTA files live in each source's <code>hosts/</code> directory (one <code>.fna</code> file
-  per <code>Host_ID</code>).  They are mapped in-place — no copying is performed.  The per-host
-  paths are merged into <code>host_fasta_mapping.json</code> and indexed by the host indexing workflow.</li>
+<li><code>metadata.csv</code> is required</li>
+<li><code>phage.fasta</code> is required</li>
+<li>host sequences are required as <code>hosts/&lt;Host_ID&gt;.fna</code></li>
+<li>every <code>Host_ID</code> in metadata must map to a host FASTA file</li>
+<li>every <code>Phage_ID</code> in metadata must exist in <code>phage.fasta</code></li>
 </ul>
-<p>When private source directories are removed from <code>private_data/</code>, rerunning the pipeline
-re-synchronizes the manifest and removes stale private records from the database.</p>
-<h2 id="required-files-per-source-directory">Required files per source directory<a class="headerlink" href="#required-files-per-source-directory" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>File</th>
-<th>Required</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>metadata.csv</code></td>
-<td>✅</td>
-</tr>
-<tr>
-<td><code>phage.fasta</code></td>
-<td>✅</td>
-</tr>
-<tr>
-<td><code>hosts/&lt;Host_ID&gt;.fna</code></td>
-<td>✅ (one file per host)</td>
-</tr>
-</tbody>
-</table>
-<h2 id="metadatacsv-columns"><code>metadata.csv</code> columns<a class="headerlink" href="#metadatacsv-columns" title="Permanent link">&para;</a></h2>
-<p>Required (case-sensitive):</p>
-<table>
-<thead>
-<tr>
-<th>Column</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Phage_ID</code></td>
-<td>Unique phage identifier matching <code>phage.fasta</code></td>
-</tr>
-<tr>
-<td><code>Host_ID</code></td>
-<td>Unique host identifier matching the filename in <code>hosts/</code></td>
-</tr>
-<tr>
-<td><code>Host_name</code></td>
-<td>Human-readable host species name</td>
-</tr>
-<tr>
-<td><code>Source_DB</code></td>
-<td>Must match the subdirectory name exactly</td>
-</tr>
-<tr>
-<td><code>interaction</code></td>
-<td><code>temperate</code> or <code>virulent</code> (case-insensitive, stored lowercase)</td>
-</tr>
-</tbody>
-</table>
-<p>Optional columns: any extra columns are preserved in <code>private_entity_attributes</code>.</p>
-<h2 id="fasta-identifier-matching-rules">FASTA identifier matching rules<a class="headerlink" href="#fasta-identifier-matching-rules" title="Permanent link">&para;</a></h2>
-<ul>
-<li>The sequence identifier is the <strong>first whitespace-delimited token</strong> of each <code>&gt;</code> header line.</li>
-<li><code>Phage_ID</code> values must each appear as an identifier in <code>phage.fasta</code>.</li>
-<li><code>Host_ID</code> values must each have a matching file in <code>hosts/</code> (for example <code>hosts/HOST_ID_1.fna</code>).</li>
-<li>Duplicate FASTA identifiers in the same file are rejected.</li>
-</ul>
-<h2 id="duplicate-row-policy">Duplicate row policy<a class="headerlink" href="#duplicate-row-policy" title="Permanent link">&para;</a></h2>
-<p>Rows that are duplicated on (<code>Phage_ID</code>, <code>Host_ID</code>, <code>Source_DB</code>) are accepted but
-deduplicated at ingestion (first occurrence kept).</p>
-<h2 id="database-synchronization-notes">Database synchronization notes<a class="headerlink" href="#database-synchronization-notes" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>fact_phages.source_type</code> distinguishes public (<code>public</code>) vs private (<code>private</code>) phages.</li>
-<li><code>private_phage_host_associations</code> stores <code>Phage_ID</code>, <code>Host_ID</code>, <code>Source_DB</code>, and <code>source_type</code> so private links can be traced back to their source dataset during resynchronization.</li>
-</ul>
-<h2 id="running-validate-private-without-docker">Running <code>validate-private</code> without Docker<a class="headerlink" href="#running-validate-private-without-docker" title="Permanent link">&para;</a></h2>
-<p>The <code>pbi</code> package installs a standalone CLI tool that runs entirely locally:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Install the package (needed once)</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># From the repository root — automatically uses ./private_data/</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>pbi<span class="w"> </span>validate-private
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Or point to an arbitrary root</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>pbi<span class="w"> </span>validate-private<span class="w"> </span>--path<span class="w"> </span>/some/other/directory
+<h2 id="validate-before-pipeline">Validate before pipeline<a class="headerlink" href="#validate-before-pipeline" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pbi<span class="w"> </span>validate-private
 </code></pre></div>
-<p>No Docker required; no pipeline run triggered.</p>
-<h2 id="container-integration-automatic">Container integration (automatic)<a class="headerlink" href="#container-integration-automatic" title="Permanent link">&para;</a></h2>
-<p><code>docker-compose.yml</code> mounts <code>./private_data</code> at <code>/private-data</code> for both:</p>
+<h2 id="runtime-behavior">Runtime behavior<a class="headerlink" href="#runtime-behavior" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>pipeline</code> (writable) so private sources can be validated and indexed</li>
-<li><code>analysis</code> (read-only) so notebooks can read private host FASTAs and
-  <code>private_phage_mapping.json</code></li>
+<li>Valid private sources are ingested and linked with <code>source_type=private</code></li>
+<li>Invalid sources are skipped (public pipeline still completes)</li>
+<li>Re-running pipeline synchronizes removals/additions</li>
 </ul>
-<p>The pipeline configuration uses:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">private_data_root</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/private-data&quot;</span>
-</code></pre></div>
-<p>No additional environment variables or config changes are needed.</p>
-<h2 id="logs-and-reports">Logs and reports<a class="headerlink" href="#logs-and-reports" title="Permanent link">&para;</a></h2>
-<p>All HTML reports and log files are written to <code>./pipeline_logs/</code> at the repository root
-(bind-mounted inside the container). Open the <code>.html</code> files directly in a browser:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pipeline_logs/
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  reports/
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    database_validation.html
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    phage_metadata_report.html
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    ...
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  logs/
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    host_download.log
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    host_download_failures.log
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    ...
-</code></pre></div>
-<h2 id="failure-handling">Failure handling<a class="headerlink" href="#failure-handling" title="Permanent link">&para;</a></h2>
+<h2 id="output-mappings">Output mappings<a class="headerlink" href="#output-mappings" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Private ingestion is non-blocking.</li>
-<li>Invalid or failed private sources are skipped; PhageScope data is always produced.</li>
-<li>End-of-run logs include an ingestion summary (sources ingested / skipped).</li>
+<li><code>private_phage_mapping.json</code> routes private phage retrieval</li>
+<li><code>host_fasta_mapping.json</code> includes host paths (public + private)</li>
 </ul>
-<h2 id="readme-template">README template<a class="headerlink" href="#readme-template" title="Permanent link">&para;</a></h2>
-<p>Use this template inside each private source directory:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a># &lt;Source_DB&gt;
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>## Files
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>- metadata.csv    — phage-host interaction table
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>- phage.fasta     — phage sequences (FASTA)
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>- hosts/          — recommended per-host FASTA files (`&lt;Host_ID&gt;.fna`)
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>- host.fasta      — optional legacy single host FASTA
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>## metadata.csv column notes
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>- Source_DB must equal &quot;&lt;Source_DB&gt;&quot; (directory name)
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>- interaction: temperate | virulent
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>## FASTA IDs
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>- Identifiers are the first whitespace-delimited token of each &#39;&gt;&#39; header line.
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>- All Phage_ID / Host_ID values in metadata.csv must appear in the respective FASTA.
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>## Optional custom columns
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>- &lt;column_name&gt;: &lt;description&gt;
-</code></pre></div>
+<h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
+<p>In Docker runs, logs/reports are available in <code>./pipeline_logs/</code>.</p>
 
 
 

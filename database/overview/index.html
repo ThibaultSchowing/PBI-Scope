@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis">
+        <meta name="description" content="Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation">
       
       
       
@@ -571,6 +571,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../guides/storytelling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story (One Read)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../guides/how-it-works/" class="md-nav__link">
         
   
@@ -919,10 +947,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#phage-metadata-database" class="md-nav__link">
+  <a href="#core-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Phage Metadata Database
+        Core structure
       
     </span>
   </a>
@@ -930,10 +958,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#host-genome-data" class="md-nav__link">
+  <a href="#schema-duckdb" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Host Genome Data
+        Schema (DuckDB)
       
     </span>
   </a>
@@ -941,174 +969,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#database-schema" class="md-nav__link">
+  <a href="#hostprivate-link-files" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Database Schema
+        Host/private link files
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Tables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Database Tables">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fact-table-fact_phages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fact Table: fact_phages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dimension-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dimension Tables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Dimension Tables">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dim_proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_terminators" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_terminators
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_anti_crispr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_anti_crispr
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_virulent_factors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_virulent_factors
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_transmembrane_proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_transmembrane_proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_trna_tmrna" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_trna_tmrna
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_crispr_array" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_crispr_array
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_antimicrobial_resistance_genes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_antimicrobial_resistance_genes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#host-phage-link-files-csv-json" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host-Phage Link Files (CSV / JSON)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Host-Phage Link Files (CSV / JSON)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#key-columns-in-phage_host_linkscsv" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Columns in phage_host_links.csv
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1116,268 +983,7 @@
   <a href="#data-sources" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data Sources
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#indexes-and-optimization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Indexes and Optimization
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Indexes and Optimization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#primary-key-indexes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Primary Key Indexes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#foreign-key-indexes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Foreign Key Indexes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#source-tracking-indexes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Source Tracking Indexes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-optimized-queries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example Optimized Queries
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#analytical-views" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Analytical Views
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Analytical Views">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#phage_summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        phage_summary
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phage_complete_profile" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        phage_complete_profile
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phage_size_distribution" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        phage_size_distribution
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-validation-quality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Validation &amp; Quality
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Validation &amp; Quality">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automated Validation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validation-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Validation Reports
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-validation-report" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Validation Report
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sequence-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Sequence Files
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Sequence Files">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#phage-genomes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Phage Genomes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#protein-sequences" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Protein Sequences
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Usage Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#pythonduckdb" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python/DuckDB
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sql-queries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SQL Queries
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance Considerations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
+        Data sources
       
     </span>
   </a>
@@ -1776,10 +1382,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#phage-metadata-database" class="md-nav__link">
+  <a href="#core-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Phage Metadata Database
+        Core structure
       
     </span>
   </a>
@@ -1787,10 +1393,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#host-genome-data" class="md-nav__link">
+  <a href="#schema-duckdb" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Host Genome Data
+        Schema (DuckDB)
       
     </span>
   </a>
@@ -1798,174 +1404,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#database-schema" class="md-nav__link">
+  <a href="#hostprivate-link-files" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Database Schema
+        Host/private link files
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#database-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Tables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Database Tables">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fact-table-fact_phages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Fact Table: fact_phages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dimension-tables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dimension Tables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Dimension Tables">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dim_proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_terminators" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_terminators
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_anti_crispr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_anti_crispr
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_virulent_factors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_virulent_factors
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_transmembrane_proteins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_transmembrane_proteins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_trna_tmrna" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_trna_tmrna
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_crispr_array" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_crispr_array
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dim_antimicrobial_resistance_genes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dim_antimicrobial_resistance_genes
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#host-phage-link-files-csv-json" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host-Phage Link Files (CSV / JSON)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Host-Phage Link Files (CSV / JSON)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#key-columns-in-phage_host_linkscsv" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Key Columns in phage_host_links.csv
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1973,268 +1418,7 @@
   <a href="#data-sources" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data Sources
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#indexes-and-optimization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Indexes and Optimization
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Indexes and Optimization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#primary-key-indexes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Primary Key Indexes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#foreign-key-indexes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Foreign Key Indexes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#source-tracking-indexes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Source Tracking Indexes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#example-optimized-queries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example Optimized Queries
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#analytical-views" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Analytical Views
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Analytical Views">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#phage_summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        phage_summary
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phage_complete_profile" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        phage_complete_profile
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#phage_size_distribution" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        phage_size_distribution
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-validation-quality" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Validation &amp; Quality
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Validation &amp; Quality">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#automated-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automated Validation
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validation-reports" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Validation Reports
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#database-validation-report" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Database Validation Report
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sequence-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Sequence Files
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Sequence Files">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#phage-genomes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Phage Genomes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#protein-sequences" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Protein Sequences
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Usage Examples
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#pythonduckdb" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python/DuckDB
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sql-queries" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SQL Queries
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance Considerations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
+        Data sources
       
     </span>
   </a>
@@ -2262,515 +1446,39 @@
 
 
 <h1 id="database-overview">Database Overview<a class="headerlink" href="#database-overview" title="Permanent link">&para;</a></h1>
-<p>The PBI database consists of two main components: the <strong>phage metadata database</strong> (DuckDB) and the <strong>host genome data</strong> (individual FASTA files + mapping index).</p>
-<h2 id="phage-metadata-database">Phage Metadata Database<a class="headerlink" href="#phage-metadata-database" title="Permanent link">&para;</a></h2>
+<p>PBI stores metadata and sequence assets in complementary layers.</p>
+<h2 id="core-structure">Core structure<a class="headerlink" href="#core-structure" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Database Engine</strong>: DuckDB (columnar, embedded analytical database)</li>
-<li><strong>Schema</strong>: Star schema with 1 fact table and 8 dimension tables</li>
-<li><strong>Total Size</strong>: ~15 GB (optimized) / ~18 GB (unoptimized)</li>
-<li><strong>Total Phages</strong>: ~873,000</li>
-<li><strong>Total Proteins</strong>: ~43 million</li>
-<li><strong>Data Sources</strong>: 14+ major phage databases via PhageScope</li>
+<li><strong>DuckDB</strong>: phage-centric star schema for analytical metadata queries</li>
+<li><strong>Indexed FASTA files</strong>: phage/protein sequences and host genomes</li>
+<li><strong>Link/mapping files</strong>: host and private-source resolution paths</li>
 </ul>
-<h2 id="host-genome-data">Host Genome Data<a class="headerlink" href="#host-genome-data" title="Permanent link">&para;</a></h2>
+<h2 id="schema-duckdb">Schema (DuckDB)<a class="headerlink" href="#schema-duckdb" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                     dim_proteins -------------------+
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                  dim_terminators -------------------+
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                  dim_anti_crispr -------------------+
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>             dim_virulent_factors -------------------+
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>       dim_transmembrane_proteins -------------------+--&gt; fact_phages
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                   dim_trna_tmrna -------------------+
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>dim_antimicrobial_resistance_genes ------------------+
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                  dim_crispr_array ------------------+
+</code></pre></div>
+<p>Host data is <strong>not</strong> a DuckDB dimension table. Host sequences are stored as FASTA files and linked via mapping files.</p>
+<h2 id="hostprivate-link-files">Host/private link files<a class="headerlink" href="#hostprivate-link-files" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Storage</strong>: Individual FASTA files, one per assembly</li>
-<li><strong>Index</strong>: <code>host_fasta_mapping.json</code> maps host IDs to file paths</li>
-<li><strong>Source</strong>: NCBI RefSeq bacterial reference genomes</li>
-<li><strong>Coverage</strong>: ~9,000 unique assembly accessions attempted; variable success rate depending on NCBI availability</li>
-<li><strong>Location</strong>: <code>/data/processed/sequences/</code> (in Docker)</li>
+<li><code>phage_host_candidates.csv</code></li>
+<li><code>phage_host_assemblies.csv</code></li>
+<li><code>phage_host_links.csv</code></li>
+<li><code>host_metadata.csv</code></li>
+<li><code>host_fasta_mapping.json</code></li>
+<li><code>private_phage_mapping.json</code> (if private sources are enabled)</li>
 </ul>
-<p>The host genome data is <strong>not stored in the DuckDB database</strong> — it is kept as separate FASTA files for memory efficiency, since individual host genomes can be very large. The <code>pbi</code> Python package uses <code>host_fasta_mapping.json</code> to locate and retrieve host sequences on demand.</p>
-<p>See <a href="../host-resolution/">Host Resolution Details</a> for information on how host species names are parsed and resolved to NCBI assemblies.</p>
-<hr />
-<h2 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                     dim_proteins ──┐
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                  dim_terminators ──┤
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                  dim_anti_crispr ──┤
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>             dim_virulent_factors ──┤
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>       dim_transmembrane_proteins ──┤──▶ fact_phages (central)
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                   dim_trna_tmrna ──┤
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>dim_antimicrobial_resistance_genes ─┤
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                  dim_crispr_array ─┘
-</code></pre></div>
-<p>All dimension tables link to <code>fact_phages</code> via <strong><code>Phage_ID</code></strong> foreign key, enabling comprehensive multi-dimensional analysis.</p>
-<p>Host genome information is linked via external CSV/JSON files rather than a database table — see <a href="#host-phage-link-files-csv--json">Host-Phage Link Files</a> below.</p>
-<h2 id="database-tables">Database Tables<a class="headerlink" href="#database-tables" title="Permanent link">&para;</a></h2>
-<h3 id="fact-table-fact_phages">Fact Table: <code>fact_phages</code><a class="headerlink" href="#fact-table-fact_phages" title="Permanent link">&para;</a></h3>
-<p>Central table containing core phage metadata.</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Primary Key): Unique phage identifier
-- <code>Source_DB</code>: Origin database (GenBank, RefSeq, PhagesDB, etc.)
-- <code>Length</code>: Genome length in base pairs
-- <code>GC_content</code>: GC content percentage
-- <code>Taxonomy</code>: Taxonomic classification
-- <code>Host</code>: Bacterial host species
-- <code>Lifestyle</code>: Lytic, Lysogenic, or Unknown</p>
-<p><strong>Row Count</strong>: ~873,718 phages</p>
-<p><strong>Example Query:</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="k">count</span><span class="p">,</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="k">Length</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">avg_length</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_phages</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">Source_DB</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">count</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
-</code></pre></div></p>
-<h3 id="dimension-tables">Dimension Tables<a class="headerlink" href="#dimension-tables" title="Permanent link">&para;</a></h3>
-<h4 id="dim_proteins"><code>dim_proteins</code><a class="headerlink" href="#dim_proteins" title="Permanent link">&para;</a></h4>
-<p>Protein annotations with functional predictions and physicochemical properties.</p>
-<p><strong>Key Columns:</strong>
-- <code>Protein_ID</code> (Primary Key)
-- <code>Phage_ID</code> (Foreign Key)
-- <code>Product</code>: Protein function/description
-- <code>Protein_length</code>: Length in amino acids
-- <code>Molecular_weight</code>: Molecular weight
-- <code>Isoelectric_point</code>: pI value
-- <code>Source_DB</code>: Origin database</p>
-<p><strong>Row Count</strong>: ~43,088,582 proteins</p>
-<h4 id="dim_terminators"><code>dim_terminators</code><a class="headerlink" href="#dim_terminators" title="Permanent link">&para;</a></h4>
-<p>Transcription terminator predictions.</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Foreign Key)
-- <code>terminator_type</code>: Type of terminator
-- <code>start</code>, <code>end</code>: Genomic coordinates
-- <code>confidence</code>: Prediction confidence score
-- <code>strand</code>: DNA strand orientation</p>
-<p><strong>Row Count</strong>: ~6,462,417 terminators</p>
-<h4 id="dim_anti_crispr"><code>dim_anti_crispr</code><a class="headerlink" href="#dim_anti_crispr" title="Permanent link">&para;</a></h4>
-<p>Anti-CRISPR protein predictions.</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Foreign Key)
-- <code>Protein_ID</code>: Associated protein
-- <code>Source_DB</code>: Prediction source
-- <code>Score</code>: Confidence score</p>
-<p><strong>Row Count</strong>: ~307,329 anti-CRISPR proteins</p>
-<h4 id="dim_virulent_factors"><code>dim_virulent_factors</code><a class="headerlink" href="#dim_virulent_factors" title="Permanent link">&para;</a></h4>
-<p>Virulence factor annotations aligned to VFDB.</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Foreign Key)
-- <code>Protein_ID</code>: Associated protein
-- <code>VF_ID</code>: VFDB identifier
-- <code>VF_Name</code>: Virulence factor name
-- <code>Source_DB</code>: Origin database</p>
-<p><strong>Row Count</strong>: ~41,609 virulence factors</p>
-<h4 id="dim_transmembrane_proteins"><code>dim_transmembrane_proteins</code><a class="headerlink" href="#dim_transmembrane_proteins" title="Permanent link">&para;</a></h4>
-<p>Transmembrane helix predictions (TMHMM).</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Foreign Key)
-- <code>Protein_ID</code>: Associated protein
-- <code>predicted_tmhs_number</code>: Number of transmembrane helices
-- <code>protein_length</code>: Protein length
-- <code>topology</code>: Membrane topology</p>
-<p><strong>Row Count</strong>: ~4,020,770 predictions</p>
-<h4 id="dim_trna_tmrna"><code>dim_trna_tmrna</code><a class="headerlink" href="#dim_trna_tmrna" title="Permanent link">&para;</a></h4>
-<p>tRNA and tmRNA predictions with sequences.</p>
-<p><strong>Key Columns:</strong>
-- <code>trna_tmrna_id</code> (Primary Key)
-- <code>Phage_ID</code> (Foreign Key)
-- <code>trna_type</code>: Amino acid specificity
-- <code>start</code>, <code>end</code>: Genomic coordinates
-- <code>sequence</code>: RNA sequence
-- <code>Source_DB</code>: Origin database</p>
-<p><strong>Row Count</strong>: ~702,607 tRNA/tmRNA features</p>
-<h4 id="dim_crispr_array"><code>dim_crispr_array</code><a class="headerlink" href="#dim_crispr_array" title="Permanent link">&para;</a></h4>
-<p>CRISPR array metadata.</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Foreign Key)
-- <code>array_id</code>: Array identifier
-- <code>repeat_sequence</code>: CRISPR repeat sequence
-- <code>spacer_count</code>: Number of spacers</p>
-<p><strong>Row Count</strong>: ~56,652 arrays</p>
-<h4 id="dim_antimicrobial_resistance_genes"><code>dim_antimicrobial_resistance_genes</code><a class="headerlink" href="#dim_antimicrobial_resistance_genes" title="Permanent link">&para;</a></h4>
-<p>Antimicrobial resistance gene annotations.</p>
-<p><strong>Key Columns:</strong>
-- <code>Phage_ID</code> (Foreign Key)
-- <code>gene_id</code>: Gene identifier
-- <code>gene_name</code>: AMR gene name
-- <code>resistance_type</code>: Type of resistance</p>
-<p><strong>Row Count</strong>: ~2,602 genes</p>
-<hr />
-<h2 id="host-phage-link-files-csv-json">Host-Phage Link Files (CSV / JSON)<a class="headerlink" href="#host-phage-link-files-csv-json" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p>⚠️ <strong>These are flat files, not database tables.</strong> Host genome data is intentionally kept outside the DuckDB database because individual host genomes can be very large. The files below provide the link between phage records and their associated bacterial host assemblies.</p>
-</blockquote>
-<p>The pipeline produces the following host-related files in <code>/data/processed/sequences/</code> (inside Docker):</p>
-<table>
-<thead>
-<tr>
-<th>File</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>phage_host_candidates.csv</code></td>
-<td>CSV file</td>
-<td>One row per (Phage_ID, token): lossless record of every host candidate parsed from the raw Host field. Used for auditing and traceability.</td>
-</tr>
-<tr>
-<td><code>phage_host_assemblies.csv</code></td>
-<td>CSV file</td>
-<td>One row per (Phage_ID, Assembly_Accession): authoritative flat mapping of phages to resolved NCBI assembly accessions. Drives genome downloads.</td>
-</tr>
-<tr>
-<td><code>phage_host_links.csv</code></td>
-<td>CSV file</td>
-<td>One row per unique (Phage_ID, Assembly_Accession) pair. Backward-compatible output used by the <code>pbi</code> package to retrieve phage–host pairs.</td>
-</tr>
-<tr>
-<td><code>host_metadata.csv</code></td>
-<td>CSV file</td>
-<td>One row per unique assembly: per-assembly metadata (level, RefSeq category, quality score, etc.).</td>
-</tr>
-<tr>
-<td><code>assembly_metadata.csv</code></td>
-<td>CSV file</td>
-<td>Detailed NCBI assembly metadata for each downloaded host genome.</td>
-</tr>
-<tr>
-<td><code>host_fasta_mapping.json</code></td>
-<td>JSON file</td>
-<td>Maps each host assembly accession (e.g. <code>GCF_000005845.2</code>) to the path of its downloaded FASTA file. Used by <code>SequenceRetriever</code> for fast on-demand access.</td>
-</tr>
-<tr>
-<td>Individual FASTA files</td>
-<td>FASTA (<code>.fna</code>)</td>
-<td>One file per downloaded host assembly, stored under <code>hosts/</code>.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="key-columns-in-phage_host_linkscsv">Key Columns in <code>phage_host_links.csv</code><a class="headerlink" href="#key-columns-in-phage_host_linkscsv" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Column</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Phage_ID</code></td>
-<td>Phage identifier (matches <code>fact_phages.Phage_ID</code>)</td>
-</tr>
-<tr>
-<td><code>Assembly_Accession</code></td>
-<td>Resolved NCBI assembly accession</td>
-</tr>
-<tr>
-<td><code>Host_Raw</code></td>
-<td>Original un-parsed Host field (traceability)</td>
-</tr>
-<tr>
-<td><code>Confidence</code></td>
-<td>Float 0–1 indicating resolution confidence</td>
-</tr>
-<tr>
-<td><code>Resolution_Source</code></td>
-<td>How the accession was resolved (<code>accession_in_host_field</code> / <code>species_to_taxid_to_assembly</code> / <code>fallback</code>)</td>
-</tr>
-</tbody>
-</table>
-<p>See <a href="../host-resolution/">Host Resolution Details</a> for a full description of how host fields are parsed and resolved to NCBI assemblies.</p>
-<hr />
-<h2 id="data-sources">Data Sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
-<p>The database integrates data from <strong>14 major phage databases</strong> via PhageScope:</p>
-<table>
-<thead>
-<tr>
-<th>Database</th>
-<th>Type</th>
-<th>Approx. Records</th>
-<th>Focus Area</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>GenBank</strong></td>
-<td>General</td>
-<td>~200,000</td>
-<td>Comprehensive phage collection</td>
-</tr>
-<tr>
-<td><strong>RefSeq</strong></td>
-<td>Curated</td>
-<td>~15,000</td>
-<td>Reference phage genomes</td>
-</tr>
-<tr>
-<td><strong>PhagesDB</strong></td>
-<td>Specialized</td>
-<td>~2,000</td>
-<td>Mycobacteriophages</td>
-</tr>
-<tr>
-<td><strong>EMBL</strong></td>
-<td>European</td>
-<td>~50,000</td>
-<td>European phage data</td>
-</tr>
-<tr>
-<td><strong>DDBJ</strong></td>
-<td>Japanese</td>
-<td>~30,000</td>
-<td>Japanese phage data</td>
-</tr>
-<tr>
-<td><strong>GOV2</strong></td>
-<td>Viral genomes</td>
-<td>~100,000</td>
-<td>Ocean viral genomes</td>
-</tr>
-<tr>
-<td><strong>MGV</strong></td>
-<td>Metagenomics</td>
-<td>~50,000</td>
-<td>Gut virome data</td>
-</tr>
-<tr>
-<td><strong>GVD</strong></td>
-<td>Metagenomics</td>
-<td>~40,000</td>
-<td>Global virome database</td>
-</tr>
-<tr>
-<td><strong>IMGVR</strong></td>
-<td>IMG/VR</td>
-<td>~30,000</td>
-<td>IMG viral database</td>
-</tr>
-<tr>
-<td><strong>GPD</strong></td>
-<td>Specialized</td>
-<td>~20,000</td>
-<td>Gut phage database</td>
-</tr>
-<tr>
-<td><strong>CHVD</strong></td>
-<td>Specialized</td>
-<td>~5,000</td>
-<td>Chicken virome data</td>
-</tr>
-<tr>
-<td><strong>STV</strong></td>
-<td>Environmental</td>
-<td>~3,000</td>
-<td>Soil/plant phages</td>
-</tr>
-<tr>
-<td><strong>TemPhD</strong></td>
-<td>Specialized</td>
-<td>~2,000</td>
-<td>Temperate phages</td>
-</tr>
-<tr>
-<td><strong>IGVD</strong></td>
-<td>Specialized</td>
-<td>~1,000</td>
-<td>Insect gut viruses</td>
-</tr>
-</tbody>
-</table>
-<h2 id="indexes-and-optimization">Indexes and Optimization<a class="headerlink" href="#indexes-and-optimization" title="Permanent link">&para;</a></h2>
-<p>The database includes <strong>14 targeted indexes</strong> for optimal query performance:</p>
-<h3 id="primary-key-indexes">Primary Key Indexes<a class="headerlink" href="#primary-key-indexes" title="Permanent link">&para;</a></h3>
+<h2 id="data-sources">Data sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>fact_phages.Phage_ID</code></li>
-<li><code>dim_proteins.Protein_ID</code></li>
-<li><code>dim_trna_tmrna.trna_tmrna_id</code></li>
+<li>Public phage data via PhageScope</li>
+<li>Optional private source folders from <code>private_data/</code></li>
+<li>Host assemblies from NCBI RefSeq</li>
 </ul>
-<h3 id="foreign-key-indexes">Foreign Key Indexes<a class="headerlink" href="#foreign-key-indexes" title="Permanent link">&para;</a></h3>
-<p>All dimension tables have indexes on <code>Phage_ID</code> for efficient joins.</p>
-<h3 id="source-tracking-indexes">Source Tracking Indexes<a class="headerlink" href="#source-tracking-indexes" title="Permanent link">&para;</a></h3>
-<p>All tables include indexes on <code>Source_DB</code> for source-based filtering.</p>
-<h3 id="example-optimized-queries">Example Optimized Queries<a class="headerlink" href="#example-optimized-queries" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">-- Fast: Uses Phage_ID index</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">dim_proteins</span><span class="w"> </span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">Phage_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;NC_000866&#39;</span><span class="p">;</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1">-- Fast: Uses Source_DB index</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">fact_phages</span><span class="w"> </span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">Source_DB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;GenBank&#39;</span><span class="p">;</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1">-- Fast: Uses both indexes</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="o">*</span><span class="w"> </span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dim_proteins</span><span class="w"> </span><span class="n">p</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">fact_phages</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">Phage_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Source_DB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;RefSeq&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="k">Length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">100000</span><span class="p">;</span>
-</code></pre></div>
-<h2 id="analytical-views">Analytical Views<a class="headerlink" href="#analytical-views" title="Permanent link">&para;</a></h2>
-<p>The database includes pre-built views for common analyses:</p>
-<h3 id="phage_summary"><code>phage_summary</code><a class="headerlink" href="#phage_summary" title="Permanent link">&para;</a></h3>
-<p>Aggregated statistics by data source.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">phage_summary</span><span class="p">;</span>
-</code></pre></div>
-<h3 id="phage_complete_profile"><code>phage_complete_profile</code><a class="headerlink" href="#phage_complete_profile" title="Permanent link">&para;</a></h3>
-<p>Comprehensive phage characterization with all dimension counts.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">phage_complete_profile</span><span class="w"> </span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">protein_count</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span>
-</code></pre></div>
-<h3 id="phage_size_distribution"><code>phage_size_distribution</code><a class="headerlink" href="#phage_size_distribution" title="Permanent link">&para;</a></h3>
-<p>Genome size categorization analysis.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">phage_size_distribution</span><span class="p">;</span>
-</code></pre></div>
-<h2 id="data-validation-quality">Data Validation &amp; Quality<a class="headerlink" href="#data-validation-quality" title="Permanent link">&para;</a></h2>
-<h3 id="automated-validation">Automated Validation<a class="headerlink" href="#automated-validation" title="Permanent link">&para;</a></h3>
-<p>The pipeline performs comprehensive quality control:</p>
-<ol>
-<li><strong>Schema Validation</strong></li>
-<li>Table existence verification (all 9 tables)</li>
-<li>Column presence and data type checks</li>
-<li>
-<p>Index verification</p>
-</li>
-<li>
-<p><strong>Data Integrity</strong></p>
-</li>
-<li>Duplicate detection (Phage_ID, Protein_ID, etc.)</li>
-<li>Orphaned record detection (foreign key consistency)</li>
-<li>
-<p>NULL value distribution analysis</p>
-</li>
-<li>
-<p><strong>Statistical Validation</strong></p>
-</li>
-<li>Row count summaries</li>
-<li>Source distribution analysis</li>
-<li>
-<p>Numerical range validation (genome sizes, GC content, TMH counts)</p>
-</li>
-<li>
-<p><strong>Relationship Verification</strong></p>
-</li>
-<li>Foreign key consistency across all dimension tables</li>
-<li>Source database alignment</li>
-</ol>
-<h3 id="validation-reports">Validation Reports<a class="headerlink" href="#validation-reports" title="Permanent link">&para;</a></h3>
-<p>HTML reports are generated with:
-- Visual database schema diagram
-- Row count statistics for all tables
-- Data quality metrics with pass/fail indicators
-- Distribution charts for key metrics
-- Warning flags for data quality issues</p>
-<p><strong>View Reports:</strong></p>
-<p>Reports are generated in the <code>workflow/reports/</code> directory after running the pipeline. They include:
-- Database Validation Report
-- Phage Metadata Report
-- Annotated Proteins Report
-- And more for each data type</p>
-<h3 id="database-validation-report">Database Validation Report<a class="headerlink" href="#database-validation-report" title="Permanent link">&para;</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Report scope</p>
-<p>The validation report below was generated <strong>before host data was added</strong> to the pipeline. It reflects the state of the DuckDB database (all phage tables) and does not yet include host-phage link statistics.</p>
-</div>
-<p>The full interactive report is embedded below. You can also <a href="../../reports/database_validation.html" target="_blank">open it in a new tab</a>.</p>
-<div style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin: 1rem 0;">
-<iframe src="../../reports/database_validation.html" width="100%" height="900px" style="border: none; display: block;"></iframe>
-</div>
-
-<h2 id="sequence-files">Sequence Files<a class="headerlink" href="#sequence-files" title="Permanent link">&para;</a></h2>
-<p>In addition to the database, the pipeline generates indexed FASTA files:</p>
-<h3 id="phage-genomes">Phage Genomes<a class="headerlink" href="#phage-genomes" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>File</strong>: <code>data/sequences/all_phages.fasta</code></li>
-<li><strong>Index</strong>: <code>data/sequences/all_phages.fasta.fai</code></li>
-<li><strong>Size</strong>: ~40 GB</li>
-<li><strong>Records</strong>: ~873,000 phage genomes</li>
-</ul>
-<h3 id="protein-sequences">Protein Sequences<a class="headerlink" href="#protein-sequences" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>File</strong>: <code>data/sequences/all_proteins.fasta</code></li>
-<li><strong>Index</strong>: <code>data/sequences/all_proteins.fasta.fai</code></li>
-<li><strong>Size</strong>: ~60 GB</li>
-<li><strong>Records</strong>: ~43 million protein sequences</li>
-</ul>
-<p>Both files are indexed with <strong>pyfaidx</strong> for fast random access.</p>
-<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
-<h3 id="pythonduckdb">Python/DuckDB<a class="headerlink" href="#pythonduckdb" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">duckdb</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># Connect to database</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">conn</span> <span class="o">=</span> <span class="n">duckdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;data/databases/phage_database_optimized.duckdb&#39;</span><span class="p">)</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Get database statistics</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">stats</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="s2">    SELECT </span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="s2">        (SELECT COUNT(*) FROM fact_phages) as phages,</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="s2">        (SELECT COUNT(*) FROM dim_proteins) as proteins,</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="s2">        (SELECT COUNT(*) FROM dim_trna_tmrna) as trna</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Phages: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Proteins: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;tRNA/tmRNA: </span><span class="si">{</span><span class="n">stats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>
-<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="c1"># Complex analytical query</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="n">results</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="s2">    SELECT </span>
-<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="s2">        f.Source_DB,</span>
-<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="s2">        COUNT(DISTINCT f.Phage_ID) as phage_count,</span>
-<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="s2">        AVG(f.Length) as avg_length,</span>
-<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="s2">        AVG(f.GC_content) as avg_gc,</span>
-<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="s2">        COUNT(DISTINCT p.Protein_ID) as protein_count</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="s2">    FROM fact_phages f</span>
-<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="s2">    LEFT JOIN dim_proteins p ON f.Phage_ID = p.Phage_ID</span>
-<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="s2">    GROUP BY f.Source_DB</span>
-<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="s2">    ORDER BY phage_count DESC</span>
-<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">df</span><span class="p">()</span>
-<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>
-<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
-<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>
-<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</code></pre></div>
-<h3 id="sql-queries">SQL Queries<a class="headerlink" href="#sql-queries" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">-- Find large phages with many proteins</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">SELECT</span><span class="w"> </span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span><span class="p">,</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="k">Length</span><span class="p">,</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="k">Host</span><span class="p">,</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">Protein_ID</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">protein_count</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_phages</span><span class="w"> </span><span class="n">f</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_proteins</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">Phage_ID</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="k">Length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">200000</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="k">Length</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="k">Host</span>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="k">HAVING</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">Protein_ID</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">200</span>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="k">Length</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="c1">-- Analyze tRNA distribution</span>
-<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="k">SELECT</span><span class="w"> </span>
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="n">trna_type</span><span class="p">,</span>
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="k">count</span><span class="p">,</span>
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="k">DISTINCT</span><span class="w"> </span><span class="n">Phage_ID</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">phage_count</span>
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="k">FROM</span><span class="w"> </span><span class="n">dim_trna_tmrna</span>
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="k">WHERE</span><span class="w"> </span><span class="n">trna_type</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">trna_type</span>
-<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">count</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
-<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>
-<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="c1">-- Find phages with anti-CRISPR systems</span>
-<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="k">SELECT</span><span class="w"> </span>
-<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span><span class="p">,</span>
-<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="k">Host</span><span class="p">,</span>
-<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">    </span><span class="n">f</span><span class="p">.</span><span class="n">Lifestyle</span><span class="p">,</span>
-<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="w">    </span><span class="k">COUNT</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">Protein_ID</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">anti_crispr_count</span>
-<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_phages</span><span class="w"> </span><span class="n">f</span>
-<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">dim_anti_crispr</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">Phage_ID</span>
-<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Phage_ID</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="k">Host</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">Lifestyle</span>
-<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="k">HAVING</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">Protein_ID</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
-<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">anti_crispr_count</span><span class="w"> </span><span class="k">DESC</span><span class="p">;</span>
-</code></pre></div>
-<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Database Size</strong>: ~15 GB (optimized with columnar storage)</li>
-<li><strong>Query Performance</strong>: Fast analytical queries thanks to indexes and columnar format</li>
-<li><strong>Memory Usage</strong>: DuckDB is memory-efficient, but complex queries may need &gt;8 GB RAM</li>
-<li><strong>Disk I/O</strong>: Use SSD for better performance</li>
-</ul>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="../../api/overview/">API Reference</a> - Query the database via REST API</li>
-<li><a href="../../reference/commands/">Command Reference</a> - Common database operations</li>
-<li><a href="../../guides/installation/">Installation Guide</a> - Set up your local environment</li>
-</ul>
-<hr />
-<p><strong>Note</strong>: The database is read-only in production. For updates, re-run the pipeline with updated source data.</p>
 
 
 
