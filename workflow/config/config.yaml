@@ -1,37 +1,43 @@
-# Output directories
+# -------------------------------
+# Runtime path roots (container-first)
+# -------------------------------
+# These absolute paths are the canonical in-container targets.
+# Snakefile rewrites them at runtime using:
+#   PBI_DATA_DIR (default local: data)
+#   PBI_PRIVATE_DATA_DIR (default local: private_data)
+#   PBI_LOGS_DIR (default local: data)
+#
+# Docker-compose defaults:
+#   /data          <- named volume pbi-data
+#   /private-data  <- ./private_data
+#   /pipeline-logs <- ./pipeline_logs
 
-# Reports and logs — written to the bind-mounted local directory so users can read them
-# directly from the repository root without needing Docker commands.
-# In the pipeline container this resolves to /pipeline-logs/ (see docker-compose.yml).
-# Running locally (no Docker) it falls back to data/logs/ and data/processed/reports/
-# unless PBI_LOGS_DIR is set.
+# Reports and logs (bind-mounted for direct host access)
 reports_output: "/pipeline-logs/reports/"
+database_validation_report_output: "/pipeline-logs/reports/database_validation.html"
 
-# Final outputs
+# Database outputs
+duckdb_output: "/data/processed/databases/phage_database.duckdb"
+optimized_duckdb_output: "/data/processed/databases/phage_database_optimized.duckdb"
+
+# Final sequence outputs
 all_phages_fasta: "/data/processed/sequences/all_phages.fasta"
 all_proteins_fasta: "/data/processed/sequences/all_proteins.fasta"
 # DEPRECATED: all_hosts_fasta is no longer used. Use host_fasta_mapping instead.
 # Kept for backward compatibility with older scripts.
 all_hosts_fasta: "/data/processed/sequences/all_hosts.fasta"
 
-# Metadata
+# Intermediate metadata outputs
 intermediate_csv_output: "/data/intermediate/csv"
 merged_csv_output: "/data/intermediate/csv/merged/"
 
-# Databases files
-duckdb_output: "/data/processed/databases/phage_database.duckdb"
-optimized_duckdb_output: "/data/processed/databases/phage_database_optimized.duckdb"
-
-private_manifest_output: "/private-data/private_manifest.json"
-
-database_validation_report_output: "/pipeline-logs/reports/database_validation.html"
-
-# Private data ingestion
-# The pipeline container mounts ./private_data (repo root) at /private-data.
-# Place one subdirectory per private dataset inside private_data/.
-# If the directory is empty the pipeline runs without private data.
+# Private-data ingestion and manifest outputs
+# The pipeline container mounts ./private_data at /private-data.
+# Place one subdirectory per private dataset under private_data/.
+# If the directory is empty, pipeline runs with only public data.
 # Set to "" or a non-existent path to fully disable.
 private_data_root: "/private-data"
+private_manifest_output: "/private-data/private_manifest.json"
 
 
 # -----------------------------------

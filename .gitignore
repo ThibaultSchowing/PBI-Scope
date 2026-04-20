@@ -21,6 +21,10 @@ private_data/*
 # HTML reports and log files written by the pipeline container will appear here.
 pipeline_logs/*
 !pipeline_logs/.gitkeep
+
+# Notebook durable analysis outputs (mounted to /results in analysis container).
+analysis_results/*
+!analysis_results/.keep
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 notebooks/exports/
