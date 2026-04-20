@@ -47,8 +47,12 @@ Outputs are stored in a shared Docker volume and exposed through:
 git clone https://github.com/ThibaultSchowing/PBI.git
 cd PBI
 
-export NCBI_EMAIL="you@domain.org"
-export NCBI_API_KEY="..."
+# Configure credentials and set your host UID/GID so containers
+# write files as your user instead of root:
+cp .env.example .env
+echo "UID=$(id -u)" >> .env
+echo "GID=$(id -g)" >> .env
+# Then edit .env and fill in NCBI_EMAIL (and NCBI_API_KEY if you have one).
 
 # Set up SSH port forwarding first (on your local machine):
 # ssh -L 8888:localhost:8888 username@your-server

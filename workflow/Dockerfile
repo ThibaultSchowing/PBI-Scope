@@ -29,9 +29,13 @@ RUN conda config --set ssl_verify false && \
     conda clean -a -y && \
     conda config --set ssl_verify true
 
-# Create data directory structure
+# Create data directory structure.
+# chmod 777 ensures that when Docker seeds the named volumes from these image
+# directories on first run, the non-root host UID (set via `user:` in
+# docker-compose.yml) can write inside them without permission errors.
 RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermediate /data/raw /cache \
-    && mkdir -p /pipeline-logs/reports /pipeline-logs/logs
+    && mkdir -p /pipeline-logs/reports /pipeline-logs/logs \
+    && chmod -R 777 /data /cache /pipeline-logs
 
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
