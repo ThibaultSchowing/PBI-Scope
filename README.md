@@ -70,26 +70,30 @@ Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8888 user@
 ## 🏗️ Infrastructure overview
 
 ```text
-                         +-------------------------+
-                         |   bind mount            |
-                         | ./private_data          |
-                         | -> /private-data        |
-                         +------------+------------+
+                  +--------------------------------------+
+                  |         shared bind mounts           |
+                  | ./private_data  -> /private-data     |
+                  | ./pipeline_logs -> /pipeline-logs    |
+                  | (pipeline: rw / analysis: ro)        |
+                  +-------------------+------------------+
                                       |
-+------------------+      +-----------v-----------+      +------------------+
+         +----------------------------+----------------------------+
+         |                                                         |
++--------v---------+      +-----------v-----------+      +--------v---------+
 | pipeline         |----->|      pbi-data         |<-----| analysis         |
-| (rw on /data)    |      | named volume (/data)  |      | (ro on /data)    |
-+--------+---------+      +-----------+-----------+      +---------+--------+
-         |                            |                            |
-         |                    +-------v-------+                    |
-         |                    | api (legacy)  |                    |
-         |                    | (ro on /data) |                    |
-         |                    +---------------+                    |
-         |
-+--------v---------+
-| bind mount       |
-| ./pipeline_logs  |
-| -> /pipeline-logs|
+| (rw: /data,      |      | named volume (/data)  |      | (ro: /data)      |
+|      /cache)     |      +-----------+-----------+      +---------+--------+
++--------+---------+                  |                            |
+         |                    +-------v-------+          +---------v---------+
+         |                    | api (legacy)  |          | bind mounts       |
+         |                    | (ro on /data) |          | [analysis only]   |
+         |                    +---------------+          | ./notebooks       |
+         |                                               |  -> /workspace(rw)|
++--------v---------+                                     | ./analysis_results|
+| named volume     |                                     |  -> /results (rw) |
+| pbi-cache        |                                     | ./src             |
+| -> /cache (rw)   |                                     |  -> /app/src (ro) |
+| [pipeline only]  |                                     +-------------------+
 +------------------+
 ```
 
