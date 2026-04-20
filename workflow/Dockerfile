@@ -35,7 +35,7 @@ RUN conda config --set ssl_verify false && \
 # docker-compose.yml) can write inside them without permission errors.
 RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermediate /data/raw /cache \
     && mkdir -p /pipeline-logs/reports /pipeline-logs/logs \
-    && chmod -R 777 /data /cache /pipeline-logs
+    && chmod -R 777 /data /cache /pipeline-logs /app/workflow
 
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
