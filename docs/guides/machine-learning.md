@@ -762,7 +762,7 @@ ensemble.fit(X_train, y_train)
 
 ### Documentation
 - [PBI API Reference](../api/overview.md)
-- [Database Schema](../database/schema.md)
+- [Database Schema](../database/overview.md)
 - [Example Notebooks](../../notebooks/)
 
 ### Related Papers
@@ -779,6 +779,6 @@ ensemble.fit(X_train, y_train)
 
 ## Getting Help
 
-- Check the [ML/streaming notebook](../../notebooks/03_ml_streaming.ipynb)
+- Check the [ML/streaming notebook](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/03_ml_streaming.ipynb)
 - Review [database documentation](../database/overview.md)
 - Open an issue on [GitHub](https://github.com/ThibaultSchowing/PBI/issues)

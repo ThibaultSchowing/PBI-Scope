@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-Test script to verify environment-based path configuration for PBI package.
-Tests that DATA_PATH environment variable correctly modifies package paths.
+Utility script: verify DATA_PATH environment variable path resolution.
+
+Run this locally or inside a container to confirm that pbi.get_default_paths()
+resolves to expected locations for both local and Docker modes.
+
+Usage:
+    python scripts/check_pbi_paths.py            # local mode
+    DATA_PATH=/data/processed python scripts/check_pbi_paths.py  # container mode
 """
 
 import os
