@@ -73,7 +73,7 @@ host_resolution_cache_output: "/data/intermediate/csv/merged/host_token_resoluti
 host_download_log: "/pipeline-logs/logs/host_download.log"
 host_failure_log: "/pipeline-logs/logs/host_download_failures.log"
 host_fasta_qc_log: "/pipeline-logs/logs/host_fasta_qc.csv"
-host_status_report: "/pipeline-logs/logs/host_status_report.csv"
+host_status_report: "/pipeline-logs/reports/host_status_report.csv"
 create_host_mapping_log: "/pipeline-logs/logs/create_host_mapping.log"
 index_individual_host_sequences_log: "/pipeline-logs/logs/index_individual_host_sequences.log"
 create_host_status_report_log: "/pipeline-logs/logs/create_host_status_report.log"
