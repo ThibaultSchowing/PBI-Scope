@@ -77,7 +77,7 @@ rule create_host_mapping:
     params:
         input_dir = config["host_genomes_intermediate"]
     log:
-        "logs/create_host_mapping.log"
+        config["create_host_mapping_log"]
     run:
         import json
         from pathlib import Path
@@ -159,7 +159,7 @@ rule index_individual_host_sequences:
         flag    = touch(config["host_index_complete_flag"]),
         qc_log  = config["host_fasta_qc_log"]
     log:
-        "logs/index_individual_host_sequences.log"
+        config["index_individual_host_sequences_log"]
     conda:
         "../envs/sequences.yaml"
     script:
@@ -188,7 +188,7 @@ rule create_host_status_report:
     output:
         status_report = config["host_status_report"]
     log:
-        "logs/create_host_status_report.log"
+        config["create_host_status_report_log"]
     conda:
         "../envs/sequences.yaml"
     script:

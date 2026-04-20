@@ -6,6 +6,13 @@ This directory contains Jupyter notebooks for exploring and analyzing the PBI ph
 
 These notebooks serve as the primary guides for working with PBI data:
 
+### 📄 `00_pipeline_logs.ipynb` — Pipeline Logs Exploration
+Quick checks and exploratory snippets for pipeline logs:
+- Lists the mounted `/pipeline-logs` directory
+- Verifies that expected log/report folders are present
+- Safely previews selected log files when available
+- Handles missing logs gracefully (no crash if pipeline has not run yet)
+
 ### 📊 `01_database_exploration.ipynb` — Database Exploration and Quality Control
 Comprehensive guide to understanding the database contents and data quality:
 - Database statistics and overview
@@ -73,6 +80,7 @@ docker compose up -d analysis
 Container paths:
 - Notebooks workspace (editable): `/workspace` (mounted from `./notebooks`)
 - Durable analysis outputs: `/results` (mounted from `./analysis_results`)
+- Pipeline logs (read-only): `/pipeline-logs` (mounted from `./pipeline_logs`)
 
 > ⚠️ **Security Note**: The analysis service runs Jupyter Lab without authentication for local development convenience. Do not expose port 8888 to untrusted networks. For remote access, use SSH tunneling.
 

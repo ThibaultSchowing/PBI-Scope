@@ -1300,7 +1300,7 @@ class SequenceRetriever:
         self,
         where_clause: str = None,
         limit: Optional[int] = None,
-        host_contig_mode: str = "first",
+        host_contig_mode: str = "concat",
         phage_contig_mode: str = "first",
     ) -> pd.DataFrame:
         """
@@ -1312,9 +1312,9 @@ class SequenceRetriever:
             limit: Optional limit on number of pairs.
             host_contig_mode: How to handle multi-contig host FASTA files.
 
-                * ``"first"`` *(default)* – return only the first/largest
+                * ``"first"`` – return only the first/largest
                   contig (original behaviour; fully backward-compatible).
-                * ``"concat"`` – concatenate all contigs into one string
+                * ``"concat"`` *(default)* – concatenate all contigs into one string
                   (sorted by length desc).  Use this to include the full
                   host genome even when it is split across scaffolds.
 
@@ -1331,7 +1331,7 @@ class SequenceRetriever:
             Phage_Sequence, Host_Sequence.
 
         Example:
-            # Get all pairs (default – single contig per sequence)
+            # Get all pairs (default – full host genome, concatenated contigs)
             pairs = retriever.get_phage_host_pairs()
 
             # Full host genome even for fragmented assemblies
@@ -1736,9 +1736,9 @@ class SequenceRetriever:
 
         Pair retrieval methods:
             - get_phage_host_pairs(where_clause=None, limit=None,
-                                   host_contig_mode="first", phage_contig_mode="first")
-                  -> pd.DataFrame  with Phage_Sequence, Host_Sequence columns
-                  Use host_contig_mode="concat" for full fragmented host genomes.
+                                   host_contig_mode="concat", phage_contig_mode="first")
+                   -> pd.DataFrame  with Phage_Sequence, Host_Sequence columns
+                   Default host mode returns full fragmented host genomes.
             - get_phage_host_pairs_iterator(where_clause=None, batch_size=1000,
                                             host_contig_mode="first", phage_contig_mode="first")
                   -> iterator of DataFrame batches (memory-efficient)

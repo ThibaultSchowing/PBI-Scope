@@ -410,10 +410,12 @@ def main():
         if os.path.getsize(fasta_path) == 0:
             raise ValueError(f"❌ FASTA file is empty: {fasta_path}")
         
-        # Determine report path
+        # Determine report path (prefer mounted pipeline logs directory in containers)
         fasta_name = Path(fasta_path).stem
-        report_path = f"../reports/{fasta_name}_duplicates.html"
-        os.makedirs("../reports", exist_ok=True)
+        logs_root = os.environ.get("PBI_LOGS_DIR")
+        report_dir = Path(logs_root) / "reports" if logs_root else Path("../reports")
+        report_dir.mkdir(parents=True, exist_ok=True)
+        report_path = str(report_dir / f"{fasta_name}_duplicates.html")
         
         # IMPORTANT: Normalize and deduplicate IN PLACE
         # This modifies the original file before indexing

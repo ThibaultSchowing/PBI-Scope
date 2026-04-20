@@ -41,7 +41,7 @@ rule merge_phage_fasta:
     output:
         config["all_phages_fasta"]
     log:
-        "logs/merge_phage_fasta.log"
+        config["merge_phage_fasta_log"]
     run:
         import os
         from pathlib import Path
@@ -81,7 +81,7 @@ rule merge_protein_fasta:
     output:
         config["all_proteins_fasta"]
     log:
-        "logs/merge_protein_fasta.log"
+        config["merge_protein_fasta_log"]
     run:
         import os
         from pathlib import Path
@@ -118,7 +118,7 @@ rule index_phage_sequences:
     output:
         config["all_phages_fasta"] + ".fai"
     log:
-        "logs/index_phage_sequences.log"
+        config["index_phage_sequences_log"]
     conda:
         "../envs/sequences.yaml"
     script:
@@ -130,7 +130,7 @@ rule index_protein_sequences:
     output:
         config["all_proteins_fasta"] + ".fai"
     log:
-        "logs/index_protein_sequences.log"
+        config["index_protein_sequences_log"]
     conda:
         "../envs/sequences.yaml"
     script:
