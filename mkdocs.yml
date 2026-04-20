@@ -1,5 +1,5 @@
 site_name: PBI Documentation
-site_description: Phage-Bacteria Interaction Database Pipeline - Comprehensive documentation for data integration, API, and analysis
+site_description: Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation
 # Important: set the full site_url for correct absolute links when hosted under /PBI/
 site_url: https://ThibaultSchowing.github.io/PBI/
 repo_name: ThibaultSchowing/PBI
@@ -36,6 +36,7 @@ nav:
   - Guides:
       - Overview: guides/overview.md
       - Installation (Docker): guides/installation.md
+      - Story (One Read): guides/storytelling.md
       - How It Works: guides/how-it-works.md
       - Analysis Container: guides/analysis-guide.md
       - Pipeline Execution: guides/pipeline-execution.md

@@ -1,6 +1,6 @@
 # PBI Package Usage Guide
 
-The `pbi` package provides a simple Python interface for accessing and querying the PBI (Phage Bacteria Interaction) database. This guide covers the main features and usage patterns.
+The `pbi` package provides a simple Python interface for accessing and querying the PBI (Phage Bacteria Interactions) data product. This guide covers the main features and usage patterns.
 
 ## Installation
 
