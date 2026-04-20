@@ -23,8 +23,10 @@ pipeline_logs/*
 !pipeline_logs/.gitkeep
 
 # Notebook durable analysis outputs (mounted to /results in analysis container).
-analysis_results/*
-!analysis_results/.keep
+outputs/*
+!outputs/.keep
+!outputs/export/
+!outputs/export/.gitkeep
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 notebooks/exports/

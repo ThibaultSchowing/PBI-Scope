@@ -89,7 +89,7 @@ Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8888 user@
          |                    | (ro on /data) |          | [analysis only]   |
          |                    +---------------+          | ./notebooks       |
          |                                               |  -> /workspace(rw)|
-+--------v---------+                                     | ./analysis_results|
++--------v---------+                                     | ./outputs         |
 | named volume     |                                     |  -> /results (rw) |
 | pbi-cache        |                                     | ./src             |
 | -> /cache (rw)   |                                     |  -> /app/src (ro) |
@@ -106,7 +106,7 @@ Additional mounts/volumes currently used in `docker-compose.yml`:
   - `./private_data` → `/private-data` (pipeline: rw, analysis: ro)
   - `./pipeline_logs` → `/pipeline-logs` (pipeline: rw, analysis: ro)
   - `./notebooks` → `/workspace` (analysis: rw)
-  - `./analysis_results` → `/results` (analysis: rw)
+  - `./outputs` → `/results` (analysis: rw)
   - `./src` → `/app/src` (analysis: ro)
 
 ## License

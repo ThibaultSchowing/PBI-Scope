@@ -24,7 +24,7 @@ def test_analysis_service_exposes_private_data_env_var():
 def test_analysis_service_has_results_mount():
     compose = _load_compose_config()
     analysis_volumes = compose["services"]["analysis"]["volumes"]
-    assert "./analysis_results:/results" in analysis_volumes
+    assert "./outputs:/results" in analysis_volumes
 
 
 def test_analysis_service_exposes_results_env_var():

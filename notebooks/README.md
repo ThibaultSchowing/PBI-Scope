@@ -79,7 +79,7 @@ docker compose up -d analysis
 
 Container paths:
 - Notebooks workspace (editable): `/workspace` (mounted from `./notebooks`)
-- Durable analysis outputs: `/results` (mounted from `./analysis_results`)
+- Durable analysis outputs: `/results` (mounted from `./outputs`)
 - Pipeline logs (read-only): `/pipeline-logs` (mounted from `./pipeline_logs`)
 
 > ⚠️ **Security Note**: The analysis service runs Jupyter Lab without authentication for local development convenience. Do not expose port 8888 to untrusted networks. For remote access, use SSH tunneling.
@@ -152,7 +152,7 @@ Recommended structure:
     figures/
 ```
 
-In the repository this maps to `./analysis_results/`.
+In the repository this maps to `./outputs/`.
 
 ## Additional Resources
 

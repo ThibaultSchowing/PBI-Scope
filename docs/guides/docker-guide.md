@@ -19,7 +19,7 @@ This guide explains the current PBI container layout.
 |  bind mount: ./private_data  -> /private-data (rw pipeline, ro analysis)
 |  bind mount: ./pipeline_logs -> /pipeline-logs (rw pipeline, ro analysis)
 |  bind mount: ./notebooks     -> /workspace (analysis)
-|  bind mount: ./analysis_results -> /results (analysis)
+|  bind mount: ./outputs -> /results (analysis)
 +---------------------------------------------------------------------+
 ```
 

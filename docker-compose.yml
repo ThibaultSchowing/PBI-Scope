@@ -67,7 +67,7 @@ services:
       # Mount notebooks directory for persistent work
       - ./notebooks:/workspace
       # Durable notebook outputs (datasets, plots, model artifacts)
-      - ./analysis_results:/results
+      - ./outputs:/results
       # Mount workflow directory (read-only) for script imports.
       # We shouldn't need the entire workflow here, but this allows notebooks to import Snakemake rules and utility functions if needed.
       #- ./workflow:/app/workflow:ro
