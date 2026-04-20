@@ -2,7 +2,9 @@
 
 # PBI - Phage Bacteria Interactions
 
-> A dockerized pipeline that builds a queryable phage-host resource for machine learning and analysis.
+> A proof-of-concept dockerized bioinformatics pipeline that makes phage genomic data from [PhageScope](https://phagescope.deepomics.org/database) and their hosts available in an efficient, structured format for training neural networks and AI models for phage-host interaction prediction. 
+
+**Install - Wait - Work** The pipeline takes care of everything within Docker !
 
 [![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18961927.svg)](https://doi.org/10.5281/zenodo.18961927)
@@ -16,6 +18,8 @@ PBI builds a unified data product from:
 - Optional private datasets from `private_data/` (validated and merged by source)
 - Host genomes resolved from NCBI RefSeq
 
+> **Note**: PBI is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, unavailable data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information. **PhageScope updates available shortly !**
+
 Outputs are stored in a shared Docker volume and exposed through:
 
 - DuckDB metadata database
@@ -25,6 +29,8 @@ Outputs are stored in a shared Docker volume and exposed through:
 
 > The REST API is currently not supported for sequence-heavy usage because it is too slow for large retrieval workloads. It will be redesigned later for database exploration-first access.
 
+![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema.png)
+
 ## 📚 Documentation
 
 - **Home**: https://thibaultschowing.github.io/PBI/
@@ -32,6 +38,8 @@ Outputs are stored in a shared Docker volume and exposed through:
 - **Story (one-read walkthrough)**: https://thibaultschowing.github.io/PBI/guides/storytelling/
 - **Private data handling**: https://thibaultschowing.github.io/PBI/guides/private-data-ingestion/
 - **Analysis container**: https://thibaultschowing.github.io/PBI/guides/analysis-guide/
+
+**Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks)**
 
 ## 🚀 Quick Start
 
@@ -42,15 +50,22 @@ cd PBI
 export NCBI_EMAIL="you@domain.org"
 export NCBI_API_KEY="..."
 
+# Set up SSH port forwarding first (on your local machine):
+# ssh -L 8888:localhost:8888 username@your-server
+
+tmux new -s pbi
+
 docker compose build pipeline
 docker compose run --rm pipeline
+# ~4 hours for PhageScope data, ~12-18 hours for host genomes retrieval
 
 # analysis container
 docker compose build analysis
 docker compose up -d analysis
+
 ```
 
-Open `http://localhost:8888` (or with SSH tunnel: `ssh -L 8888:localhost:8888 user@server`).
+Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8888 user@server`).
 
 ## 🏗️ Infrastructure overview
 
