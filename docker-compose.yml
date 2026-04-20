@@ -47,10 +47,17 @@ services:
 
   # Analysis service for direct data access and Jupyter notebooks
   analysis:
+
     build:
       context: .
       dockerfile: Dockerfile.analysis
     container_name: pbi-analysis
+    deploy:
+    resources:
+      limits:
+        memory: 8G  # Maximum memory
+      reservations:
+        memory: 4G  # Guaranteed memory
     ports:
       - "8888:8888"
     volumes:
@@ -61,8 +68,9 @@ services:
       - ./private_data:/private-data:ro
       # Mount notebooks directory for persistent work
       - ./notebooks:/workspace
-      # Mount workflow directory (read-only) for script imports
-      - ./workflow:/app/workflow:ro
+      # Mount workflow directory (read-only) for script imports.
+      # We shouldn't need the entire workflow here, but this allows notebooks to import Snakemake rules and utility functions if needed.
+      #- ./workflow:/app/workflow:ro
       # Mount src directory (read-only) for package imports
       - ./src:/app/src:ro
     environment:
