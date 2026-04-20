@@ -31,3 +31,10 @@ def test_analysis_service_exposes_results_env_var():
     compose = _load_compose_config()
     analysis_env = compose["services"]["analysis"]["environment"]
     assert "PBI_RESULTS_DIR=/results" in analysis_env
+
+
+def test_pipeline_service_exposes_writable_home_cache():
+    compose = _load_compose_config()
+    pipeline_env = compose["services"]["pipeline"]["environment"]
+    assert "HOME=/cache" in pipeline_env
+    assert "XDG_CACHE_HOME=/cache" in pipeline_env

@@ -21,6 +21,8 @@ services:
       - ./pipeline_logs:/pipeline-logs
     environment:
       # Core path roots used by Snakefile/env-aware path replacement
+      - HOME=/cache
+      - XDG_CACHE_HOME=/cache
       - SNAKEMAKE_OUTPUT_CACHE=/cache
       - SNAKEMAKE_CONDA_PREFIX=/cache/conda
       - PBI_DATA_DIR=/data
