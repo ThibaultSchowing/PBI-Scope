@@ -55,6 +55,7 @@ setup(
             "seaborn>=0.12",
             "biopython>=1.80",
             "numpy>=1.24.0",
+            "pyarrow>=14.0.0",
             "scikit-learn>=1.3.0",
         ],
         "ml": [

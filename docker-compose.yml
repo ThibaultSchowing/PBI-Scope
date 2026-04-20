@@ -5,6 +5,10 @@ services:
       context: .
       dockerfile: workflow/Dockerfile
     container_name: pbi-pipeline
+    # Run as the host user so files written to bind-mounted directories
+    # (./pipeline_logs, ./private_data) are owned by you, not root.
+    # UID and GID are read from the .env file (see .env.example).
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       # Mount data directory to persist database and sequences
       - pbi-data:/data
@@ -54,6 +58,10 @@ services:
       context: .
       dockerfile: Dockerfile.analysis
     container_name: pbi-analysis
+    # Run as the host user so files written to bind-mounted directories
+    # (./notebooks, ./outputs) are owned by you, not root.
+    # UID and GID are read from the .env file (see .env.example).
+    user: "${UID:-1000}:${GID:-1000}"
     ports:
       - "8888:8888"
     volumes:
@@ -67,7 +75,7 @@ services:
       # Mount notebooks directory for persistent work
       - ./notebooks:/workspace
       # Durable notebook outputs (datasets, plots, model artifacts)
-      - ./analysis_results:/results
+      - ./outputs:/results
       # Mount workflow directory (read-only) for script imports.
       # We shouldn't need the entire workflow here, but this allows notebooks to import Snakemake rules and utility functions if needed.
       #- ./workflow:/app/workflow:ro
@@ -78,6 +86,9 @@ services:
       - PBI_PRIVATE_DATA_DIR=/private-data
       - PBI_LOGS_DIR=/pipeline-logs
       - PBI_RESULTS_DIR=/results
+      # Tell Jupyter to use the system-wide config written during image build,
+      # so it is accessible regardless of which UID runs the container.
+      - JUPYTER_CONFIG_DIR=/etc/jupyter
       # Set PYTHONPATH for proper module imports
       - PYTHONPATH=/app
     networks:

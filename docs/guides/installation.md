@@ -15,9 +15,23 @@ PBI is designed to run with Docker.
 git clone https://github.com/ThibaultSchowing/PBI.git
 cd PBI
 
-export NCBI_EMAIL="your.email@example.com"
-export NCBI_API_KEY="YOUR_KEY"
+# Copy the example env file and open it to fill in NCBI credentials:
+cp .env.example .env
+# Set NCBI_EMAIL=your.email@example.com (and NCBI_API_KEY if you have one)
+
+# Append your host UID and GID so containers write files as your user (not root):
+echo "UID=$(id -u)" >> .env
+echo "GID=$(id -g)" >> .env
 ```
+
+> **Why UID/GID?** Docker containers run as root by default. Without this, files
+> written to bind-mounted directories (`./notebooks`, `./outputs`,
+> `./pipeline_logs`) are owned by root and require `sudo` to delete or edit.
+> Setting `UID`/`GID` makes containers run as your host user so all output files
+> belong to you.
+>
+> On macOS with Docker Desktop this is handled transparently — setting the values
+> is still safe and recommended for portability.
 
 ## 2) Run pipeline
 

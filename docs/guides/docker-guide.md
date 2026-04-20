@@ -8,6 +8,30 @@ This guide explains the current PBI container layout.
 - `analysis`: read-only data access for users (preferred)
 - `api`: legacy REST layer (limited support)
 
+## Non-root execution (required setup)
+
+Both the `pipeline` and `analysis` services run as your host user (`UID:GID`) to
+prevent Docker from creating root-owned files in bind-mounted directories.
+
+The `user:` field in `docker-compose.yml` reads `UID` and `GID` from the `.env`
+file.  **You must set these once after cloning:**
+
+```bash
+cp .env.example .env
+# Edit .env: fill in NCBI_EMAIL (and NCBI_API_KEY if you have one)
+
+# Append your host UID and GID:
+echo "UID=$(id -u)" >> .env
+echo "GID=$(id -g)" >> .env
+```
+
+Without this, every file the containers write to `./notebooks`, `./outputs`, and
+`./pipeline_logs` will be owned by `root` and require `sudo` to edit or delete.
+
+> **macOS note**: Docker Desktop on macOS translates file ownership via a built-in
+> shim, so root-owned files are less common there.  Setting `UID`/`GID` is still
+> recommended for portability and consistency.
+
 ## Volumes and mounts
 
 ```text
@@ -19,7 +43,7 @@ This guide explains the current PBI container layout.
 |  bind mount: ./private_data  -> /private-data (rw pipeline, ro analysis)
 |  bind mount: ./pipeline_logs -> /pipeline-logs (rw pipeline, ro analysis)
 |  bind mount: ./notebooks     -> /workspace (analysis)
-|  bind mount: ./analysis_results -> /results (analysis)
+|  bind mount: ./outputs -> /results (analysis)
 +---------------------------------------------------------------------+
 ```
 
