@@ -16,13 +16,15 @@ services:
       # Pipeline logs and HTML reports — accessible directly from the repository root.
       - ./pipeline_logs:/pipeline-logs
     environment:
+      # Core path roots used by Snakefile/env-aware path replacement
       - SNAKEMAKE_OUTPUT_CACHE=/cache
       - SNAKEMAKE_CONDA_PREFIX=/cache/conda
-      - NCBI_EMAIL=${NCBI_EMAIL} # Pass NCBI email for Entrez API usage from environment variable
-      - NCBI_API_KEY=${NCBI_API_KEY} # Pass NCBI API key for higher rate limits (optional) from environment variable
       - PBI_DATA_DIR=/data
       - PBI_LOGS_DIR=/pipeline-logs
       - PBI_PRIVATE_DATA_DIR=/private-data
+      # External service credentials
+      - NCBI_EMAIL=${NCBI_EMAIL} # Pass NCBI email for Entrez API usage from environment variable
+      - NCBI_API_KEY=${NCBI_API_KEY} # Pass NCBI API key for higher rate limits (optional) from environment variable
     networks:
       - pbi-network
 
@@ -68,6 +70,8 @@ services:
       - ./private_data:/private-data:ro
       # Mount notebooks directory for persistent work
       - ./notebooks:/workspace
+      # Durable notebook outputs (datasets, plots, model artifacts)
+      - ./analysis_results:/results
       # Mount workflow directory (read-only) for script imports.
       # We shouldn't need the entire workflow here, but this allows notebooks to import Snakemake rules and utility functions if needed.
       #- ./workflow:/app/workflow:ro
@@ -76,6 +80,7 @@ services:
     environment:
       - DATA_PATH=/data/processed
       - PBI_PRIVATE_DATA_DIR=/private-data
+      - PBI_RESULTS_DIR=/results
       # Set PYTHONPATH for proper module imports
       - PYTHONPATH=/app
     networks:

@@ -70,6 +70,10 @@ docker compose up -d analysis
 # Access Jupyter Lab at http://localhost:8888
 ```
 
+Container paths:
+- Notebooks workspace (editable): `/workspace` (mounted from `./notebooks`)
+- Durable analysis outputs: `/results` (mounted from `./analysis_results`)
+
 > ⚠️ **Security Note**: The analysis service runs Jupyter Lab without authentication for local development convenience. Do not expose port 8888 to untrusted networks. For remote access, use SSH tunneling.
 
 ### Local Development
@@ -118,6 +122,29 @@ conn = duckdb.connect(db_path, read_only=True)
 ### Path Not Found
 - **In Docker:** Paths like `/data/processed/...` are set automatically via `DATA_PATH`
 - **Locally:** Set the `DATA_PATH` environment variable or use project-relative paths
+
+## Analysis Output Structure (`/results`)
+
+Notebooks save generated artifacts outside `./notebooks` to keep notebook sources clean.
+Recommended structure:
+
+```
+/results/
+  01_database_exploration/
+    tables/
+    figures/
+  02_sequence_retrieval/
+    tables/
+    figures/
+  03_ml_streaming/
+    tables/
+    figures/
+  04_data_release_exploration/
+    tables/
+    figures/
+```
+
+In the repository this maps to `./analysis_results/`.
 
 ## Additional Resources
 
