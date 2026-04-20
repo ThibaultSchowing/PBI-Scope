@@ -73,7 +73,14 @@ host_resolution_cache_output: "/data/intermediate/csv/merged/host_token_resoluti
 host_download_log: "/pipeline-logs/logs/host_download.log"
 host_failure_log: "/pipeline-logs/logs/host_download_failures.log"
 host_fasta_qc_log: "/pipeline-logs/logs/host_fasta_qc.csv"
-host_status_report: "/data/intermediate/csv/merged/host_status_report.csv" # Todo move to /pipeline-logs too
+host_status_report: "/pipeline-logs/logs/host_status_report.csv"
+create_host_mapping_log: "/pipeline-logs/logs/create_host_mapping.log"
+index_individual_host_sequences_log: "/pipeline-logs/logs/index_individual_host_sequences.log"
+create_host_status_report_log: "/pipeline-logs/logs/create_host_status_report.log"
+merge_phage_fasta_log: "/pipeline-logs/logs/merge_phage_fasta.log"
+merge_protein_fasta_log: "/pipeline-logs/logs/merge_protein_fasta.log"
+index_phage_sequences_log: "/pipeline-logs/logs/index_phage_sequences.log"
+index_protein_sequences_log: "/pipeline-logs/logs/index_protein_sequences.log"
 
 # Host download settings
 ncbi_email: "phage.pipeline@example.com"  # Fallback only — set NCBI_EMAIL env variable instead (see .env.example)

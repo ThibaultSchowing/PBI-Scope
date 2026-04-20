@@ -11,15 +11,18 @@ echo "📁 Creating data directories..."
 mkdir -p data/raw/{phage_fasta_compressed,phage_fasta_extracted,protein_fasta_compressed,protein_fasta_extracted}
 mkdir -p data/intermediate/{csv/merged,fasta/phages,fasta/proteins}
 mkdir -p data/processed/{databases,sequences,reports}
+mkdir -p pipeline_logs/{logs,reports}
 mkdir -p private_data/phages
 
 # Set environment to use local relative paths
 export PBI_DATA_DIR="data"
 export PBI_PRIVATE_DATA_DIR="private_data"
+export PBI_LOGS_DIR="pipeline_logs"
 
 echo "✅ Environment configured:"
 echo "   PBI_DATA_DIR = $PBI_DATA_DIR"
 echo "   PBI_PRIVATE_DATA_DIR = $PBI_PRIVATE_DATA_DIR"
+echo "   PBI_LOGS_DIR = $PBI_LOGS_DIR"
 echo ""
 
 # Check if conda environment is activated

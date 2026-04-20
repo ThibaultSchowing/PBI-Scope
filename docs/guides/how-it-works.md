@@ -91,7 +91,7 @@ retriever = SequenceRetriever(
 **Key methods:**
 - `get_phage_metadata(where=None, limit=None)` — query phage metadata
 - `get_host_metadata(where=None)` — query host metadata
-- `get_phage_host_pairs(where=None, limit=None)` — get linked phage-host pairs
+- `get_phage_host_pairs(where=None, limit=None, host_contig_mode='concat')` — get linked phage-host pairs
 - `get_sequences_by_ids(ids, sequence_type='phage')` — retrieve FASTA sequences
 - `get_stats()` — database and file statistics
 - `export_fasta(df, path, id_col)` — export sequences to FASTA

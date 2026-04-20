@@ -267,7 +267,7 @@ seq = retriever.get_host_sequence("GCF_000005845", contig_mode="concat")
 Get interaction pairs with both sequences and metadata:
 
 ```python
-# Get all pairs (default – returns first/largest contig for each host)
+# Get all pairs (default – returns full host genomes via contig concatenation)
 pairs = retriever.get_phage_host_pairs()
 
 # Full host genome even for fragmented (scaffold-level) assemblies
@@ -298,7 +298,7 @@ pairs = retriever.get_phage_host_pairs(
 ### Memory-Efficient Batch Iteration with Full Genomes
 
 ```python
-# Default (single contig per host)
+# Iterator default (single contig per host)
 for batch_df in retriever.get_phage_host_pairs_iterator(batch_size=1000):
     print(f"Processing {len(batch_df)} pairs")
 
