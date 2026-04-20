@@ -54,12 +54,6 @@ services:
       context: .
       dockerfile: Dockerfile.analysis
     container_name: pbi-analysis
-    deploy:
-      resources:
-        limits:
-          memory: 8G  # Maximum memory
-        reservations:
-          memory: 4G  # Guaranteed memory
     ports:
       - "8888:8888"
     volumes:
