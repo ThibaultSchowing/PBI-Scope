@@ -83,9 +83,19 @@ RUN mkdir -p /.local/share/jupyter/runtime \
     /.local/cache \
     && chmod -R 777 /.local
 
+# Copy and enable the dynamic entrypoint that patches /etc/passwd at runtime.
+# This is required so that Python's getpass.getuser() / pwd.getpwuid() do not
+# crash when the container is started with an arbitrary host UID that has no
+# entry in the container's /etc/passwd (the root cause of the Jupyter crash at
+# /usr/local/bin/jupyter-lab line 8).
+COPY entrypoint.analysis.sh /usr/local/bin/entrypoint.analysis.sh
+RUN chmod +x /usr/local/bin/entrypoint.analysis.sh
+
 # Health check - verify Jupyter is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8888/api || exit 1
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.analysis.sh"]
 
 # Start Jupyter Lab (no --allow-root needed; container runs as host UID via docker-compose user:)
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace"]
