@@ -71,11 +71,16 @@ ENV DATA_PATH=/data/processed
 # here only matter when running without mounts (e.g. quick ad-hoc use).
 RUN mkdir -p /workspace /results && chmod 777 /workspace /results
 
-# Pre-create Jupyter's runtime/data directories under /.local so that
+# Pre-create Jupyter/IPython writable directories under /.local so that
 # any arbitrary host UID (set via docker-compose user:) can write there.
 # Without this, Jupyter crashes on startup with FileNotFoundError because
 # the non-root user has no home directory and /.local does not exist.
-RUN mkdir -p /.local/share/jupyter/runtime /.local/share/jupyter/kernels \
+RUN mkdir -p /.local/share/jupyter/runtime \
+    /.local/share/jupyter/kernels \
+    /.local/share/jupyter/lab/workspaces \
+    /.local/share/jupyter/lab/user-settings \
+    /.local/share/ipython \
+    /.local/cache \
     && chmod -R 777 /.local
 
 # Health check - verify Jupyter is running

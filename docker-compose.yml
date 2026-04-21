@@ -88,6 +88,12 @@ services:
       - PBI_PRIVATE_DATA_DIR=/private-data
       - PBI_LOGS_DIR=/pipeline-logs
       - PBI_RESULTS_DIR=/results
+      # Use writable user locations for Jupyter/IPython state when running as host UID.
+      - HOME=/workspace
+      - XDG_CACHE_HOME=/.local/cache
+      - IPYTHONDIR=/.local/share/ipython
+      - JUPYTERLAB_WORKSPACES_DIR=/.local/share/jupyter/lab/workspaces
+      - JUPYTERLAB_SETTINGS_DIR=/.local/share/jupyter/lab/user-settings
       # Tell Jupyter to use the system-wide config written during image build,
       # so it is accessible regardless of which UID runs the container.
       - JUPYTER_CONFIG_DIR=/etc/jupyter
