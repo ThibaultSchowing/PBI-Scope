@@ -43,5 +43,5 @@ def test_pipeline_service_exposes_writable_home_cache():
 def test_analysis_service_exposes_writable_matplotlib_config_dirs():
     compose = _load_compose_config()
     analysis_env = compose["services"]["analysis"]["environment"]
-    assert "XDG_CONFIG_HOME=/.local/config" in analysis_env
-    assert "MPLCONFIGDIR=/.local/config/matplotlib" in analysis_env
+    assert "XDG_CONFIG_HOME=/workspace/.config" in analysis_env
+    assert "MPLCONFIGDIR=/workspace/.config/matplotlib" in analysis_env
