@@ -80,10 +80,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.analysis.sh"]
 # Start Jupyter Lab (no --allow-root needed; container runs as host UID via docker-compose user:)
 # WARNING: Authentication is disabled for LOCAL DEVELOPMENT ONLY.
 # NEVER expose this service to untrusted networks without enabling authentication.
-CMD ["jupyter", "lab",
-     "--ip=0.0.0.0",
-     "--port=8888",
-     "--no-browser",
-     "--notebook-dir=/workspace",
-     "--ServerApp.token=",
-     "--ServerApp.password="]
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace", "--ServerApp.token=", "--ServerApp.password="]
