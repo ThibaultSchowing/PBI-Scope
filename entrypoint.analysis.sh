@@ -24,7 +24,9 @@ CURRENT_GID=$(id -g)
 export USER="${USER:-jupyter}"
 export LOGNAME="${LOGNAME:-${USER}}"
 
-# Only patch if the UID is truly absent from /etc/passwd.
+# Only patch if the UID is absent and /etc/passwd is writable, so we avoid
+# both unnecessary writes and noisy permission errors when /etc/passwd is
+# read-only at runtime.
 if ! getent passwd "${CURRENT_UID}" > /dev/null 2>&1 && [ -w /etc/passwd ]; then
     # /etc/passwd may be read-only in some hardened setups; tolerate failure.
     echo "jupyter:x:${CURRENT_UID}:${CURRENT_GID}:Jupyter user:${HOME:-/workspace}:/bin/sh" \

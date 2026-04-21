@@ -96,9 +96,9 @@ services:
       - IPYTHONDIR=/.local/share/ipython
       - JUPYTERLAB_WORKSPACES_DIR=/.local/share/jupyter/lab/workspaces
       - JUPYTERLAB_SETTINGS_DIR=/.local/share/jupyter/lab/user-settings
-      # Tell Jupyter to use the system-wide config written during image build,
-      # so it is accessible regardless of which UID runs the container.
-      - JUPYTER_CONFIG_DIR=/etc/jupyter
+      # Tell Jupyter to use /workspace/.jupyter so config migration stays writable
+      # when the container runs as arbitrary host UID/GID.
+      - JUPYTER_CONFIG_DIR=/workspace/.jupyter
       # Set PYTHONPATH for proper module imports
       - PYTHONPATH=/app
     networks:

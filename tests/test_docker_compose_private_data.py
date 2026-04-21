@@ -50,4 +50,4 @@ def test_analysis_service_exposes_writable_matplotlib_config_dirs():
 def test_analysis_service_exposes_jupyter_config_dir():
     compose = _load_compose_config()
     analysis_env = compose["services"]["analysis"]["environment"]
-    assert "JUPYTER_CONFIG_DIR=/etc/jupyter" in analysis_env
+    assert "JUPYTER_CONFIG_DIR=/workspace/.jupyter" in analysis_env
