@@ -80,6 +80,7 @@ RUN mkdir -p /.local/share/jupyter/runtime \
     /.local/share/jupyter/lab/workspaces \
     /.local/share/jupyter/lab/user-settings \
     /.local/share/ipython \
+    /.local/cache \
     && chmod -R 777 /.local
 
 # Health check - verify Jupyter is running
