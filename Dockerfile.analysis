@@ -58,7 +58,7 @@ RUN mkdir -p /etc/jupyter && \
         "c.ServerApp.port = 8888" \
         "c.ServerApp.open_browser = False" \
         > /etc/jupyter/jupyter_lab_config.py && \
-    chmod -R a+rX /etc/jupyter
+    chmod -R 777 /etc/jupyter
 
 # Expose Jupyter Lab port
 EXPOSE 8888

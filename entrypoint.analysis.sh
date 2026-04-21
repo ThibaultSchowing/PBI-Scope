@@ -20,8 +20,12 @@
 CURRENT_UID=$(id -u)
 CURRENT_GID=$(id -g)
 
+# Ensure getpass.getuser() has environment fallbacks when /etc/passwd cannot be modified.
+export USER="${USER:-jupyter}"
+export LOGNAME="${LOGNAME:-${USER}}"
+
 # Only patch if the UID is truly absent from /etc/passwd.
-if ! getent passwd "${CURRENT_UID}" > /dev/null 2>&1; then
+if ! getent passwd "${CURRENT_UID}" > /dev/null 2>&1 && [ -w /etc/passwd ]; then
     # /etc/passwd may be read-only in some hardened setups; tolerate failure.
     echo "jupyter:x:${CURRENT_UID}:${CURRENT_GID}:Jupyter user:${HOME:-/workspace}:/bin/sh" \
         >> /etc/passwd 2>/dev/null || true
