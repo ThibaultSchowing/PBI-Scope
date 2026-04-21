@@ -45,3 +45,9 @@ def test_analysis_service_exposes_writable_matplotlib_config_dirs():
     analysis_env = compose["services"]["analysis"]["environment"]
     assert "XDG_CONFIG_HOME=/workspace/.config" in analysis_env
     assert "MPLCONFIGDIR=/workspace/.config/matplotlib" in analysis_env
+
+
+def test_analysis_service_exposes_jupyter_config_dir():
+    compose = _load_compose_config()
+    analysis_env = compose["services"]["analysis"]["environment"]
+    assert "JUPYTER_CONFIG_DIR=/workspace/.jupyter" in analysis_env
