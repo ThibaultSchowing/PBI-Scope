@@ -91,6 +91,8 @@ services:
       # Use writable user locations for Jupyter/IPython state when running as host UID.
       - HOME=/workspace
       - XDG_CACHE_HOME=/.local/cache
+      - XDG_CONFIG_HOME=/.local/config
+      - MPLCONFIGDIR=/.local/config/matplotlib
       - IPYTHONDIR=/.local/share/ipython
       - JUPYTERLAB_WORKSPACES_DIR=/.local/share/jupyter/lab/workspaces
       - JUPYTERLAB_SETTINGS_DIR=/.local/share/jupyter/lab/user-settings
