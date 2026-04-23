@@ -29,7 +29,7 @@ Outputs are stored in a shared Docker volume and exposed through:
 
 > The REST API is currently not supported for sequence-heavy usage because it is too slow for large retrieval workloads. It will be redesigned later for database exploration-first access.
 
-![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema.png)
+![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema_Note_HighRes.jpg)
 
 ## 📚 Documentation
 
