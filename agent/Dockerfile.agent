@@ -1,0 +1,42 @@
+# Dockerfile for the PBI Agent service
+#
+# This container runs the FastAPI + LangChain agentic chat service.
+# It does NOT need GPU access — the GPU stays in the Ollama container.
+# The agent connects to Ollama over the internal pbi-network via
+# the OLLAMA_BASE_URL environment variable.
+
+FROM python:3.10-slim
+
+# Install system dependencies needed by some Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy PBI package source and setup file so we can install it as an
+# editable package (same pattern as Dockerfile.api)
+COPY src /app/src
+COPY setup.py /app/
+
+# Copy agent source
+COPY agent /app/agent
+
+# Install PBI package first (provides pbi.quick_connect etc.), then
+# install agent-specific dependencies
+RUN pip install --no-cache-dir -e . && \
+    pip install --no-cache-dir -r agent/requirements.txt
+
+# Set PYTHONPATH so `from agent.tools.xxx import` works correctly
+ENV PYTHONPATH=/app
+
+# Expose the agent port
+EXPOSE 8001
+
+# Health check — polls /health every 30 s
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Run with uvicorn
+CMD ["uvicorn", "agent.app:app", "--host", "0.0.0.0", "--port", "8001"]
