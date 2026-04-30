@@ -105,6 +105,61 @@ services:
       - pbi-network
     restart: unless-stopped
 
+  # Ollama LLM service (Llama 3.1 via GPU)
+  # After first start, pull the model with:
+  #   docker exec pbi-ollama ollama pull llama3.1:8b
+  ollama:
+    image: ollama/ollama:latest
+    container_name: pbi-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist downloaded models across container restarts
+      - ollama-models:/root/.ollama
+    # GPU access — requires NVIDIA drivers + nvidia-container-toolkit on the host.
+    # Remove the deploy block if running without a GPU (Ollama falls back to CPU).
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - pbi-network
+    restart: unless-stopped
+
+  # Agentic chat service (FastAPI + LangChain)
+  agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile.agent
+    container_name: pbi-agent
+    ports:
+      # Access via SSH tunnel: ssh -L 8001:localhost:8001 user@server
+      - "8001:8001"
+    volumes:
+      # Read-only access to the PBI database
+      - pbi-data:/data:ro
+      # Read-only access to pipeline logs for the log-explorer tool
+      - ./pipeline_logs:/pipeline-logs:ro
+    environment:
+      - DATA_PATH=/data/processed
+      - PBI_LOGS_DIR=/pipeline-logs
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1:8b}
+      # Security: cap log reads and SQL result sizes to avoid token flooding
+      - AGENT_MAX_LOG_SIZE_KB=${AGENT_MAX_LOG_SIZE_KB:-512}
+      - AGENT_SQL_ROW_LIMIT=${AGENT_SQL_ROW_LIMIT:-500}
+      # Optional API key to protect the /chat/stream endpoint.
+      # Set AGENT_API_KEY in your .env file to enable bearer-token auth.
+      - AGENT_API_KEY=${AGENT_API_KEY:-}
+    depends_on:
+      - ollama
+    networks:
+      - pbi-network
+    restart: unless-stopped
+
 volumes:
   # Named volume for persistent data storage
   pbi-data:
@@ -112,6 +167,9 @@ volumes:
   # Named volume for Snakemake cache (conda environments, metadata, logs)
   # This persists across container runs to avoid re-downloading dependencies
   pbi-cache:
+    driver: local
+  # Named volume for Ollama model weights
+  ollama-models:
     driver: local
 
 networks:
