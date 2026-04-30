@@ -42,6 +42,7 @@ from pydantic import BaseModel, Field
 _LOG_ROOT = Path(os.environ.get("PBI_LOGS_DIR", "/pipeline-logs"))
 _MAX_BYTES = int(os.environ.get("AGENT_MAX_LOG_SIZE_KB", "512")) * 1024
 _MAX_CONTEXT_LINES = 10
+_MAX_SEARCH_MATCHES = 100  # stop collecting context after this many hits
 
 
 # ---------------------------------------------------------------------------
@@ -164,9 +165,15 @@ def _search_file(target: Path, pattern: str, context_lines: int) -> str:
     if not matching_indices:
         return f"No matches found for pattern '{pattern}' in {target.name}."
 
+    total_matches = len(matching_indices)
+    # Cap the number of matches rendered to avoid flooding the context window.
+    matching_indices = matching_indices[:_MAX_SEARCH_MATCHES]
+
     # Collect context windows, merging overlapping ranges
     output_lines: list[str] = [
-        f"Found {len(matching_indices)} match(es) for '{pattern}' in {target.name}:\n"
+        f"Found {total_matches} match(es) for '{pattern}' in {target.name}"
+        + (f" (showing first {_MAX_SEARCH_MATCHES}):" if total_matches > _MAX_SEARCH_MATCHES else ":")
+        + "\n"
     ]
     shown: set[int] = set()
     for idx in matching_indices:

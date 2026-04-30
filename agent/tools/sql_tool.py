@@ -130,6 +130,12 @@ def get_db_schema(db_path: Optional[Path] = None) -> str:
 
         lines: list[str] = ["Database schema:", ""]
         for table in sorted(tables):
+            # Validate the table name against a conservative allowlist pattern
+            # (alphanumeric + underscore) before using it in a DESCRIBE statement.
+            if not re.match(r"^\w+$", table):
+                lines.append(f"Table: {table}  (skipped: unexpected name format)")
+                lines.append("")
+                continue
             try:
                 desc = conn.execute(f"DESCRIBE {table}").fetchdf()
                 lines.append(f"Table: {table}")
