@@ -83,7 +83,7 @@ def _load_system_prompt(schema: str) -> str:
     prompt_path = _PROMPTS_DIR / "system_prompt.txt"
     try:
         template = prompt_path.read_text(encoding="utf-8")
-        return template.format(schema=schema or "(database not yet available)")
+        return template.replace("{schema}", schema or "(database not yet available)")
     except FileNotFoundError:
         logger.warning("system_prompt.txt not found at %s", prompt_path)
         return (
