@@ -1259,11 +1259,33 @@ def main():
     """Main entry point for Snakemake"""
     import argparse
 
-    # Setup logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
+    # For Snakemake integration
+    if 'snakemake' in globals():
+        # Route all logging explicitly to the Snakemake log file
+        try:
+            _common = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'common')
+            if _common not in sys.path:
+                sys.path.insert(0, _common)
+            from logging_utils import setup_logging  # noqa: PLC0415
+            setup_logging(snakemake.log[0])          # noqa: F821
+        except Exception:
+            Path(snakemake.log[0]).parent.mkdir(parents=True, exist_ok=True)  # noqa: F821
+            fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+            root = logging.getLogger()
+            root.handlers.clear()
+            root.setLevel(logging.INFO)
+            fh = logging.FileHandler(snakemake.log[0])  # noqa: F821
+            fh.setFormatter(fmt)
+            root.addHandler(fh)
+            sh = logging.StreamHandler(sys.stderr)
+            sh.setFormatter(fmt)
+            root.addHandler(sh)
+    else:
+        # Setup logging for command-line mode
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
 
     # For Snakemake integration
     if 'snakemake' in globals():

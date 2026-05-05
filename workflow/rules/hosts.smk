@@ -7,10 +7,6 @@ This Snakefile handles:
 3. Indexing the merged FASTA with pyfaidx
 """
 
-import os
-
-PRIVATE_CONFLICT_EXAMPLE_LIMIT = 20
-
 rule download_host_genomes:
     """
     Download host bacterial genomes from NCBI RefSeq
@@ -78,68 +74,10 @@ rule create_host_mapping:
         input_dir = config["host_genomes_intermediate"]
     log:
         config["create_host_mapping_log"]
-    run:
-        import json
-        from pathlib import Path
-        import pandas as pd
-        
-        # Read metadata to get list of Host_IDs
-        metadata_df = pd.read_csv(input.metadata)
-        
-        output_path = Path(output.mapping)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        input_dir = Path(params.input_dir)
-        
-        # Create mapping from Host_ID to file path
-        host_mapping = {}
-        valid_count = 0
-        missing_count = 0
-        
-        for _, row in metadata_df.iterrows():
-            host_id = row['Host_ID']
-            fasta_file = input_dir / f"{host_id}.fna"
-            
-            if fasta_file.exists() and fasta_file.stat().st_size > 0:
-                host_mapping[host_id] = str(fasta_file)
-                valid_count += 1
-            else:
-                missing_count += 1
-                print(f"⚠️ Missing or empty file: {fasta_file}", file=open(log[0], 'a'))
-        
-        if not host_mapping:
-            raise ValueError("❌ No valid host FASTA files found!")
-        
-        # Merge private host mapping entries (if any)
-        private_mapping_path = Path(input.private_mapping)
-        private_added = 0
-        private_conflicts = 0
-        conflict_ids = []
-        if private_mapping_path.exists():
-            with private_mapping_path.open("r") as f:
-                private_mapping = json.load(f)
-            for host_id, fasta_path in private_mapping.items():
-                if host_id in host_mapping:
-                    private_conflicts += 1
-                    if len(conflict_ids) < PRIVATE_CONFLICT_EXAMPLE_LIMIT:
-                        conflict_ids.append(host_id)
-                    continue
-                fasta_file = Path(fasta_path)
-                if fasta_file.exists() and fasta_file.stat().st_size > 0:
-                    host_mapping[host_id] = str(fasta_file)
-                    private_added += 1
-
-        # Write mapping to JSON file
-        with open(output.mapping, 'w') as f:
-            json.dump(host_mapping, f, indent=2)
-        
-        print(f"✅ Created mapping for {valid_count} host FASTA files", file=open(log[0], 'a'))
-        print(f"✅ Added {private_added} private host FASTA files", file=open(log[0], 'a'))
-        if private_conflicts > 0:
-            print(f"⚠️ Skipped {private_conflicts} conflicting private Host_ID entries", file=open(log[0], 'a'))
-            print(f"   Conflicting Host_ID examples: {', '.join(conflict_ids)}", file=open(log[0], 'a'))
-        if missing_count > 0:
-            print(f"⚠️ {missing_count} host files were missing or empty", file=open(log[0], 'a'))
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/sequences/create_host_mapping.py"
 
 
 rule index_individual_host_sequences:

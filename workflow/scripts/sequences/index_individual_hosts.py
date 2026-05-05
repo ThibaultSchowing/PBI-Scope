@@ -21,16 +21,41 @@ DataFrame for downstream analysis.
 import csv
 import json
 import logging
+import os
+import sys
 from pathlib import Path
 
 from pyfaidx import Fasta
 
 from fasta_qc import run_qc
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# ---------------------------------------------------------------------------
+# Shared logging helper (delegates to workflow/scripts/common/logging_utils.py
+# when available; falls back to an inline equivalent).
+# ---------------------------------------------------------------------------
+
+def _setup_logging(log_file: str, also_stderr: bool = True) -> None:
+    """Route root-logger output to *log_file* and optionally stderr."""
+    try:
+        _common = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'common')
+        if _common not in sys.path:
+            sys.path.insert(0, _common)
+        from logging_utils import setup_logging  # noqa: PLC0415
+        setup_logging(log_file, also_stderr=also_stderr)
+    except Exception:
+        Path(log_file).parent.mkdir(parents=True, exist_ok=True)
+        fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        root = logging.getLogger()
+        root.handlers.clear()
+        root.setLevel(logging.INFO)
+        fh = logging.FileHandler(log_file)
+        fh.setFormatter(fmt)
+        root.addHandler(fh)
+        if also_stderr:
+            sh = logging.StreamHandler(sys.stderr)
+            sh.setFormatter(fmt)
+            root.addHandler(sh)
+
 
 # Columns written to the CSV QC log — keep in sync with create_host_status_report.py
 _QC_LOG_COLUMNS = [
@@ -170,4 +195,5 @@ if __name__ == "__main__":
     log_file = snakemake.log[0]                     # noqa: F821
     qc_log_file = snakemake.output.qc_log           # noqa: F821
 
+    _setup_logging(log_file)
     index_host_files(mapping_file, log_file, qc_log_file)
