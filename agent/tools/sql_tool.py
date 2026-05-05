@@ -124,6 +124,10 @@ def _extract_table_names(query: str) -> list[str]:
     Matches identifiers that follow FROM or JOIN keywords (handles aliases
     and subquery contexts reasonably well for typical agent-generated SQL).
     Returns a deduplicated list in order of first appearance.
+
+    Limitation: schema-qualified names (e.g. ``schema.table``), quoted
+    identifiers, and table-valued functions are not handled — the first
+    plain identifier after FROM/JOIN is extracted in all cases.
     """
     pattern = r"\b(?:FROM|JOIN)\s+([a-zA-Z_]\w*)"
     found = re.findall(pattern, query, re.IGNORECASE)
@@ -169,6 +173,8 @@ def _schema_hint_for_tables(
         # the correct name on the next attempt.
         try:
             tables_df = conn.execute("SHOW TABLES").fetchdf()
+            # DuckDB's SHOW TABLES consistently returns a 'name' column;
+            # the guard is kept as a defensive measure against schema changes.
             available = sorted(tables_df["name"].tolist()) if "name" in tables_df.columns else []
             lines.append(
                 f"  Tables not found: {', '.join(missing)}. "
