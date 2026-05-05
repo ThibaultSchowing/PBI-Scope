@@ -27,9 +27,7 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import threading
-from pathlib import Path
 from typing import Any, Optional, Type
 
 from langchain_core.tools import BaseTool
@@ -234,67 +232,24 @@ def _list_hosts() -> str:
             return f"Error listing hosts: {exc2}"
 
 
-_LOG_ROOT = Path(os.environ.get("PBI_LOGS_DIR", "/pipeline-logs"))
-_HOST_FAILURE_LOG = "logs/host_download_failures.log"
-_HOST_STATUS_REPORT = "reports/host_status_report.csv"
-_MAX_FAILURE_LINES = 200
-
-
 def _list_failed_hosts() -> str:
-    """Return host species that failed to be retrieved, from pipeline log files."""
-    # Try the structured host status report first (CSV, most informative)
-    status_path = _LOG_ROOT / _HOST_STATUS_REPORT
-    if status_path.exists():
-        try:
-            import pandas as pd  # noqa: PLC0415
+    """Return host species that failed to be retrieved, from pipeline log files.
 
-            df = pd.read_csv(status_path)
-            # Look for columns indicating failure
-            fail_cols = [
-                c for c in df.columns
-                if any(kw in c.lower() for kw in ("fail", "error", "missing", "unresolved", "status"))
-            ]
-            if fail_cols:
-                status_col = fail_cols[0]
-                failed = df[df[status_col].astype(str).str.lower().str.contains(
-                    r"fail|error|missing|unresolved|not_found|not found", na=False
-                )]
-                if not failed.empty:
-                    try:
-                        result = failed.head(_HOST_SAMPLE_LIMIT).to_markdown(index=False)
-                    except ImportError:
-                        result = failed.head(_HOST_SAMPLE_LIMIT).to_string(index=False)
-                    return (
-                        f"Hosts with failures from {_HOST_STATUS_REPORT} "
-                        f"({len(failed)} row(s) shown, up to {_HOST_SAMPLE_LIMIT}):\n\n"
-                        + result
-                    )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Could not parse host status report: %s", exc)
-
-    # Fall back to the plain-text failure log
-    failure_path = _LOG_ROOT / _HOST_FAILURE_LOG
-    if failure_path.exists():
+    Delegates to the host_log_tool helper to avoid duplicating the CSV-parsing
+    and fallback logic.
+    """
+    try:
+        from agent.tools.host_log_tool import _list_failures  # noqa: PLC0415
+    except ImportError:
+        # Fallback when the package path isn't configured (e.g. during testing)
         try:
-            with failure_path.open("rb") as fh:
-                raw = fh.read()
-            lines = raw.decode("utf-8", errors="replace").splitlines()
-            if not lines:
-                return "Host failure log is empty — no failed hosts recorded."
-            selected = lines[-_MAX_FAILURE_LINES:]
-            header = (
-                f"Last {len(selected)} line(s) from {_HOST_FAILURE_LOG} "
-                f"({failure_path.stat().st_size // 1024} KB total):\n\n"
+            from tools.host_log_tool import _list_failures  # type: ignore[no-redef]  # noqa: PLC0415
+        except ImportError:
+            return (
+                "Could not load host log tool. "
+                "Check that host_log_tool.py is present in the tools directory."
             )
-            return header + "\n".join(selected)
-        except Exception as exc:  # noqa: BLE001
-            return f"Error reading host failure log: {exc}"
-
-    return (
-        "Host failure log not found. "
-        "The pipeline may not have run yet, or no host failures were recorded. "
-        f"Expected log at: {_HOST_FAILURE_LOG}"
-    )
+    return _list_failures()
 
 
 # ---------------------------------------------------------------------------

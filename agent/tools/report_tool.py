@@ -75,7 +75,7 @@ class PipelineReportInput(BaseModel):
         default=None,
         description=(
             "Optional case-insensitive substring filter. "
-            "For CSV 'summary', only rows whose any column contains this value "
+            "For CSV 'summary', only rows where any column contains this value "
             "are returned."
         ),
     )
