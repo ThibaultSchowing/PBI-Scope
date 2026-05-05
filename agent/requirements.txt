@@ -1,12 +1,13 @@
-# Pinned to the last 0.3.x / 0.2.x releases that still export AgentExecutor
-# and create_tool_calling_agent from langchain.agents.  LangChain >=1.0 removed
-# these symbols; unpinned >=0.3.0 constraints allowed 1.x to be installed and
-# broke agent startup with an ImportError.  Upgrade only after migrating to the
-# LangGraph-based agent API.
-langchain==0.3.28
-langchain-core==0.3.84
-langchain-community==0.3.31
-langchain-ollama==0.2.3
+# Pinned to langchain 1.x + LangGraph, which provide the modern tool-calling
+# agent API (create_react_agent) and include the langchain-core >=1.2.22
+# security fix for path traversal in legacy load_prompt functions (GHSA).
+# The 0.3.x AgentExecutor-based implementation has been replaced; upgrade
+# these pins together and re-test when moving to future major versions.
+langchain==1.2.17
+langchain-core==1.3.2
+langchain-community==0.4.1
+langchain-ollama==1.1.0
+langgraph==1.1.10
 fastapi>=0.109.0
 uvicorn[standard]>=0.24.0
 duckdb>=0.9.0
