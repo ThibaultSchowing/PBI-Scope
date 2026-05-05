@@ -112,6 +112,8 @@ def _build_agent():
         from agent.tools.log_tool import LogExplorerTool
         from agent.tools.pbi_tool import PBIRetrieverTool
         from agent.tools.sql_tool import DuckDBQueryTool, get_db_schema
+        from agent.tools.host_log_tool import HostRetrievalLogTool
+        from agent.tools.report_tool import PipelineReportTool
 
         schema = get_db_schema()
         system_prompt = _load_system_prompt(schema)
@@ -122,7 +124,13 @@ def _build_agent():
             temperature=0,
         )
 
-        tools = [DuckDBQueryTool(db_schema=schema), LogExplorerTool(), PBIRetrieverTool()]
+        tools = [
+            DuckDBQueryTool(db_schema=schema),
+            LogExplorerTool(),
+            PBIRetrieverTool(),
+            HostRetrievalLogTool(),
+            PipelineReportTool(),
+        ]
 
         # prompt injects the system prompt as the first system message.
         agent = create_react_agent(llm, tools, prompt=system_prompt)
