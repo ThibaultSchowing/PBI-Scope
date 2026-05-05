@@ -20,15 +20,14 @@ Whitelisted actions
 ``get_phage_by_id``    – fetch metadata + sequence for a single phage.
 ``get_protein_by_id``  – fetch metadata + sequence for a single protein.
 ``list_hosts``         – return a sample of host organisms from the database.
+``list_failed_hosts``  – return hosts that failed to be retrieved (from pipeline logs).
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 import threading
-from pathlib import Path
 from typing import Any, Optional, Type
 
 from langchain_core.tools import BaseTool
@@ -39,7 +38,7 @@ logger = logging.getLogger(__name__)
 _APP_SRC_PATH = "/app/src"
 
 WHITELISTED_ACTIONS = frozenset(
-    ["get_stats", "get_phage_by_id", "get_protein_by_id", "list_hosts"]
+    ["get_stats", "get_phage_by_id", "get_protein_by_id", "list_hosts", "list_failed_hosts"]
 )
 
 _HOST_SAMPLE_LIMIT = 50
@@ -58,6 +57,13 @@ class PBIRetrieverInput(BaseModel):
     record_id: Optional[str] = Field(
         default=None,
         description="Phage or protein accession ID (required for *_by_id actions).",
+    )
+    error: Optional[str] = Field(
+        default=None,
+        description=(
+            "Optional error filter for list_hosts. "
+            "Use 'failed_to_retrieve' to list only hosts that could not be downloaded."
+        ),
     )
 
 
@@ -226,6 +232,26 @@ def _list_hosts() -> str:
             return f"Error listing hosts: {exc2}"
 
 
+def _list_failed_hosts() -> str:
+    """Return host species that failed to be retrieved, from pipeline log files.
+
+    Delegates to the host_log_tool helper to avoid duplicating the CSV-parsing
+    and fallback logic.
+    """
+    try:
+        from agent.tools.host_log_tool import _list_failures  # noqa: PLC0415
+    except ImportError:
+        # Fallback when the package path isn't configured (e.g. during testing)
+        try:
+            from tools.host_log_tool import _list_failures  # type: ignore[no-redef]  # noqa: PLC0415
+        except ImportError:
+            return (
+                "Could not load host log tool. "
+                "Check that host_log_tool.py is present in the tools directory."
+            )
+    return _list_failures()
+
+
 # ---------------------------------------------------------------------------
 # Tool
 # ---------------------------------------------------------------------------
@@ -239,12 +265,15 @@ class PBIRetrieverTool(BaseTool):
         "Use action='get_stats' for overall database statistics, "
         "action='get_phage_by_id' (with record_id=) to look up a specific phage record, "
         "action='get_protein_by_id' (with record_id=) for a specific protein record, "
-        "action='list_hosts' to see available host organisms. "
-        "Input must be a JSON object with keys: action, record_id (optional)."
+        "action='list_hosts' to see available host organisms in the database, "
+        "action='list_failed_hosts' to see host species that failed to be retrieved "
+        "(reads from pipeline failure logs — does not require a DB connection). "
+        "Input must be a JSON object with keys: action, record_id (optional), error (optional)."
     )
     args_schema: Type[BaseModel] = PBIRetrieverInput
 
-    def _run(self, action: str, record_id: Optional[str] = None) -> str:
+    def _run(self, action: str, record_id: Optional[str] = None,
+             error: Optional[str] = None) -> str:
         action = action.strip().lower()
 
         if action not in WHITELISTED_ACTIONS:
@@ -267,7 +296,14 @@ class PBIRetrieverTool(BaseTool):
             return _get_protein_by_id(record_id)
 
         if action == "list_hosts":
+            # When the caller requests failed hosts via the error filter, delegate
+            # to the log-based implementation instead of querying the database.
+            if error and "fail" in error.lower():
+                return _list_failed_hosts()
             return _list_hosts()
+
+        if action == "list_failed_hosts":
+            return _list_failed_hosts()
 
         return f"Unhandled action '{action}'."
 
