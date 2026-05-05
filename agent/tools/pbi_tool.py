@@ -25,7 +25,6 @@ Whitelisted actions
 
 from __future__ import annotations
 
-import json
 import logging
 import threading
 from typing import Any, Optional, Type
@@ -157,7 +156,14 @@ def _get_stats() -> str:
 
     try:
         stats = retriever.get_stats()
-        return json.dumps(stats, indent=2, default=str)
+        if not isinstance(stats, dict):
+            return str(stats)
+        lines = ["Database statistics:", ""]
+        for key, value in stats.items():
+            # Format keys: replace underscores with spaces and title-case
+            label = str(key).replace("_", " ").title()
+            lines.append(f"  {label}: {value}")
+        return "\n".join(lines)
     except Exception as exc:  # noqa: BLE001
         return f"Error retrieving stats: {exc}"
 
@@ -175,7 +181,10 @@ def _get_phage_by_id(phage_id: str) -> str:
         if df.empty:
             return f"No phage found with ID '{phage_id}'."
         record = df.iloc[0].to_dict()
-        return json.dumps(record, indent=2, default=str)
+        lines = [f"Phage record for '{phage_id}':", ""]
+        for key, value in record.items():
+            lines.append(f"  {key}: {value}")
+        return "\n".join(lines)
     except Exception as exc:  # noqa: BLE001
         return f"Error retrieving phage record: {exc}"
 
@@ -193,7 +202,10 @@ def _get_protein_by_id(protein_id: str) -> str:
         if df.empty:
             return f"No protein found with ID '{protein_id}'."
         record = df.iloc[0].to_dict()
-        return json.dumps(record, indent=2, default=str)
+        lines = [f"Protein record for '{protein_id}':", ""]
+        for key, value in record.items():
+            lines.append(f"  {key}: {value}")
+        return "\n".join(lines)
     except Exception as exc:  # noqa: BLE001
         return f"Error retrieving protein record: {exc}"
 
@@ -262,13 +274,13 @@ class PBIRetrieverTool(BaseTool):
     name: str = "pbi_retriever"
     description: str = (
         "Access PBI phage-bacteria interaction data using curated actions. "
-        "Use action='get_stats' for overall database statistics, "
-        "action='get_phage_by_id' (with record_id=) to look up a specific phage record, "
-        "action='get_protein_by_id' (with record_id=) for a specific protein record, "
-        "action='list_hosts' to see available host organisms in the database, "
-        "action='list_failed_hosts' to see host species that failed to be retrieved "
+        "action='get_stats': return overall database statistics. "
+        "action='get_phage_by_id': look up a specific phage record (record_id= required). "
+        "action='get_protein_by_id': look up a specific protein record (record_id= required). "
+        "action='list_hosts': list available host organisms in the database. "
+        "action='list_failed_hosts': list host species that failed to be retrieved "
         "(reads from pipeline failure logs — does not require a DB connection). "
-        "Input must be a JSON object with keys: action, record_id (optional), error (optional)."
+        "Optional record_id= for *_by_id actions; error= filter for list_hosts."
     )
     args_schema: Type[BaseModel] = PBIRetrieverInput
 

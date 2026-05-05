@@ -202,10 +202,8 @@ class PipelineReportTool(BaseTool):
         "action='summary': display a report — CSV reports are shown as Markdown tables, "
         "HTML reports as plain text (name= required, e.g. 'host_status_report.csv'). "
         "action='read': read the raw content of a report file (name= required). "
-        "Optional: filter= to restrict CSV rows to those containing a substring; "
-        "n_rows= to limit the number of CSV rows shown (default 50). "
-        "Input must be a JSON object with keys: action, name (optional), "
-        "filter (optional), n_rows (optional)."
+        "Optional filter= restricts CSV rows to those containing a substring; "
+        "n_rows= limits the number of CSV rows shown (default 50, max 500)."
     )
     args_schema: Type[BaseModel] = PipelineReportInput
 

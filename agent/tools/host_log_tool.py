@@ -239,10 +239,9 @@ class HostRetrievalLogTool(BaseTool):
         "(per-phage host resolution, download, and QC results). "
         "action='get_fasta_qc': FASTA quality-control results for host genomes "
         "(host_fasta_qc.csv — duplicate headers, identical sequences, etc.). "
-        "action='get_download_log': recent lines from the general host download log. "
-        "Optional: add filter= to restrict rows/lines to those containing a substring. "
-        "Input must be a JSON object with keys: action, n_lines (optional, default 100), "
-        "filter (optional)."
+        "action='get_download_log': recent lines from the general host download log "
+        "(n_lines controls how many tail lines to return; default 100, max 500). "
+        "Optional filter= restricts rows/lines to those containing a given substring."
     )
     args_schema: Type[BaseModel] = HostRetrievalLogInput
 
