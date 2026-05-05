@@ -149,7 +149,12 @@ def _list_dir(target: Path) -> str:
     having to enumerate each subdirectory manually.
     """
     if not target.exists():
-        return f"Path not found: {target}"
+        return (
+            f"Path not found: {target.name!r} in the pipeline-logs directory.\n"
+            "Use action='list' (no path) to see all available log files.\n"
+            "Note: if you are looking for phage or database data, "
+            "use the duckdb_query tool with a SELECT statement instead."
+        )
 
     entries: list[str] = []
     for entry in sorted(target.iterdir()):
@@ -415,13 +420,15 @@ class LogExplorerTool(BaseTool):
 
     name: str = "log_explorer"
     description: str = (
-        "Browse and search pipeline log files. "
-        "action='list': list files (path= optional for subdirectory). "
-        "action='read': read a file (path= required; use start_line/end_line for a specific section). "
-        "action='head': show the first n_lines lines of a file (path= required, default n_lines=50). "
-        "action='tail': show the last n_lines lines of a file (path= required, default n_lines=50). "
-        "action='search': grep for a pattern (pattern= required; path= optional — omit or give a "
+        "Browse and search pipeline LOG FILES only — do NOT use this for phage/protein/database data queries "
+        "(use duckdb_query for those). "
+        "action='list': list log files (path= optional for subdirectory; omit to see all logs). "
+        "action='read': read a log file (path= required; use start_line/end_line for a specific section). "
+        "action='head': show the first n_lines lines of a log file (path= required, default n_lines=50). "
+        "action='tail': show the last n_lines lines of a log file (path= required, default n_lines=50). "
+        "action='search': grep for a pattern in log files (pattern= required; path= optional — omit or give a "
         "directory path to search ALL log files recursively). "
+        "Always call action='list' first to discover available log file paths before reading. "
         "Input must be a JSON object with keys: action, path (optional), pattern (for search), "
         "context_lines (optional, default 2), n_lines (optional, default 50), "
         "start_line (optional), end_line (optional)."
@@ -444,18 +451,51 @@ class LogExplorerTool(BaseTool):
             return _list_dir(target)
 
         if action == "read":
-            if path is None:
-                return "path is required for action='read'."
+            if not path:
+                return (
+                    "path is required for action='read'. "
+                    "Call action='list' first to see available log files, "
+                    "then provide a specific file path.\n\n"
+                    + _list_dir(target)
+                )
+            if target.is_dir():
+                return (
+                    f"'{path}' is a directory. "
+                    "Provide a specific file path for action='read'.\n\n"
+                    + _list_dir(target)
+                )
             return _read_file(target, start_line=start_line, end_line=end_line)
 
         if action == "head":
-            if path is None:
-                return "path is required for action='head'."
+            if not path:
+                return (
+                    "path is required for action='head'. "
+                    "Call action='list' first to see available log files, "
+                    "then provide a specific file path.\n\n"
+                    + _list_dir(target)
+                )
+            if target.is_dir():
+                return (
+                    f"'{path}' is a directory. "
+                    "Provide a specific file path for action='head'.\n\n"
+                    + _list_dir(target)
+                )
             return _head_file(target, n_lines)
 
         if action == "tail":
-            if path is None:
-                return "path is required for action='tail'."
+            if not path:
+                return (
+                    "path is required for action='tail'. "
+                    "Call action='list' first to see available log files, "
+                    "then provide a specific file path.\n\n"
+                    + _list_dir(target)
+                )
+            if target.is_dir():
+                return (
+                    f"'{path}' is a directory. "
+                    "Provide a specific file path for action='tail'.\n\n"
+                    + _list_dir(target)
+                )
             return _tail_file(target, n_lines)
 
         if action == "search":
