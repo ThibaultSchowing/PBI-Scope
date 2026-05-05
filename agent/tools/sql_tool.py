@@ -117,6 +117,75 @@ def _is_allowed(query: str) -> bool:
     return first_token in _ALLOWED_PREFIXES
 
 
+def _extract_table_names(query: str) -> list[str]:
+    """
+    Heuristically extract table names referenced in a SQL query.
+
+    Matches identifiers that follow FROM or JOIN keywords (handles aliases
+    and subquery contexts reasonably well for typical agent-generated SQL).
+    Returns a deduplicated list in order of first appearance.
+
+    Limitation: schema-qualified names (e.g. ``schema.table``), quoted
+    identifiers, and table-valued functions are not handled — the first
+    plain identifier after FROM/JOIN is extracted in all cases.
+    """
+    pattern = r"\b(?:FROM|JOIN)\s+([a-zA-Z_]\w*)"
+    found = re.findall(pattern, query, re.IGNORECASE)
+    # Deduplicate while preserving order; lower-case for DESCRIBE lookup.
+    seen: dict[str, None] = {}
+    for name in found:
+        seen[name.lower()] = None
+    return list(seen)
+
+
+def _schema_hint_for_tables(
+    conn: "duckdb.DuckDBPyConnection",
+    table_names: list[str],
+) -> str:
+    """
+    Return a concise schema summary for *table_names* using DESCRIBE.
+
+    Falls back to listing all available tables when a referenced table
+    cannot be described (e.g. it does not exist).
+    """
+    if not table_names:
+        return ""
+
+    lines: list[str] = []
+    missing: list[str] = []
+
+    for table in table_names:
+        # Only safe, plain identifiers.
+        if not re.match(r"^\w+$", table):
+            continue
+        try:
+            desc = conn.execute(f"DESCRIBE {table}").fetchdf()
+            col_list = ", ".join(
+                f"{row['column_name']} ({row['column_type']})"
+                for _, row in desc.iterrows()
+            )
+            lines.append(f"  {table}: {col_list}")
+        except Exception:  # noqa: BLE001
+            missing.append(table)
+
+    if missing:
+        # Table(s) not found — list what IS available so the agent can pick
+        # the correct name on the next attempt.
+        try:
+            tables_df = conn.execute("SHOW TABLES").fetchdf()
+            # DuckDB's SHOW TABLES consistently returns a 'name' column;
+            # the guard is kept as a defensive measure against schema changes.
+            available = sorted(tables_df["name"].tolist()) if "name" in tables_df.columns else []
+            lines.append(
+                f"  Tables not found: {', '.join(missing)}. "
+                f"Available tables: {', '.join(available)}"
+            )
+        except Exception:  # noqa: BLE001
+            lines.append(f"  Tables not found: {', '.join(missing)}.")
+
+    return "\n".join(lines)
+
+
 def _inject_limit(query: str, limit: int) -> str:
     """
     Append ``LIMIT <limit>`` to a SELECT query that does not already
@@ -268,7 +337,27 @@ class DuckDBQueryTool(BaseTool):
             df = conn.execute(safe_query).fetchdf()
             return _df_to_text(df)
         except duckdb.Error as exc:
-            return f"DuckDB error: {exc}"
+            error_msg = f"DuckDB error: {exc}"
+            # When the error is likely due to wrong column/table names, append
+            # a schema hint so the agent can self-correct on the next attempt.
+            error_lower = str(exc).lower()
+            if any(
+                kw in error_lower
+                for kw in ("binder error", "catalog error", "not found", "does not exist")
+            ):
+                try:
+                    if conn is not None:
+                        tables = _extract_table_names(safe_query)
+                        hint = _schema_hint_for_tables(conn, tables)
+                        if hint:
+                            error_msg += (
+                                "\n\nUse these exact column names for the referenced tables "
+                                "(do NOT guess — retry with the correct names below):\n"
+                                + hint
+                            )
+                except Exception:  # noqa: BLE001
+                    pass
+            return error_msg
         except FileNotFoundError:
             return (
                 "Database file not found. "
