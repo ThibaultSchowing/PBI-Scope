@@ -271,8 +271,8 @@ class HostRetrievalLogTool(BaseTool):
             if filter:
                 lines = result.splitlines()
                 # Keep header line(s) plus matching lines
-                header = [l for l in lines[:2] if l.startswith("[")]
-                body = [l for l in lines if filter.lower() in l.lower()]
+                header = [line for line in lines[:2] if line.startswith("[")]
+                body = [line for line in lines if filter.lower() in line.lower()]
                 result = "\n".join(header + body) if body else (
                     f"No lines matching '{filter}' in host_download.log."
                 )
