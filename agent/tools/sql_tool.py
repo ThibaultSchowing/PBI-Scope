@@ -276,18 +276,37 @@ def get_db_schema(db_path: Optional[Path] = None) -> str:
 # Tool
 # ---------------------------------------------------------------------------
 
+_BASE_TOOL_DESCRIPTION = (
+    "Execute a read-only SQL query on the PBI DuckDB phage-bacteria interaction "
+    "database. Supports SELECT, SHOW TABLES, and DESCRIBE <table>. "
+    f"Results are returned as a Markdown table (up to {_ROW_LIMIT} rows). "
+    "Input must be a JSON object with key 'query' containing the SQL string."
+)
+
+
 class DuckDBQueryTool(BaseTool):
     """Execute read-only SQL queries on the PBI DuckDB database."""
 
     name: str = "duckdb_query"
-    description: str = (
-        "Execute a read-only SQL query on the PBI DuckDB phage-bacteria interaction "
-        "database. Supports SELECT, SHOW TABLES, and DESCRIBE <table>. "
-        "Results are returned as a Markdown table (up to "
-        f"{_ROW_LIMIT} rows). "
-        "Input must be a JSON object with key 'query' containing the SQL string."
-    )
+    description: str = _BASE_TOOL_DESCRIPTION
     args_schema: Type[BaseModel] = DuckDBQueryInput
+
+    def __init__(self, db_schema: str = "", **kwargs):
+        """
+        Initialise the tool, optionally embedding the DB schema in the
+        description so the LLM always has correct table/column names
+        available when composing a query — even without looking up the
+        system prompt.
+        """
+        if db_schema:
+            full_description = (
+                _BASE_TOOL_DESCRIPTION
+                + "\n\nDatabase schema (use ONLY these exact table and column names):\n"
+                + db_schema
+            )
+        else:
+            full_description = _BASE_TOOL_DESCRIPTION
+        super().__init__(description=full_description, **kwargs)
 
     def _get_conn(self) -> Optional[duckdb.DuckDBPyConnection]:
         """Return the shared read-only connection, or None when not ready."""

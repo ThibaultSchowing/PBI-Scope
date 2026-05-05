@@ -122,7 +122,7 @@ def _build_agent():
             temperature=0,
         )
 
-        tools = [DuckDBQueryTool(), LogExplorerTool(), PBIRetrieverTool()]
+        tools = [DuckDBQueryTool(db_schema=schema), LogExplorerTool(), PBIRetrieverTool()]
 
         # prompt injects the system prompt as the first system message.
         agent = create_react_agent(llm, tools, prompt=system_prompt)
