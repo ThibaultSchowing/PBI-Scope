@@ -141,7 +141,13 @@ def _safe_resolve(relative: Optional[str]) -> Path:
 
 
 def _list_dir(target: Path) -> str:
-    """Return a formatted directory listing."""
+    """Return a formatted directory listing.
+
+    When the target directory contains subdirectories, their immediate
+    contents are shown as well (one level deep).  This lets the agent
+    see all available log files in a single list call instead of
+    having to enumerate each subdirectory manually.
+    """
     if not target.exists():
         return f"Path not found: {target}"
 
@@ -149,6 +155,21 @@ def _list_dir(target: Path) -> str:
     for entry in sorted(target.iterdir()):
         if entry.is_dir():
             entries.append(f"[dir]  {entry.name}/")
+            # Expand immediate contents of subdirectories so the agent
+            # can see the full log file tree in one shot.
+            try:
+                sub_entries = sorted(entry.iterdir())
+            except PermissionError:
+                sub_entries = []
+            for subentry in sub_entries:
+                if subentry.is_dir():
+                    entries.append(f"         [dir]  {entry.name}/{subentry.name}/")
+                else:
+                    size_kb = subentry.stat().st_size / 1024
+                    entries.append(
+                        f"         [file] {entry.name}/{subentry.name}"
+                        f"  ({size_kb:.1f} KB)"
+                    )
         else:
             size_kb = entry.stat().st_size / 1024
             entries.append(f"[file] {entry.name}  ({size_kb:.1f} KB)")
