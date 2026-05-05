@@ -9,10 +9,35 @@ import hashlib
 import shutil
 from collections import defaultdict
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+
+def _setup_logging(log_file: str, also_stderr: bool = True) -> None:
+    """Route all logging to *log_file* (Snakemake log: path).
+
+    Delegates to ``workflow/scripts/common/logging_utils.py`` when available;
+    otherwise applies an equivalent inline setup so the script remains
+    self-contained.
+    """
+    try:
+        _common = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'common')
+        if _common not in sys.path:
+            sys.path.insert(0, _common)
+        from logging_utils import setup_logging  # noqa: PLC0415
+        setup_logging(log_file, also_stderr=also_stderr)
+    except Exception:
+        # Fallback: minimal inline setup
+        Path(log_file).parent.mkdir(parents=True, exist_ok=True)
+        fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        root = logging.getLogger()
+        root.handlers.clear()
+        root.setLevel(logging.INFO)
+        fh = logging.FileHandler(log_file)
+        fh.setFormatter(fmt)
+        root.addHandler(fh)
+        if also_stderr:
+            sh = logging.StreamHandler(sys.stderr)
+            sh.setFormatter(fmt)
+            root.addHandler(sh)
+
 
 def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_width=80, 
                                                duplicate_report_path=None):
@@ -381,11 +406,14 @@ def index_fasta(fasta_path):
 
 def main():
     """Main indexing function for Snakemake"""
-    
+
+    # Route all logging to the Snakemake log file
+    _setup_logging(snakemake.log[0])  # noqa: F821
+
     # Get input from Snakemake
-    fasta_path = snakemake.input[0]
-    output_index = snakemake.output[0]
-    
+    fasta_path = snakemake.input[0]  # noqa: F821
+    output_index = snakemake.output[0]  # noqa: F821
+
     logging.info(f"🚀 Starting FASTA indexing")
     logging.info(f"📂 Input: {fasta_path}")
     logging.info(f"📂 Output: {output_index}")
@@ -456,7 +484,7 @@ def main():
     except Exception as e:
         logging.error(f"❌ Indexing failed: {str(e)}")
         import traceback
-        traceback.print_exc()
+        logging.error(traceback.format_exc())
         sys.exit(1)
 
 if __name__ == "__main__":

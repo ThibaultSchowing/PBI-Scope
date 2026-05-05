@@ -22,10 +22,39 @@ The output CSV has one row per ``(Phage_ID, Host_Token)`` pair.
 """
 
 import logging
+import os
 import sys
 from pathlib import Path
 
 import pandas as pd
+
+# ---------------------------------------------------------------------------
+# Shared logging helper
+# ---------------------------------------------------------------------------
+
+
+def _setup_logging(log_file: str, also_stderr: bool = True) -> None:
+    """Route root-logger output to *log_file* and optionally stderr."""
+    try:
+        _common = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'common')
+        if _common not in sys.path:
+            sys.path.insert(0, _common)
+        from logging_utils import setup_logging  # noqa: PLC0415
+        setup_logging(log_file, also_stderr=also_stderr)
+    except Exception:
+        Path(log_file).parent.mkdir(parents=True, exist_ok=True)
+        fmt = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        root = logging.getLogger()
+        root.handlers.clear()
+        root.setLevel(logging.INFO)
+        fh = logging.FileHandler(log_file)
+        fh.setFormatter(fmt)
+        root.addHandler(fh)
+        if also_stderr:
+            sh = logging.StreamHandler(sys.stderr)
+            sh.setFormatter(fmt)
+            root.addHandler(sh)
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -174,6 +203,7 @@ def create_host_status_report(
 
 if __name__ == "__main__":
     if 'snakemake' in dir():                               # noqa: F821
+        _setup_logging(snakemake.log[0])                   # noqa: F821
         create_host_status_report(
             candidates_csv=snakemake.input.candidates,         # noqa: F821
             assemblies_csv=snakemake.input.assemblies,         # noqa: F821
