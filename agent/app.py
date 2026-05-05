@@ -93,16 +93,20 @@ def _load_system_prompt(schema: str) -> str:
 
 def _build_agent():
     """
-    Build and return a LangChain AgentExecutor.
+    Build and return a LangGraph ReAct agent (CompiledGraph).
 
     This is called once at startup.  Errors are logged but do not prevent
     the FastAPI app from starting — the /health endpoint will report
     the agent as unavailable, and /chat/stream will return an error
     message to the client.
+
+    Uses ``langgraph.prebuilt.create_react_agent`` — the successor to the
+    removed ``langchain.agents.AgentExecutor`` — together with
+    ``langchain-core >=1.2.22`` which contains the security fix for path
+    traversal in legacy ``load_prompt`` functions.
     """
     try:
-        from langchain.agents import AgentExecutor, create_tool_calling_agent
-        from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+        from langgraph.prebuilt import create_react_agent
         from langchain_ollama import ChatOllama
 
         from agent.tools.log_tool import LogExplorerTool
@@ -120,26 +124,11 @@ def _build_agent():
 
         tools = [DuckDBQueryTool(), LogExplorerTool(), PBIRetrieverTool()]
 
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", system_prompt),
-                MessagesPlaceholder("chat_history", optional=True),
-                ("human", "{input}"),
-                MessagesPlaceholder("agent_scratchpad"),
-            ]
-        )
-
-        agent = create_tool_calling_agent(llm, tools, prompt)
-        executor = AgentExecutor(
-            agent=agent,
-            tools=tools,
-            verbose=True,
-            return_intermediate_steps=True,
-            handle_parsing_errors=True,
-        )
+        # state_modifier injects the system prompt as the first system message.
+        agent = create_react_agent(llm, tools, state_modifier=system_prompt)
 
         logger.info("Agent initialised with model '%s' at %s", OLLAMA_MODEL, OLLAMA_BASE_URL)
-        return executor
+        return agent
 
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to build agent: %s", exc, exc_info=True)
@@ -211,14 +200,18 @@ async def _stream_agent(
     executor, message: str, chat_history: list
 ) -> AsyncIterator[str]:
     """
-    Yield SSE-formatted strings produced by the LangChain agent.
+    Yield SSE-formatted strings produced by the LangGraph agent.
 
     Uses ``astream_events`` (LangChain ≥ 0.2) to emit token-level and
-    tool-level events.
+    tool-level events.  LangGraph agents expect the full conversation as a
+    ``messages`` list; the current user turn is appended here.
     """
+    from langchain_core.messages import HumanMessage
+
     try:
+        messages = list(chat_history) + [HumanMessage(content=message)]
         async for event in executor.astream_events(
-            {"input": message, "chat_history": chat_history},
+            {"messages": messages},
             version="v2",
         ):
             kind = event.get("event", "")
