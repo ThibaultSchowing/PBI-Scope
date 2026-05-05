@@ -280,7 +280,7 @@ _BASE_TOOL_DESCRIPTION = (
     "Execute a read-only SQL query on the PBI DuckDB phage-bacteria interaction "
     "database. Supports SELECT, SHOW TABLES, and DESCRIBE <table>. "
     f"Results are returned as a Markdown table (up to {_ROW_LIMIT} rows). "
-    "Input must be a JSON object with key 'query' containing the SQL string."
+    "Provide the SQL string as the 'query' parameter."
 )
 
 

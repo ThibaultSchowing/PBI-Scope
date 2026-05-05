@@ -428,10 +428,7 @@ class LogExplorerTool(BaseTool):
         "action='tail': show the last n_lines lines of a log file (path= required, default n_lines=50). "
         "action='search': grep for a pattern in log files (pattern= required; path= optional — omit or give a "
         "directory path to search ALL log files recursively). "
-        "Always call action='list' first to discover available log file paths before reading. "
-        "Input must be a JSON object with keys: action, path (optional), pattern (for search), "
-        "context_lines (optional, default 2), n_lines (optional, default 50), "
-        "start_line (optional), end_line (optional)."
+        "Always call action='list' first to discover available log file paths before reading."
     )
     args_schema: Type[BaseModel] = LogExplorerInput
 
