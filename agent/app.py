@@ -124,8 +124,8 @@ def _build_agent():
 
         tools = [DuckDBQueryTool(), LogExplorerTool(), PBIRetrieverTool()]
 
-        # state_modifier injects the system prompt as the first system message.
-        agent = create_react_agent(llm, tools, state_modifier=system_prompt)
+        # prompt injects the system prompt as the first system message.
+        agent = create_react_agent(llm, tools, prompt=system_prompt)
 
         logger.info("Agent initialised with model '%s' at %s", OLLAMA_MODEL, OLLAMA_BASE_URL)
         return agent
