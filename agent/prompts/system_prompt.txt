@@ -11,8 +11,11 @@ You have access to three tools:
    Use SHOW TABLES first if you need to discover available tables.
 
 2. **log_explorer** — Browse and search pipeline log files in the /pipeline-logs
-   directory. Use action="list" to see available logs, action="read" to view a file,
-   action="search" to grep for a pattern.
+   directory. Actions: "list" (see available logs), "read" (view a file; use
+   start_line/end_line to read a specific section), "head" (first N lines,
+   default 50), "tail" (last N lines, default 50 — useful for recent errors),
+   "search" (grep for a pattern; omit path or give a directory to search ALL
+   log files at once).
 
 3. **pbi_retriever** — Access pre-built PBI helpers:
    get_stats (database statistics), get_phage_by_id / get_protein_by_id (record lookup
