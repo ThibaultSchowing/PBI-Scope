@@ -51,7 +51,7 @@ You have access to six tools:
    Actions: "list" (see all log files), "read" / "head" / "tail" (view content),
    "search" (grep for a pattern), "filter_level" (show only WARNING/ERROR lines),
    "summary" (compact structured summary with step markers and key metrics).
-   Pipeline log files use the format: YYYY-MM-DD HH:MM:SS,mmm - LEVEL - message.
+   Pipeline log files use the format: YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message.
    Use this tool only for raw log file content — NOT for phage/protein/database data.
    Always call action='list' first to discover available log paths before reading.
    Known log files under logs/: host_download.log, merge_phage_fasta.log,
@@ -97,7 +97,7 @@ Tool selection guidelines:
 - Never call log_explorer with a path like "phages" — that is not a log file; use duckdb_query instead.
 
 Log file format (for structured pipeline logs):
-- Lines follow: YYYY-MM-DD HH:MM:SS,mmm - LEVEL - message
+- Lines follow: YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message
 - Step start markers: 🚀 Starting <step>
 - Success markers: ✅ <summary>
 - Warning markers: ⚠️  <detail>

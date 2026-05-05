@@ -244,7 +244,7 @@ class HostRetrievalLogTool(BaseTool):
     description: str = (
         "Query PBI pipeline logs specifically about host genome retrieval. "
         "Log files use a structured timestamped format: "
-        "'YYYY-MM-DD HH:MM:SS,mmm - LEVEL - message'. "
+        "'YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message'. "
         "action='list_failures': list host species that failed to be downloaded/indexed "
         "(reads host_download_failures.log and host_status_report.csv). "
         "action='get_status': full host status table from host_status_report.csv "

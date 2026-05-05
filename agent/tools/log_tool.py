@@ -619,7 +619,7 @@ class LogExplorerTool(BaseTool):
         "Browse and search pipeline LOG FILES only — do NOT use this for phage/protein/database data queries "
         "(use duckdb_query for those). "
         "Pipeline log files use a structured timestamped format: "
-        "'YYYY-MM-DD HH:MM:SS,mmm - LEVEL - message'. "
+        "'YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message'. "
         "action='list': list log files (path= optional for subdirectory; omit to see all logs). "
         "action='read': read a log file (path= required; use start_line/end_line for a specific section). "
         "action='head': show the first n_lines lines of a log file (path= required, default n_lines=50). "
