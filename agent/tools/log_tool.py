@@ -51,7 +51,15 @@ _MAX_CONTEXT_LINES = 10
 _MAX_SEARCH_MATCHES = 100  # stop collecting context after this many hits
 _MAX_N_LINES = 500         # cap for head / tail
 _DEFAULT_N_LINES = 50
-_AVERAGE_LINE_BYTES = 200  # heuristic for tail seek offset
+# Rough heuristic for the tail seek offset: assume an average of 200 bytes
+# per line.  Actual line counts may vary; the tail implementation falls back
+# to a full read when the file is smaller than the estimated window.
+_AVERAGE_LINE_BYTES = 200
+# Maximum number of files to enumerate in a recursive search.
+# Reusing _MAX_SEARCH_MATCHES as a ceiling keeps the file-count proportional
+# to the match budget — once 100 matches are exhausted, scanning more files
+# would produce no additional output anyway.
+_MAX_FILES_TO_SEARCH = _MAX_SEARCH_MATCHES
 
 
 # ---------------------------------------------------------------------------
@@ -240,7 +248,7 @@ def _tail_file(target: Path, n_lines: int) -> str:
 def _collect_log_files(root: Path) -> list[Path]:
     """Return all readable files under *root*, recursively.
 
-    Iteration stops early once ``_MAX_SEARCH_MATCHES`` files have been
+    Iteration stops early once ``_MAX_FILES_TO_SEARCH`` files have been
     collected, since ``_search_dir`` will exhaust the match budget before
     processing more files anyway.
     """
@@ -248,7 +256,7 @@ def _collect_log_files(root: Path) -> list[Path]:
     for entry in sorted(root.rglob("*")):
         if entry.is_file():
             files.append(entry)
-            if len(files) >= _MAX_SEARCH_MATCHES:
+            if len(files) >= _MAX_FILES_TO_SEARCH:
                 break
     return files
 
