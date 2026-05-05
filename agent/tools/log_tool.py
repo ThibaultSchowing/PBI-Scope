@@ -51,6 +51,7 @@ _MAX_CONTEXT_LINES = 10
 _MAX_SEARCH_MATCHES = 100  # stop collecting context after this many hits
 _MAX_N_LINES = 500         # cap for head / tail
 _DEFAULT_N_LINES = 50
+_AVERAGE_LINE_BYTES = 200  # heuristic for tail seek offset
 
 
 # ---------------------------------------------------------------------------
@@ -219,7 +220,7 @@ def _tail_file(target: Path, n_lines: int) -> str:
     size = target.stat().st_size
     # Read the tail from the end of the file without loading everything.
     # Heuristic: average line ~200 bytes; read enough to capture n_lines.
-    read_bytes = min(size, max(_MAX_BYTES, n_lines * 200))
+    read_bytes = min(size, max(_MAX_BYTES, n_lines * _AVERAGE_LINE_BYTES))
     with target.open("rb") as fh:
         if size > read_bytes:
             fh.seek(size - read_bytes)
@@ -237,11 +238,18 @@ def _tail_file(target: Path, n_lines: int) -> str:
 
 
 def _collect_log_files(root: Path) -> list[Path]:
-    """Return all readable files under *root*, recursively."""
+    """Return all readable files under *root*, recursively.
+
+    Iteration stops early once ``_MAX_SEARCH_MATCHES`` files have been
+    collected, since ``_search_dir`` will exhaust the match budget before
+    processing more files anyway.
+    """
     files: list[Path] = []
     for entry in sorted(root.rglob("*")):
         if entry.is_file():
             files.append(entry)
+            if len(files) >= _MAX_SEARCH_MATCHES:
+                break
     return files
 
 
