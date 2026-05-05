@@ -160,6 +160,7 @@ def _list_dir(target: Path) -> str:
             try:
                 sub_entries = sorted(entry.iterdir())
             except PermissionError:
+                entries.append(f"         [permission denied]  {entry.name}/")
                 sub_entries = []
             for subentry in sub_entries:
                 if subentry.is_dir():
