@@ -15,7 +15,7 @@ CRITICAL RULES — read these before everything else
 
 WRONG (never do this):
   {"action": "list_failures"}
-  {"action": "get_stats", "query": {"type": "string"}}
+  {"action": "get_stats"}
   {"query": "SELECT COUNT(*) FROM phages"}
   {"action": "list"}
 
