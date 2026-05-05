@@ -264,7 +264,9 @@ _ACTION_TO_TOOL: dict[str, str] = {
     "list": "pipeline_report",
     "summary": "pipeline_report",
     "read": "pipeline_report",
-    # log_explorer (overlaps with pipeline_report for "list"/"read" — resolved below)
+    # log_explorer exclusive actions ('list' and 'read' overlap with pipeline_report;
+    # they are mapped to pipeline_report above as the more common default.
+    # 'head', 'tail', and 'search' uniquely identify log_explorer invocations.)
     "head": "log_explorer",
     "tail": "log_explorer",
     "search": "log_explorer",
@@ -272,7 +274,7 @@ _ACTION_TO_TOOL: dict[str, str] = {
 
 
 def _detect_json_tool_invocation(
-    text: str, tools: list
+    text: str, tools: list[Any]
 ) -> Optional[tuple[Any, dict]]:
     """
     Return ``(tool_instance, parsed_args)`` when *text* is a bare JSON object
@@ -333,13 +335,14 @@ async def _run_tool_recovery(
     except Exception as exc:  # noqa: BLE001
         logger.error("Tool recovery failed for '%s': %s", tool_name, exc, exc_info=True)
         yield _sse({"type": "tool_end", "tool": tool_name})
+        # Do not expose internal exception details to the client.
         yield _sse(
-            {"type": "token", "content": f"An error occurred while running {tool_name}: {exc}"}
+            {"type": "token", "content": f"Could not retrieve results from {tool_name}. Please try again."}
         )
 
 
 async def _stream_agent(
-    executor, message: str, chat_history: list, tools: Optional[list] = None
+    executor, message: str, chat_history: list, tools: Optional[list[Any]] = None
 ) -> AsyncIterator[str]:
     """
     Yield SSE-formatted strings produced by the LangGraph agent.
