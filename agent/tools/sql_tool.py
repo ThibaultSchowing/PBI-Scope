@@ -20,17 +20,20 @@ Input schema (JSON string)
 
 from __future__ import annotations
 
-import json
+import logging
 import os
 import re
+import threading
 from pathlib import Path
-from typing import Any, Optional, Type
+from typing import Optional, Type
 
 import duckdb
 import numpy as np
 import pandas as pd
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -45,6 +48,50 @@ _ROW_LIMIT = int(os.environ.get("AGENT_SQL_ROW_LIMIT", "500"))
 
 # Allowed statement prefixes (upper-cased)
 _ALLOWED_PREFIXES = ("SELECT", "SHOW", "DESCRIBE", "PRAGMA")
+
+# ---------------------------------------------------------------------------
+# Shared connection state (module-level so pre-loading and the tool share it)
+# ---------------------------------------------------------------------------
+
+_shared_conn: Optional[duckdb.DuckDBPyConnection] = None
+_conn_loading: bool = False
+_conn_load_error: Optional[str] = None
+_conn_lock = threading.Lock()
+
+
+def preload_db_conn() -> None:
+    """
+    Open the DuckDB connection eagerly in a background thread at startup.
+
+    Safe to call multiple times — subsequent calls are no-ops once the
+    connection is established.  Errors are recorded in ``_conn_load_error``
+    so the tool can surface a descriptive message instead of hanging.
+    """
+    global _shared_conn, _conn_loading, _conn_load_error  # noqa: PLW0603
+
+    with _conn_lock:
+        if _shared_conn is not None or _conn_loading:
+            return
+        _conn_loading = True
+
+    logger.info("Pre-loading DuckDB connection from %s …", _DEFAULT_DB)
+    try:
+        conn = duckdb.connect(str(_DEFAULT_DB), read_only=True)
+        with _conn_lock:
+            _shared_conn = conn
+            _conn_load_error = None
+        logger.info("DuckDB connection ready.")
+    except FileNotFoundError:
+        with _conn_lock:
+            _conn_load_error = "not_found"
+        logger.warning("DuckDB file not found at %s", _DEFAULT_DB)
+    except Exception as exc:  # noqa: BLE001
+        with _conn_lock:
+            _conn_load_error = str(exc)
+        logger.error("DuckDB preload failed: %s", exc)
+    finally:
+        with _conn_lock:
+            _conn_loading = False
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +155,11 @@ def _df_to_text(df: pd.DataFrame) -> str:
     # Replace non-JSON-serialisable values
     df = df.replace([np.inf, -np.inf], None).where(pd.notnull(df), None)
 
-    return df.to_markdown(index=False)
+    try:
+        return df.to_markdown(index=False)
+    except ImportError:
+        # tabulate not installed — fall back to plain text tabulation
+        return df.to_string(index=False)
 
 
 def get_db_schema(db_path: Optional[Path] = None) -> str:
@@ -169,15 +220,33 @@ class DuckDBQueryTool(BaseTool):
     )
     args_schema: Type[BaseModel] = DuckDBQueryInput
 
-    # DuckDB connection — opened lazily and reused
-    _conn: Optional[duckdb.DuckDBPyConnection] = None
-
-    def _get_conn(self) -> duckdb.DuckDBPyConnection:
-        if self._conn is None:
-            self._conn = duckdb.connect(str(_DEFAULT_DB), read_only=True)
-        return self._conn
+    def _get_conn(self) -> Optional[duckdb.DuckDBPyConnection]:
+        """Return the shared read-only connection, or None when not ready."""
+        if _shared_conn is not None:
+            return _shared_conn
+        # Shared connection not pre-loaded yet — open one on the fly (best-effort).
+        # This path is only hit when preload_db_conn() was never scheduled.
+        try:
+            conn = duckdb.connect(str(_DEFAULT_DB), read_only=True)
+            return conn
+        except Exception:  # noqa: BLE001
+            return None
 
     def _run(self, query: str) -> str:  # type: ignore[override]
+        # Surface DB loading / error state before doing anything else.
+        if _conn_loading:
+            return (
+                "⏳ The database is still loading — this can take up to 5 minutes "
+                "on first start. Please try again in a moment."
+            )
+        if _conn_load_error == "not_found":
+            return (
+                "Database file not found. "
+                "The pipeline must complete before the agent can query data."
+            )
+        if _conn_load_error:
+            return f"Database connection failed: {_conn_load_error}"
+
         if not query or not query.strip():
             return "Empty query."
 
@@ -191,6 +260,11 @@ class DuckDBQueryTool(BaseTool):
 
         try:
             conn = self._get_conn()
+            if conn is None:
+                return (
+                    "Database connection is not available yet. "
+                    "Please try again in a moment."
+                )
             df = conn.execute(safe_query).fetchdf()
             return _df_to_text(df)
         except duckdb.Error as exc:

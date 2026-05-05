@@ -142,11 +142,46 @@ def _build_agent():
 _agent_executor = None
 
 
+async def _preload_databases() -> None:
+    """
+    Warm up both database connections in background threads so they are
+    ready before the first user query arrives.  The large PBI database files
+    can take up to 5 minutes to open; running the load at startup means the
+    agent only needs to wait once, rather than on the first tool call.
+    """
+    try:
+        from agent.tools.pbi_tool import preload_retriever
+        from agent.tools.sql_tool import preload_db_conn
+
+        loop = asyncio.get_running_loop()
+        await asyncio.gather(
+            loop.run_in_executor(None, preload_retriever),
+            loop.run_in_executor(None, preload_db_conn),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Database preload failed: %s", exc, exc_info=True)
+
+
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     """Build the agent at startup and clean up on shutdown."""
     global _agent_executor  # noqa: PLW0603
     _agent_executor = _build_agent()
+    # Start DB pre-loading in the background — do not await so the app
+    # finishes starting up immediately while the heavy files load.
+    # Store the task reference to prevent it being garbage-collected and to
+    # log any unexpected exception that escapes _preload_databases.
+    _preload_task = asyncio.create_task(_preload_databases())
+
+    def _on_preload_done(task: asyncio.Task) -> None:
+        if not task.cancelled() and task.exception() is not None:
+            logger.error(
+                "Unhandled exception in database preload task: %s",
+                task.exception(),
+                exc_info=task.exception(),
+            )
+
+    _preload_task.add_done_callback(_on_preload_done)
     yield
     # Nothing to clean up currently; add retriever.close() here if needed.
 
@@ -205,11 +240,21 @@ async def _stream_agent(
     Uses ``astream_events`` (LangChain ≥ 0.2) to emit token-level and
     tool-level events.  LangGraph agents expect the full conversation as a
     ``messages`` list; the current user turn is appended here.
+
+    Fallback: some LLM backends (e.g. Ollama) do not stream the final
+    response after a tool call token-by-token.  When no tokens are received
+    after the last tool invocation, the completed graph state is read from
+    the ``on_chain_end`` event and the final AI message is emitted at once.
     """
-    from langchain_core.messages import HumanMessage
+    from langchain_core.messages import AIMessage, HumanMessage
 
     try:
         messages = list(chat_history) + [HumanMessage(content=message)]
+
+        # Tracking variables for the streaming fallback.
+        _tool_was_called = False
+        _tokens_after_last_tool = False
+
         async for event in executor.astream_events(
             {"messages": messages},
             version="v2",
@@ -223,14 +268,27 @@ async def _stream_agent(
                 if chunk:
                     token = ""
                     if hasattr(chunk, "content"):
-                        token = chunk.content
+                        content = chunk.content
+                        if isinstance(content, str):
+                            token = content
+                        elif isinstance(content, list):
+                            # Multi-modal content blocks (e.g. {"type":"text","text":"…"})
+                            for part in content:
+                                if isinstance(part, dict) and part.get("type") == "text":
+                                    token += part.get("text", "")
+                                elif isinstance(part, str):
+                                    token += part
                     elif isinstance(chunk, dict):
                         token = chunk.get("content", "")
                     if token:
+                        if _tool_was_called:
+                            _tokens_after_last_tool = True
                         yield _sse({"type": "token", "content": token})
 
             # Tool start
             elif kind == "on_tool_start":
+                _tool_was_called = True
+                _tokens_after_last_tool = False
                 tool_input = event.get("data", {}).get("input", "")
                 yield _sse(
                     {
@@ -243,6 +301,22 @@ async def _stream_agent(
             # Tool end
             elif kind == "on_tool_end":
                 yield _sse({"type": "tool_end", "tool": name})
+
+            # Fallback: if tools ran but the LLM's final response was not
+            # streamed token-by-token, extract it from the completed graph state.
+            elif kind == "on_chain_end" and not event.get("parent_ids"):
+                if _tool_was_called and not _tokens_after_last_tool:
+                    output = event.get("data", {}).get("output", {})
+                    if isinstance(output, dict):
+                        final_msgs = output.get("messages", [])
+                        for msg in reversed(final_msgs):
+                            if isinstance(msg, AIMessage) and not getattr(
+                                msg, "tool_calls", None
+                            ):
+                                content = msg.content
+                                if isinstance(content, str) and content.strip():
+                                    yield _sse({"type": "token", "content": content})
+                                break
 
     except Exception as exc:  # noqa: BLE001
         logger.error("Agent stream error: %s", exc, exc_info=True)

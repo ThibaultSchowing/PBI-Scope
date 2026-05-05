@@ -25,12 +25,18 @@ Whitelisted actions
 from __future__ import annotations
 
 import json
+import logging
 import os
+import threading
 from pathlib import Path
 from typing import Any, Optional, Type
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
+
+_APP_SRC_PATH = "/app/src"
 
 WHITELISTED_ACTIONS = frozenset(
     ["get_stats", "get_phage_by_id", "get_protein_by_id", "list_hosts"]
@@ -56,30 +62,82 @@ class PBIRetrieverInput(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Lazy retriever initialisation
+# Lazy retriever initialisation with loading-state tracking
 # ---------------------------------------------------------------------------
 
 _retriever = None
+_retriever_loading: bool = False
+_retriever_error: Optional[str] = None
+_retriever_lock = threading.Lock()
+
+
+def preload_retriever() -> None:
+    """
+    Eagerly initialise the PBI SequenceRetriever in a background thread.
+
+    Loading the large database files can take several minutes; calling this
+    at application startup means the connection is ready (or has a clear
+    error) before the first user query arrives.  Safe to call multiple times.
+    """
+    global _retriever, _retriever_loading, _retriever_error  # noqa: PLW0603
+
+    with _retriever_lock:
+        if _retriever is not None or _retriever_loading:
+            return
+        _retriever_loading = True
+
+    logger.info("Pre-loading PBI SequenceRetriever (this may take several minutes) …")
+    try:
+        import sys
+
+        if _APP_SRC_PATH not in sys.path:
+            sys.path.insert(0, _APP_SRC_PATH)
+
+        from pbi import quick_connect  # type: ignore[import]
+
+        ret = quick_connect()
+        with _retriever_lock:
+            _retriever = ret
+            _retriever_error = None
+        logger.info("PBI SequenceRetriever ready.")
+    except Exception as exc:  # noqa: BLE001
+        with _retriever_lock:
+            _retriever_error = str(exc)
+        logger.error("PBI retriever preload failed: %s", exc)
+    finally:
+        with _retriever_lock:
+            _retriever_loading = False
 
 
 def _get_retriever():
-    """Return a module-level SequenceRetriever, initialised on first call."""
-    global _retriever  # noqa: PLW0603
-    if _retriever is None:
-        try:
-            import sys
-
-            # Ensure the pbi package installed in /app is importable
-            app_src = "/app/src"
-            if app_src not in sys.path:
-                sys.path.insert(0, app_src)
-
-            from pbi import quick_connect  # type: ignore[import]
-
-            _retriever = quick_connect()
-        except Exception as exc:  # noqa: BLE001
-            return None, str(exc)
-    return _retriever, None
+    """Return the module-level SequenceRetriever, or (None, error_message)."""
+    if _retriever is not None:
+        return _retriever, None
+    if _retriever_loading:
+        return None, (
+            "⏳ The database is still loading — this can take up to 5 minutes "
+            "on first start. Please try again in a moment."
+        )
+    if _retriever_error:
+        return None, f"Could not connect to PBI database: {_retriever_error}"
+    # preload_retriever() was never called — trigger a synchronous on-demand
+    # load, honouring the same lock/state to avoid concurrent connection attempts.
+    with _retriever_lock:
+        # Re-check under the lock in case another thread just finished loading.
+        if _retriever is not None:
+            return _retriever, None
+        if _retriever_loading:
+            return None, (
+                "⏳ The database is still loading — this can take up to 5 minutes "
+                "on first start. Please try again in a moment."
+            )
+    # Delegate to preload_retriever which handles all locking internally,
+    # then return whatever state was set.
+    preload_retriever()
+    with _retriever_lock:
+        if _retriever is not None:
+            return _retriever, None
+        return None, f"Could not connect to PBI database: {_retriever_error or 'unknown error'}"
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +147,7 @@ def _get_retriever():
 def _get_stats() -> str:
     retriever, err = _get_retriever()
     if err:
-        return f"Could not connect to PBI database: {err}"
+        return err
 
     try:
         stats = retriever.get_stats()
@@ -101,7 +159,7 @@ def _get_stats() -> str:
 def _get_phage_by_id(phage_id: str) -> str:
     retriever, err = _get_retriever()
     if err:
-        return f"Could not connect to PBI database: {err}"
+        return err
 
     try:
         df = retriever.conn.execute(
@@ -119,7 +177,7 @@ def _get_phage_by_id(phage_id: str) -> str:
 def _get_protein_by_id(protein_id: str) -> str:
     retriever, err = _get_retriever()
     if err:
-        return f"Could not connect to PBI database: {err}"
+        return err
 
     try:
         df = retriever.conn.execute(
@@ -137,7 +195,7 @@ def _get_protein_by_id(protein_id: str) -> str:
 def _list_hosts() -> str:
     retriever, err = _get_retriever()
     if err:
-        return f"Could not connect to PBI database: {err}"
+        return err
 
     try:
         query = (
@@ -147,7 +205,10 @@ def _list_hosts() -> str:
         df = retriever.conn.execute(query).fetchdf()
         if df.empty:
             return "No host organisms found in the database."
-        return df.to_markdown(index=False)
+        try:
+            return df.to_markdown(index=False)
+        except ImportError:
+            return df.to_string(index=False)
     except Exception as exc:  # noqa: BLE001
         # Fallback: try alternate column names
         try:
@@ -157,7 +218,10 @@ def _list_hosts() -> str:
             df = retriever.conn.execute(query).fetchdf()
             if df.empty:
                 return "No host organisms found in the database."
-            return df.to_markdown(index=False)
+            try:
+                return df.to_markdown(index=False)
+            except ImportError:
+                return df.to_string(index=False)
         except Exception as exc2:  # noqa: BLE001
             return f"Error listing hosts: {exc2}"
 
