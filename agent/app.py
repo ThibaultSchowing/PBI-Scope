@@ -274,6 +274,19 @@ async def _stream_agent(
             if kind == "on_chat_model_stream":
                 chunk = event.get("data", {}).get("chunk")
                 if chunk:
+                    # Skip chunks that are part of a tool-call invocation.
+                    # Ollama/Llama sometimes emits the tool-call JSON as
+                    # content text; filtering here prevents that JSON from
+                    # appearing as the visible chat response, and keeps
+                    # _tokens_after_last_tool accurate so the on_chain_end
+                    # fallback can still fire when no real text was produced.
+                    has_tool_calls = bool(getattr(chunk, "tool_calls", None)) or (
+                        isinstance(getattr(chunk, "additional_kwargs", None), dict)
+                        and bool(chunk.additional_kwargs.get("tool_calls"))
+                    )
+                    if has_tool_calls:
+                        continue
+
                     token = ""
                     if hasattr(chunk, "content"):
                         content = chunk.content
