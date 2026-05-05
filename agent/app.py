@@ -93,7 +93,8 @@ def _load_system_prompt(schema: str) -> str:
 
 def _build_agent():
     """
-    Build and return a LangGraph ReAct agent (CompiledGraph).
+    Build and return ``(agent, tools)`` — a LangGraph ReAct agent (CompiledGraph)
+    and the list of registered LangChain tools.
 
     This is called once at startup.  Errors are logged but do not prevent
     the FastAPI app from starting — the /health endpoint will report
@@ -136,11 +137,11 @@ def _build_agent():
         agent = create_react_agent(llm, tools, prompt=system_prompt)
 
         logger.info("Agent initialised with model '%s' at %s", OLLAMA_MODEL, OLLAMA_BASE_URL)
-        return agent
+        return agent, tools
 
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to build agent: %s", exc, exc_info=True)
-        return None
+        return None, []
 
 
 # ---------------------------------------------------------------------------
@@ -148,6 +149,7 @@ def _build_agent():
 # ---------------------------------------------------------------------------
 
 _agent_executor = None
+_agent_tools: list = []
 
 
 async def _preload_databases() -> None:
@@ -173,8 +175,8 @@ async def _preload_databases() -> None:
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     """Build the agent at startup and clean up on shutdown."""
-    global _agent_executor  # noqa: PLW0603
-    _agent_executor = _build_agent()
+    global _agent_executor, _agent_tools  # noqa: PLW0603
+    _agent_executor, _agent_tools = _build_agent()
     # Start DB pre-loading in the background — do not await so the app
     # finishes starting up immediately while the heavy files load.
     # Store the task reference to prevent it being garbage-collected and to
@@ -235,12 +237,112 @@ def _check_auth(request: Request) -> None:
 # ---------------------------------------------------------------------------
 
 
+
 def _sse(payload: dict) -> str:
     return f"data: {json.dumps(payload)}\n\n"
 
 
+# ---------------------------------------------------------------------------
+# JSON tool-call detection and recovery helpers
+# ---------------------------------------------------------------------------
+
+# Maps action values to the tool name that handles them.
+# Used to identify which tool a model-generated JSON invocation targets.
+_ACTION_TO_TOOL: dict[str, str] = {
+    # host_retrieval_log
+    "list_failures": "host_retrieval_log",
+    "get_status": "host_retrieval_log",
+    "get_fasta_qc": "host_retrieval_log",
+    "get_download_log": "host_retrieval_log",
+    # pbi_retriever
+    "get_stats": "pbi_retriever",
+    "get_phage_by_id": "pbi_retriever",
+    "get_protein_by_id": "pbi_retriever",
+    "list_hosts": "pbi_retriever",
+    "list_failed_hosts": "pbi_retriever",
+    # pipeline_report
+    "list": "pipeline_report",
+    "summary": "pipeline_report",
+    "read": "pipeline_report",
+    # log_explorer exclusive actions ('list' and 'read' overlap with pipeline_report;
+    # they are mapped to pipeline_report above as the more common default.
+    # 'head', 'tail', and 'search' uniquely identify log_explorer invocations.)
+    "head": "log_explorer",
+    "tail": "log_explorer",
+    "search": "log_explorer",
+}
+
+
+def _detect_json_tool_invocation(
+    text: str, tools: list[Any]
+) -> Optional[tuple[Any, dict]]:
+    """
+    Return ``(tool_instance, parsed_args)`` when *text* is a bare JSON object
+    that looks like a tool invocation the model was trying to make but output
+    as plain text instead of calling the tool via the framework.
+
+    Returns ``None`` when the text is normal prose or cannot be matched to a
+    registered tool.
+    """
+    stripped = text.strip()
+    if not (stripped.startswith("{") and stripped.endswith("}")):
+        return None
+    try:
+        data = json.loads(stripped)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict):
+        return None
+
+    # Match by 'action' field (most tools use this)
+    action = str(data.get("action", "")).lower()
+    if action:
+        target_name = _ACTION_TO_TOOL.get(action)
+        if target_name:
+            tool_obj = next((t for t in tools if t.name == target_name), None)
+            if tool_obj:
+                return tool_obj, data
+
+    # Match by 'query' field (duckdb_query)
+    if "query" in data and isinstance(data.get("query"), str):
+        tool_obj = next((t for t in tools if t.name == "duckdb_query"), None)
+        if tool_obj:
+            return tool_obj, data
+
+    return None
+
+
+async def _run_tool_recovery(
+    tool_obj: Any, args: dict
+) -> AsyncIterator[str]:
+    """
+    Execute *tool_obj* with *args* as a recovery path when the model output
+    a bare JSON invocation instead of calling the tool through the framework.
+
+    Emits ``tool_start`` / ``tool_end`` SSE events so the UI shows the tool
+    was used, then streams the tool's text result as a token.
+    """
+    tool_name = getattr(tool_obj, "name", "unknown_tool")
+    yield _sse({"type": "tool_start", "tool": tool_name, "input": str(args)[:300]})
+    try:
+        loop = asyncio.get_running_loop()
+        # tool.invoke() validates args through the args_schema (extra fields are
+        # silently ignored by Pydantic v2's default 'ignore' extra policy).
+        result: str = await loop.run_in_executor(None, lambda: tool_obj.invoke(args))
+        yield _sse({"type": "tool_end", "tool": tool_name})
+        if result and result.strip():
+            yield _sse({"type": "token", "content": result})
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Tool recovery failed for '%s': %s", tool_name, exc, exc_info=True)
+        yield _sse({"type": "tool_end", "tool": tool_name})
+        # Do not expose internal exception details to the client.
+        yield _sse(
+            {"type": "token", "content": f"Could not retrieve results from {tool_name}. Please try again."}
+        )
+
+
 async def _stream_agent(
-    executor, message: str, chat_history: list
+    executor, message: str, chat_history: list, tools: Optional[list[Any]] = None
 ) -> AsyncIterator[str]:
     """
     Yield SSE-formatted strings produced by the LangGraph agent.
@@ -249,19 +351,31 @@ async def _stream_agent(
     tool-level events.  LangGraph agents expect the full conversation as a
     ``messages`` list; the current user turn is appended here.
 
-    Fallback: some LLM backends (e.g. Ollama) do not stream the final
-    response after a tool call token-by-token.  When no tokens are received
-    after the last tool invocation, the completed graph state is read from
-    the ``on_chain_end`` event and the final AI message is emitted at once.
+    Token buffering
+    ---------------
+    All content tokens are buffered and only flushed when it is safe to do so.
+    This lets the ``on_chain_end`` handler inspect the full accumulated text
+    before deciding whether to emit it or to activate the JSON-recovery path.
+
+    Fallback A (tool called, no final tokens): if tools ran but the LLM's
+    final response was not streamed token-by-token, the completed graph state
+    is read from the ``on_chain_end`` event and the final AI message is emitted.
+
+    Fallback B (no tool called, bare JSON output): when the model outputs a raw
+    JSON object that matches a registered tool's input schema instead of calling
+    the tool through the framework, the JSON is detected, suppressed, and the
+    correct tool is executed transparently so the user always sees a result.
     """
     from langchain_core.messages import AIMessage, HumanMessage
 
     try:
         messages = list(chat_history) + [HumanMessage(content=message)]
 
-        # Tracking variables for the streaming fallback.
+        # Tracking variables for the streaming fallbacks.
         _tool_was_called = False
         _tokens_after_last_tool = False
+        # Buffer of (token_str,) tuples; flushed at on_chain_end.
+        _token_buffer: list[str] = []
 
         async for event in executor.astream_events(
             {"messages": messages},
@@ -270,16 +384,16 @@ async def _stream_agent(
             kind = event.get("event", "")
             name = event.get("name", "")
 
-            # LLM token chunks
+            # LLM token chunks — buffer rather than yield immediately so the
+            # on_chain_end handler can inspect the full accumulated text.
             if kind == "on_chat_model_stream":
                 chunk = event.get("data", {}).get("chunk")
                 if chunk:
                     # Skip chunks that are part of a tool-call invocation.
                     # Ollama/Llama sometimes emits the tool-call JSON as
                     # content text; filtering here prevents that JSON from
-                    # appearing as the visible chat response, and keeps
-                    # _tokens_after_last_tool accurate so the on_chain_end
-                    # fallback can still fire when no real text was produced.
+                    # appearing in the buffer, keeping _tokens_after_last_tool
+                    # accurate so the on_chain_end fallback fires correctly.
                     has_tool_calls = bool(getattr(chunk, "tool_calls", None)) or (
                         isinstance(getattr(chunk, "additional_kwargs", None), dict)
                         and bool(chunk.additional_kwargs.get("tool_calls"))
@@ -304,10 +418,14 @@ async def _stream_agent(
                     if token:
                         if _tool_was_called:
                             _tokens_after_last_tool = True
-                        yield _sse({"type": "token", "content": token})
+                        _token_buffer.append(token)
 
-            # Tool start
+            # Tool start — flush any buffered tokens that preceded the tool call,
+            # then emit the tool_start event immediately for UI responsiveness.
             elif kind == "on_tool_start":
+                for tok in _token_buffer:
+                    yield _sse({"type": "token", "content": tok})
+                _token_buffer = []
                 _tool_was_called = True
                 _tokens_after_last_tool = False
                 tool_input = event.get("data", {}).get("input", "")
@@ -323,21 +441,51 @@ async def _stream_agent(
             elif kind == "on_tool_end":
                 yield _sse({"type": "tool_end", "tool": name})
 
-            # Fallback: if tools ran but the LLM's final response was not
-            # streamed token-by-token, extract it from the completed graph state.
+            # Fallback A / B: end of the top-level agent chain.
             elif kind == "on_chain_end" and not event.get("parent_ids"):
-                if _tool_was_called and not _tokens_after_last_tool:
-                    output = event.get("data", {}).get("output", {})
-                    if isinstance(output, dict):
-                        final_msgs = output.get("messages", [])
-                        for msg in reversed(final_msgs):
-                            if isinstance(msg, AIMessage) and not getattr(
-                                msg, "tool_calls", None
-                            ):
-                                content = msg.content
-                                if isinstance(content, str) and content.strip():
-                                    yield _sse({"type": "token", "content": content})
-                                break
+                if _tool_was_called:
+                    if _tokens_after_last_tool:
+                        # Normal path: flush buffered tokens.
+                        for tok in _token_buffer:
+                            yield _sse({"type": "token", "content": tok})
+                    else:
+                        # Fallback A: tools ran but LLM response wasn't streamed
+                        # token-by-token. Extract final AI message from graph state.
+                        output = event.get("data", {}).get("output", {})
+                        if isinstance(output, dict):
+                            final_msgs = output.get("messages", [])
+                            for msg in reversed(final_msgs):
+                                if isinstance(msg, AIMessage) and not getattr(
+                                    msg, "tool_calls", None
+                                ):
+                                    content = msg.content
+                                    if isinstance(content, str) and content.strip():
+                                        yield _sse({"type": "token", "content": content})
+                                    break
+                else:
+                    # No tool was called: inspect the accumulated buffer.
+                    accumulated = "".join(_token_buffer).strip()
+                    if accumulated:
+                        # Fallback B: detect bare JSON tool invocations that the
+                        # model output as text instead of calling through the API.
+                        recovery = (
+                            _detect_json_tool_invocation(accumulated, tools or [])
+                            if tools
+                            else None
+                        )
+                        if recovery is not None:
+                            tool_obj, args = recovery
+                            logger.warning(
+                                "Model output bare JSON tool invocation for '%s'; "
+                                "executing via recovery path.",
+                                getattr(tool_obj, "name", "unknown"),
+                            )
+                            async for sse in _run_tool_recovery(tool_obj, args):
+                                yield sse
+                        else:
+                            # Normal prose — flush buffer.
+                            for tok in _token_buffer:
+                                yield _sse({"type": "token", "content": tok})
 
     except Exception as exc:  # noqa: BLE001
         logger.error("Agent stream error: %s", exc, exc_info=True)
@@ -407,7 +555,7 @@ async def chat_stream(request: Request, body: ChatRequest) -> StreamingResponse:
             lc_history.append(AIMessage(content=msg.content))
 
     return StreamingResponse(
-        _stream_agent(_agent_executor, body.message, lc_history),
+        _stream_agent(_agent_executor, body.message, lc_history, tools=_agent_tools),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
