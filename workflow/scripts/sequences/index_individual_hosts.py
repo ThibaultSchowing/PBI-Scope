@@ -57,11 +57,6 @@ def _setup_logging(log_file: str, also_stderr: bool = True) -> None:
             root.addHandler(sh)
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
 # Columns written to the CSV QC log — keep in sync with create_host_status_report.py
 _QC_LOG_COLUMNS = [
     'host_id',

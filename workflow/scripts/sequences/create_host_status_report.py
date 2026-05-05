@@ -56,12 +56,6 @@ def _setup_logging(log_file: str, also_stderr: bool = True) -> None:
             root.addHandler(sh)
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-
 def create_host_status_report(
     candidates_csv: str,
     assemblies_csv: str,
