@@ -140,7 +140,7 @@ If none of the above happens, Snakemake skips the rule.
 
 Host token resolution now persists a cache file:
 
-- `/data/intermediate/csv/merged/host_token_resolution_cache.json`
+- `pipeline_logs/csv/host_token_resolution_cache.json`
 
 When `reuse_host_resolution_cache: true` (default), already-resolved host tokens are reused on later runs, so expensive NCBI resolution calls are not repeated unnecessarily.
 
