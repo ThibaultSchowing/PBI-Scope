@@ -13,6 +13,13 @@ The pipeline generates several host-related outputs under the log root:
 * ``logs/create_host_mapping.log``    – host-to-FASTA mapping creation log
 * ``reports/host_status_report.csv``  – per-(Phage_ID, Host_Token) status (CSV)
 
+All log files (``*.log``) use a structured timestamped format produced by
+``workflow/scripts/common/logging_utils.py``::
+
+    2026-05-05 12:00:00,000 - INFO - 🚀 Starting host mapping creation
+    2026-05-05 12:00:05,200 - WARNING - ⚠️  Missing or empty file: foo.fna
+    2026-05-05 12:00:05,500 - INFO - ✅ Created mapping for 42 public host FASTA files
+
 Security guarantees
 -------------------
 * All reads are restricted to the configured log root (path-traversal safe).
@@ -22,8 +29,8 @@ Security guarantees
 Input schema (JSON string)
 --------------------------
 ``action`` – one of ``"list_failures"``, ``"get_status"``, ``"get_fasta_qc"``,
-             ``"get_download_log"`` (required).
-``n_lines`` – number of tail lines for ``"get_download_log"``
+             ``"get_download_log"``, ``"get_host_mapping_log"`` (required).
+``n_lines`` – number of tail lines for log actions
               (default 100, max 500).
 ``filter``  – optional substring filter applied to rows / lines returned.
 """
@@ -62,12 +69,15 @@ class HostRetrievalLogInput(BaseModel):
     action: str = Field(
         description=(
             "Action to perform:\n"
-            "  'list_failures'   – list host species that failed to be retrieved "
+            "  'list_failures'      – list host species that failed to be retrieved "
             "(reads host_download_failures.log and/or host_status_report.csv).\n"
-            "  'get_status'      – summarise the host_status_report.csv table "
+            "  'get_status'         – summarise the host_status_report.csv table "
             "(overall retrieval / download / QC results per phage-host pair).\n"
-            "  'get_fasta_qc'    – show the FASTA QC results (host_fasta_qc.csv).\n"
-            "  'get_download_log'– show recent lines from the host_download.log."
+            "  'get_fasta_qc'       – show the FASTA QC results (host_fasta_qc.csv).\n"
+            "  'get_download_log'   – show recent lines from the host_download.log.\n"
+            "  'get_host_mapping_log' – show the host mapping creation log "
+            "(create_host_mapping.log — includes counts of valid/missing FASTA files, "
+            "elapsed time, and any private-dataset merge warnings)."
         )
     )
     n_lines: int = Field(
@@ -233,6 +243,8 @@ class HostRetrievalLogTool(BaseTool):
     name: str = "host_retrieval_log"
     description: str = (
         "Query PBI pipeline logs specifically about host genome retrieval. "
+        "Log files use a structured timestamped format: "
+        "'YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message'. "
         "action='list_failures': list host species that failed to be downloaded/indexed "
         "(reads host_download_failures.log and host_status_report.csv). "
         "action='get_status': full host status table from host_status_report.csv "
@@ -241,6 +253,8 @@ class HostRetrievalLogTool(BaseTool):
         "(host_fasta_qc.csv — duplicate headers, identical sequences, etc.). "
         "action='get_download_log': recent lines from the general host download log "
         "(n_lines controls how many tail lines to return; default 100, max 500). "
+        "action='get_host_mapping_log': recent lines from the host mapping creation log "
+        "(create_host_mapping.log — includes counts of mapped/missing FASTA files and elapsed time). "
         "Optional filter= restricts rows/lines to those containing a given substring."
     )
     args_schema: Type[BaseModel] = HostRetrievalLogInput
@@ -277,9 +291,21 @@ class HostRetrievalLogTool(BaseTool):
                 )
             return result
 
+        if action == "get_host_mapping_log":
+            result = _tail_text(_LOG_ROOT / _HOST_MAPPING_LOG, n_lines)
+            if filter:
+                lines = result.splitlines()
+                header = [line for line in lines[:2] if line.startswith("[")]
+                body = [line for line in lines if filter.lower() in line.lower()]
+                result = "\n".join(header + body) if body else (
+                    f"No lines matching '{filter}' in create_host_mapping.log."
+                )
+            return result
+
         return (
             f"Unknown action '{action}'. "
-            "Valid actions: 'list_failures', 'get_status', 'get_fasta_qc', 'get_download_log'."
+            "Valid actions: 'list_failures', 'get_status', 'get_fasta_qc', "
+            "'get_download_log', 'get_host_mapping_log'."
         )
 
     async def _arun(self, **kwargs: Any) -> str:  # type: ignore[override]

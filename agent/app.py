@@ -115,6 +115,7 @@ def _build_agent():
         from agent.tools.sql_tool import DuckDBQueryTool, get_db_schema
         from agent.tools.host_log_tool import HostRetrievalLogTool
         from agent.tools.report_tool import PipelineReportTool
+        from agent.tools.routing_tool import QueryRouterTool
 
         schema = get_db_schema()
         system_prompt = _load_system_prompt(schema)
@@ -131,6 +132,7 @@ def _build_agent():
             PBIRetrieverTool(),
             HostRetrievalLogTool(),
             PipelineReportTool(),
+            QueryRouterTool(),
         ]
 
         # prompt injects the system prompt as the first system message.

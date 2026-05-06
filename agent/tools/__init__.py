@@ -5,6 +5,7 @@ from .sql_tool import DuckDBQueryTool
 from .pbi_tool import PBIRetrieverTool
 from .host_log_tool import HostRetrievalLogTool
 from .report_tool import PipelineReportTool
+from .routing_tool import QueryRouterTool
 
 __all__ = [
     "LogExplorerTool",
@@ -12,4 +13,5 @@ __all__ = [
     "PBIRetrieverTool",
     "HostRetrievalLogTool",
     "PipelineReportTool",
+    "QueryRouterTool",
 ]

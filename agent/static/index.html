@@ -169,9 +169,27 @@
 <div id="chat-window">
   <div class="msg assistant">
     <div class="bubble">
-      Hello! I'm the PBI Agent. I can help you explore the phage-bacteria interaction
-      database, query it with SQL, inspect pipeline logs, and look up specific phage or
-      protein records. What would you like to know?
+      Hello! I'm the <strong>PBI Agent</strong> — your assistant for the Phage–Bacteria Interactions project. I can help you explore the phage-bacteria interaction database, inspect pipeline logs, and look up specific records.
+
+Here's how I work and how to get the best results:
+
+<strong>📊 Database / SQL queries</strong> — ask about phage data, counts, metadata, or hosts stored in the database.
+<em>Example:</em> <code>How many phages are in the database from the RefSeq source?</code>
+<em>Example:</em> <code>Show me the top 10 phages with the most proteins.</code>
+
+<strong>📋 Pipeline log exploration</strong> — ask about what happened during the pipeline run, errors, warnings, or step summaries.
+<em>Example:</em> <code>Were there any errors or warnings during the phage FASTA merge step?</code>
+<em>Example:</em> <code>Show a summary of the host mapping creation log.</code>
+
+<strong>🔬 Host genome retrieval</strong> — ask about which host genomes were downloaded, which failed, or QC results.
+<em>Example:</em> <code>Which hosts failed to be downloaded?</code>
+<em>Example:</em> <code>Show the FASTA quality control results for host genomes.</code>
+
+<strong>📄 Pipeline reports</strong> — ask about HTML/CSV pipeline reports produced after each run.
+<em>Example:</em> <code>What reports are available?</code>
+<em>Example:</em> <code>Show the host status report.</code>
+
+If I'm unsure which tool to use, I'll figure it out automatically. You can also just ask naturally — I'll pick the right tool for you.
     </div>
   </div>
 </div>

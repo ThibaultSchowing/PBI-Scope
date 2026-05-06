@@ -13,15 +13,27 @@ Security guarantees
 * Reads are capped at ``AGENT_MAX_LOG_SIZE_KB`` kilobytes (default 512 KB)
   to prevent token-budget exhaustion.
 
+Log format
+----------
+Pipeline log files use a structured timestamped format produced by the
+shared ``workflow/scripts/common/logging_utils.py`` helper::
+
+    2026-05-05 12:00:00,000 - INFO - 🚀 Starting phage FASTA merge
+    2026-05-05 12:00:01,500 - WARNING - ⚠️  Skipping empty file: foo.fasta
+    2026-05-05 12:00:05,200 - INFO - ✅ Merged 14/14 phage FASTA files
+
+Use ``action='filter_level'`` to isolate WARNING/ERROR lines, and
+``action='summary'`` for a compact human-readable summary of a log file.
+
 Input schema (JSON string)
 --------------------------
 ``action`` – one of ``"list"``, ``"read"``, ``"head"``, ``"tail"``,
-             ``"search"`` (required).
+             ``"search"``, ``"filter_level"``, ``"summary"`` (required).
 ``path``   – relative path inside the log root, e.g. ``"logs/rule.log"``
-             (required for ``read``, ``head``, ``tail``; optional for
-             ``list`` to scope the listing to a subdirectory; optional
-             for ``search`` — omit or point to a directory to search all
-             log files recursively).
+             (required for ``read``, ``head``, ``tail``, ``filter_level``,
+             ``summary``; optional for ``list`` to scope the listing to a
+             subdirectory; optional for ``search`` — omit or point to a
+             directory to search all log files recursively).
 ``pattern`` – substring or regex to search for (required for ``search``).
 ``context_lines`` – number of lines of context around each match for
                     ``search`` (default 2, max 10).
@@ -29,6 +41,9 @@ Input schema (JSON string)
               (default 50, max 500).
 ``start_line`` – 1-based first line to return for ``read`` (optional).
 ``end_line``   – 1-based last line to return for ``read`` (optional).
+``level``  – log level to filter on for ``filter_level``: one of
+             ``"DEBUG"``, ``"INFO"``, ``"WARNING"``, ``"ERROR"``
+             (default ``"WARNING"`` — shows WARNING and ERROR lines).
 """
 
 from __future__ import annotations
@@ -40,6 +55,17 @@ from typing import Any, Optional, Type
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
+
+# ---------------------------------------------------------------------------
+# Structured log-line pattern
+# Matches lines produced by logging_utils.py:
+#   2026-05-05 12:00:00,000 - LEVEL - message
+# ---------------------------------------------------------------------------
+_STRUCTURED_LOG_RE = re.compile(
+    r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d+)"  # timestamp
+    r"\s+-\s+(DEBUG|INFO|WARNING|ERROR|CRITICAL)"     # level
+    r"\s+-\s+(.*)$"                                   # message
+)
 
 # ---------------------------------------------------------------------------
 # Configuration (read from environment with safe defaults)
@@ -69,14 +95,16 @@ _MAX_FILES_TO_SEARCH = _MAX_SEARCH_MATCHES
 class LogExplorerInput(BaseModel):
     action: str = Field(
         description=(
-            'Action to perform: "list", "read", "head", "tail", or "search".'
+            'Action to perform: "list", "read", "head", "tail", "search", '
+            '"filter_level", or "summary".'
         )
     )
     path: Optional[str] = Field(
         default=None,
         description=(
             "Relative path inside the pipeline-logs directory. "
-            'Required for "read", "head", and "tail"; optional for "list" '
+            'Required for "read", "head", "tail", "filter_level", and "summary"; '
+            'optional for "list" '
             "(omit or use empty string to list the root); optional for "
             '"search" — omit or point to a directory to search all log '
             "files recursively."
@@ -106,6 +134,15 @@ class LogExplorerInput(BaseModel):
         description=(
             '1-based line number to stop reading at, inclusive (for "read"). '
             "Used together with start_line to read a specific section."
+        ),
+    )
+    level: Optional[str] = Field(
+        default=None,
+        description=(
+            'Minimum log level to include for "filter_level". '
+            'One of "DEBUG", "INFO", "WARNING", "ERROR". '
+            'Defaults to "WARNING" (returns WARNING and ERROR lines only). '
+            'Use "ERROR" to see only errors; use "INFO" to see all messages.'
         ),
     )
 
@@ -411,6 +448,165 @@ def _search_dir(root: Path, pattern: str, context_lines: int) -> str:
     return header + "".join(sections)
 
 
+# Log level priority for filter_level
+_LEVEL_PRIORITY: dict[str, int] = {
+    "DEBUG": 0,
+    "INFO": 1,
+    "WARNING": 2,
+    "ERROR": 3,
+    "CRITICAL": 4,
+}
+
+
+def _filter_by_level(target: Path, min_level: str) -> str:
+    """Return only log lines at or above *min_level* from a structured log file.
+
+    Lines that do not match the structured log format are passed through
+    unchanged (e.g. section separators, emoji markers) so that visual
+    context is preserved.
+    """
+    if not target.exists():
+        return f"File not found: {target}"
+    if target.is_dir():
+        return f"'{target}' is a directory — provide a file path for filter_level."
+
+    min_priority = _LEVEL_PRIORITY.get(min_level.upper(), 2)
+
+    with target.open("rb") as fh:
+        raw = fh.read(_MAX_BYTES)
+
+    lines = raw.decode("utf-8", errors="replace").splitlines()
+    kept: list[str] = []
+
+    for line in lines:
+        m = _STRUCTURED_LOG_RE.match(line)
+        if m:
+            level = m.group(2)
+            if _LEVEL_PRIORITY.get(level, 0) >= min_priority:
+                kept.append(line)
+        else:
+            # Non-structured line (separator, blank, etc.) — include as context
+            # only when we have already kept some content, to avoid a noisy prefix.
+            if kept and line.strip():
+                kept.append(line)
+
+    if not kept:
+        return (
+            f"No lines at level {min_level.upper()} or above found in {target.name}. "
+            "The log may use a different format or contain no matching entries."
+        )
+
+    total_size_kb = target.stat().st_size / 1024
+    header = (
+        f"[{min_level.upper()}+ lines from {target.name} "
+        f"({len(kept)} line(s), file is {total_size_kb:.1f} KB)]\n\n"
+    )
+    return header + "\n".join(kept)
+
+
+def _summarise_log(target: Path) -> str:
+    """Parse a structured pipeline log file and return a compact summary.
+
+    Extracts:
+    - Step start/end markers (lines with 🚀 / ✅ / ❌)
+    - WARNING and ERROR counts with examples
+    - Key-value pairs emitted as ``  Key : value``
+    - Total lines and file size
+    """
+    if not target.exists():
+        return f"File not found: {target}"
+    if target.is_dir():
+        return f"'{target}' is a directory — provide a file path for summary."
+
+    with target.open("rb") as fh:
+        raw = fh.read(_MAX_BYTES)
+
+    lines = raw.decode("utf-8", errors="replace").splitlines()
+    total_lines = len(lines)
+    file_size_kb = target.stat().st_size / 1024
+    truncated = target.stat().st_size > _MAX_BYTES
+
+    counts: dict[str, int] = {"DEBUG": 0, "INFO": 0, "WARNING": 0, "ERROR": 0, "CRITICAL": 0}
+    warnings: list[str] = []
+    errors: list[str] = []
+    step_lines: list[str] = []         # 🚀 / ✅ / ❌ lines
+    kv_lines: list[str] = []           # "   Key  : value" lines
+
+    # Detect whether the file uses the structured format at all
+    structured_count = 0
+
+    for line in lines:
+        m = _STRUCTURED_LOG_RE.match(line)
+        if m:
+            structured_count += 1
+            level = m.group(2)
+            msg = m.group(3).strip()
+            counts[level] = counts.get(level, 0) + 1
+
+            if level == "WARNING" and len(warnings) < 10:
+                warnings.append(f"  [{m.group(1)}] {msg}")
+            elif level in ("ERROR", "CRITICAL") and len(errors) < 10:
+                errors.append(f"  [{m.group(1)}] {msg}")
+
+            # Step markers
+            if any(ch in msg for ch in ("🚀", "✅", "❌")):
+                step_lines.append(f"  {msg}")
+
+            # Key-value pairs like "   Expected inputs : 14"
+            if re.match(r"\s{2,}\w[\w\s/()-]+:\s+\S", msg):
+                kv_lines.append(f"  {msg.strip()}")
+
+    out: list[str] = [
+        f"Summary of {target.name} "
+        f"({total_lines} lines, {file_size_kb:.1f} KB"
+        + (" [truncated]" if truncated else "")
+        + "):",
+        "",
+    ]
+
+    if structured_count == 0:
+        out.append(
+            "⚠️  This file does not use the structured timestamped log format. "
+            "Use action='read', 'head', or 'tail' to inspect it directly."
+        )
+        return "\n".join(out)
+
+    out.append(
+        f"Log level counts: "
+        + ", ".join(f"{k}: {v}" for k, v in counts.items() if v > 0)
+    )
+    out.append("")
+
+    if step_lines:
+        out.append("Pipeline steps:")
+        out.extend(step_lines[:20])
+        if len(step_lines) > 20:
+            out.append(f"  … and {len(step_lines) - 20} more step lines")
+        out.append("")
+
+    if kv_lines:
+        out.append("Key metrics / paths:")
+        out.extend(kv_lines[:30])
+        if len(kv_lines) > 30:
+            out.append(f"  … and {len(kv_lines) - 30} more key-value lines")
+        out.append("")
+
+    if warnings:
+        out.append(f"Warnings ({counts['WARNING']} total, showing up to 10):")
+        out.extend(warnings)
+        out.append("")
+
+    if errors:
+        out.append(f"Errors/Critical ({counts['ERROR'] + counts['CRITICAL']} total, showing up to 10):")
+        out.extend(errors)
+        out.append("")
+
+    if not step_lines and not warnings and not errors:
+        out.append("No warnings or errors found. Pipeline step completed successfully.")
+
+    return "\n".join(out)
+
+
 # ---------------------------------------------------------------------------
 # Tool
 # ---------------------------------------------------------------------------
@@ -422,13 +618,24 @@ class LogExplorerTool(BaseTool):
     description: str = (
         "Browse and search pipeline LOG FILES only — do NOT use this for phage/protein/database data queries "
         "(use duckdb_query for those). "
+        "Pipeline log files use a structured timestamped format: "
+        "'YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message'. "
         "action='list': list log files (path= optional for subdirectory; omit to see all logs). "
         "action='read': read a log file (path= required; use start_line/end_line for a specific section). "
         "action='head': show the first n_lines lines of a log file (path= required, default n_lines=50). "
         "action='tail': show the last n_lines lines of a log file (path= required, default n_lines=50). "
         "action='search': grep for a pattern in log files (pattern= required; path= optional — omit or give a "
         "directory path to search ALL log files recursively). "
-        "Always call action='list' first to discover available log file paths before reading."
+        "action='filter_level': show only lines at or above a given log level from a structured log file "
+        "(path= required; level= one of 'DEBUG', 'INFO', 'WARNING', 'ERROR'; default level='WARNING'). "
+        "action='summary': parse a structured log file and return a compact summary with step markers, "
+        "key metrics, warning/error counts (path= required). "
+        "Always call action='list' first to discover available log file paths before reading. "
+        "Known log files: logs/host_download.log, logs/host_download_failures.log, "
+        "logs/index_individual_host_sequences.log, logs/create_host_status_report.log, "
+        "logs/merge_phage_fasta.log, logs/merge_protein_fasta.log, "
+        "logs/index_phage_sequences.log, logs/index_protein_sequences.log, "
+        "logs/create_host_mapping.log."
     )
     args_schema: Type[BaseModel] = LogExplorerInput
 
@@ -436,7 +643,8 @@ class LogExplorerTool(BaseTool):
              pattern: Optional[str] = None, context_lines: int = 2,
              n_lines: int = _DEFAULT_N_LINES,
              start_line: Optional[int] = None,
-             end_line: Optional[int] = None) -> str:
+             end_line: Optional[int] = None,
+             level: Optional[str] = None) -> str:
         try:
             target = _safe_resolve(path)
         except ValueError as exc:
@@ -502,9 +710,48 @@ class LogExplorerTool(BaseTool):
                 return _search_dir(target, pattern, context_lines)
             return _search_file(target, pattern, context_lines)
 
+        if action == "filter_level":
+            if not path:
+                return (
+                    "path is required for action='filter_level'. "
+                    "Call action='list' first to see available log files, "
+                    "then provide a specific file path.\n\n"
+                    + _list_dir(target)
+                )
+            if target.is_dir():
+                return (
+                    f"'{path}' is a directory. "
+                    "Provide a specific file path for action='filter_level'.\n\n"
+                    + _list_dir(target)
+                )
+            min_level = (level or "WARNING").upper()
+            if min_level not in _LEVEL_PRIORITY:
+                return (
+                    f"Unknown level '{min_level}'. "
+                    "Valid levels: DEBUG, INFO, WARNING, ERROR."
+                )
+            return _filter_by_level(target, min_level)
+
+        if action == "summary":
+            if not path:
+                return (
+                    "path is required for action='summary'. "
+                    "Call action='list' first to see available log files, "
+                    "then provide a specific file path.\n\n"
+                    + _list_dir(target)
+                )
+            if target.is_dir():
+                return (
+                    f"'{path}' is a directory. "
+                    "Provide a specific file path for action='summary'.\n\n"
+                    + _list_dir(target)
+                )
+            return _summarise_log(target)
+
         return (
             f"Unknown action '{action}'. "
-            "Valid actions are: 'list', 'read', 'head', 'tail', 'search'."
+            "Valid actions are: 'list', 'read', 'head', 'tail', 'search', "
+            "'filter_level', 'summary'."
         )
 
     async def _arun(self, **kwargs: Any) -> str:  # type: ignore[override]
