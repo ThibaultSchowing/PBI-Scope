@@ -1311,6 +1311,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2358,7 +2386,7 @@ It exits non-zero when required columns are missing.</p>
 <h3 id="host-resolution-reuse-across-reruns">Host resolution reuse across reruns<a class="headerlink" href="#host-resolution-reuse-across-reruns" title="Permanent link">&para;</a></h3>
 <p>Host token resolution now persists a cache file:</p>
 <ul>
-<li><code>/data/intermediate/csv/merged/host_token_resolution_cache.json</code></li>
+<li><code>pipeline_logs/csv/host_token_resolution_cache.json</code></li>
 </ul>
 <p>When <code>reuse_host_resolution_cache: true</code> (default), already-resolved host tokens are reused on later runs, so expensive NCBI resolution calls are not repeated unnecessarily.</p>
 <p>This is especially useful when the host rule is re-triggered but host tokens are unchanged.</p>
