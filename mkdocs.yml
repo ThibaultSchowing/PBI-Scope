@@ -45,6 +45,7 @@ nav:
       - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md
       - Docker Advanced: guides/docker-guide.md
+      - Pipeline Logs: guides/logging.md
   - Database:
       - Overview: database/overview.md
       - Host Resolution: database/host-resolution.md

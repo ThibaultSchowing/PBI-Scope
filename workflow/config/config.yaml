@@ -12,7 +12,11 @@
 #   /private-data  <- ./private_data
 #   /pipeline-logs <- ./pipeline_logs
 
-# Reports and logs (bind-mounted for direct host access)
+# Reports, logs and interesting intermediate files (bind-mounted for direct host access)
+# Subdirectory layout under /pipeline-logs:
+#   logs/    - Plain-text and CSV log files produced during pipeline execution
+#   reports/ - HTML validation and statistics reports
+#   csv/     - Intermediate CSV/JSON files useful for post-run analysis
 reports_output: "/pipeline-logs/reports/"
 database_validation_report_output: "/pipeline-logs/reports/database_validation.html"
 
@@ -63,13 +67,13 @@ private_host_mapping: "/private-data/private_host_fasta_mapping.json"
 # Host files are served directly from each source's hosts/ directory — no copy.
 private_phage_mapping: "/private-data/private_phage_mapping.json"
 private_phage_genomes_intermediate: "/private-data/phages"
-host_index_complete_flag: "/data/processed/sequences/.host_indexes_complete"
-host_metadata_output: "/data/intermediate/csv/merged/host_metadata.csv"
-assembly_metadata_output: "/data/intermediate/csv/merged/assembly_metadata.csv"
-phage_host_links_output: "/data/intermediate/csv/merged/phage_host_links.csv"
-phage_host_candidates_output: "/data/intermediate/csv/merged/phage_host_candidates.csv"
-phage_host_assemblies_output: "/data/intermediate/csv/merged/phage_host_assemblies.csv"
-host_resolution_cache_output: "/data/intermediate/csv/merged/host_token_resolution_cache.json"
+host_index_complete_flag: "/pipeline-logs/csv/.host_indexes_complete"
+host_metadata_output: "/pipeline-logs/csv/host_metadata.csv"
+assembly_metadata_output: "/pipeline-logs/csv/assembly_metadata.csv"
+phage_host_links_output: "/pipeline-logs/csv/phage_host_links.csv"
+phage_host_candidates_output: "/pipeline-logs/csv/phage_host_candidates.csv"
+phage_host_assemblies_output: "/pipeline-logs/csv/phage_host_assemblies.csv"
+host_resolution_cache_output: "/pipeline-logs/csv/host_token_resolution_cache.json"
 host_download_log: "/pipeline-logs/logs/host_download.log"
 host_failure_log: "/pipeline-logs/logs/host_download_failures.log"
 host_fasta_qc_log: "/pipeline-logs/logs/host_fasta_qc.csv"
