@@ -616,7 +616,8 @@ class LogExplorerTool(BaseTool):
 
     name: str = "log_explorer"
     description: str = (
-        "Browse and search pipeline LOG FILES only — do NOT use this for phage/protein/database data queries "
+        "Browse pipeline execution LOG FILES (.log files) — NOT for HTML/CSV reports (use pipeline_report for those). "
+        "Do NOT use this for phage/protein/database data queries "
         "(use duckdb_query for those). "
         "Pipeline log files use a structured timestamped format: "
         "'YYYY-MM-DD HH:MM:SS,nnn (3-digit milliseconds) - LEVEL - message'. "
