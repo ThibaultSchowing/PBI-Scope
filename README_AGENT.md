@@ -4,12 +4,12 @@ This document explains how the agentic architecture works in this branch and can
 
 ## Scope
 
-The agentic service is implemented in `/home/runner/work/PBI/PBI/agent` and exposes a chat API over PBI data and pipeline artifacts.
+The agentic service is implemented in `agent/` and exposes a chat API over PBI data and pipeline artifacts.
 
-- Runtime entrypoint: `/home/runner/work/PBI/PBI/agent/app.py`
-- Tool implementations: `/home/runner/work/PBI/PBI/agent/tools/*.py`
-- System prompt: `/home/runner/work/PBI/PBI/agent/prompts/system_prompt.txt`
-- Container image: `/home/runner/work/PBI/PBI/agent/Dockerfile.agent`
+- Runtime entrypoint: `agent/app.py`
+- Tool implementations: `agent/tools/*.py`
+- System prompt: `agent/prompts/system_prompt.txt`
+- Container image: `agent/Dockerfile.agent`
 
 ## High-level architecture
 
