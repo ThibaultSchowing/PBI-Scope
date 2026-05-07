@@ -1,4 +1,4 @@
-# PBI Agentic Architecture (agentic branch)
+# PBI Agentic Architecture
 
 This document explains how the agentic architecture works in this branch and can be used as a base for a future documentation page.
 

@@ -298,13 +298,13 @@ def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[
 
     path_val = data.get("path")
     name_val = data.get("name")
-    target = ""
+    target: Optional[str] = None
     if isinstance(name_val, str):
         target = name_val
     elif isinstance(path_val, str):
         target = path_val
-    target_lower = target.lower()
-    if target_lower:
+    if target:
+        target_lower = target.lower()
         if (
             "log_explorer" in candidates
             and (target_lower.endswith(".log") or target_lower.startswith("logs/"))
