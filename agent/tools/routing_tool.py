@@ -61,20 +61,20 @@ _RULES: list[tuple[list[str], str, str, str]] = [
          "fasta qc", "fasta quality", "duplicate header", "identical sequence",
          "host status", "host indexed", "host rejected",
          "which host", "what host fail"],
-        "host_retrieval_log",
+        "pipeline_logs",
         "action='list_failures' or action='get_status'",
         "Questions about host genome retrieval failures or FASTA QC should use "
-        "the host_retrieval_log tool.",
+        "the pipeline_logs tool.",
     ),
 
     # Host mapping log
     (
         ["host mapping", "mapping creation", "host fasta mapping",
          "create_host_mapping", "how many host fasta", "host fasta file"],
-        "host_retrieval_log",
+        "pipeline_logs",
         "action='get_host_mapping_log'",
         "Questions about the host mapping creation process or counts of mapped "
-        "FASTA files should use the host_retrieval_log tool with "
+        "FASTA files should use the pipeline_logs tool with "
         "action='get_host_mapping_log'.",
     ),
 
@@ -82,10 +82,10 @@ _RULES: list[tuple[list[str], str, str, str]] = [
     (
         ["report", "html report", "csv report", "data quality", "pipeline report",
          "database validation", "validation report", "summary report"],
-        "pipeline_report",
-        "action='list' then action='summary'",
+        "pipeline_logs",
+        "action='list' then action='show'",
         "Questions about pipeline HTML/CSV reports should use the "
-        "pipeline_report tool.",
+        "pipeline_logs tool.",
     ),
 
     # Log errors / warnings (generic)
@@ -98,10 +98,10 @@ _RULES: list[tuple[list[str], str, str, str]] = [
          "phage fasta merge", "protein fasta merge",
          "index_phage_sequences", "index_protein_sequences",
          "merge_phage_fasta", "merge_protein_fasta"],
-        "log_explorer",
+        "pipeline_logs",
         "action='list', then action='summary' or action='filter_level' with level='WARNING'",
         "Questions about pipeline step errors or warnings should use the "
-        "log_explorer tool — list files first, then use summary or filter_level.",
+        "pipeline_logs tool — list files first, then use summary or filter_level.",
     ),
 
     # Generic log browsing
@@ -109,7 +109,7 @@ _RULES: list[tuple[list[str], str, str, str]] = [
         ["log file", "pipeline log", "show log", "read log", "what does the log",
          "what happened", "pipeline ran", "pipeline status",
          "host download log", "index log", "create host", "host index"],
-        "log_explorer",
+        "pipeline_logs",
         "action='list', then action='tail' or action='summary'",
         "General log file browsing: list available files first, then read or "
         "summarise the relevant log.",
@@ -156,15 +156,15 @@ def _route_query(query: str) -> dict[str, str]:
 
     # Fallback
     return {
-        "tool": "duckdb_query or log_explorer",
+        "tool": "duckdb_query or pipeline_logs",
         "suggested_action": (
             "duckdb_query: query='SELECT ...' for database questions; "
-            "log_explorer: action='list' for pipeline log questions"
+            "pipeline_logs: action='list' for pipeline log/report questions"
         ),
         "rationale": (
             "Could not determine the best tool from the query. "
             "If the question is about phage/protein/host data use duckdb_query; "
-            "if it is about pipeline execution or log files use log_explorer."
+            "if it is about pipeline execution, logs, or reports use pipeline_logs."
         ),
     }
 
@@ -194,8 +194,7 @@ class QueryRouterTool(BaseTool):
         "Use this tool ONLY when you are uncertain which other tool best answers the user's question. "
         "Provide the user's question as 'query' and the tool will return the recommended tool name, "
         "suggested action, and a rationale. "
-        "Available tools to route to: duckdb_query (database/SQL), log_explorer (log files), "
-        "host_retrieval_log (host genome logs), pipeline_report (HTML/CSV reports), "
+        "Available tools to route to: duckdb_query (database/SQL), pipeline_logs (all log files and reports), "
         "pbi_retriever (database stats and individual records). "
         "Do NOT use this tool for every query — only when genuinely unsure."
     )

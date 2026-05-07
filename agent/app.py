@@ -112,11 +112,9 @@ def _build_agent():
         from langgraph.prebuilt import create_react_agent
         from langchain_ollama import ChatOllama
 
-        from agent.tools.log_tool import LogExplorerTool
+        from agent.tools.pipeline_logs_tool import PipelineLogsTool
         from agent.tools.pbi_tool import PBIRetrieverTool
         from agent.tools.sql_tool import DuckDBQueryTool, get_db_schema
-        from agent.tools.host_log_tool import HostRetrievalLogTool
-        from agent.tools.report_tool import PipelineReportTool
         from agent.tools.routing_tool import QueryRouterTool
 
         schema = get_db_schema()
@@ -130,10 +128,8 @@ def _build_agent():
 
         tools = [
             DuckDBQueryTool(db_schema=schema),
-            LogExplorerTool(),
+            PipelineLogsTool(),
             PBIRetrieverTool(),
-            HostRetrievalLogTool(),
-            PipelineReportTool(),
             QueryRouterTool(),
         ]
 
@@ -250,30 +246,32 @@ def _sse(payload: dict) -> str:
 # JSON tool-call detection and recovery helpers
 # ---------------------------------------------------------------------------
 
-# Maps action values to candidate tool names that handle them.
-# Used to identify which tool a model-generated JSON invocation targets.
+# Maps action values to the tool that handles them.
+# All pipeline log/report/host actions now route to the single pipeline_logs tool,
+# eliminating the previous routing ambiguity between log_explorer, pipeline_report,
+# and host_retrieval_log.
 _ACTION_TO_TOOLS: dict[str, list[str]] = {
-    # host_retrieval_log
-    "list_failures": ["host_retrieval_log"],
-    "get_status": ["host_retrieval_log"],
-    "get_fasta_qc": ["host_retrieval_log"],
-    "get_download_log": ["host_retrieval_log"],
-    "get_host_mapping_log": ["host_retrieval_log"],
+    # pipeline_logs — all file/log/report actions
+    "list": ["pipeline_logs"],
+    "show": ["pipeline_logs"],
+    "read": ["pipeline_logs"],
+    "head": ["pipeline_logs"],
+    "tail": ["pipeline_logs"],
+    "search": ["pipeline_logs"],
+    "filter_level": ["pipeline_logs"],
+    "summary": ["pipeline_logs"],
+    # pipeline_logs — host retrieval shortcuts
+    "list_failures": ["pipeline_logs"],
+    "get_status": ["pipeline_logs"],
+    "get_fasta_qc": ["pipeline_logs"],
+    "get_download_log": ["pipeline_logs"],
+    "get_host_mapping_log": ["pipeline_logs"],
     # pbi_retriever
     "get_stats": ["pbi_retriever"],
     "get_phage_by_id": ["pbi_retriever"],
     "get_protein_by_id": ["pbi_retriever"],
     "list_hosts": ["pbi_retriever"],
     "list_failed_hosts": ["pbi_retriever"],
-    # pipeline_report / log_explorer overlap
-    "list": ["pipeline_report", "log_explorer"],
-    "summary": ["pipeline_report", "log_explorer"],
-    "read": ["pipeline_report", "log_explorer"],
-    # log_explorer-exclusive actions
-    "head": ["log_explorer"],
-    "tail": ["log_explorer"],
-    "search": ["log_explorer"],
-    "filter_level": ["log_explorer"],
 }
 
 _LOG_ARG_KEYS = ("path", "pattern", "context_lines", "start_line", "end_line", "level")
@@ -299,44 +297,11 @@ _RECOVERY_MERGE_TOP_LEVEL_KEYS = (
 
 
 def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[str]:
-    """Resolve the best tool for an action, including overlap disambiguation."""
+    """Resolve the tool for an action. All log/report/host actions map to pipeline_logs."""
     candidates = _ACTION_TO_TOOLS.get(action, [])
     if not candidates:
         return None
-    if len(candidates) == 1:
-        return candidates[0]
-
-    # Shared actions between pipeline_report and log_explorer are resolved by
-    # argument shape and file hints.
-    has_log_args = any(key in data for key in _LOG_ARG_KEYS)
-    has_report_args = any(key in data for key in _REPORT_ARG_KEYS)
-
-    if has_log_args and "log_explorer" in candidates:
-        return "log_explorer"
-    if has_report_args and "pipeline_report" in candidates:
-        return "pipeline_report"
-
-    path_val = data.get("path")
-    name_val = data.get("name")
-    target: Optional[str] = None
-    if isinstance(name_val, str):
-        target = name_val
-    elif isinstance(path_val, str):
-        target = path_val
-    if target:
-        target_lower = target.lower()
-        if (
-            "log_explorer" in candidates
-            and (target_lower.endswith(".log") or target_lower.startswith("logs/"))
-        ):
-            return "log_explorer"
-        if (
-            "pipeline_report" in candidates
-            and target_lower.endswith((".csv", ".html", ".htm"))
-        ):
-            return "pipeline_report"
-
-    # Backward-compatible default for bare {"action":"list|read|summary"}.
+    # All entries in _ACTION_TO_TOOLS have exactly one candidate now.
     return candidates[0]
 
 
@@ -527,6 +492,43 @@ def _normalise_recovery_payload(
     return explicit_tool, args
 
 
+# Old tool names that mapped to what is now pipeline_logs.
+_LEGACY_PIPELINE_LOGS_TOOL_NAMES = frozenset(
+    {"pipeline_report", "log_explorer", "host_retrieval_log"}
+)
+
+
+def _normalise_tool_args(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """
+    Post-process *args* for *tool_name* to handle legacy field names and
+    backward-compatible translations.
+
+    Specifically: when routing to ``pipeline_logs``, the old ``pipeline_report``
+    tool used ``name`` for file identification while the new tool uses ``path``.
+    If the model echoed an old-style invocation (e.g. ``name='host_status_report.csv'``),
+    translate ``name`` → ``path`` so the unified tool receives the right argument.
+    """
+    resolved_name = tool_name
+    # If explicit_tool was an old name, it was already resolved to pipeline_logs
+    # by the action lookup; normalise here too for direct explicit_tool hits.
+    if resolved_name in _LEGACY_PIPELINE_LOGS_TOOL_NAMES:
+        resolved_name = "pipeline_logs"
+
+    if resolved_name == "pipeline_logs":
+        args = dict(args)
+        # Translate 'name' → 'path' for backward compatibility with pipeline_report.
+        if "name" in args and "path" not in args:
+            args["path"] = args.pop("name")
+        # Translate old pipeline_report action='summary'/'read' → action='show' for
+        # report files (path ends in .html/.csv/.htm).
+        action = str(args.get("action", "")).lower()
+        if action in ("summary", "read"):
+            path_val = str(args.get("path", "")).lower()
+            if path_val.endswith((".html", ".htm", ".csv")):
+                args["action"] = "show"
+    return args
+
+
 def _detect_json_tool_invocation(
     text: str, tools: list[Any]
 ) -> Optional[tuple[Any, dict]]:
@@ -547,7 +549,7 @@ def _detect_json_tool_invocation(
     if explicit_tool:
         tool_obj = next((t for t in tools if t.name == explicit_tool), None)
         if tool_obj:
-            return tool_obj, data
+            return tool_obj, _normalise_tool_args(explicit_tool, data)
 
     # Match by 'action' field (most tools use this)
     action = str(data.get("action", "")).lower()
@@ -556,7 +558,7 @@ def _detect_json_tool_invocation(
         if target_name:
             tool_obj = next((t for t in tools if t.name == target_name), None)
             if tool_obj:
-                return tool_obj, data
+                return tool_obj, _normalise_tool_args(target_name, data)
 
     # Match by 'query' field (duckdb_query)
     if "query" in data and isinstance(data.get("query"), str):
