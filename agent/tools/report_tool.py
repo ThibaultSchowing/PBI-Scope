@@ -197,7 +197,7 @@ class PipelineReportTool(BaseTool):
 
     name: str = "pipeline_report"
     description: str = (
-        "Access pipeline report files stored in /pipeline-logs/reports/. "
+        "Access HTML and CSV REPORTS (data quality summaries, validation reports) stored in /pipeline-logs/reports/. DO NOT use log_explorer for reports. "
         "action='list': list all available reports (HTML data-quality summaries and CSV tables). "
         "action='summary': display a report — CSV reports are shown as Markdown tables, "
         "HTML reports as plain text (name= required, e.g. 'host_status_report.csv'). "

@@ -42,13 +42,13 @@ The agent uses six tools, each with a narrow responsibility:
 1. `duckdb_query`  
    Read-only SQL over the PBI DuckDB.
 2. `log_explorer`  
-   Generic pipeline log browsing/search/filtering/summaries under `/pipeline-logs`.
+   Browse and search pipeline execution **`.log` files** under `/pipeline-logs`. Not for HTML/CSV reports.
 3. `pbi_retriever`  
    Curated helper actions (`get_stats`, `get_*_by_id`, host listing).
 4. `host_retrieval_log`  
    Specialized host retrieval diagnostics (status/failures/QC/mapping log).
 5. `pipeline_report`  
-   Access to pipeline report files (`/pipeline-logs/reports`) for list/summary/read.
+   Access HTML and CSV **reports** (data quality summaries, validation reports) in `/pipeline-logs/reports/`. Do not use `log_explorer` for these files.
 6. `query_router`  
    Fallback router when the model is uncertain about the right tool.
 
@@ -73,7 +73,7 @@ This prevents dead-end assistant replies and improves retrieval reliability.
 
 ## Action-to-tool resolution and overlap handling
 
-Some actions overlap across tools (`list`, `read`, `summary` in `log_explorer` and `pipeline_report`).
+Actions such as `list`, `read`, and `summary` exist in both `log_explorer` and `pipeline_report`, but the tools target **different file types**: `log_explorer` handles `.log` files while `pipeline_report` handles `.html` and `.csv` files. The tool descriptions make this explicit to the LLM.
 
 Resolution strategy:
 
