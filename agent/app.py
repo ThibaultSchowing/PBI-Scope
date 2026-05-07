@@ -40,10 +40,12 @@ AGENT_API_KEY           Optional bearer token for the /chat/stream endpoint.
 
 from __future__ import annotations
 
+import ast
 import asyncio
 import json
 import logging
 import os
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, AsyncIterator, List, Optional
@@ -320,6 +322,117 @@ def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[
     return candidates[0]
 
 
+def _parse_json_like_dict(raw: str) -> Optional[dict[str, Any]]:
+    """Parse *raw* as JSON first, then as a Python literal dict."""
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            return parsed
+    except json.JSONDecodeError:
+        pass
+
+    try:
+        parsed = ast.literal_eval(raw)
+    except (SyntaxError, ValueError):
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def _extract_dict_from_model_text(text: str) -> Optional[dict[str, Any]]:
+    """
+    Extract a dict payload from model text that may be:
+    - a bare JSON/Python dict
+    - a code-fenced dict
+    - a tool echo like "pipeline_report({...})" or "🔧 pipeline_report({...})"
+    """
+    stripped = text.strip()
+
+    # Code-fenced payloads.
+    fenced = re.search(r"```(?:json|python)?\s*(\{.*\})\s*```", stripped, re.DOTALL)
+    if fenced:
+        parsed = _parse_json_like_dict(fenced.group(1).strip())
+        if parsed is not None:
+            return parsed
+
+    # Bare dict payload.
+    if stripped.startswith("{") and stripped.endswith("}"):
+        parsed = _parse_json_like_dict(stripped)
+        if parsed is not None:
+            return parsed
+
+    # Echoed tool calls such as:
+    #   pipeline_report({...})
+    #   🔧 pipeline_report({...})
+    call_match = re.search(
+        r"(?:^|\s)[^\w]*([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*(\{.*\})\s*\)\s*$",
+        stripped,
+        re.DOTALL,
+    )
+    if call_match:
+        explicit_tool = call_match.group(1)
+        inner = call_match.group(2).strip()
+        parsed = _parse_json_like_dict(inner)
+        if isinstance(parsed, dict):
+            if not any(k in parsed for k in ("name", "function", "tool")):
+                parsed["function"] = explicit_tool
+            return parsed
+
+    return None
+
+
+def _normalise_recovery_payload(
+    payload: dict[str, Any],
+) -> tuple[Optional[str], dict[str, Any]]:
+    """
+    Normalize multiple payload shapes into ``(explicit_tool_name, tool_args)``.
+
+    Supports:
+    - {"action": "...", ...}
+    - {"name"|"function"|"tool": "...", "parameters"| "arguments"| "args": {...}}
+    - mixed top-level + nested argument fields.
+    """
+    explicit_tool = None
+    for key in ("name", "function", "tool"):
+        val = payload.get(key)
+        if isinstance(val, str) and val.strip():
+            explicit_tool = val.strip()
+            break
+
+    nested = None
+    for key in ("parameters", "arguments", "args"):
+        val = payload.get(key)
+        if isinstance(val, dict):
+            nested = val
+            break
+
+    # Default to top-level args, but when a nested args object is present
+    # use it and merge selected top-level fields only if absent.
+    if nested is None:
+        args = dict(payload)
+    else:
+        args = dict(nested)
+        for key in ("action", "query", "path", "name", "pattern", "n_lines", "n_rows", "filter"):
+            if key in payload and key not in args:
+                args[key] = payload[key]
+
+    # Remove envelope-only keys from the final tool args.
+    for key in ("function", "tool", "parameters", "arguments", "args"):
+        args.pop(key, None)
+    # 'name' is overloaded:
+    # - envelope tool name in {"name":"pipeline_report","parameters":{...}}
+    # - legitimate tool argument in {"action":"summary","name":"report.html"}
+    # Remove only the envelope form.
+    if (
+        explicit_tool
+        and isinstance(payload.get("name"), str)
+        and payload.get("name") == explicit_tool
+        and not (isinstance(nested, dict) and "name" in nested)
+    ):
+        args.pop("name", None)
+
+    return explicit_tool, args
+
+
 def _detect_json_tool_invocation(
     text: str, tools: list[Any]
 ) -> Optional[tuple[Any, dict]]:
@@ -331,15 +444,16 @@ def _detect_json_tool_invocation(
     Returns ``None`` when the text is normal prose or cannot be matched to a
     registered tool.
     """
-    stripped = text.strip()
-    if not (stripped.startswith("{") and stripped.endswith("}")):
+    payload = _extract_dict_from_model_text(text)
+    if payload is None:
         return None
-    try:
-        data = json.loads(stripped)
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(data, dict):
-        return None
+
+    explicit_tool, data = _normalise_recovery_payload(payload)
+
+    if explicit_tool:
+        tool_obj = next((t for t in tools if t.name == explicit_tool), None)
+        if tool_obj:
+            return tool_obj, data
 
     # Match by 'action' field (most tools use this)
     action = str(data.get("action", "")).lower()
