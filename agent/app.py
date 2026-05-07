@@ -248,31 +248,76 @@ def _sse(payload: dict) -> str:
 # JSON tool-call detection and recovery helpers
 # ---------------------------------------------------------------------------
 
-# Maps action values to the tool name that handles them.
+# Maps action values to candidate tool names that handle them.
 # Used to identify which tool a model-generated JSON invocation targets.
-_ACTION_TO_TOOL: dict[str, str] = {
+_ACTION_TO_TOOLS: dict[str, list[str]] = {
     # host_retrieval_log
-    "list_failures": "host_retrieval_log",
-    "get_status": "host_retrieval_log",
-    "get_fasta_qc": "host_retrieval_log",
-    "get_download_log": "host_retrieval_log",
+    "list_failures": ["host_retrieval_log"],
+    "get_status": ["host_retrieval_log"],
+    "get_fasta_qc": ["host_retrieval_log"],
+    "get_download_log": ["host_retrieval_log"],
+    "get_host_mapping_log": ["host_retrieval_log"],
     # pbi_retriever
-    "get_stats": "pbi_retriever",
-    "get_phage_by_id": "pbi_retriever",
-    "get_protein_by_id": "pbi_retriever",
-    "list_hosts": "pbi_retriever",
-    "list_failed_hosts": "pbi_retriever",
-    # pipeline_report
-    "list": "pipeline_report",
-    "summary": "pipeline_report",
-    "read": "pipeline_report",
-    # log_explorer exclusive actions ('list' and 'read' overlap with pipeline_report;
-    # they are mapped to pipeline_report above as the more common default.
-    # 'head', 'tail', and 'search' uniquely identify log_explorer invocations.)
-    "head": "log_explorer",
-    "tail": "log_explorer",
-    "search": "log_explorer",
+    "get_stats": ["pbi_retriever"],
+    "get_phage_by_id": ["pbi_retriever"],
+    "get_protein_by_id": ["pbi_retriever"],
+    "list_hosts": ["pbi_retriever"],
+    "list_failed_hosts": ["pbi_retriever"],
+    # pipeline_report / log_explorer overlap
+    "list": ["pipeline_report", "log_explorer"],
+    "summary": ["pipeline_report", "log_explorer"],
+    "read": ["pipeline_report", "log_explorer"],
+    # log_explorer-exclusive actions
+    "head": ["log_explorer"],
+    "tail": ["log_explorer"],
+    "search": ["log_explorer"],
+    "filter_level": ["log_explorer"],
 }
+
+_LOG_ARG_KEYS = ("path", "pattern", "context_lines", "start_line", "end_line", "level")
+_REPORT_ARG_KEYS = ("name", "n_rows")
+
+
+def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[str]:
+    """Resolve the best tool for an action, including overlap disambiguation."""
+    candidates = _ACTION_TO_TOOLS.get(action, [])
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]
+
+    # Shared actions between pipeline_report and log_explorer are resolved by
+    # argument shape and file hints.
+    has_log_args = any(key in data for key in _LOG_ARG_KEYS)
+    has_report_args = any(key in data for key in _REPORT_ARG_KEYS)
+
+    if has_log_args and "log_explorer" in candidates:
+        return "log_explorer"
+    if has_report_args and "pipeline_report" in candidates:
+        return "pipeline_report"
+
+    path_val = data.get("path")
+    name_val = data.get("name")
+    target: Optional[str] = None
+    if isinstance(name_val, str):
+        target = name_val
+    elif isinstance(path_val, str):
+        target = path_val
+    if target:
+        target_lower = target.lower()
+        if (
+            "log_explorer" in candidates
+            and (target_lower.endswith(".log") or target_lower.startswith("logs/"))
+        ):
+            return "log_explorer"
+        if (
+            "pipeline_report" in candidates
+            and target_lower.endswith((".csv", ".html", ".htm"))
+        ):
+            return "pipeline_report"
+
+    # Backward-compatible default for bare {"action":"list|read|summary"}.
+    return candidates[0]
 
 
 def _detect_json_tool_invocation(
@@ -299,7 +344,7 @@ def _detect_json_tool_invocation(
     # Match by 'action' field (most tools use this)
     action = str(data.get("action", "")).lower()
     if action:
-        target_name = _ACTION_TO_TOOL.get(action)
+        target_name = _choose_tool_name_for_action(action, data)
         if target_name:
             tool_obj = next((t for t in tools if t.name == target_name), None)
             if tool_obj:
