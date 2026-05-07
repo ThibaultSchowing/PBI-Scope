@@ -79,7 +79,6 @@ async def _preload_database() -> None:
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     """Build the agent at startup."""
-    del app
     global _agent_executor, _agent_tools  # noqa: PLW0603
     _agent_executor, _agent_tools = _build_agent()
     asyncio.create_task(_preload_database())
