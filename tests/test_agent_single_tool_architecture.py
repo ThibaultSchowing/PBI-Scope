@@ -19,6 +19,10 @@ def test_health_reports_single_tool_list_shape():
     class MockTool:
         name = "duckdb_query"
 
-    agent_app._agent_tools = [MockTool()]
-    data = asyncio.run(agent_app.health())
-    assert data["tools"] == ["duckdb_query"]
+    previous_tools = list(agent_app._agent_tools)
+    try:
+        agent_app._agent_tools = [MockTool()]
+        data = asyncio.run(agent_app.health())
+        assert data["tools"] == ["duckdb_query"]
+    finally:
+        agent_app._agent_tools = previous_tools

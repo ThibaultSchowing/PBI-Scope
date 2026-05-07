@@ -29,6 +29,7 @@ _STATIC_DIR = Path(__file__).parent / "static"
 
 _agent_executor = None
 _agent_tools: list = []
+_db_preload_status = "pending"
 
 
 def _load_system_prompt(schema: str) -> str:
@@ -43,7 +44,7 @@ def _load_system_prompt(schema: str) -> str:
 
 
 def _build_agent():
-    """Build a basic one-tool LangGraph agent."""
+    """Build and return ``(agent, tools)`` for a basic one-tool LangGraph agent."""
     try:
         from langchain_ollama import ChatOllama
         from langgraph.prebuilt import create_react_agent
@@ -67,12 +68,16 @@ def _build_agent():
 
 async def _preload_database() -> None:
     """Warm up the DuckDB connection in the background."""
+    global _db_preload_status  # noqa: PLW0603
+    _db_preload_status = "loading"
     try:
         from agent.tools.sql_tool import preload_db_conn
 
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, preload_db_conn)
+        _db_preload_status = "ready"
     except Exception as exc:  # noqa: BLE001
+        _db_preload_status = "error"
         logger.error("Database preload failed: %s", exc, exc_info=True)
 
 
@@ -169,6 +174,7 @@ async def health() -> dict:
     return {
         "status": "ok",
         "agent": "ready" if _agent_executor is not None else "unavailable",
+        "database": _db_preload_status,
         "model": OLLAMA_MODEL,
         "ollama_url": OLLAMA_BASE_URL,
         "tools": [getattr(tool, "name", "unknown") for tool in _agent_tools],
