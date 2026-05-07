@@ -274,6 +274,9 @@ _ACTION_TO_TOOLS: dict[str, list[str]] = {
     "filter_level": ["log_explorer"],
 }
 
+_LOG_ARG_KEYS = ("path", "pattern", "context_lines", "start_line", "end_line", "level")
+_REPORT_ARG_KEYS = ("name", "n_rows")
+
 
 def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[str]:
     """Resolve the best tool for an action, including overlap disambiguation."""
@@ -285,12 +288,8 @@ def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[
 
     # Shared actions between pipeline_report and log_explorer are resolved by
     # argument shape and file hints.
-    has_log_args = any(
-        key in data for key in ("path", "pattern", "context_lines", "start_line", "end_line", "level")
-    )
-    has_report_args = any(
-        key in data for key in ("name", "n_rows")
-    )
+    has_log_args = any(key in data for key in _LOG_ARG_KEYS)
+    has_report_args = any(key in data for key in _REPORT_ARG_KEYS)
 
     if has_log_args and "log_explorer" in candidates:
         return "log_explorer"
@@ -299,7 +298,11 @@ def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[
 
     path_val = data.get("path")
     name_val = data.get("name")
-    target = name_val if isinstance(name_val, str) else (path_val if isinstance(path_val, str) else "")
+    target = ""
+    if isinstance(name_val, str):
+        target = name_val
+    elif isinstance(path_val, str):
+        target = path_val
     target_lower = target.lower()
     if target_lower:
         if (
