@@ -278,6 +278,24 @@ _ACTION_TO_TOOLS: dict[str, list[str]] = {
 
 _LOG_ARG_KEYS = ("path", "pattern", "context_lines", "start_line", "end_line", "level")
 _REPORT_ARG_KEYS = ("name", "n_rows")
+# Top-level keys that are commonly produced outside nested "parameters"/"arguments"
+# wrappers by model outputs.
+# Selection criteria:
+# - keys already used by current tool schemas;
+# - low-risk scalar routing/query fields;
+# - no transport/envelope metadata.
+# We merge only this conservative subset into nested args so recovery stays
+# deterministic and avoids forwarding arbitrary metadata to tools.
+_RECOVERY_MERGE_TOP_LEVEL_KEYS = (
+    "action",
+    "query",
+    "path",
+    "name",
+    "pattern",
+    "n_lines",
+    "n_rows",
+    "filter",
+)
 
 
 def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[str]:
@@ -323,7 +341,7 @@ def _choose_tool_name_for_action(action: str, data: dict[str, Any]) -> Optional[
 
 
 def _parse_json_like_dict(raw: str) -> Optional[dict[str, Any]]:
-    """Parse *raw* as JSON first, then as a Python literal dict."""
+    """Parse *raw* as JSON first, then as a Python literal dict; return dict or None."""
     try:
         parsed = json.loads(raw)
         if isinstance(parsed, dict):
@@ -338,6 +356,52 @@ def _parse_json_like_dict(raw: str) -> Optional[dict[str, Any]]:
     return parsed if isinstance(parsed, dict) else None
 
 
+def _extract_balanced_braces(text: str, start_index: int) -> Optional[tuple[str, int]]:
+    """
+    Return ``(braced_segment, end_index_exclusive)`` for a balanced ``{...}`` block.
+
+    Returns ``None`` when ``start_index`` is invalid, does not point to ``'{'``,
+    or when braces are unbalanced/malformed. String-state tracking supports both
+    JSON and Python-literal style quoted strings to avoid counting braces inside
+    quoted content.
+    """
+    if start_index < 0 or start_index >= len(text) or text[start_index] != "{":
+        return None
+
+    depth = 0
+    in_string = False
+    quote_char = ""
+    escape = False
+
+    for i in range(start_index, len(text)):
+        ch = text[i]
+
+        if in_string:
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == quote_char:
+                in_string = False
+            continue
+
+        if ch in ('"', "'"):
+            in_string = True
+            quote_char = ch
+            continue
+        if ch == "{":
+            depth += 1
+            continue
+        if ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start_index:i + 1], i + 1
+
+    return None
+
+
 def _extract_dict_from_model_text(text: str) -> Optional[dict[str, Any]]:
     """
     Extract a dict payload from model text that may be:
@@ -348,36 +412,71 @@ def _extract_dict_from_model_text(text: str) -> Optional[dict[str, Any]]:
     stripped = text.strip()
 
     # Code-fenced payloads.
-    fenced = re.search(r"```(?:json|python)?\s*(\{.*\})\s*```", stripped, re.DOTALL)
+    fenced = re.search(r"```(?:json|python)?", stripped)
     if fenced:
-        parsed = _parse_json_like_dict(fenced.group(1).strip())
-        if parsed is not None:
-            return parsed
+        brace_start = stripped.find("{", fenced.end())
+        if brace_start != -1:
+            segment = _extract_balanced_braces(stripped, brace_start)
+            if segment is not None:
+                parsed = _parse_json_like_dict(segment[0].strip())
+                if parsed is not None:
+                    return parsed
 
     # Bare dict payload.
-    if stripped.startswith("{") and stripped.endswith("}"):
-        parsed = _parse_json_like_dict(stripped)
-        if parsed is not None:
-            return parsed
+    if stripped.startswith("{"):
+        segment = _extract_balanced_braces(stripped, 0)
+        spans_full_text = segment is not None and segment[1] == len(stripped)
+        if spans_full_text:
+            parsed = _parse_json_like_dict(segment[0])
+            if parsed is not None:
+                return parsed
 
-    # Echoed tool calls such as:
-    #   pipeline_report({...})
-    #   🔧 pipeline_report({...})
+    # Match echoed calls (including prefixed symbols like "🔧"):
+    #   "pipeline_report({...})"
+    #   "🔧 pipeline_report({...})"
     call_match = re.search(
-        r"(?:^|\s)[^\w]*([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*(\{.*\})\s*\)\s*$",
+        r"(?:^|\s)[^\w]*([A-Za-z_][A-Za-z0-9_]*)\s*\(",
         stripped,
-        re.DOTALL,
     )
     if call_match:
         explicit_tool = call_match.group(1)
-        inner = call_match.group(2).strip()
-        parsed = _parse_json_like_dict(inner)
-        if isinstance(parsed, dict):
-            if not any(k in parsed for k in ("name", "function", "tool")):
-                parsed["function"] = explicit_tool
-            return parsed
+        brace_start = stripped.find("{", call_match.end())
+        if brace_start != -1:
+            segment = _extract_balanced_braces(stripped, brace_start)
+            if segment is not None:
+                inner, end_idx = segment
+                # Ensure the balanced dict is the function argument payload.
+                trailing = stripped[end_idx:].strip()
+                if trailing.startswith(")"):
+                    parsed = _parse_json_like_dict(inner.strip())
+                    if isinstance(parsed, dict):
+                        # Inject the echoed tool name only when the payload
+                        # does not already specify a tool target explicitly.
+                        if not any(k in parsed for k in ("name", "function", "tool")):
+                            parsed["function"] = explicit_tool
+                        return parsed
 
     return None
+
+
+def _is_envelope_name(
+    payload: dict[str, Any],
+    nested: Optional[dict[str, Any]],
+    explicit_tool: Optional[str],
+) -> bool:
+    """
+    Return True when payload['name'] is an envelope tool identifier.
+
+    Args:
+        payload: Original parsed payload dictionary.
+        nested: Nested arguments dictionary (parameters/arguments/args), if present.
+        explicit_tool: Explicit tool target inferred from payload envelope keys.
+    """
+    has_tool = bool(explicit_tool)
+    payload_name = payload.get("name")
+    has_matching_name = isinstance(payload_name, str) and payload_name == explicit_tool
+    nested_defines_name = isinstance(nested, dict) and "name" in nested
+    return has_tool and has_matching_name and not nested_defines_name
 
 
 def _normalise_recovery_payload(
@@ -411,7 +510,7 @@ def _normalise_recovery_payload(
         args = dict(payload)
     else:
         args = dict(nested)
-        for key in ("action", "query", "path", "name", "pattern", "n_lines", "n_rows", "filter"):
+        for key in _RECOVERY_MERGE_TOP_LEVEL_KEYS:
             if key in payload and key not in args:
                 args[key] = payload[key]
 
@@ -422,12 +521,7 @@ def _normalise_recovery_payload(
     # - envelope tool name in {"name":"pipeline_report","parameters":{...}}
     # - legitimate tool argument in {"action":"summary","name":"report.html"}
     # Remove only the envelope form.
-    if (
-        explicit_tool
-        and isinstance(payload.get("name"), str)
-        and payload.get("name") == explicit_tool
-        and not (isinstance(nested, dict) and "name" in nested)
-    ):
+    if _is_envelope_name(payload, nested, explicit_tool):
         args.pop("name", None)
 
     return explicit_tool, args
