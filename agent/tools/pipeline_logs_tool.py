@@ -436,12 +436,9 @@ def _summary_log(target: Path) -> str:
     if not (starts or successes or warnings or errors):
         parts.append(
             "No structured log lines found. "
+            "This file may not use the structured timestamped format. "
             "Use action='read' to inspect the file directly."
         )
-        if not (starts or successes or warnings or errors):
-            parts.append(
-                "\nNote: this file may not use the structured timestamped format."
-            )
 
     return "\n".join(parts)
 
