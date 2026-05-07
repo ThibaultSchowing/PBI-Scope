@@ -1,6 +1,6 @@
 # PBI Agentic Architecture
 
-This document explains how the agentic architecture works in this branch and can be used as a base for a future documentation page.
+This document explains how the agentic architecture works and can be used as a base for a future documentation page.
 
 ## Scope
 
@@ -37,20 +37,34 @@ This reduces first-query latency and gives clearer loading/error states to users
 
 ## Tooling model
 
-The agent uses six tools, each with a narrow responsibility:
+The agent uses **four tools** to keep tool selection simple for the LLM:
 
 1. `duckdb_query`  
    Read-only SQL over the PBI DuckDB.
-2. `log_explorer`  
-   Browse and search pipeline execution **`.log` files** under `/pipeline-logs`. Not for HTML/CSV reports.
+2. `pipeline_logs`  
+   Browse **all** pipeline artifacts under `/pipeline-logs/`: log files, HTML/CSV reports,
+   and intermediate CSVs. This single tool replaces the previous `log_explorer`,
+   `pipeline_report`, and `host_retrieval_log` tools to eliminate routing confusion.
 3. `pbi_retriever`  
    Curated helper actions (`get_stats`, `get_*_by_id`, host listing).
-4. `host_retrieval_log`  
-   Specialized host retrieval diagnostics (status/failures/QC/mapping log).
-5. `pipeline_report`  
-   Access HTML and CSV **reports** (data quality summaries, validation reports) in `/pipeline-logs/reports/`. Do not use `log_explorer` for these files.
-6. `query_router`  
+4. `query_router`  
    Fallback router when the model is uncertain about the right tool.
+
+### Why one tool for all pipeline files?
+
+Previously three separate tools (`log_explorer`, `pipeline_report`, `host_retrieval_log`)
+handled pipeline artifacts, causing the LLM to route incorrectly or hallucinate report
+lists instead of calling the tool. Merging them into `pipeline_logs` means there is
+only one obvious choice for any question about pipeline output files.
+
+**For reports**, the LLM must always start with:
+```json
+{"action": "list"}
+```
+This lists all available files. Then it can display a specific report with:
+```json
+{"action": "show", "path": "reports/host_status_report.csv"}
+```
 
 ## Information retrieval flow
 
@@ -64,36 +78,31 @@ If the model prints a raw JSON object instead of making a proper framework tool 
 
 Recovery logic:
 
-1. Parse bare JSON output.
-2. Detect tool intent from action/query fields.
-3. Resolve the target tool.
+1. Parse the model output (bare JSON, code-fenced JSON, Python dict literal, or echoed `tool_name({...})`).
+2. Detect tool intent from explicit tool name, action field, or query field.
+3. Translate legacy field names (e.g. `name` → `path` for old `pipeline_report` echoes).
 4. Execute the tool and stream its result.
 
 This prevents dead-end assistant replies and improves retrieval reliability.
 
-## Action-to-tool resolution and overlap handling
+## Action-to-tool resolution
 
-Actions such as `list`, `read`, and `summary` exist in both `log_explorer` and `pipeline_report`, but the tools target **different file types**: `log_explorer` handles `.log` files while `pipeline_report` handles `.html` and `.csv` files. The tool descriptions make this explicit to the LLM.
+All log/report/host actions now map unambiguously to `pipeline_logs`. There are no
+overlapping tool candidates to disambiguate.
 
-Resolution strategy:
-
-- Prefer explicit argument shape:
-  - log-focused arguments (`path`, `pattern`, `context_lines`, `start_line`, `end_line`, `level`) → `log_explorer`
-  - report-focused arguments (`name`, `n_rows`) → `pipeline_report`
-- Use path/file hints when present:
-  - `logs/...` or `*.log` → `log_explorer`
-  - `*.csv`, `*.html`, `*.htm` → `pipeline_report`
-- Keep deterministic default fallback for ambiguous bare actions.
-
-This improves retrieval precision without changing external API contracts.
+| Action | Tool |
+|--------|------|
+| `list`, `show`, `read`, `head`, `tail`, `search`, `filter_level`, `summary` | `pipeline_logs` |
+| `list_failures`, `get_status`, `get_fasta_qc`, `get_download_log`, `get_host_mapping_log` | `pipeline_logs` |
+| `get_stats`, `get_phage_by_id`, `get_protein_by_id`, `list_hosts`, `list_failed_hosts` | `pbi_retriever` |
 
 ## Security and guardrails
 
 Key protections in the tool layer:
 
 - SQL tool is read-only and action-restricted.
-- File tools validate paths stay under configured roots.
-- Log/report reads are size-capped.
+- File tools validate paths stay under configured roots (path-traversal safe).
+- Log/report reads are size-capped (`AGENT_MAX_LOG_SIZE_KB`, default 512 KB).
 - Errors are returned as user-safe messages without leaking internal stack traces.
 
 ## Streaming protocol
@@ -124,8 +133,8 @@ Primary environment variables:
 
 When adding or modifying tools:
 
-1. Keep each tool domain-focused and read-only where possible.
-2. Update prompt instructions so tool selection stays accurate.
-3. Update recovery action-resolution logic for new actions or overlaps.
+1. Keep the tool count low — fewer choices reduce LLM routing errors.
+2. Update the system prompt to reflect new tool names and actions.
+3. Update `_ACTION_TO_TOOLS` in `app.py` for new actions.
 4. Preserve SSE observability (`tool_start` / `tool_end`).
 5. Prefer deterministic behavior over heuristic-only routing.
