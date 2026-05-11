@@ -367,3 +367,7 @@ The cache is a plain JSON object and can be inspected or edited manually if need
 | `csv/phage_host_candidates.csv` | `phage_host_candidates_output` | CSV | `download_host_genomes` |
 | `csv/phage_host_assemblies.csv` | `phage_host_assemblies_output` | CSV | `download_host_genomes` |
 | `csv/host_token_resolution_cache.json` | `host_resolution_cache_output` | JSON | `download_host_genomes` |
+| `csv/public_data_manifest.json` | `public_data_provenance.manifest_json_output` | JSON | `build_public_data_provenance_manifest` |
+| `csv/public_data_manifest.csv` | `public_data_provenance.manifest_csv_output` | CSV | `build_public_data_provenance_manifest` |
+| `csv/pipeline_run_provenance.json` | `public_data_provenance.pipeline_run_provenance_json_output` | JSON | `build_public_data_provenance_manifest` |
+| `csv/pipeline_run_provenance.csv` | `public_data_provenance.pipeline_run_provenance_csv_output` | CSV | `build_public_data_provenance_manifest` |

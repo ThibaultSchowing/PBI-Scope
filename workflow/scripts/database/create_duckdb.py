@@ -5,6 +5,8 @@ import pandas as pd
 import os
 import logging
 import sys
+import csv
+import json
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +26,82 @@ def _table_exists(conn, table_name: str) -> bool:
             [table_name],
         ).fetchone()
     )
+
+
+def _csv_header_columns(path: str) -> set[str]:
+    if not path or not os.path.exists(path) or os.path.getsize(path) == 0:
+        return set()
+    try:
+        with open(path, "r", encoding="utf-8", newline="") as handle:
+            reader = csv.reader(handle)
+            header = next(reader, [])
+        return {str(name).strip() for name in header if str(name).strip()}
+    except Exception:
+        return set()
+
+
+def _create_dataset_provenance_table(conn, manifest_csv_path: str):
+    if manifest_csv_path and os.path.exists(manifest_csv_path) and os.path.getsize(manifest_csv_path) > 0:
+        conn.execute("""
+        CREATE TABLE dataset_provenance AS
+        SELECT *
+        FROM read_csv(?,
+                      header=true,
+                      all_varchar=true,
+                      ignore_errors=true,
+                      null_padding=true)
+        """, [manifest_csv_path])
+    else:
+        conn.execute("""
+        CREATE TABLE dataset_provenance (
+            provider_name VARCHAR,
+            provider_release VARCHAR,
+            provider_snapshot_date VARCHAR,
+            provider_schema_profile VARCHAR,
+            feature VARCHAR,
+            source_key VARCHAR,
+            normalized_source_db VARCHAR,
+            source_url VARCHAR,
+            local_path VARCHAR,
+            retrieved_at VARCHAR,
+            file_size VARCHAR,
+            sha256 VARCHAR,
+            etag VARCHAR,
+            last_modified VARCHAR,
+            detected_tabular_columns VARCHAR,
+            schema_fingerprint VARCHAR,
+            status VARCHAR,
+            error_message VARCHAR
+        )
+        """)
+
+
+def _create_pipeline_run_provenance_table(conn, run_csv_path: str):
+    if run_csv_path and os.path.exists(run_csv_path) and os.path.getsize(run_csv_path) > 0:
+        conn.execute("""
+        CREATE TABLE pipeline_run_provenance AS
+        SELECT *
+        FROM read_csv(?,
+                      header=true,
+                      all_varchar=true,
+                      ignore_errors=true,
+                      null_padding=true)
+        """, [run_csv_path])
+    else:
+        conn.execute("""
+        CREATE TABLE pipeline_run_provenance (
+            pipeline_run_timestamp VARCHAR,
+            provider_name VARCHAR,
+            provider_release VARCHAR,
+            provider_snapshot_date VARCHAR,
+            provider_schema_profile VARCHAR,
+            provider_api_base_url VARCHAR,
+            provider_provenance_mode VARCHAR,
+            pbi_version VARCHAR,
+            git_commit VARCHAR,
+            download_records_count VARCHAR
+        )
+        """)
 
 def create_star_schema_duckdb():
     """Create DuckDB with star schema from PhageScope data"""
@@ -45,7 +123,18 @@ def create_star_schema_duckdb():
     assembly_metadata_path = snakemake.input.get('assembly_metadata', None)
     phage_host_links_path = snakemake.input.get('phage_host_links', None)
     private_manifest_path = snakemake.input.get('private_manifest', None)
+    provenance_cfg = snakemake.config.get("public_data_provenance", {})
+    dataset_provenance_manifest_csv = snakemake.input.get(
+        "public_data_manifest",
+        provenance_cfg.get("manifest_csv_output", ""),
+    )
+    pipeline_run_provenance_csv = snakemake.input.get(
+        "pipeline_run_provenance",
+        provenance_cfg.get("pipeline_run_provenance_csv_output", ""),
+    )
     host_count = 0
+    dataset_provenance_count = 0
+    pipeline_run_provenance_count = 0
     
     # Create output directory
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
@@ -56,9 +145,28 @@ def create_star_schema_duckdb():
     
     # 1. CREATE FACT TABLE - PHAGES
     logging.info("Creating fact_phages table")
+    phage_columns = _csv_header_columns(phage_data)
+    optional_fact_columns = [
+        "Provider_Name",
+        "Provider_Release",
+        "Provider_Snapshot_Date",
+        "Provider_Schema_Profile",
+        "Input_Source_Key",
+        "Input_File",
+        "Input_Retrieved_At",
+    ]
+
+    optional_select_parts = []
+    for column_name in optional_fact_columns:
+        if column_name in phage_columns:
+            optional_select_parts.append(column_name)
+        else:
+            optional_select_parts.append(f"NULL::VARCHAR AS {column_name}")
+
+    optional_select_sql = ",\n        ".join(optional_select_parts)
     conn.execute(f"""
-    CREATE TABLE fact_phages AS 
-    SELECT 
+    CREATE TABLE fact_phages AS
+    SELECT
         Phage_ID,
         Source_DB,
         TRY_CAST(NULLIF(Length, '-') AS INTEGER) as Length,
@@ -69,14 +177,15 @@ def create_star_schema_duckdb():
         Lifestyle,
         Cluster,
         Subcluster,
+        {optional_select_sql},
         'public' as source_type
-    FROM read_csv('{phage_data}', 
-                  header=true, 
-                  all_varchar=true, 
+    FROM read_csv(?,
+                  header=true,
+                  all_varchar=true,
                   ignore_errors=true,
                   null_padding=true)
     WHERE Phage_ID IS NOT NULL
-    """)
+    """, [phage_data])
     
     phage_count = conn.execute("SELECT COUNT(*) FROM fact_phages").fetchone()[0]
     logging.info(f"✅ Created fact_phages: {phage_count:,} rows")
@@ -420,8 +529,6 @@ def create_star_schema_duckdb():
     private_ingestion_summary = {"ingested": [], "skipped": []}
     if private_manifest_path and os.path.exists(private_manifest_path):
         try:
-            import json
-
             with open(private_manifest_path, "r", encoding="utf-8") as handle:
                 manifest = json.load(handle) or {}
             valid_source_dirs = [
@@ -441,6 +548,21 @@ def create_star_schema_duckdb():
                     host_count = conn.execute("SELECT COUNT(*) FROM dim_hosts").fetchone()[0]
         except Exception as e:
             logging.warning(f"⚠️  Private ingestion failed, continuing with PhageScope-only database: {e}")
+
+    # 12. PROVENANCE TABLES (NON-BLOCKING)
+    try:
+        _create_dataset_provenance_table(conn, str(dataset_provenance_manifest_csv or ""))
+        dataset_provenance_count = conn.execute("SELECT COUNT(*) FROM dataset_provenance").fetchone()[0]
+        logging.info(f"✅ Created dataset_provenance: {dataset_provenance_count:,} rows")
+    except Exception as e:
+        logging.warning(f"⚠️  Could not create dataset_provenance table: {e}")
+
+    try:
+        _create_pipeline_run_provenance_table(conn, str(pipeline_run_provenance_csv or ""))
+        pipeline_run_provenance_count = conn.execute("SELECT COUNT(*) FROM pipeline_run_provenance").fetchone()[0]
+        logging.info(f"✅ Created pipeline_run_provenance: {pipeline_run_provenance_count:,} rows")
+    except Exception as e:
+        logging.warning(f"⚠️  Could not create pipeline_run_provenance table: {e}")
 
     # Normalize provenance labels to avoid NULL/blank source_type values.
     # Public rows default to 'public'; rows linked to private interactions are
@@ -546,6 +668,10 @@ def create_star_schema_duckdb():
     if phage_host_links_count > 0:
         conn.execute("CREATE INDEX idx_phage_host_phage ON dim_phage_host_links(Phage_ID)")
         conn.execute("CREATE INDEX idx_phage_host_assembly ON dim_phage_host_links(Assembly_Accession)")
+
+    if _table_exists(conn, "dataset_provenance") and dataset_provenance_count > 0:
+        conn.execute("CREATE INDEX idx_dataset_provenance_feature ON dataset_provenance(feature)")
+        conn.execute("CREATE INDEX idx_dataset_provenance_source_key ON dataset_provenance(source_key)")
     
     # CREATE ANALYTICAL VIEWS
     logging.info("Creating analytical views")
@@ -840,6 +966,8 @@ def create_star_schema_duckdb():
         logging.info(f"   • Assembly Metadata: {assembly_metadata_count:,}")
     if phage_host_links_count > 0:
         logging.info(f"   • Phage-Host Links: {phage_host_links_count:,}")
+    logging.info(f"   • Dataset Provenance Rows: {dataset_provenance_count:,}")
+    logging.info(f"   • Pipeline Run Provenance Rows: {pipeline_run_provenance_count:,}")
     n_ingested = len(private_ingestion_summary["ingested"])
     n_skipped = len(private_ingestion_summary["skipped"])
     if n_ingested or n_skipped:

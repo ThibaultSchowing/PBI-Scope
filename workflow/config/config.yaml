@@ -97,6 +97,25 @@ skip_existing_downloads: true  # Skip already downloaded genomes
 validate_file_checksums: true  # Validate downloaded file integrity
 reuse_host_resolution_cache: true  # Reuse token resolution cache across reruns
 
+# Public data provenance and version-pinning foundation
+public_data_provider:
+  name: "PhageScope"
+  release: "rolling"
+  snapshot_date: "2026-05-11"
+  schema_profile: "phagescope_v1"
+  api_base_url: "https://phageapi.deepomics.org"
+  provenance_mode: "config_pinned"
+
+public_data_provenance:
+  require_release_or_snapshot: true
+  capture_checksums: true
+  capture_response_headers: true
+  fail_on_schema_mismatch: false
+  manifest_json_output: "/pipeline-logs/csv/public_data_manifest.json"
+  manifest_csv_output: "/pipeline-logs/csv/public_data_manifest.csv"
+  pipeline_run_provenance_json_output: "/pipeline-logs/csv/pipeline_run_provenance.json"
+  pipeline_run_provenance_csv_output: "/pipeline-logs/csv/pipeline_run_provenance.csv"
+
 
 protein_fasta_urls:
     "Genbank": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/Genbank.tar.gz"

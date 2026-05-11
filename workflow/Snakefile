@@ -17,16 +17,24 @@ BASE_PRIVATE_DATA_DIR = os.getenv('PBI_PRIVATE_DATA_DIR', 'private_data')
 # which is bind-mounted to ./pipeline_logs/ at the repository root.
 BASE_LOGS_DIR = os.getenv('PBI_LOGS_DIR', BASE_DATA_DIR)
 
+def _rewrite_path_prefix(value):
+    if isinstance(value, str):
+        if value.startswith('/pipeline-logs'):
+            return value.replace('/pipeline-logs', BASE_LOGS_DIR, 1)
+        if value.startswith('/private-data'):
+            return value.replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
+        if value.startswith('/data'):
+            return value.replace('/data', BASE_DATA_DIR, 1)
+        return value
+    if isinstance(value, dict):
+        return {k: _rewrite_path_prefix(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_rewrite_path_prefix(v) for v in value]
+    return value
+
+
 # Replace config paths with environment-aware equivalents
-for path_key in config:
-    if isinstance(config[path_key], str):
-        if config[path_key].startswith('/pipeline-logs'):
-            config[path_key] = config[path_key].replace('/pipeline-logs', BASE_LOGS_DIR, 1)
-        elif config[path_key].startswith('/private-data'):
-            config[path_key] = config[path_key].replace('/private-data', BASE_PRIVATE_DATA_DIR, 1)
-        elif config[path_key].startswith('/data'):
-            # Replace /data prefix with BASE_DATA_DIR
-            config[path_key] = config[path_key].replace('/data', BASE_DATA_DIR, 1)
+config = _rewrite_path_prefix(config)
 
 
 # List here the features for which reports will be generated.

@@ -19,6 +19,8 @@ PBI stores metadata and sequence assets in complementary layers.
                    dim_trna_tmrna -------------------+
 dim_antimicrobial_resistance_genes ------------------+
                   dim_crispr_array ------------------+
+               dataset_provenance -------------------+
+          pipeline_run_provenance -------------------+
 ```
 
 Host data is **not** a DuckDB dimension table. Host sequences are stored as FASTA files and linked via mapping files.
@@ -31,6 +33,8 @@ Host data is **not** a DuckDB dimension table. Host sequences are stored as FAST
 - `host_metadata.csv`
 - `host_fasta_mapping.json`
 - `private_phage_mapping.json` (if private sources are enabled)
+- `public_data_manifest.json/.csv`
+- `pipeline_run_provenance.json/.csv`
 
 ## Data sources
 

@@ -10,6 +10,13 @@ optional:
   - Lifestyle
   - Cluster
   - Subcluster
+  - Provider_Name
+  - Provider_Release
+  - Provider_Snapshot_Date
+  - Provider_Schema_Profile
+  - Input_Source_Key
+  - Input_File
+  - Input_Retrieved_At
 aliases:
   Phage_id: Phage_ID
   phage_id: Phage_ID
