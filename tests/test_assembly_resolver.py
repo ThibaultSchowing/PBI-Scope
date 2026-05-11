@@ -213,6 +213,70 @@ class TestAssemblyResolver(unittest.TestCase):
         assemblies = self.resolver.resolve("INVALID_ID_12345")
         self.assertEqual(len(assemblies), 0)
 
+    # ------------------------------------------------------------------
+    # is_bacterial_taxid tests
+    # ------------------------------------------------------------------
+
+    def test_is_bacterial_taxid_cache_initially_empty(self):
+        """Cache should start empty (populated lazily by API calls)."""
+        resolver = AssemblyResolver(email='pbi-test@example.org')
+        self.assertIsInstance(resolver._bacterial_taxid_cache, dict)
+        self.assertEqual(len(resolver._bacterial_taxid_cache), 0)
+
+    def test_bacteria_taxid_constant(self):
+        """BACTERIA_TAXID class constant must equal 2 (NCBI Bacteria domain)."""
+        self.assertEqual(AssemblyResolver.BACTERIA_TAXID, 2)
+
+    def test_is_bacterial_taxid_bacteria_domain_itself(self):
+        """TaxID 2 (the Bacteria domain root) must return True without an API call."""
+        resolver = AssemblyResolver(email='pbi-test@example.org')
+        result = resolver.is_bacterial_taxid(2)
+        self.assertTrue(result)
+        # Must be cached after the call
+        self.assertIn(2, resolver._bacterial_taxid_cache)
+        self.assertTrue(resolver._bacterial_taxid_cache[2])
+
+    @unittest.skipIf(
+        not os.environ.get('NCBI_EMAIL'),
+        "Skipping NCBI API test (set NCBI_EMAIL to run)"
+    )
+    def test_is_bacterial_taxid_ecoli(self):
+        """Escherichia coli (TaxID 562) must be identified as bacterial."""
+        result = self.resolver.is_bacterial_taxid(562)
+        self.assertTrue(result)
+
+    @unittest.skipIf(
+        not os.environ.get('NCBI_EMAIL'),
+        "Skipping NCBI API test (set NCBI_EMAIL to run)"
+    )
+    def test_is_bacterial_taxid_homo_sapiens(self):
+        """Homo sapiens (TaxID 9606) must NOT be identified as bacterial."""
+        result = self.resolver.is_bacterial_taxid(9606)
+        self.assertFalse(result)
+
+    @unittest.skipIf(
+        not os.environ.get('NCBI_EMAIL'),
+        "Skipping NCBI API test (set NCBI_EMAIL to run)"
+    )
+    def test_is_bacterial_taxid_mus_musculus(self):
+        """Mus musculus (TaxID 10090) must NOT be identified as bacterial."""
+        result = self.resolver.is_bacterial_taxid(10090)
+        self.assertFalse(result)
+
+    @unittest.skipIf(
+        not os.environ.get('NCBI_EMAIL'),
+        "Skipping NCBI API test (set NCBI_EMAIL to run)"
+    )
+    def test_is_bacterial_taxid_caching(self):
+        """Result for a TaxID is cached after the first lookup."""
+        # Warm up cache for E. coli
+        self.resolver.is_bacterial_taxid(562)
+        self.assertIn(562, self.resolver._bacterial_taxid_cache)
+        # Second call must not raise and must return the cached value
+        result = self.resolver.is_bacterial_taxid(562)
+        self.assertTrue(result)
+
+
 
 class TestAssemblyLevelEnum(unittest.TestCase):
     """Test AssemblyLevel enum"""
