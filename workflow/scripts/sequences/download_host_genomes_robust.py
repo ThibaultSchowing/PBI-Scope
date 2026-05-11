@@ -1028,6 +1028,53 @@ class RobustHostGenomeDownloader:
         )
 
         # ------------------------------------------------------------------
+        # Stage 2b: Verify resolved assemblies are bacterial; log and remove
+        # any that belong to non-bacterial organisms (e.g. human, mouse).
+        # ------------------------------------------------------------------
+        non_bacterial_tokens: List[str] = []
+        for tok, assemblies in list(token_to_assemblies.items()):
+            if not assemblies:
+                continue
+            bacterial_assemblies: List[AssemblyMetadata] = []
+            for asm in assemblies:
+                if asm.species_taxid is None:
+                    # Cannot verify – keep and warn at debug level
+                    logging.debug(
+                        f"No TaxID for assembly {asm.assembly_accession} "
+                        f"('{asm.organism_name}'); including without bacterial check"
+                    )
+                    bacterial_assemblies.append(asm)
+                    continue
+                is_bacterial = self.resolver.is_bacterial_taxid(asm.species_taxid)
+                if is_bacterial is False:
+                    logging.warning(
+                        f"⚠️  Non-bacterial host skipped: token '{tok}' resolved to "
+                        f"'{asm.organism_name}' (TaxID {asm.species_taxid}), "
+                        f"which is not in the Bacteria domain — excluding from pipeline"
+                    )
+                    if tok not in non_bacterial_tokens:
+                        non_bacterial_tokens.append(tok)
+                elif is_bacterial is None:
+                    logging.warning(
+                        f"⚠️  Could not verify taxonomy for token '{tok}' resolved to "
+                        f"'{asm.organism_name}' (TaxID {asm.species_taxid}); "
+                        f"including in pipeline as bacterial status is unknown"
+                    )
+                    bacterial_assemblies.append(asm)
+                else:
+                    bacterial_assemblies.append(asm)
+            token_to_assemblies[tok] = bacterial_assemblies
+
+        if non_bacterial_tokens:
+            logging.warning(
+                f"⚠️  {len(non_bacterial_tokens)} host token(s) were excluded because "
+                f"they resolved to non-bacterial organisms: "
+                + ", ".join(f"'{t}'" for t in non_bacterial_tokens)
+            )
+        else:
+            logging.info("✅ All resolved hosts verified as bacterial")
+
+        # ------------------------------------------------------------------
         # Stage 3: Build phage_host_assemblies
         # ------------------------------------------------------------------
         assembly_links_df = self._build_assembly_links(candidates_df, token_to_assemblies)

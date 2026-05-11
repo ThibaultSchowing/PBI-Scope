@@ -157,6 +157,9 @@ class AssemblyResolver:
         IdentifierType.UNKNOWN: 6
     }
     
+    #: NCBI Taxonomy ID for the Bacteria domain.
+    BACTERIA_TAXID: int = 2
+
     def __init__(self, 
                  email: str,
                  api_key: Optional[str] = None,
@@ -188,6 +191,10 @@ class AssemblyResolver:
         self.taxid_pattern = re.compile(r'^\d+$')
         # Pattern to match GCA/GCF with space instead of underscore (e.g., "GCA 900066335.1")
         self.assembly_with_space_pattern = re.compile(r'\b(GCF|GCA)\s+(\d{9}\.\d+)\b')
+
+        # Cache for is_bacterial_taxid() results keyed by TaxID to avoid
+        # redundant NCBI Taxonomy API calls within a run.
+        self._bacterial_taxid_cache: Dict[int, Optional[bool]] = {}
         
         logging.info(f"✅ AssemblyResolver initialized")
         logging.info(f"   Email: {email}")
@@ -666,6 +673,45 @@ class AssemblyResolver:
             logging.error(f"Error parsing assembly summary: {e}")
             return None
     
+    def is_bacterial_taxid(self, taxid: int) -> Optional[bool]:
+        """Check whether a TaxID belongs to the Bacteria domain (TaxID 2).
+
+        Fetches the taxonomic lineage from the NCBI Taxonomy database and
+        checks whether Bacteria (TaxID 2) appears anywhere in that lineage.
+        Results are cached by TaxID to avoid redundant API calls within a run.
+
+        Args:
+            taxid: NCBI Taxonomy ID to check.
+
+        Returns:
+            ``True``  – the organism is bacterial.
+            ``False`` – the organism is *not* bacterial (e.g. human, mouse).
+            ``None``  – the taxonomy lookup failed; cannot determine.
+        """
+        if taxid in self._bacterial_taxid_cache:
+            return self._bacterial_taxid_cache[taxid]
+
+        try:
+            time.sleep(self.delay)
+            handle = Entrez.efetch(db="taxonomy", id=str(taxid), retmode="xml")
+            records = Entrez.read(handle)
+            handle.close()
+
+            if not records:
+                logging.warning(f"⚠️  No taxonomy record found for TaxID {taxid}")
+                self._bacterial_taxid_cache[taxid] = None
+                return None
+
+            lineage = records[0].get('LineageEx', [])
+            is_bacterial = any(int(node['TaxId']) == self.BACTERIA_TAXID for node in lineage)
+            self._bacterial_taxid_cache[taxid] = is_bacterial
+            return is_bacterial
+
+        except Exception as exc:
+            logging.warning(f"⚠️  Could not determine taxonomy for TaxID {taxid}: {exc}")
+            self._bacterial_taxid_cache[taxid] = None
+            return None
+
     def get_best_assembly(self,
                          identifier: str,
                          prefer_refseq: bool = True,
