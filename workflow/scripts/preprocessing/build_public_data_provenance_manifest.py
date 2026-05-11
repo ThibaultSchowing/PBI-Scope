@@ -4,6 +4,7 @@ import csv
 import json
 import logging
 import os
+import shutil
 import subprocess
 from datetime import datetime, timezone
 from importlib.metadata import PackageNotFoundError, version
@@ -19,8 +20,11 @@ def _to_utc_iso(ts: datetime | None = None) -> str:
 
 def _safe_git_commit() -> str:
     try:
+        git_bin = shutil.which("git")
+        if not git_bin:
+            return ""
         result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
+            [git_bin, "rev-parse", "HEAD"],
             check=True,
             text=True,
             capture_output=True,
@@ -71,7 +75,7 @@ def main():
     csv_rows = []
     for record in records:
         row = dict(record)
-        row["detected_tabular_columns"] = "|".join(record.get("detected_tabular_columns", []) or [])
+        row["detected_tabular_columns"] = json.dumps(record.get("detected_tabular_columns", []) or [])
         csv_rows.append(row)
 
     manifest_fieldnames = [

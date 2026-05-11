@@ -28,10 +28,6 @@ def _table_exists(conn, table_name: str) -> bool:
     )
 
 
-def _quote_sql_string(value: str) -> str:
-    return value.replace("'", "''")
-
-
 def _csv_header_columns(path: str) -> set[str]:
     if not path or not os.path.exists(path) or os.path.getsize(path) == 0:
         return set()
@@ -46,15 +42,15 @@ def _csv_header_columns(path: str) -> set[str]:
 
 def _create_dataset_provenance_table(conn, manifest_csv_path: str):
     if manifest_csv_path and os.path.exists(manifest_csv_path) and os.path.getsize(manifest_csv_path) > 0:
-        conn.execute(f"""
+        conn.execute("""
         CREATE TABLE dataset_provenance AS
         SELECT *
-        FROM read_csv('{_quote_sql_string(manifest_csv_path)}',
+        FROM read_csv(?,
                       header=true,
                       all_varchar=true,
                       ignore_errors=true,
                       null_padding=true)
-        """)
+        """, [manifest_csv_path])
     else:
         conn.execute("""
         CREATE TABLE dataset_provenance (
@@ -82,15 +78,15 @@ def _create_dataset_provenance_table(conn, manifest_csv_path: str):
 
 def _create_pipeline_run_provenance_table(conn, run_csv_path: str):
     if run_csv_path and os.path.exists(run_csv_path) and os.path.getsize(run_csv_path) > 0:
-        conn.execute(f"""
+        conn.execute("""
         CREATE TABLE pipeline_run_provenance AS
         SELECT *
-        FROM read_csv('{_quote_sql_string(run_csv_path)}',
+        FROM read_csv(?,
                       header=true,
                       all_varchar=true,
                       ignore_errors=true,
                       null_padding=true)
-        """)
+        """, [run_csv_path])
     else:
         conn.execute("""
         CREATE TABLE pipeline_run_provenance (
@@ -183,13 +179,13 @@ def create_star_schema_duckdb():
         Subcluster,
         {optional_select_sql},
         'public' as source_type
-    FROM read_csv('{_quote_sql_string(phage_data)}',
+    FROM read_csv(?,
                   header=true,
                   all_varchar=true,
                   ignore_errors=true,
                   null_padding=true)
     WHERE Phage_ID IS NOT NULL
-    """)
+    """, [phage_data])
     
     phage_count = conn.execute("SELECT COUNT(*) FROM fact_phages").fetchone()[0]
     logging.info(f"✅ Created fact_phages: {phage_count:,} rows")

@@ -7,6 +7,7 @@ import numpy as np
 import os
 import logging
 import csv
+import json
 from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 
@@ -41,8 +42,6 @@ def _load_retrieved_at_from_sidecar(tsv_path: str) -> str:
     if not os.path.exists(sidecar_path):
         return ""
     try:
-        import json
-
         with open(sidecar_path, "r", encoding="utf-8") as handle:
             payload = json.load(handle) or {}
         return str(payload.get("retrieved_at", "")).strip()

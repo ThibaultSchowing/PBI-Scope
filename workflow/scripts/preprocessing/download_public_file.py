@@ -7,6 +7,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 logging.basicConfig(level=logging.INFO)
@@ -68,7 +69,7 @@ def _load_previous_fingerprint(manifest_path: str, feature: str, source_key: str
 
 def _download(url: str, output_path: str) -> tuple[dict, int]:
     request = Request(url, headers={"User-Agent": "PBI-public-download/1.0"})
-    with urlopen(request, timeout=120) as response:  # nosec B310 - trusted configured URLs
+    with urlopen(request, timeout=120) as response:  # nosec B310 - URL validated via _validate_source_url
         body = response.read()
         headers = {
             "etag": response.headers.get("ETag"),
@@ -82,6 +83,22 @@ def _download(url: str, output_path: str) -> tuple[dict, int]:
     return headers, len(body)
 
 
+def _validate_source_url(source_url: str, api_base_url: str) -> None:
+    parsed = urlparse(source_url)
+    if parsed.scheme != "https":
+        raise ValueError(f"Public source URL must use HTTPS: {source_url}")
+
+    allowed_host = urlparse(api_base_url).netloc if api_base_url else ""
+    if allowed_host and parsed.netloc and parsed.netloc != allowed_host:
+        raise ValueError(
+            f"Public source URL host '{parsed.netloc}' does not match configured provider host '{allowed_host}'."
+        )
+
+    path_segments = [segment for segment in parsed.path.split("/") if segment]
+    if any(segment == ".." for segment in path_segments):
+        raise ValueError(f"Public source URL path contains unsupported traversal segment: {source_url}")
+
+
 def main():
     config = snakemake.config
     provider_cfg = config.get("public_data_provider", {})
@@ -92,6 +109,7 @@ def main():
     feature = str(snakemake.wildcards.feature)
     source_key = str(snakemake.wildcards.source)
     source_url = str(snakemake.params.url)
+    _validate_source_url(source_url, str(provider_cfg.get("api_base_url", "") or ""))
 
     provider_release = str(provider_cfg.get("release", "") or "")
     provider_snapshot = str(provider_cfg.get("snapshot_date", "") or "")
@@ -100,7 +118,8 @@ def main():
     if require_release_or_snapshot and not (provider_release or provider_snapshot):
         raise ValueError(
             "public_data_provenance.require_release_or_snapshot is enabled but neither "
-            "public_data_provider.release nor public_data_provider.snapshot_date is set."
+            "public_data_provider.release nor public_data_provider.snapshot_date is set. "
+            "Please set either public_data_provider.release or public_data_provider.snapshot_date in the configuration."
         )
 
     os.makedirs(os.path.dirname(output_tsv), exist_ok=True)
@@ -116,7 +135,7 @@ def main():
 
     try:
         response_headers, file_size = _download(source_url, output_tsv)
-        detected_columns = _read_tsv_header(output_tsv) if output_tsv.endswith(".tsv") else []
+        detected_columns = _read_tsv_header(output_tsv) if output_tsv.lower().endswith(".tsv") else []
         schema_fingerprint = _schema_fingerprint(detected_columns)
         if provenance_cfg.get("capture_checksums", True):
             sha256 = _sha256_file(output_tsv)
@@ -138,7 +157,10 @@ def main():
             f"{previous_fingerprint} -> {schema_fingerprint}"
         )
         if provenance_cfg.get("fail_on_schema_mismatch", False):
-            raise ValueError(message)
+            raise ValueError(
+                f"{message}. Update public_data_provider.schema_profile or "
+                "set public_data_provenance.fail_on_schema_mismatch=false while reviewing upstream schema changes."
+            )
         LOGGER.warning(message)
 
     record = {
