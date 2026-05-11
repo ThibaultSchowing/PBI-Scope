@@ -227,6 +227,15 @@ class TestAssemblyResolver(unittest.TestCase):
         """BACTERIA_TAXID class constant must equal 2 (NCBI Bacteria domain)."""
         self.assertEqual(AssemblyResolver.BACTERIA_TAXID, 2)
 
+    def test_is_bacterial_taxid_bacteria_domain_itself(self):
+        """TaxID 2 (the Bacteria domain root) must return True without an API call."""
+        resolver = AssemblyResolver(email='pbi-test@example.org')
+        result = resolver.is_bacterial_taxid(2)
+        self.assertTrue(result)
+        # Must be cached after the call
+        self.assertIn(2, resolver._bacterial_taxid_cache)
+        self.assertTrue(resolver._bacterial_taxid_cache[2])
+
     @unittest.skipIf(
         not os.environ.get('NCBI_EMAIL'),
         "Skipping NCBI API test (set NCBI_EMAIL to run)"

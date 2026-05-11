@@ -417,28 +417,6 @@ class TestBacterialHostFiltering(unittest.TestCase):
             refseq_category='reference genome',
         )
 
-    def _run_stage2b(self, downloader, token_to_assemblies):
-        """Execute only the Stage 2b bacterial-filtering loop from process_all_hosts."""
-        non_bacterial_tokens = []
-        for tok, assemblies in list(token_to_assemblies.items()):
-            if not assemblies:
-                continue
-            bacterial_assemblies = []
-            for asm in assemblies:
-                if asm.species_taxid is None:
-                    bacterial_assemblies.append(asm)
-                    continue
-                is_bacterial = downloader.resolver.is_bacterial_taxid(asm.species_taxid)
-                if is_bacterial is False:
-                    if tok not in non_bacterial_tokens:
-                        non_bacterial_tokens.append(tok)
-                elif is_bacterial is None:
-                    bacterial_assemblies.append(asm)
-                else:
-                    bacterial_assemblies.append(asm)
-            token_to_assemblies[tok] = bacterial_assemblies
-        return token_to_assemblies, non_bacterial_tokens
-
     def test_bacterial_assembly_kept(self):
         """A confirmed bacterial assembly must remain in token_to_assemblies."""
         rows = [{'Phage_ID': 'p1', 'Host': 'Escherichia coli', 'Source_DB': 'RefSeq'}]
@@ -450,7 +428,7 @@ class TestBacterialHostFiltering(unittest.TestCase):
         # Patch: E. coli (562) → bacterial
         dl.resolver._bacterial_taxid_cache[562] = True
 
-        result, excluded = self._run_stage2b(dl, token_to_assemblies)
+        result, excluded = dl._filter_non_bacterial_assemblies(token_to_assemblies)
         self.assertEqual(len(result['Escherichia coli']), 1)
         self.assertEqual(excluded, [])
 
@@ -465,7 +443,7 @@ class TestBacterialHostFiltering(unittest.TestCase):
         # Patch: Homo sapiens (9606) → not bacterial
         dl.resolver._bacterial_taxid_cache[9606] = False
 
-        result, excluded = self._run_stage2b(dl, token_to_assemblies)
+        result, excluded = dl._filter_non_bacterial_assemblies(token_to_assemblies)
         self.assertEqual(len(result['Homo sapiens']), 0)
         self.assertIn('Homo sapiens', excluded)
 
@@ -480,7 +458,7 @@ class TestBacterialHostFiltering(unittest.TestCase):
         # Patch: lookup fails → None
         dl.resolver._bacterial_taxid_cache[99999] = None
 
-        result, excluded = self._run_stage2b(dl, token_to_assemblies)
+        result, excluded = dl._filter_non_bacterial_assemblies(token_to_assemblies)
         self.assertEqual(len(result['Unknown bacterium']), 1)
         self.assertEqual(excluded, [])
 
@@ -492,7 +470,7 @@ class TestBacterialHostFiltering(unittest.TestCase):
         asm = self._make_assembly('GCF_123456789.1', 'Bacteroides dorei', taxid=None)
         token_to_assemblies = {'Bacteroides dorei': [asm]}
 
-        result, excluded = self._run_stage2b(dl, token_to_assemblies)
+        result, excluded = dl._filter_non_bacterial_assemblies(token_to_assemblies)
         self.assertEqual(len(result['Bacteroides dorei']), 1)
         self.assertEqual(excluded, [])
 
@@ -514,11 +492,31 @@ class TestBacterialHostFiltering(unittest.TestCase):
         dl.resolver._bacterial_taxid_cache[562] = True
         dl.resolver._bacterial_taxid_cache[10090] = False
 
-        result, excluded = self._run_stage2b(dl, token_to_assemblies)
+        result, excluded = dl._filter_non_bacterial_assemblies(token_to_assemblies)
         self.assertEqual(len(result['Escherichia coli']), 1)
         self.assertEqual(len(result['Mus musculus']), 0)
         self.assertIn('Mus musculus', excluded)
         self.assertNotIn('Escherichia coli', excluded)
+
+    def test_token_with_mixed_assemblies_not_in_excluded(self):
+        """A token that resolves to both bacterial and non-bacterial assemblies
+        must NOT appear in excluded (the bacterial assembly keeps it valid)."""
+        rows = [{'Phage_ID': 'p1', 'Host': 'Ambiguous', 'Source_DB': 'RefSeq'}]
+        dl = self._make_downloader(rows)
+
+        bact_asm = self._make_assembly('GCF_000005845.2', 'Escherichia coli K-12', taxid=562)
+        non_bact_asm = self._make_assembly('GCF_000001405.40', 'Homo sapiens', taxid=9606)
+        token_to_assemblies = {'Ambiguous': [bact_asm, non_bact_asm]}
+
+        dl.resolver._bacterial_taxid_cache[562] = True
+        dl.resolver._bacterial_taxid_cache[9606] = False
+
+        result, excluded = dl._filter_non_bacterial_assemblies(token_to_assemblies)
+        # Only the bacterial assembly remains
+        self.assertEqual(len(result['Ambiguous']), 1)
+        self.assertEqual(result['Ambiguous'][0].assembly_accession, 'GCF_000005845.2')
+        # Token is NOT in excluded because at least one bacterial assembly remains
+        self.assertNotIn('Ambiguous', excluded)
 
 
 def main():

@@ -691,6 +691,12 @@ class AssemblyResolver:
         if taxid in self._bacterial_taxid_cache:
             return self._bacterial_taxid_cache[taxid]
 
+        # The Bacteria domain node (TaxID 2) itself is bacterial but has no
+        # ancestor in LineageEx that equals 2 — handle this edge case directly.
+        if taxid == self.BACTERIA_TAXID:
+            self._bacterial_taxid_cache[taxid] = True
+            return True
+
         try:
             time.sleep(self.delay)
             handle = Entrez.efetch(db="taxonomy", id=str(taxid), retmode="xml")

@@ -945,6 +945,67 @@ class RobustHostGenomeDownloader:
             ).reset_index(drop=True)
         return df
 
+    def _filter_non_bacterial_assemblies(
+        self,
+        token_to_assemblies: Dict[str, List[AssemblyMetadata]],
+    ) -> Tuple[Dict[str, List[AssemblyMetadata]], List[str]]:
+        """Filter out assemblies that do not belong to the Bacteria domain.
+
+        For each resolved token, every assembly whose ``species_taxid`` can be
+        confirmed as non-bacterial (via :meth:`AssemblyResolver.is_bacterial_taxid`)
+        is removed and logged.  Assemblies without a TaxID, or whose bacterial
+        status cannot be determined (lookup returns ``None``), are kept with an
+        appropriate warning so that uncertain cases are not silently discarded.
+
+        Args:
+            token_to_assemblies: Mapping from host token string to the list of
+                resolved :class:`AssemblyMetadata` objects for that token.
+
+        Returns:
+            A 2-tuple of:
+
+            * the (mutated) *token_to_assemblies* dict with non-bacterial
+              assemblies removed, and
+            * a list of token strings that had *all* their assemblies removed
+              because they resolved exclusively to non-bacterial organisms.
+        """
+        non_bacterial_tokens: List[str] = []
+        for tok, assemblies in list(token_to_assemblies.items()):
+            if not assemblies:
+                continue
+            bacterial_assemblies: List[AssemblyMetadata] = []
+            token_has_non_bacterial = False
+            for asm in assemblies:
+                if asm.species_taxid is None:
+                    # Cannot verify – keep and note at debug level
+                    logging.debug(
+                        f"No TaxID for assembly {asm.assembly_accession} "
+                        f"('{asm.organism_name}'); including without bacterial check"
+                    )
+                    bacterial_assemblies.append(asm)
+                    continue
+                is_bacterial = self.resolver.is_bacterial_taxid(asm.species_taxid)
+                if is_bacterial is False:
+                    logging.warning(
+                        f"⚠️  Non-bacterial host skipped: token '{tok}' resolved to "
+                        f"'{asm.organism_name}' (TaxID {asm.species_taxid}), "
+                        f"which is not in the Bacteria domain — excluding from pipeline"
+                    )
+                    token_has_non_bacterial = True
+                elif is_bacterial is None:
+                    logging.warning(
+                        f"⚠️  Could not verify taxonomy for token '{tok}' resolved to "
+                        f"'{asm.organism_name}' (TaxID {asm.species_taxid}); "
+                        f"including in pipeline as bacterial status is unknown"
+                    )
+                    bacterial_assemblies.append(asm)
+                else:
+                    bacterial_assemblies.append(asm)
+            token_to_assemblies[tok] = bacterial_assemblies
+            if token_has_non_bacterial and not bacterial_assemblies:
+                non_bacterial_tokens.append(tok)
+        return token_to_assemblies, non_bacterial_tokens
+
     def process_all_hosts(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """Main processing pipeline: parse hosts, resolve to assemblies, download.
 
@@ -1031,40 +1092,9 @@ class RobustHostGenomeDownloader:
         # Stage 2b: Verify resolved assemblies are bacterial; log and remove
         # any that belong to non-bacterial organisms (e.g. human, mouse).
         # ------------------------------------------------------------------
-        non_bacterial_tokens: List[str] = []
-        for tok, assemblies in list(token_to_assemblies.items()):
-            if not assemblies:
-                continue
-            bacterial_assemblies: List[AssemblyMetadata] = []
-            for asm in assemblies:
-                if asm.species_taxid is None:
-                    # Cannot verify – keep and warn at debug level
-                    logging.debug(
-                        f"No TaxID for assembly {asm.assembly_accession} "
-                        f"('{asm.organism_name}'); including without bacterial check"
-                    )
-                    bacterial_assemblies.append(asm)
-                    continue
-                is_bacterial = self.resolver.is_bacterial_taxid(asm.species_taxid)
-                if is_bacterial is False:
-                    logging.warning(
-                        f"⚠️  Non-bacterial host skipped: token '{tok}' resolved to "
-                        f"'{asm.organism_name}' (TaxID {asm.species_taxid}), "
-                        f"which is not in the Bacteria domain — excluding from pipeline"
-                    )
-                    if tok not in non_bacterial_tokens:
-                        non_bacterial_tokens.append(tok)
-                elif is_bacterial is None:
-                    logging.warning(
-                        f"⚠️  Could not verify taxonomy for token '{tok}' resolved to "
-                        f"'{asm.organism_name}' (TaxID {asm.species_taxid}); "
-                        f"including in pipeline as bacterial status is unknown"
-                    )
-                    bacterial_assemblies.append(asm)
-                else:
-                    bacterial_assemblies.append(asm)
-            token_to_assemblies[tok] = bacterial_assemblies
-
+        token_to_assemblies, non_bacterial_tokens = self._filter_non_bacterial_assemblies(
+            token_to_assemblies
+        )
         if non_bacterial_tokens:
             logging.warning(
                 f"⚠️  {len(non_bacterial_tokens)} host token(s) were excluded because "
