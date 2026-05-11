@@ -673,6 +673,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#public-data-pinning-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public-data pinning configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pipeline-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1432,6 +1443,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#public-data-pinning-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public-data pinning configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pipeline-stages" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1503,10 +1525,17 @@
 <li><strong>Optional private input</strong>: <code>private_data/&lt;Source_DB&gt;/</code></li>
 <li><strong>Host genome source</strong>: NCBI RefSeq</li>
 </ul>
+<h2 id="public-data-pinning-configuration">Public-data pinning configuration<a class="headerlink" href="#public-data-pinning-configuration" title="Permanent link">&para;</a></h2>
+<p><code>workflow/config/config.yaml</code> now includes:</p>
+<ul>
+<li><code>public_data_provider.*</code> (<code>name</code>, <code>release</code>, <code>snapshot_date</code>, <code>schema_profile</code>, <code>api_base_url</code>, <code>provenance_mode</code>)</li>
+<li><code>public_data_provenance.*</code> controls (<code>require_release_or_snapshot</code>, checksum/header capture, schema-mismatch behavior, and manifest output paths)</li>
+</ul>
+<p>This keeps current <code>*_urls</code> maps intact while adding a provider/version foundation for future <code>phagescope_v1</code>/<code>phagescope_v2</code> transitions.</p>
 <h2 id="pipeline-stages">Pipeline stages<a class="headerlink" href="#pipeline-stages" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>workflow/Snakefile
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   |
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   +-- phagescope.smk  -&gt; download public phage metadata/FASTA
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   +-- phagescope.smk  -&gt; download public phage metadata/FASTA + provenance manifests
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>   +-- database.smk    -&gt; merge metadata + build/optimize DuckDB
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>   +-- sequences.smk   -&gt; build/index phage &amp; protein FASTA
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>   +-- hosts.smk       -&gt; parse host fields, resolve assemblies, download host FASTA
@@ -1519,6 +1548,8 @@
 <li><code>all_proteins.fasta(.fai)</code></li>
 <li><code>host_fasta_mapping.json</code></li>
 <li><code>private_phage_mapping.json</code> (if private sources exist)</li>
+<li><code>public_data_manifest.json/.csv</code> (public-source provenance)</li>
+<li><code>pipeline_run_provenance.json/.csv</code> (run-level provider pinning)</li>
 <li>reports and logs</li>
 </ul>
 <h2 id="access-model">Access model<a class="headerlink" href="#access-model" title="Permanent link">&para;</a></h2>

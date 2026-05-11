@@ -1490,6 +1490,8 @@
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                   dim_trna_tmrna -------------------+
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>dim_antimicrobial_resistance_genes ------------------+
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                  dim_crispr_array ------------------+
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>               dataset_provenance -------------------+
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>          pipeline_run_provenance -------------------+
 </code></pre></div>
 <p>Host data is <strong>not</strong> a DuckDB dimension table. Host sequences are stored as FASTA files and linked via mapping files.</p>
 <h2 id="hostprivate-link-files">Host/private link files<a class="headerlink" href="#hostprivate-link-files" title="Permanent link">&para;</a></h2>
@@ -1500,6 +1502,8 @@
 <li><code>host_metadata.csv</code></li>
 <li><code>host_fasta_mapping.json</code></li>
 <li><code>private_phage_mapping.json</code> (if private sources are enabled)</li>
+<li><code>public_data_manifest.json/.csv</code></li>
+<li><code>pipeline_run_provenance.json/.csv</code></li>
 </ul>
 <h2 id="data-sources">Data sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
 <ul>
