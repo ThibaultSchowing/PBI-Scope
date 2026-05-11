@@ -18,12 +18,37 @@ from schema_contracts import load_contract, normalize_df_schema
 inputs = snakemake.input
 output = snakemake.output[0]
 
+provider_config = snakemake.config.get("public_data_provider", {})
+PROVIDER_NAME = provider_config.get("name", "PhageScope")
+PROVIDER_RELEASE = provider_config.get("release", "")
+PROVIDER_SNAPSHOT_DATE = provider_config.get("snapshot_date", "")
+PROVIDER_SCHEMA_PROFILE = provider_config.get("schema_profile", "")
+
 COLUMNS_LIST = ["Phage_ID", "Length", "GC_content", "Taxonomy", "Completeness", 
-                "Host", "Lifestyle", "Cluster", "Subcluster", "Source_DB"]
+                "Host", "Lifestyle", "Cluster", "Subcluster", "Source_DB",
+                "Provider_Name", "Provider_Release", "Provider_Snapshot_Date",
+                "Provider_Schema_Profile", "Input_Source_Key", "Input_File", "Input_Retrieved_At"]
 
 NUMERICAL_COLUMNS = ["Length", "GC_content"]
-STRING_COLUMNS = ["Phage_ID", "Taxonomy", "Completeness", "Host", "Lifestyle", "Cluster", "Subcluster", "Source_DB"]
+STRING_COLUMNS = ["Phage_ID", "Taxonomy", "Completeness", "Host", "Lifestyle", "Cluster", "Subcluster", "Source_DB",
+                  "Provider_Name", "Provider_Release", "Provider_Snapshot_Date", "Provider_Schema_Profile",
+                  "Input_Source_Key", "Input_File", "Input_Retrieved_At"]
 CONTRACT = load_contract(Path(__file__).resolve().parents[3] / "schemas" / "phage_metadata_merged.yaml")
+
+
+def _load_retrieved_at_from_sidecar(tsv_path: str) -> str:
+    sidecar_path = str(Path(tsv_path).with_suffix(".provenance.json"))
+    if not os.path.exists(sidecar_path):
+        return ""
+    try:
+        import json
+
+        with open(sidecar_path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle) or {}
+        return str(payload.get("retrieved_at", "")).strip()
+    except Exception as exc:
+        logging.warning(f"Could not read sidecar {sidecar_path}: {exc}")
+        return ""
 
 # List of DataFrames
 dfs = []
@@ -42,6 +67,15 @@ for infile in inputs:
     if "Source_DB" not in df.columns:
         source_name = os.path.basename(infile).split("_")[0]
         df["Source_DB"] = source_name
+
+    source_key = Path(infile).stem
+    df["Provider_Name"] = PROVIDER_NAME
+    df["Provider_Release"] = PROVIDER_RELEASE
+    df["Provider_Snapshot_Date"] = PROVIDER_SNAPSHOT_DATE
+    df["Provider_Schema_Profile"] = PROVIDER_SCHEMA_PROFILE
+    df["Input_Source_Key"] = source_key
+    df["Input_File"] = os.path.basename(infile)
+    df["Input_Retrieved_At"] = _load_retrieved_at_from_sidecar(infile)
 
     df, _ = normalize_df_schema(df, CONTRACT, dataset_name="phage_metadata", logger=logging.getLogger(__name__))
     

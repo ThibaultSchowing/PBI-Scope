@@ -27,7 +27,9 @@ rule create_duckdb:
         host_metadata=config["host_metadata_output"],
         assembly_metadata=config["assembly_metadata_output"],
         phage_host_links=config["phage_host_links_output"],
-        private_manifest=config["private_manifest_output"]
+        private_manifest=config["private_manifest_output"],
+        public_data_manifest=config["public_data_provenance"]["manifest_csv_output"],
+        pipeline_run_provenance=config["public_data_provenance"]["pipeline_run_provenance_csv_output"]
     output:
         db=config["duckdb_output"]
     conda:

@@ -21,16 +21,35 @@ rule download_all_tsvs:
 
 rule download_tsv:
     output:
-        config["intermediate_csv_output"] + "/{feature}/{source}.tsv" # removed temp() to keep files for debugging
+        tsv=config["intermediate_csv_output"] + "/{feature}/{source}.tsv",
+        provenance_sidecar=config["intermediate_csv_output"] + "/{feature}/{source}.provenance.json"
     params: 
         url = lambda wildcards: config[f"{wildcards.feature}_urls"][wildcards.source],
         intermediate_csv_output = config["intermediate_csv_output"]
     threads: 8
-    shell:
-        """
-        mkdir -p {params.intermediate_csv_output}/{wildcards.feature}
-        wget -O {output} {params.url} || echo "Failed download for {wildcards.feature}/{wildcards.source}"
-        """
+    script:
+        "../scripts/preprocessing/download_public_file.py"
+
+
+rule build_public_data_provenance_manifest:
+    input:
+        sum(
+            [
+                [
+                    f"{config['intermediate_csv_output']}/{feature}/{source}.provenance.json"
+                    for source in config[f"{feature}_urls"].keys()
+                ]
+                for feature in FEATURES
+            ],
+            []
+        )
+    output:
+        manifest_json=config["public_data_provenance"]["manifest_json_output"],
+        manifest_csv=config["public_data_provenance"]["manifest_csv_output"],
+        pipeline_run_json=config["public_data_provenance"]["pipeline_run_provenance_json_output"],
+        pipeline_run_csv=config["public_data_provenance"]["pipeline_run_provenance_csv_output"]
+    script:
+        "../scripts/preprocessing/build_public_data_provenance_manifest.py"
 
 # ----------------------------------------
 # RULE MERGE TRANSCRIPTION TERMINATOR METADATA
