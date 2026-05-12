@@ -617,14 +617,14 @@ def validate_database():
                 """
             ).fetchall()
 
-            failed_rows = conn.execute(
+            failed_rows_result = conn.execute(
                 """
                 SELECT COUNT(*)
                 FROM dataset_provenance
                 WHERE COALESCE(NULLIF(TRIM(status), ''), 'unknown') NOT IN ('success')
                 """
             ).fetchone()
-            failed_rows = failed_rows_tuple[0] if failed_rows_tuple else 0
+            failed_rows = failed_rows_result[0] if failed_rows_result else 0
 
             provider_releases = conn.execute(
                 """
