@@ -958,7 +958,7 @@ def generate_html_report(results, report_path):
     has_provenance = bool(run_provenance) or bool(dataset_provenance)
 
     if has_provenance:
-        def _primary_or_list(primary_value, fallback_values):
+        def _format_value_with_fallback(primary_value, fallback_values):
             if primary_value:
                 return str(primary_value)
             return ', '.join(fallback_values) if fallback_values else 'N/A'
@@ -968,9 +968,9 @@ def generate_html_report(results, report_path):
         schema_values = dataset_provenance.get('provider_schema_profiles', []) or []
         status_distribution = dataset_provenance.get('status_distribution', {}) or {}
         non_success_rows = dataset_provenance.get('non_success_rows', 0) or 0
-        release_display = _primary_or_list(run_provenance.get('provider_release'), release_values)
-        snapshot_display = _primary_or_list(run_provenance.get('provider_snapshot_date'), snapshot_values)
-        schema_display = _primary_or_list(run_provenance.get('provider_schema_profile'), schema_values)
+        release_display = _format_value_with_fallback(run_provenance.get('provider_release'), release_values)
+        snapshot_display = _format_value_with_fallback(run_provenance.get('provider_snapshot_date'), snapshot_values)
+        schema_display = _format_value_with_fallback(run_provenance.get('provider_schema_profile'), schema_values)
 
         html_content += f"""
         <div class="section">
