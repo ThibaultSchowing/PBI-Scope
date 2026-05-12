@@ -610,10 +610,10 @@ def validate_database():
             dataset_count = conn.execute("SELECT COUNT(*) FROM dataset_provenance").fetchone()[0]
             status_distribution = conn.execute(
                 """
-                SELECT COALESCE(NULLIF(TRIM(status), ''), 'unknown') as status_label, COUNT(*) as cnt
+                SELECT COALESCE(NULLIF(TRIM(status), ''), 'unknown') as status_label, COUNT(*) as count
                 FROM dataset_provenance
                 GROUP BY status_label
-                ORDER BY cnt DESC
+                ORDER BY count DESC
                 """
             ).fetchall()
 
@@ -623,7 +623,8 @@ def validate_database():
                 FROM dataset_provenance
                 WHERE COALESCE(NULLIF(TRIM(status), ''), 'unknown') NOT IN ('success')
                 """
-            ).fetchone()[0]
+            ).fetchone()
+            failed_rows = failed_rows_tuple[0] if failed_rows_tuple else 0
 
             provider_releases = conn.execute(
                 """
