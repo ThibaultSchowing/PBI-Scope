@@ -64,7 +64,7 @@ Important behavior:
 If a notebook query like `Source_DB = 'test_private'` returns `0`, first verify available private sources:
 
 ```sql
-SELECT Source_DB, source_type, COUNT(*)
+SELECT Source_DB, source_type, COUNT(*) AS phage_count
 FROM fact_phages
 GROUP BY Source_DB, source_type
 ORDER BY source_type, Source_DB;
@@ -82,4 +82,3 @@ Then inspect:
 - **Source name mismatch**: manifest error `Source_DB mismatch: expected only '<folder>'`
 - **Public provenance failure**: `dataset_provenance.status='failed'` with non-empty `error_message`
 - **Schema drift warning/failure**: schema fingerprint change in download logs and provenance record
-
