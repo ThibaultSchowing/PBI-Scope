@@ -38,6 +38,7 @@ nav:
       - Installation (Docker): guides/installation.md
       - Story (One Read): guides/storytelling.md
       - How It Works: guides/how-it-works.md
+      - Provenance and Version Pinning: guides/provenance-version-pinning.md
       - Analysis Container: guides/analysis-guide.md
       - Pipeline Execution: guides/pipeline-execution.md
       - Private Data Ingestion: guides/private-data-ingestion.md

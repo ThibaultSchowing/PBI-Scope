@@ -32,6 +32,20 @@ pbi validate-private
 - Valid private sources are ingested and linked with `source_type=private`
 - Invalid sources are skipped (public pipeline still completes)
 - Re-running pipeline synchronizes removals/additions
+- `Source_DB` in `metadata.csv` must match the source folder name exactly
+
+## Validate what was ingested
+
+Use DuckDB (or `SequenceRetriever`) to inspect available source labels:
+
+```sql
+SELECT Source_DB, source_type, COUNT(*) AS phage_count
+FROM fact_phages
+GROUP BY Source_DB, source_type
+ORDER BY source_type, Source_DB;
+```
+
+If you filter `Source_DB = 'test_private'` and get `0`, first check this query to confirm the exact source name currently present (for example `test_private_2`).
 
 ## Output mappings
 
@@ -41,3 +55,18 @@ pbi validate-private
 ## Logs
 
 In Docker runs, logs/reports are available in `./pipeline_logs/`.
+
+Private-source validation details are written to:
+
+- `private_data/private_manifest.json` (host path)
+- `/private-data/private_manifest.json` (inside container)
+
+This manifest explicitly lists:
+
+- `is_valid` per source
+- validation `errors`
+- skipped/ingested source counts
+
+For provenance/version-pinning details and public-source diagnostics, see:
+
+- [Provenance and version pinning](provenance-version-pinning.md)

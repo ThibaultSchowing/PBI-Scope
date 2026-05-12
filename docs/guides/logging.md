@@ -335,6 +335,55 @@ The cache is a plain JSON object and can be inspected or edited manually if need
 
 ---
 
+### `public_data_manifest.json` and `public_data_manifest.csv`
+
+**Config keys**:
+
+- `public_data_provenance.manifest_json_output`
+- `public_data_provenance.manifest_csv_output`
+
+Per-download provenance records for each public input source.
+
+Key diagnostics:
+
+- `status = failed` means that source failed download/provenance capture
+- `error_message` contains the failure reason
+- `schema_fingerprint` tracks header/schema drift over time
+
+---
+
+### `pipeline_run_provenance.json` and `pipeline_run_provenance.csv`
+
+**Config keys**:
+
+- `public_data_provenance.pipeline_run_provenance_json_output`
+- `public_data_provenance.pipeline_run_provenance_csv_output`
+
+Run-level provenance snapshot that captures pinned provider metadata for the pipeline run (`provider_release`, `provider_snapshot_date`, `provider_schema_profile`, `git_commit`, `pbi_version`).
+
+---
+
+### `private_manifest.json`
+
+**Config key**: `private_manifest_output`
+
+Location:
+
+- host: `private_data/private_manifest.json`
+- container: `/private-data/private_manifest.json`
+
+This file is the authoritative private-source validation summary.
+
+Key diagnostics:
+
+- `sources_valid` / `sources_invalid`
+- per-source `is_valid`
+- per-source `errors` and `warnings`
+
+If a private source is missing from the database, check this file first to confirm whether it was skipped during validation.
+
+---
+
 ## Quick-reference table
 
 | File (relative to `pipeline_logs/`) | Config key | Format | Produced by rule |
