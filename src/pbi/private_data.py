@@ -221,22 +221,47 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
     )
 
 
-def discover_private_sources(roots: Iterable[str]) -> List[Path]:
+def _normalize_excluded_source_dirs(excluded_source_dirs: Optional[Iterable[str | Path]]) -> Set[Path]:
+    if not excluded_source_dirs:
+        return set()
+    normalized: Set[Path] = set()
+    for excluded in excluded_source_dirs:
+        try:
+            normalized.add(Path(excluded).expanduser().resolve())
+        except OSError:
+            continue
+    return normalized
+
+
+def discover_private_sources(
+    roots: Iterable[str],
+    excluded_source_dirs: Optional[Iterable[str | Path]] = None,
+) -> List[Path]:
     discovered: List[Path] = []
     seen: Set[Path] = set()
+    excluded_dirs = _normalize_excluded_source_dirs(excluded_source_dirs)
     for root in roots:
         root_path = Path(root).expanduser()
         if not root_path.exists() or not root_path.is_dir():
             continue
         for child in sorted(root_path.iterdir()):
-            if child.is_dir() and child not in seen:
+            if not child.is_dir():
+                continue
+            resolved_child = child.resolve()
+            if resolved_child in excluded_dirs:
+                continue
+            if resolved_child not in seen:
                 discovered.append(child)
-                seen.add(child)
+                seen.add(resolved_child)
     return discovered
 
 
-def validate_private_roots(roots: Iterable[str], include_dataframe: bool = False) -> Dict:
-    sources = discover_private_sources(roots)
+def validate_private_roots(
+    roots: Iterable[str],
+    include_dataframe: bool = False,
+    excluded_source_dirs: Optional[Iterable[str | Path]] = None,
+) -> Dict:
+    sources = discover_private_sources(roots, excluded_source_dirs=excluded_source_dirs)
     duplicate_names = {}
     for src in sources:
         duplicate_names[src.name] = duplicate_names.get(src.name, 0) + 1
@@ -280,8 +305,15 @@ def _source_fingerprint(source_dir: Path) -> str:
     return hasher.hexdigest()
 
 
-def build_private_manifest(roots: Iterable[str]) -> Dict:
-    summary = validate_private_roots(roots, include_dataframe=False)
+def build_private_manifest(
+    roots: Iterable[str],
+    excluded_source_dirs: Optional[Iterable[str | Path]] = None,
+) -> Dict:
+    summary = validate_private_roots(
+        roots,
+        include_dataframe=False,
+        excluded_source_dirs=excluded_source_dirs,
+    )
     manifest_sources = []
     for src in summary["sources"]:
         manifest_sources.append(
