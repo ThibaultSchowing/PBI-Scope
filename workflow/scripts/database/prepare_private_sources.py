@@ -37,7 +37,15 @@ def main():
         )
         return
 
-    manifest = build_private_manifest([str(root_path)])
+    excluded_source_dirs = []
+    private_phage_dir = snakemake.config.get("private_phage_genomes_intermediate", "")
+    if private_phage_dir:
+        excluded_source_dirs.append(private_phage_dir)
+
+    manifest = build_private_manifest(
+        [str(root_path)],
+        excluded_source_dirs=excluded_source_dirs,
+    )
     write_private_manifest(manifest, output_path)
     logging.info(
         "Prepared private manifest with %d sources (%d valid, %d invalid)",

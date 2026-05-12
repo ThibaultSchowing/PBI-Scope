@@ -7,6 +7,7 @@ import json
 import pandas as pd
 
 from pbi.private_data import (
+    build_private_manifest,
     ingest_private_sources_into_db,
     prepare_private_sequence_artifacts,
     validate_private_source,
@@ -369,6 +370,38 @@ def test_prepare_private_sequence_artifacts_skips_invalid_sources(tmp_path):
     phage_fasta_path = Path(pmapping["Valid_Source"])
     assert ">P1 desc" in phage_fasta_path.read_text(encoding="utf-8")
     assert "Invalid_Source" not in pmapping
+
+
+def test_build_private_manifest_excludes_generated_phage_directory(tmp_path):
+    valid_source = _create_private_source(
+        tmp_path,
+        "Project_A",
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "H1",
+                "Host_name": "Host One",
+                "Source_DB": "Project_A",
+                "interaction": "virulent",
+            }
+        ],
+        ["P1"],
+        ["H1"],
+    )
+
+    generated_phage_dir = tmp_path / "phages"
+    generated_phage_dir.mkdir()
+
+    manifest = build_private_manifest(
+        [str(tmp_path)],
+        excluded_source_dirs=[str(generated_phage_dir)],
+    )
+
+    assert manifest["sources_found"] == 1
+    assert manifest["sources_valid"] == 1
+    assert manifest["sources_invalid"] == 0
+    assert len(manifest["sources"]) == 1
+    assert manifest["sources"][0]["source_db"] == valid_source.name
 
 
 def test_ingest_private_sources_resyncs_deleted_sources_and_prevents_duplicates(tmp_path):
