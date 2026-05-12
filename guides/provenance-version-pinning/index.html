@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/analysis-guide/">
+        <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI/guides/provenance-version-pinning/">
       
       
-        <link rel="prev" href="../provenance-version-pinning/">
+        <link rel="prev" href="../how-it-works/">
       
       
-        <link rel="next" href="../pipeline-execution/">
+        <link rel="next" href="../analysis-guide/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Analysis Container - PBI Documentation</title>
+        <title>Provenance and Version Pinning - PBI Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#analysis-container-guide" class="md-skip">
+        <a href="#provenance-and-version-pinning" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Analysis Container
+              Provenance and Version Pinning
             
           </span>
         </div>
@@ -627,34 +627,6 @@
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../provenance-version-pinning/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Provenance and Version Pinning
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -674,7 +646,7 @@
   <span class="md-ellipsis">
     
   
-    Analysis Container
+    Provenance and Version Pinning
   
 
     
@@ -692,7 +664,7 @@
   <span class="md-ellipsis">
     
   
-    Analysis Container
+    Provenance and Version Pinning
   
 
     
@@ -718,49 +690,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#access-options" class="md-nav__link">
+  <a href="#what-is-pinned" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Access options
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Access options">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preferred-vs-code-dev-containers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preferred: VS Code Dev Containers
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stable-fallback-jupyter-lab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stable fallback: Jupyter Lab
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#oom-warning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        OOM warning
+        What is pinned
       
     </span>
   </a>
@@ -768,10 +701,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-python-start" class="md-nav__link">
+  <a href="#how-provenance-is-captured" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Python start
+        How provenance is captured
       
     </span>
   </a>
@@ -779,10 +712,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#recommended-notebooks" class="md-nav__link">
+  <a href="#duckdb-provenance-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Recommended notebooks
+        DuckDB provenance tables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#private-data-ingestion-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Private-data ingestion diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-error-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common error indicators
       
     </span>
   </a>
@@ -793,6 +748,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis Container
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1466,49 +1449,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#access-options" class="md-nav__link">
+  <a href="#what-is-pinned" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Access options
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Access options">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preferred-vs-code-dev-containers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Preferred: VS Code Dev Containers
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stable-fallback-jupyter-lab" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stable fallback: Jupyter Lab
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#oom-warning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        OOM warning
+        What is pinned
       
     </span>
   </a>
@@ -1516,10 +1460,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-python-start" class="md-nav__link">
+  <a href="#how-provenance-is-captured" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick Python start
+        How provenance is captured
       
     </span>
   </a>
@@ -1527,10 +1471,32 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#recommended-notebooks" class="md-nav__link">
+  <a href="#duckdb-provenance-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Recommended notebooks
+        DuckDB provenance tables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#private-data-ingestion-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Private-data ingestion diagnostics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-error-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common error indicators
       
     </span>
   </a>
@@ -1557,37 +1523,77 @@
   
 
 
-<h1 id="analysis-container-guide">Analysis Container Guide<a class="headerlink" href="#analysis-container-guide" title="Permanent link">&para;</a></h1>
-<p>The analysis container is the recommended way to consume PBI data.</p>
-<h2 id="access-options">Access options<a class="headerlink" href="#access-options" title="Permanent link">&para;</a></h2>
-<h3 id="preferred-vs-code-dev-containers">Preferred: VS Code Dev Containers<a class="headerlink" href="#preferred-vs-code-dev-containers" title="Permanent link">&para;</a></h3>
-<p>Use <strong>VS Code Remote – Containers / Dev Containers</strong> to attach to the <code>analysis</code> service.
-This is the preferred workflow because it provides a full IDE (editor, terminal, debugger, extensions).</p>
-<h3 id="stable-fallback-jupyter-lab">Stable fallback: Jupyter Lab<a class="headerlink" href="#stable-fallback-jupyter-lab" title="Permanent link">&para;</a></h3>
-<p>Start and open:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
-</code></pre></div>
-<p>If remote, tunnel first:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>user@server
-</code></pre></div>
-<p>Open <code>http://localhost:8888</code>.</p>
-<p>Jupyter Lab is stable, but not the preferred option when a full IDE workflow is needed.</p>
-<h2 id="oom-warning">OOM warning<a class="headerlink" href="#oom-warning" title="Permanent link">&para;</a></h2>
-<p>Large joins and sequence materialization can trigger out-of-memory errors.
-Use filtering, limits, and batch/iterator patterns.</p>
-<h2 id="quick-python-start">Quick Python start<a class="headerlink" href="#quick-python-start" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">quick_connect</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">retriever</span> <span class="o">=</span> <span class="n">quick_connect</span><span class="p">()</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">stats</span> <span class="o">=</span> <span class="n">retriever</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">print</span><span class="p">(</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">])</span>
-</code></pre></div>
-<h2 id="recommended-notebooks">Recommended notebooks<a class="headerlink" href="#recommended-notebooks" title="Permanent link">&para;</a></h2>
+<h1 id="provenance-and-version-pinning">Provenance and Version Pinning<a class="headerlink" href="#provenance-and-version-pinning" title="Permanent link">&para;</a></h1>
+<p>This page explains how PBI pins upstream public data context and how to audit what was ingested.</p>
+<h2 id="what-is-pinned">What is pinned<a class="headerlink" href="#what-is-pinned" title="Permanent link">&para;</a></h2>
+<p>Public-source pinning is configured in <code>workflow/config/config.yaml</code>:</p>
 <ul>
-<li><code>01_database_exploration.ipynb</code></li>
-<li><code>02_sequence_retrieval.ipynb</code></li>
-<li><code>03_ml_streaming.ipynb</code></li>
-<li><code>00_pipeline_logs.ipynb</code></li>
+<li><code>public_data_provider.name</code></li>
+<li><code>public_data_provider.release</code></li>
+<li><code>public_data_provider.snapshot_date</code></li>
+<li><code>public_data_provider.schema_profile</code></li>
+<li><code>public_data_provider.api_base_url</code></li>
+<li><code>public_data_provider.provenance_mode</code></li>
+</ul>
+<p>These values are recorded for every run, so downstream users can identify exactly which upstream snapshot/profile was used.</p>
+<h2 id="how-provenance-is-captured">How provenance is captured<a class="headerlink" href="#how-provenance-is-captured" title="Permanent link">&para;</a></h2>
+<p>During each public file download, PBI writes a sidecar record with:</p>
+<ul>
+<li>source URL and local path</li>
+<li>retrieval timestamp</li>
+<li>file size</li>
+<li>optional checksum (<code>sha256</code>)</li>
+<li>optional HTTP headers (<code>ETag</code>, <code>Last-Modified</code>)</li>
+<li>detected tabular columns + schema fingerprint</li>
+<li>status/error message</li>
+</ul>
+<p>Then all sidecars are consolidated into:</p>
+<ul>
+<li><code>pipeline_logs/csv/public_data_manifest.json</code></li>
+<li><code>pipeline_logs/csv/public_data_manifest.csv</code></li>
+<li><code>pipeline_logs/csv/pipeline_run_provenance.json</code></li>
+<li><code>pipeline_logs/csv/pipeline_run_provenance.csv</code></li>
+</ul>
+<h2 id="duckdb-provenance-tables">DuckDB provenance tables<a class="headerlink" href="#duckdb-provenance-tables" title="Permanent link">&para;</a></h2>
+<p>The database build loads these files into:</p>
+<ul>
+<li><code>dataset_provenance</code></li>
+<li><code>pipeline_run_provenance</code></li>
+</ul>
+<p>Quick checks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">dataset_provenance</span><span class="w"> </span><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">provider_release</span><span class="p">,</span><span class="w"> </span><span class="n">provider_snapshot_date</span><span class="p">,</span><span class="w"> </span><span class="n">provider_schema_profile</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">pipeline_run_provenance</span><span class="p">;</span>
+</code></pre></div>
+<h2 id="private-data-ingestion-diagnostics">Private-data ingestion diagnostics<a class="headerlink" href="#private-data-ingestion-diagnostics" title="Permanent link">&para;</a></h2>
+<p>Private datasets are validated source-by-source from <code>private_data/&lt;Source_DB&gt;/</code>.
+Validation output is written to:</p>
+<ul>
+<li><code>private_data/private_manifest.json</code> (or <code>/private-data/private_manifest.json</code> in containers)</li>
+</ul>
+<p>Important behavior:</p>
+<ul>
+<li>only <code>is_valid: true</code> sources are ingested</li>
+<li>invalid sources are skipped and listed with explicit <code>errors</code></li>
+<li><code>Source_DB</code> in each <code>metadata.csv</code> must match the folder name exactly</li>
+</ul>
+<p>If a notebook query like <code>Source_DB = 'test_private'</code> returns <code>0</code>, first verify available private sources:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">,</span><span class="w"> </span><span class="n">source_type</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">phage_count</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_phages</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">,</span><span class="w"> </span><span class="n">source_type</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">source_type</span><span class="p">,</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">;</span>
+</code></pre></div>
+<p>Then inspect:</p>
+<ul>
+<li><code>private_manifest.json</code> for skipped sources and validation errors</li>
+<li><code>pipeline_logs/logs/host_download_failures.log</code> for host-resolution/download failures</li>
+<li><code>dataset_provenance</code> rows with <code>status = 'failed'</code> for public-source provenance failures</li>
+</ul>
+<h2 id="common-error-indicators">Common error indicators<a class="headerlink" href="#common-error-indicators" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Source not ingested</strong>: source missing from <code>fact_phages</code>, present in manifest with <code>is_valid: false</code></li>
+<li><strong>Source name mismatch</strong>: manifest error <code>Source_DB mismatch: expected only '&lt;folder&gt;'</code></li>
+<li><strong>Public provenance failure</strong>: <code>dataset_provenance.status='failed'</code> with non-empty <code>error_message</code></li>
+<li><strong>Schema drift warning/failure</strong>: schema fingerprint change in download logs and provenance record</li>
 </ul>
 
 

@@ -630,6 +630,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../provenance-version-pinning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provenance and Version Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../analysis-guide/" class="md-nav__link">
         
   
@@ -1145,6 +1173,39 @@
     <span class="md-ellipsis">
       
         host_token_resolution_cache.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#public_data_manifestjson-and-public_data_manifestcsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        public_data_manifest.json and public_data_manifest.csv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline_run_provenancejson-and-pipeline_run_provenancecsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline_run_provenance.json and pipeline_run_provenance.csv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#private_manifestjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        private_manifest.json
       
     </span>
   </a>
@@ -1913,6 +1974,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#public_data_manifestjson-and-public_data_manifestcsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        public_data_manifest.json and public_data_manifest.csv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline_run_provenancejson-and-pipeline_run_provenancecsv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pipeline_run_provenance.json and pipeline_run_provenance.csv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#private_manifestjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        private_manifest.json
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2384,6 +2478,44 @@
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>--config<span class="w"> </span><span class="nv">reuse_host_resolution_cache</span><span class="o">=</span><span class="nb">false</span>
 </code></pre></div>
 <p>The cache is a plain JSON object and can be inspected or edited manually if needed.</p>
+<hr />
+<h3 id="public_data_manifestjson-and-public_data_manifestcsv"><code>public_data_manifest.json</code> and <code>public_data_manifest.csv</code><a class="headerlink" href="#public_data_manifestjson-and-public_data_manifestcsv" title="Permanent link">&para;</a></h3>
+<p><strong>Config keys</strong>:</p>
+<ul>
+<li><code>public_data_provenance.manifest_json_output</code></li>
+<li><code>public_data_provenance.manifest_csv_output</code></li>
+</ul>
+<p>Per-download provenance records for each public input source.</p>
+<p>Key diagnostics:</p>
+<ul>
+<li><code>status = failed</code> means that source failed download/provenance capture</li>
+<li><code>error_message</code> contains the failure reason</li>
+<li><code>schema_fingerprint</code> tracks header/schema drift over time</li>
+</ul>
+<hr />
+<h3 id="pipeline_run_provenancejson-and-pipeline_run_provenancecsv"><code>pipeline_run_provenance.json</code> and <code>pipeline_run_provenance.csv</code><a class="headerlink" href="#pipeline_run_provenancejson-and-pipeline_run_provenancecsv" title="Permanent link">&para;</a></h3>
+<p><strong>Config keys</strong>:</p>
+<ul>
+<li><code>public_data_provenance.pipeline_run_provenance_json_output</code></li>
+<li><code>public_data_provenance.pipeline_run_provenance_csv_output</code></li>
+</ul>
+<p>Run-level provenance snapshot that captures pinned provider metadata for the pipeline run (<code>provider_release</code>, <code>provider_snapshot_date</code>, <code>provider_schema_profile</code>, <code>git_commit</code>, <code>pbi_version</code>).</p>
+<hr />
+<h3 id="private_manifestjson"><code>private_manifest.json</code><a class="headerlink" href="#private_manifestjson" title="Permanent link">&para;</a></h3>
+<p><strong>Config key</strong>: <code>private_manifest_output</code></p>
+<p>Location:</p>
+<ul>
+<li>host: <code>private_data/private_manifest.json</code></li>
+<li>container: <code>/private-data/private_manifest.json</code></li>
+</ul>
+<p>This file is the authoritative private-source validation summary.</p>
+<p>Key diagnostics:</p>
+<ul>
+<li><code>sources_valid</code> / <code>sources_invalid</code></li>
+<li>per-source <code>is_valid</code></li>
+<li>per-source <code>errors</code> and <code>warnings</code></li>
+</ul>
+<p>If a private source is missing from the database, check this file first to confirm whether it was skipped during validation.</p>
 <hr />
 <h2 id="quick-reference-table">Quick-reference table<a class="headerlink" href="#quick-reference-table" title="Permanent link">&para;</a></h2>
 <table>

@@ -630,6 +630,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../provenance-version-pinning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provenance and Version Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../analysis-guide/" class="md-nav__link">
         
   
@@ -783,6 +811,17 @@
     <span class="md-ellipsis">
       
         Runtime behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validate-what-was-ingested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate what was ingested
       
     </span>
   </a>
@@ -1476,6 +1515,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#validate-what-was-ingested" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate what was ingested
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#output-mappings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1543,7 +1593,16 @@
 <li>Valid private sources are ingested and linked with <code>source_type=private</code></li>
 <li>Invalid sources are skipped (public pipeline still completes)</li>
 <li>Re-running pipeline synchronizes removals/additions</li>
+<li><code>Source_DB</code> in <code>metadata.csv</code> must match the source folder name exactly</li>
 </ul>
+<h2 id="validate-what-was-ingested">Validate what was ingested<a class="headerlink" href="#validate-what-was-ingested" title="Permanent link">&para;</a></h2>
+<p>Use DuckDB (or <code>SequenceRetriever</code>) to inspect available source labels:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">,</span><span class="w"> </span><span class="n">source_type</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">phage_count</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">FROM</span><span class="w"> </span><span class="n">fact_phages</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">,</span><span class="w"> </span><span class="n">source_type</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">source_type</span><span class="p">,</span><span class="w"> </span><span class="n">Source_DB</span><span class="p">;</span>
+</code></pre></div>
+<p>If you filter <code>Source_DB = 'test_private'</code> and get <code>0</code>, first check this query to confirm the exact source name currently present (for example <code>test_private_2</code>).</p>
 <h2 id="output-mappings">Output mappings<a class="headerlink" href="#output-mappings" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>private_phage_mapping.json</code> routes private phage retrieval</li>
@@ -1551,6 +1610,21 @@
 </ul>
 <h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">&para;</a></h2>
 <p>In Docker runs, logs/reports are available in <code>./pipeline_logs/</code>.</p>
+<p>Private-source validation details are written to:</p>
+<ul>
+<li><code>private_data/private_manifest.json</code> (host path)</li>
+<li><code>/private-data/private_manifest.json</code> (inside container)</li>
+</ul>
+<p>This manifest explicitly lists:</p>
+<ul>
+<li><code>is_valid</code> per source</li>
+<li>validation <code>errors</code></li>
+<li>skipped/ingested source counts</li>
+</ul>
+<p>For provenance/version-pinning details and public-source diagnostics, see:</p>
+<ul>
+<li><a href="../provenance-version-pinning/">Provenance and version pinning</a></li>
+</ul>
 
 
 
