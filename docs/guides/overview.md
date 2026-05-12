@@ -5,6 +5,7 @@
 - [Installation](installation.md)
 - [Story — one read walkthrough](storytelling.md)
 - [How it works](how-it-works.md)
+- [Provenance and version pinning](provenance-version-pinning.md)
 
 ## Usage
 

@@ -6,6 +6,7 @@ import logging
 import sys
 from datetime import datetime
 import json
+import html
 
 logging.basicConfig(level=logging.INFO)
 
@@ -31,6 +32,7 @@ def validate_database():
         'database_path': db_path,
         'tables': {},
         'data_quality': {},
+        'provenance': {},
         'summary': {}
     }
     
@@ -580,17 +582,101 @@ def validate_database():
 
         validation_results['private_data'] = private_data
 
-        # 5. Check indexes exist
+        # 5. Collect provider/version provenance metadata (optional tables)
+        logging.info("Collecting provenance/version metadata...")
+        provenance = {
+            'pipeline_run': {},
+            'dataset_provenance': {}
+        }
+
+        if 'pipeline_run_provenance' in table_names:
+            # Retrieve the most recent run-level provenance record to display
+            # current provider/version pinning in the validation report header.
+            run_rows = conn.execute(
+                """
+                SELECT *
+                FROM pipeline_run_provenance
+                ORDER BY pipeline_run_timestamp DESC
+                LIMIT 1
+                """
+            ).fetchall()
+            run_schema = conn.execute("DESCRIBE pipeline_run_provenance").fetchall()
+            run_columns = [col[0] for col in run_schema]
+            if run_rows:
+                provenance['pipeline_run'] = {
+                    key: run_rows[0][idx]
+                    for idx, key in enumerate(run_columns)
+                }
+
+        if 'dataset_provenance' in table_names:
+            dataset_count = conn.execute("SELECT COUNT(*) FROM dataset_provenance").fetchone()[0]
+            status_distribution = conn.execute(
+                """
+                SELECT COALESCE(NULLIF(TRIM(status), ''), 'unknown') as status_label, COUNT(*) as count
+                FROM dataset_provenance
+                GROUP BY status_label
+                ORDER BY count DESC
+                """
+            ).fetchall()
+
+            failed_rows_result = conn.execute(
+                """
+                SELECT COUNT(*)
+                FROM dataset_provenance
+                WHERE COALESCE(NULLIF(TRIM(status), ''), 'unknown') NOT IN ('success')
+                """
+            ).fetchone()
+            failed_rows = failed_rows_result[0] if failed_rows_result else 0
+
+            provider_releases = conn.execute(
+                """
+                SELECT DISTINCT provider_release
+                FROM dataset_provenance
+                WHERE provider_release IS NOT NULL AND TRIM(provider_release) <> ''
+                ORDER BY provider_release
+                """
+            ).fetchall()
+
+            provider_snapshots = conn.execute(
+                """
+                SELECT DISTINCT provider_snapshot_date
+                FROM dataset_provenance
+                WHERE provider_snapshot_date IS NOT NULL AND TRIM(provider_snapshot_date) <> ''
+                ORDER BY provider_snapshot_date
+                """
+            ).fetchall()
+
+            provider_schemas = conn.execute(
+                """
+                SELECT DISTINCT provider_schema_profile
+                FROM dataset_provenance
+                WHERE provider_schema_profile IS NOT NULL AND TRIM(provider_schema_profile) <> ''
+                ORDER BY provider_schema_profile
+                """
+            ).fetchall()
+
+            provenance['dataset_provenance'] = {
+                'row_count': dataset_count,
+                'status_distribution': dict(status_distribution),
+                'non_success_rows': failed_rows,
+                'provider_releases': [row[0] for row in provider_releases],
+                'provider_snapshot_dates': [row[0] for row in provider_snapshots],
+                'provider_schema_profiles': [row[0] for row in provider_schemas],
+            }
+
+        validation_results['provenance'] = provenance
+
+        # 6. Check indexes exist
         logging.info("Checking indexes...")
         indexes = conn.execute("SELECT name FROM sqlite_master WHERE type='index'").fetchall()
         validation_results['indexes'] = [idx[0] for idx in indexes]
         
-        # 6. Check views exist
+        # 7. Check views exist
         logging.info("Checking views...")
         views = conn.execute("SELECT name FROM sqlite_master WHERE type='view'").fetchall()
         validation_results['views'] = [view[0] for view in views]
         
-        # 7. Overall summary
+        # 8. Overall summary
         total_phages = validation_results['tables'].get('fact_phages', {}).get('row_count', 0)
         total_proteins = validation_results['tables'].get('dim_proteins', {}).get('row_count', 0)
         total_terminators = validation_results['tables'].get('dim_terminators', {}).get('row_count', 0)
@@ -866,6 +952,82 @@ def generate_html_report(results, report_path):
             </div>
         </div>
     """
+
+    # Add provenance/version section
+    provenance = results.get('provenance', {})
+    run_provenance = provenance.get('pipeline_run', {}) or {}
+    dataset_provenance = provenance.get('dataset_provenance', {}) or {}
+    has_provenance = bool(run_provenance) or bool(dataset_provenance)
+
+    if has_provenance:
+        def _format_primary_or_fallback_list(primary_value, fallback_values):
+            if primary_value:
+                return str(primary_value)
+            return ', '.join(fallback_values) if fallback_values else 'N/A'
+
+        release_values = dataset_provenance.get('provider_releases', []) or []
+        snapshot_values = dataset_provenance.get('provider_snapshot_dates', []) or []
+        schema_values = dataset_provenance.get('provider_schema_profiles', []) or []
+        status_distribution = dataset_provenance.get('status_distribution', {}) or {}
+        non_success_rows = dataset_provenance.get('non_success_rows', 0) or 0
+        release_display = _format_primary_or_fallback_list(run_provenance.get('provider_release'), release_values)
+        snapshot_display = _format_primary_or_fallback_list(run_provenance.get('provider_snapshot_date'), snapshot_values)
+        schema_display = _format_primary_or_fallback_list(run_provenance.get('provider_schema_profile'), schema_values)
+
+        html_content += f"""
+        <div class="section">
+            <h2>🏷️ Provider Version & Provenance</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Provider Name</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(run_provenance.get('provider_name', 'N/A')))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Pinned Release</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(release_display))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Pinned Snapshot Date</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(snapshot_display))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Schema Profile</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(schema_display))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Provenance Mode</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(run_provenance.get('provider_provenance_mode', 'N/A')))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">PBI Version</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(run_provenance.get('pbi_version', 'N/A')))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Git Commit</div>
+                    <div class="stat-value" style="font-size: 14px;">{html.escape(str(run_provenance.get('git_commit', 'N/A')))}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Provenance Rows</div>
+                    <div class="stat-value">{int(dataset_provenance.get('row_count', 0)):,}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Non-success Provenance Rows</div>
+                    <div class="stat-value">{int(non_success_rows):,}</div>
+                </div>
+            </div>
+        """
+
+        if status_distribution:
+            html_content += """
+            <h3 style="margin-top: 20px;">Public Data Provenance Status Distribution</h3>
+            <table>
+                <tr><th>Status</th><th>Count</th></tr>
+            """
+            for status_label, count in sorted(status_distribution.items(), key=lambda x: -x[1]):
+                html_content += f"<tr><td>{html.escape(str(status_label))}</td><td>{count:,}</td></tr>"
+            html_content += "</table>"
+
+        html_content += "</div>"
     
     # Add detailed table statistics
     if results['tables']:

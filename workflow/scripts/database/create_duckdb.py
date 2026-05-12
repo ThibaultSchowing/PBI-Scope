@@ -531,6 +531,8 @@ def create_star_schema_duckdb():
         try:
             with open(private_manifest_path, "r", encoding="utf-8") as handle:
                 manifest = json.load(handle) or {}
+            # Only ingest validated sources from the manifest; invalid entries
+            # are kept in the manifest for diagnostics but skipped here.
             valid_source_dirs = [
                 source.get("source_dir")
                 for source in manifest.get("sources", [])

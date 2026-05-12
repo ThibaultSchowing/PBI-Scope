@@ -54,6 +54,8 @@ def main():
     provenance_cfg = snakemake.config.get("public_data_provenance", {})
     provider_cfg = snakemake.config.get("public_data_provider", {})
 
+    # Each input is a per-download sidecar JSON emitted by download_public_file.py.
+    # We merge all sidecars into one run-level provenance manifest.
     records = []
     for sidecar_path in sorted(str(path) for path in snakemake.input):
         if not os.path.exists(sidecar_path) or os.path.getsize(sidecar_path) == 0:
@@ -72,6 +74,7 @@ def main():
         json.dump(records, handle, indent=2)
         handle.write("\n")
 
+    # Flatten list-like fields for CSV storage while preserving JSON output fidelity.
     csv_rows = []
     for record in records:
         row = dict(record)
@@ -100,6 +103,8 @@ def main():
     ]
     _write_csv(manifest_csv, csv_rows, manifest_fieldnames)
 
+    # Run-level pinning snapshot: ties the downloaded manifest to a specific
+    # provider config and pipeline/package revision.
     run_record = {
         "pipeline_run_timestamp": _to_utc_iso(),
         "provider_name": provider_cfg.get("name", "PhageScope"),

@@ -22,6 +22,8 @@ def _to_utc_iso(ts: datetime | None = None) -> str:
 def _normalize_source_db(source_key: str) -> str:
     if not source_key:
         return ""
+    # Keep the first token before "_" so keys like
+    # "RefSeq_Phage_Metadata_URL" map back to "RefSeq".
     return source_key.split("_", 1)[0]
 
 
@@ -54,6 +56,8 @@ def _load_previous_fingerprint(manifest_path: str, feature: str, source_key: str
     try:
         with open(manifest_path, "r", encoding="utf-8") as handle:
             records = json.load(handle) or []
+        # Scan from newest to oldest to compare against the latest successful
+        # retrieval for the same feature/source pair.
         for record in reversed(records):
             if (
                 record.get("feature") == feature
@@ -151,6 +155,8 @@ def main():
         feature,
         source_key,
     )
+    # Optional schema drift guardrail:
+    # compare current TSV header fingerprint to the last successful run.
     if schema_fingerprint and previous_fingerprint and schema_fingerprint != previous_fingerprint:
         message = (
             f"Schema fingerprint changed for {feature}/{source_key}: "
