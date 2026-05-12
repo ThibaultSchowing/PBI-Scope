@@ -962,6 +962,9 @@ def generate_html_report(results, report_path):
         schema_values = dataset_provenance.get('provider_schema_profiles', []) or []
         status_distribution = dataset_provenance.get('status_distribution', {}) or {}
         non_success_rows = dataset_provenance.get('non_success_rows', 0) or 0
+        release_display = run_provenance.get('provider_release') or (', '.join(release_values) if release_values else 'N/A')
+        snapshot_display = run_provenance.get('provider_snapshot_date') or (', '.join(snapshot_values) if snapshot_values else 'N/A')
+        schema_display = run_provenance.get('provider_schema_profile') or (', '.join(schema_values) if schema_values else 'N/A')
 
         html_content += f"""
         <div class="section">
@@ -973,15 +976,15 @@ def generate_html_report(results, report_path):
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Pinned Release</div>
-                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(run_provenance.get('provider_release', ', '.join(release_values) if release_values else 'N/A')))}</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(release_display))}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Pinned Snapshot Date</div>
-                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(run_provenance.get('provider_snapshot_date', ', '.join(snapshot_values) if snapshot_values else 'N/A')))}</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(snapshot_display))}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Schema Profile</div>
-                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(run_provenance.get('provider_schema_profile', ', '.join(schema_values) if schema_values else 'N/A')))}</div>
+                    <div class="stat-value" style="font-size: 20px;">{html.escape(str(schema_display))}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Provenance Mode</div>
