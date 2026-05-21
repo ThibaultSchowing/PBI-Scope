@@ -8,6 +8,12 @@ This guide explains the current PBI container layout.
 - `analysis`: read-only data access for users (preferred)
 - `api`: legacy REST layer (limited support)
 
+> ⚠️ **Security notice**: The `analysis` container runs Jupyter Lab with
+> authentication and XSRF protection disabled. This is intentional for
+> local/SSH-tunnelled development. **Do not expose port 8888 to untrusted
+> networks.** See [Analysis Container Guide](analysis-guide.md#-security-notice)
+> for details and hardening steps.
+
 ## Non-root execution (required setup)
 
 Both the `pipeline` and `analysis` services run as your host user (`UID:GID`) to

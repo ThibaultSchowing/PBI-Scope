@@ -156,6 +156,8 @@ snakemake --cores 4 --use-conda \
   --config reuse_host_resolution_cache=false
 ```
 
+**Configuration File** (`workflow/config/genome_download_config.yaml`):
+
 ```yaml
 ncbi:
   email: your.email@example.com  # Required by NCBI
