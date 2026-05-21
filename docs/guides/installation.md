@@ -54,7 +54,12 @@ docker compose build analysis
 docker compose up -d analysis
 ```
 
-If remote:
+> ⚠️ **Security note**: The analysis container starts Jupyter Lab with authentication
+> and XSRF protection **disabled** — this is intentional for local/SSH-tunnelled
+> development. See the [Analysis Container Guide](analysis-guide.md#-security-notice)
+> for a full explanation and hardening steps before exposing the service to a network.
+
+If remote, use an SSH tunnel (safe because traffic stays inside the encrypted SSH connection):
 
 ```bash
 ssh -L 8888:localhost:8888 user@server
@@ -64,10 +69,9 @@ Then open `http://localhost:8888`.
 
 ## Preferred analysis access
 
-- **Preferred**: VS Code + **Dev Containers / VS Code Remote – Containers** attached to the running `analysis` service.
-- **Stable fallback**: Jupyter Lab on `http://localhost:8888`.
-
-Jupyter works well, but VS Code is preferred because it provides a full IDE workflow.
+- **Preferred**: VS Code + **Dev Containers** attached to the running `analysis` service — provides a full IDE workflow.
+  See [Analysis Container Guide](analysis-guide.md) for local and remote connection instructions.
+- **Stable fallback**: Jupyter Lab on `http://localhost:8888` (via SSH tunnel if remote).
 
 ## OOM caution
 

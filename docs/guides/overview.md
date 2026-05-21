@@ -24,3 +24,4 @@
 
 - The REST API is currently not supported for sequence-heavy retrieval.
 - Private source folders are optional, but when present they must follow the required format.
+- The analysis container runs Jupyter Lab with authentication disabled — safe only on localhost or via SSH tunnel. See [Analysis Container Guide](analysis-guide.md#-security-notice).

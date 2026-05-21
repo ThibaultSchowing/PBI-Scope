@@ -79,6 +79,27 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 ENTRYPOINT ["/usr/local/bin/entrypoint.analysis.sh"]
 
 # Start Jupyter Lab (no --allow-root needed; container runs as host UID via docker-compose user:)
-# WARNING: Authentication is disabled for LOCAL DEVELOPMENT ONLY.
-# NEVER expose this service to untrusted networks without enabling authentication.
+#
+# ⚠️  SECURITY WARNING — LOCAL / TRUSTED-NETWORK USE ONLY ⚠️
+#
+# The flags below disable ALL Jupyter authentication:
+#   --ServerApp.token=""            — no token required to open the notebook server
+#   --ServerApp.password=""         — no password required
+#   --ServerApp.disable_check_xsrf=True — disables Cross-Site Request Forgery (XSRF)
+#                                         protection.  Without XSRF checking, any web
+#                                         page that can reach port 8888 can execute
+#                                         arbitrary code in the kernel.
+#
+# These options are intentional for a development setup where the container is
+# only reachable from localhost (or via an SSH tunnel from a trusted machine).
+# They are NOT safe if port 8888 is directly exposed to the internet or to
+# an untrusted local network.
+#
+# Before deploying to a shared or internet-facing server:
+#   1. Remove --ServerApp.token= and --ServerApp.password= (or set real values).
+#   2. Remove --ServerApp.disable_check_xsrf=True.
+#   3. Place the service behind a reverse proxy with TLS and access controls.
+#
+# See docs/guides/analysis-guide.md for a full security discussion and for
+# instructions on how to connect safely via an SSH tunnel or VS Code Dev Containers.
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace", "--ServerApp.token=", "--ServerApp.password=", "--ServerApp.disable_check_xsrf=True"]

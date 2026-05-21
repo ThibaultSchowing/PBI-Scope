@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Detailed VS Code remote connection guide (SSH + Dev Containers) in [Analysis Container Guide](guides/analysis-guide.md).
+- Security warning section in analysis-guide.md, installation.md, and docker-guide.md explaining the implications of `--ServerApp.disable_check_xsrf=True` and the broader lack of authentication.
+
+### Changed
+
+- Expanded `Dockerfile.analysis` CMD comment to explicitly document the security risks of disabling token auth, password auth, and XSRF protection, with guidance on hardening steps.
+
 ## [0.3.0] - 2026-04-20
 
 ### Changed
