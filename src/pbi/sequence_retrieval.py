@@ -1476,7 +1476,108 @@ class SequenceRetriever:
         logging.info(f"✅ Retrieved {len(result):,} complete phage-host pairs with sequences")
 
         return result
-    
+
+    def query_phage_host_pairs(
+        self,
+        phage_filters: Optional[Dict[str, str]] = None,
+        host_filters: Optional[Dict[str, str]] = None,
+        limit: Optional[int] = None,
+        host_contig_mode: str = "concat",
+        phage_contig_mode: str = "first",
+    ) -> pd.DataFrame:
+        """
+        Query phage-host pairs using structured filter dictionaries.
+
+        A convenience wrapper around :meth:`get_phage_host_pairs` that accepts
+        column-level filter dicts instead of a raw SQL WHERE clause.
+
+        Args:
+            phage_filters: Mapping of phage column names to filter values.
+                Keys are columns in the ``fact_phages`` table (e.g.
+                ``"Lifestyle"``, ``"Source_DB"``).  Values that contain ``%``
+                are matched with SQL ``LIKE``; all other values use
+                case-insensitive equality (``LOWER(col) = LOWER(val)``).
+            host_filters: Mapping of host column names to filter values.
+                Keys are columns in the ``dim_hosts`` table.
+                ``"Organism_Name"`` is accepted as an alias for
+                ``"Species_Name"``.  The same ``%`` / equality rule applies.
+            limit: Maximum number of pairs to return.
+            host_contig_mode: See :meth:`get_phage_host_pairs`.
+            phage_contig_mode: See :meth:`get_phage_host_pairs`.
+
+        Returns:
+            DataFrame — same schema as :meth:`get_phage_host_pairs`.
+
+        Example:
+            # Lytic phages infecting Escherichia hosts
+            pairs = retriever.query_phage_host_pairs(
+                phage_filters={'Lifestyle': 'lytic'},
+                host_filters={'Organism_Name': '%Escherichia%'},
+                limit=20,
+            )
+
+            # Complete-genome hosts only
+            pairs = retriever.query_phage_host_pairs(
+                host_filters={'Assembly_Level': 'Complete Genome'},
+            )
+        """
+        # Map intuitive host column aliases to the actual dim_hosts column names
+        HOST_COLUMN_ALIASES: Dict[str, str] = {
+            "Organism_Name": "Species_Name",
+        }
+
+        conditions: List[str] = []
+
+        for col, val in (phage_filters or {}).items():
+            col_expr = f"p.{col}"
+            val_str = str(val).replace("'", "''")  # basic escaping
+            if "%" in val_str:
+                conditions.append(f"{col_expr} LIKE '{val_str}'")
+            else:
+                conditions.append(f"LOWER({col_expr}) = LOWER('{val_str}')")
+
+        for col, val in (host_filters or {}).items():
+            real_col = HOST_COLUMN_ALIASES.get(col, col)
+            col_expr = f"h.{real_col}"
+            val_str = str(val).replace("'", "''")  # basic escaping
+            if "%" in val_str:
+                conditions.append(f"{col_expr} LIKE '{val_str}'")
+            else:
+                conditions.append(f"LOWER({col_expr}) = LOWER('{val_str}')")
+
+        where_clause = " AND ".join(conditions) if conditions else None
+
+        return self.get_phage_host_pairs(
+            where_clause=where_clause,
+            limit=limit,
+            host_contig_mode=host_contig_mode,
+            phage_contig_mode=phage_contig_mode,
+        )
+
+    def get_phage_sequence(self, phage_id: str) -> Optional[str]:
+        """
+        Get the DNA sequence for a single phage.
+
+        A public convenience wrapper around the internal
+        :meth:`_get_phage_sequence` method for use in notebooks and scripts
+        where the source database is not known in advance.  The method first
+        tries the public ``all_phages.fasta`` and falls back to private
+        per-source FASTA files when private phage mapping is configured.
+
+        Args:
+            phage_id: Phage identifier (first token of the FASTA header).
+
+        Returns:
+            Sequence string, or ``None`` if the phage is not found in any
+            indexed FASTA.
+
+        Example:
+            seq = retriever.get_phage_sequence('PHAGE_Esche_phiX174_NC_001422')
+            if seq:
+                print(f'Length: {len(seq):,} bp')
+        """
+        return self._get_phage_sequence(phage_id)
+
     def _fetch_host_sequences(self, host_ids: list) -> pd.DataFrame:
         """
         Fetch host sequences for given Host IDs
