@@ -51,6 +51,13 @@ def _prepare_minimal_db(conn: duckdb.DuckDBPyConnection):
             Lifestyle VARCHAR,
             Cluster VARCHAR,
             Subcluster VARCHAR,
+            Provider_Name VARCHAR,
+            Provider_Release VARCHAR,
+            Provider_Snapshot_Date VARCHAR,
+            Provider_Schema_Profile VARCHAR,
+            Input_Source_Key VARCHAR,
+            Input_File VARCHAR,
+            Input_Retrieved_At VARCHAR,
             source_type VARCHAR
         )
         """
