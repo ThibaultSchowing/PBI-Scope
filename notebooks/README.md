@@ -4,12 +4,14 @@ This directory contains Jupyter notebooks for exploring and analyzing the PBI ph
 
 ## Main Notebooks
 
-These notebooks serve as the primary guides for working with PBI data:
+These notebooks form a progressive, user-oriented guide for working with PBI data.
+Run them in order for a complete introduction, or jump to the notebook that suits your goal.
 
 ### 📄 `00_pipeline_logs.ipynb` — Pipeline Logs Exploration
-Quick checks and exploratory snippets for pipeline logs:
-- Lists the mounted `/pipeline-logs` directory
-- Verifies that expected log/report folders are present
+Verify and understand pipeline execution and provenance:
+- Explains PBI's **three-layer versioning model** (package version · provider schema profile · run provenance)
+- Surfaces `pbi.__version__` and `pipeline_run_provenance.json` at startup
+- Lists the mounted `/pipeline-logs` directory and verifies expected artefacts
 - Safely previews selected log files when available
 - Handles missing logs gracefully (no crash if pipeline has not run yet)
 
@@ -36,17 +38,40 @@ End-to-end machine learning workflow from raw data to model training:
 - **Part 1 (DataFrame approach):** EDA, feature engineering, negative example generation, Random Forest baseline
 - **Part 2 (Streaming approach):** Memory-efficient `PhageHostStreamingDataset`, `PhageHostIndexedDataset`, batch iterators, custom transforms, train/test splitting
 
-### 📦 `04_data_release_exploration.ipynb` — Data Release Smoke Test & Exploration
-Standalone notebook distributed alongside the Zenodo data release (no PBI package required — only `duckdb` and `pandas`):
+### 📦 `04_data_release_exploration.ipynb` — Data Release Exploration
+Standalone release-consumer notebook distributed alongside the Zenodo data release (no PBI package required — only `duckdb` and `pandas`):
+- Structured introduction: purpose, expected inputs, requirements
 - Connect to the DuckDB database in read-only mode and verify all tables
 - Explore phage metadata: source distribution, genome length, GC content, lifestyle, host organisms
 - Inspect annotation coverage per phage (proteins, terminators, AMR genes, CRISPR, etc.)
 - Browse all CSV files in `phages/` and `hosts/` with row counts and column previews
 - Host download status from JSON files
 - Clickable links to HTML data-merging and validation reports in `reports/`
-- Example cross-table SQL queries
+- Example cross-table SQL queries (marked as optional)
+
+### 🗺️ `05_end_to_end_walkthrough.ipynb` — End-to-End Walkthrough *(new)*
+Guided, user-oriented journey through the full PBI data path in one notebook — ideal as a first read:
+1. Pipeline provenance check (did the pipeline run? which snapshot?)
+2. Database at a glance (counts, coverage)
+3. Query a biologically meaningful phage–host subset
+4. Retrieve phage DNA sequences with O(1) FASTA access
+5. Downstream analysis snapshot (genome length / GC distribution)
+- Connects the dots between all other notebooks
+- Outputs saved under `<results>/05_end_to_end_walkthrough/`
+
+### 🔒 `06_reproducibility.ipynb` — Reproducibility & Provenance *(new)*
+Deep-dive into PBI's versioning conventions, build metadata, and reproducibility practices:
+- Explains and demonstrates the **three-layer versioning model** in detail
+- Reads `pbi.__version__`, `schema_profile` from config, and `pipeline_run_provenance.json`
+- Inspects the public data manifest (snapshot date, HTTP headers, checksums)
+- Queries the database `dataset_provenance` / `run_provenance` tables
+- Provides a practical **reproducibility checklist** and a ready-to-use citation line
 
 ## Subdirectories
+
+### `_shared/`
+Shared Python utilities imported by the notebooks:
+- `notebook_utils.py` — `print_env_info()`, `get_results_dir()`, `print_provenance()` helpers
 
 ### `exploration/`
 Development notebooks used while building the database. Useful as historical reference:
@@ -138,6 +163,8 @@ Recommended structure:
 
 ```
 /results/
+  05_end_to_end_walkthrough/
+  06_reproducibility/
   01_database_exploration/
     tables/
     figures/
