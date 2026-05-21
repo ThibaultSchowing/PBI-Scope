@@ -466,7 +466,7 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
         conn.register("private_phages_df", private_phages)
         conn.execute(
             """
-            INSERT INTO fact_phages
+            INSERT INTO fact_phages BY NAME
             SELECT * FROM private_phages_df
             """
         )
