@@ -30,6 +30,7 @@ RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pyth
 # Install Jupyter and scientific computing stack
 RUN pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org \
     jupyterlab==4.0.9 \
+    ipykernel \
     duckdb>=0.9.0 \
     pyfaidx>=0.7.0 \
     pandas>=2.0.0 \
@@ -80,4 +81,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.analysis.sh"]
 # Start Jupyter Lab (no --allow-root needed; container runs as host UID via docker-compose user:)
 # WARNING: Authentication is disabled for LOCAL DEVELOPMENT ONLY.
 # NEVER expose this service to untrusted networks without enabling authentication.
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace", "--ServerApp.token=", "--ServerApp.password="]
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--notebook-dir=/workspace", "--ServerApp.token=", "--ServerApp.password=", "--ServerApp.disable_check_xsrf=True"]
