@@ -27,7 +27,9 @@ This configuration is intentional for **local or SSH-tunnelled development only*
 
 **Before exposing the container to a shared or internet-facing network:**
 
-1. Set a real token: replace `--ServerApp.token=` with `--ServerApp.token=<your-secret>`.
+1. Set a real token and/or password:
+   - `--ServerApp.token=<your-secret>` (token-based access), **or**
+   - `--ServerApp.password=<hashed-password>` (use `jupyter server password` to generate the hash).
 2. Remove `--ServerApp.disable_check_xsrf=True`.
 3. Place the service behind a reverse proxy (nginx, Caddy, …) with TLS.
 
@@ -90,14 +92,14 @@ If the analysis container is running on a **remote server**, follow these steps.
 #### Step 3 — Open your notebooks
 
 - Open the folder `/workspace` — this is the bind-mounted `./notebooks` directory
-  on the remote server.
-- If you have a **local clone** of the repository, the `./notebooks` directory on
-  the server and your local clone share the same content via bind mount. You can
-  edit notebooks locally and they appear instantly inside the container, or edit
-  them inside the container and push/pull via git on the server.
-- If you only have a **copy of the notebooks** (not a full clone), copy them to
-  the `./notebooks` directory on the server — that directory is the container's
-  `/workspace`.
+  on the **remote server**.
+- If you have a **local clone** of the repository on the server, the `./notebooks`
+  directory is already in place and bind-mounted into the container. Edit notebooks
+  from within the attached VS Code window (which runs inside the container) and
+  commit/push via git on the server as usual.
+- If you only have a **copy of the notebooks** (not a full server-side clone),
+  copy them to the `./notebooks` directory on the server first — that directory
+  is what the container sees as `/workspace`.
 
 #### Step 4 — Install extensions inside the container (optional)
 
