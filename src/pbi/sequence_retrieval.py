@@ -1521,6 +1521,17 @@ class SequenceRetriever:
                 host_filters={'Assembly_Level': 'Complete Genome'},
             )
         """
+        # Allowed column names for each table (guards against column-name injection)
+        _ALLOWED_PHAGE_COLS: frozenset = frozenset({
+            "Phage_ID", "Source_DB", "Length", "GC_content", "Taxonomy",
+            "Completeness", "Host", "Lifestyle", "Cluster", "Subcluster",
+            "source_type",
+        })
+        _ALLOWED_HOST_COLS: frozenset = frozenset({
+            "Host_ID", "Species_Name", "Strain_Name", "Assembly_Accession",
+            "Assembly_Name", "Assembly_Level", "Genome_Length", "GC_Content",
+            "RefSeq_Category", "Download_Date", "Source",
+        })
         # Map intuitive host column aliases to the actual dim_hosts column names
         HOST_COLUMN_ALIASES: Dict[str, str] = {
             "Organism_Name": "Species_Name",
@@ -1529,8 +1540,13 @@ class SequenceRetriever:
         conditions: List[str] = []
 
         for col, val in (phage_filters or {}).items():
+            if col not in _ALLOWED_PHAGE_COLS:
+                raise ValueError(
+                    f"Unknown phage filter column '{col}'. "
+                    f"Allowed columns: {sorted(_ALLOWED_PHAGE_COLS)}"
+                )
             col_expr = f"p.{col}"
-            val_str = str(val).replace("'", "''")  # basic escaping
+            val_str = str(val).replace("'", "''")
             if "%" in val_str:
                 conditions.append(f"{col_expr} LIKE '{val_str}'")
             else:
@@ -1538,8 +1554,13 @@ class SequenceRetriever:
 
         for col, val in (host_filters or {}).items():
             real_col = HOST_COLUMN_ALIASES.get(col, col)
+            if real_col not in _ALLOWED_HOST_COLS:
+                raise ValueError(
+                    f"Unknown host filter column '{col}'. "
+                    f"Allowed columns: {sorted(_ALLOWED_HOST_COLS | set(HOST_COLUMN_ALIASES))}"
+                )
             col_expr = f"h.{real_col}"
-            val_str = str(val).replace("'", "''")  # basic escaping
+            val_str = str(val).replace("'", "''")
             if "%" in val_str:
                 conditions.append(f"{col_expr} LIKE '{val_str}'")
             else:
