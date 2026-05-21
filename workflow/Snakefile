@@ -102,7 +102,8 @@ rule all:
         # Host genome files
         config["host_index_complete_flag"],
         config["host_fasta_mapping"],
-        config["host_metadata_output"]
+        config["host_metadata_output"],
+        config["host_status_report"]
 
 
 # if launched with auto discovery of snakefile (from the root directory),no need to specify the workflow directory
