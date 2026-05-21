@@ -1612,16 +1612,22 @@ is still safe and recommended for portability.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
 </code></pre></div>
-<p>If remote:</p>
+<blockquote>
+<p>⚠️ <strong>Security note</strong>: The analysis container starts Jupyter Lab with authentication
+and XSRF protection <strong>disabled</strong> — this is intentional for local/SSH-tunnelled
+development. See the <a href="../analysis-guide/#-security-notice">Analysis Container Guide</a>
+for a full explanation and hardening steps before exposing the service to a network.</p>
+</blockquote>
+<p>If remote, use an SSH tunnel (safe because traffic stays inside the encrypted SSH connection):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>user@server
 </code></pre></div>
 <p>Then open <code>http://localhost:8888</code>.</p>
 <h2 id="preferred-analysis-access">Preferred analysis access<a class="headerlink" href="#preferred-analysis-access" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Preferred</strong>: VS Code + <strong>Dev Containers / VS Code Remote – Containers</strong> attached to the running <code>analysis</code> service.</li>
-<li><strong>Stable fallback</strong>: Jupyter Lab on <code>http://localhost:8888</code>.</li>
+<li><strong>Preferred</strong>: VS Code + <strong>Dev Containers</strong> attached to the running <code>analysis</code> service — provides a full IDE workflow.
+  See <a href="../analysis-guide/">Analysis Container Guide</a> for local and remote connection instructions.</li>
+<li><strong>Stable fallback</strong>: Jupyter Lab on <code>http://localhost:8888</code> (via SSH tunnel if remote).</li>
 </ul>
-<p>Jupyter works well, but VS Code is preferred because it provides a full IDE workflow.</p>
 <h2 id="oom-caution">OOM caution<a class="headerlink" href="#oom-caution" title="Permanent link">&para;</a></h2>
 <p>For large joins/sequence retrieval, use chunked queries and avoid loading very large tables into memory in a single cell.</p>
 <h2 id="private-data-note">Private data note<a class="headerlink" href="#private-data-note" title="Permanent link">&para;</a></h2>

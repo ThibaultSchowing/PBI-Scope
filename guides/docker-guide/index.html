@@ -1531,6 +1531,13 @@
 <li><code>analysis</code>: read-only data access for users (preferred)</li>
 <li><code>api</code>: legacy REST layer (limited support)</li>
 </ul>
+<blockquote>
+<p>⚠️ <strong>Security notice</strong>: The <code>analysis</code> container runs Jupyter Lab with
+authentication and XSRF protection disabled. This is intentional for
+local/SSH-tunnelled development. <strong>Do not expose port 8888 to untrusted
+networks.</strong> See <a href="../analysis-guide/#-security-notice">Analysis Container Guide</a>
+for details and hardening steps.</p>
+</blockquote>
 <h2 id="non-root-execution-required-setup">Non-root execution (required setup)<a class="headerlink" href="#non-root-execution-required-setup" title="Permanent link">&para;</a></h2>
 <p>Both the <code>pipeline</code> and <code>analysis</code> services run as your host user (<code>UID:GID</code>) to
 prevent Docker from creating root-owned files in bind-mounted directories.</p>
