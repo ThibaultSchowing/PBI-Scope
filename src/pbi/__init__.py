@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .negative_examples import NegativeExampleGenerator
     from .sequence_retrieval import SequenceRetriever
+    from .gff3_retrieval import GFF3Retriever
     from .streaming_dataset import (
         PhageHostIndexedDataset,
         PhageHostStreamingDataset,
@@ -25,6 +26,7 @@ __author__ = "Thibault Schowing, CI4CB"
 # Public exports used by `from pbi import *`
 __all__ = [
     'SequenceRetriever',
+    'GFF3Retriever',
     'NegativeExampleGenerator',
     'PhageHostStreamingDataset',
     'PhageHostIndexedDataset',
@@ -37,6 +39,9 @@ def __getattr__(name):
     if name == "SequenceRetriever":
         from .sequence_retrieval import SequenceRetriever
         return SequenceRetriever
+    if name == "GFF3Retriever":
+        from .gff3_retrieval import GFF3Retriever
+        return GFF3Retriever
     if name == "NegativeExampleGenerator":
         from .negative_examples import NegativeExampleGenerator
         return NegativeExampleGenerator
@@ -90,6 +95,8 @@ def get_default_paths():
         'protein_fasta': base_path / 'sequences' / 'all_proteins.fasta',
         'host_mapping': base_path / 'sequences' / 'host_fasta_mapping.json',
         'private_phage_mapping': private_base_path / 'private_phage_mapping.json',
+        'gff3_dir': base_path / 'gff3',
+        'gff3_index': base_path / 'gff3' / 'gff3_index.json',
         # Legacy path for backward compatibility
         'host_fasta': base_path / 'sequences' / 'all_hosts.fasta',
     }

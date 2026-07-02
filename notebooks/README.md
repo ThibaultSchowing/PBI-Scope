@@ -67,6 +67,14 @@ Deep-dive into PBI's versioning conventions, build metadata, and reproducibility
 - Queries the database `dataset_provenance` / `run_provenance` tables
 - Provides a practical **reproducibility checklist** and a ready-to-use citation line
 
+### 🧬 `07_gff3_annotations.ipynb` — GFF3 Gene Annotations *(new)*
+Working with phage gene annotations stored in GFF3 format:
+- Initialize `GFF3Retriever` and explore the index
+- Retrieve raw GFF3 content for specific phages
+- Parse GFF3 into structured DataFrames (CDS features, products)
+- Memory-efficient line iteration for large files
+- Integration with phage metadata from DuckDB
+
 ## Subdirectories
 
 ### `_shared/`
@@ -75,13 +83,9 @@ Shared Python utilities imported by the notebooks:
 
 ### `exploration/`
 Development notebooks used while building the database. Useful as historical reference:
-- `expl_1.ipynb` — Initial database exploration
-- `expl_2_PhageScope.ipynb` — PhageScope data integration
-- `expl_3_VRHdb.ipynb` — VRHdb database integration
-- `expl_4_INPHARED.ipynb` — INPHARED database integration
-- `expl_5_TestDB.ipynb` — Database testing and validation
-- `expl_6_Fasta.ipynb` — FASTA file handling and indexing
-- `expl_7_hostgenomes.ipynb` — Host genome retrieval and processing
+- `expl_1_Fasta.ipynb` — Initial FASTA file exploration
+- `expl_2_TestDB.ipynb` — Database testing and validation
+- `expl_3_hostgenomes.ipynb` — Host genome retrieval and processing
 
 ### `bin/`
 Previous versions of the main notebooks, kept for reference:
@@ -165,6 +169,7 @@ Recommended structure:
 /results/
   05_end_to_end_walkthrough/
   06_reproducibility/
+  07_gff3_annotations/
   01_database_exploration/
     tables/
     figures/

@@ -203,6 +203,9 @@ phage_GFF3_urls:
     "TYMEFLIES": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/TYMEFLIES_Viral.gff3"
     "MetaVR": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/MetaVR.gff3"
 
+# GFF3 storage paths
+phage_gff3_output: "/data/processed/gff3"
+phage_gff3_index_output: "/data/processed/gff3/gff3_index.json"
 
 # -----------------------------------
 # Metadata - Features configuration

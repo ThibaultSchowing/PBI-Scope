@@ -9,6 +9,10 @@ from .private_data import validate_private_roots
 # Default private data root relative to the current working directory.
 _DEFAULT_PRIVATE_ROOT = "private_data"
 
+# Default GFF3 paths (container mode)
+_DEFAULT_GFF3_DIR = "/data/processed/gff3"
+_DEFAULT_GFF3_INDEX = "/data/processed/gff3/gff3_index.json"
+
 
 def _cmd_validate_private(args: argparse.Namespace) -> int:
     roots = list(args.path) if args.path else []
@@ -57,6 +61,64 @@ def _cmd_validate_private(args: argparse.Namespace) -> int:
     return 0 if summary["sources_invalid"] == 0 else 1
 
 
+def _cmd_get_gff3(args: argparse.Namespace) -> int:
+    """Retrieve GFF3 content for a phage."""
+    from .gff3_retrieval import GFF3Retriever
+
+    gff3_dir = args.gff3_dir or _DEFAULT_GFF3_DIR
+    index_path = args.index or _DEFAULT_GFF3_INDEX
+
+    if not Path(index_path).exists():
+        print(f"GFF3 index not found: {index_path}", file=sys.stderr)
+        print("Run the pipeline first to generate the GFF3 index.", file=sys.stderr)
+        return 1
+
+    try:
+        retriever = GFF3Retriever(gff3_dir, index_path)
+
+        if args.stats:
+            stats = retriever.stats()
+            print(f"GFF3 Index Statistics:")
+            print(f"  Total phages: {stats['total_phages']}")
+            print(f"  Sources:")
+            for source, count in sorted(stats["sources"].items()):
+                print(f"    {source}: {count}")
+            return 0
+
+        if args.list_sources:
+            stats = retriever.stats()
+            for source in sorted(stats["sources"].keys()):
+                print(source)
+            return 0
+
+        if args.list_phages:
+            source_filter = args.list_phages if args.list_phages != "all" else None
+            phages = retriever.list_phages(source_db=source_filter)
+            for phage_id in sorted(phages):
+                print(phage_id)
+            return 0
+
+        # Default: retrieve GFF3 content for a phage
+        if not args.phage_id:
+            print("Error: phage_id is required (or use --stats, --list-sources, --list-phages)", file=sys.stderr)
+            return 1
+
+        content = retriever.get_gff3(args.phage_id)
+        if content:
+            print(content, end="")
+            return 0
+        else:
+            print(f"No GFF3 found for '{args.phage_id}'", file=sys.stderr)
+            return 1
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Error retrieving GFF3: {e}", file=sys.stderr)
+        return 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="pbi", description="PBI command line utilities")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -77,6 +139,45 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     validate_private.set_defaults(func=_cmd_validate_private)
+
+    get_gff3 = subparsers.add_parser(
+        "get-gff3",
+        help="Retrieve GFF3 annotations for a phage or inspect the GFF3 index",
+    )
+    get_gff3.add_argument(
+        "phage_id",
+        nargs="?",
+        default=None,
+        help="Phage ID to retrieve (e.g., 'Mycobacterium_phage_NuevoMundo')",
+    )
+    get_gff3.add_argument(
+        "--gff3-dir",
+        default=None,
+        help=f"GFF3 directory path (default: {_DEFAULT_GFF3_DIR})",
+    )
+    get_gff3.add_argument(
+        "--index",
+        default=None,
+        help=f"GFF3 index path (default: {_DEFAULT_GFF3_INDEX})",
+    )
+    get_gff3.add_argument(
+        "--stats",
+        action="store_true",
+        help="Show GFF3 index statistics",
+    )
+    get_gff3.add_argument(
+        "--list-sources",
+        action="store_true",
+        help="List all source databases in the index",
+    )
+    get_gff3.add_argument(
+        "--list-phages",
+        nargs="?",
+        const="all",
+        default=None,
+        help="List all phage IDs (optionally filter by source DB)",
+    )
+    get_gff3.set_defaults(func=_cmd_get_gff3)
 
     return parser
 

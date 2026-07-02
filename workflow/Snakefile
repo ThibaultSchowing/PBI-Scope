@@ -93,6 +93,8 @@ rule all:
         expand(config["phage_fasta_merged_output"] + "{dataset}.fasta",
             dataset=list(config["phage_fasta_urls"].keys())
         ),
+        # GFF3 index (triggers GFF3 download + index build)
+        config["phage_gff3_index_output"],
         # DuckDB database and validation report
         config["optimized_duckdb_output"],
         config["database_validation_report_output"],
@@ -109,6 +111,8 @@ rule all:
 # if launched with auto discovery of snakefile (from the root directory),no need to specify the workflow directory
 # Since rules have been moved to a subdirectory, we needed to add "../"to all the paths  
 include: "rules/phagescope.smk"
+
+include: "rules/gff3.smk"
 
 include: "rules/database.smk"
 
