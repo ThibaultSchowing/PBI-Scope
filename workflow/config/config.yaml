@@ -173,6 +173,37 @@ phage_fasta_urls:
     "TYMEFLIES": "https://phageapi.deepomics.org/download/phage/fasta/?datasource=TYMEFLIES_Viral"
     "MetaVR": "https://phageapi.deepomics.org/download/phage/fasta/?datasource=MetaVR"
 
+# NEW: GFF3 files for phage genomes
+
+phage_GFF3_urls:
+    "Genbank": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/Genbank.gff3"
+    "RefSeq": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/RefSeq.gff3"
+    "DDBJ": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/DDBJ.gff3"
+    "EMBL": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/EMBL.gff3"
+    "PhagesDB": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/PhagesDB.gff3"
+    "GPD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/GPD.gff3"
+    "GVD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/GVD.gff3"
+    "SVD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/SVD.gff3"
+    "MGV": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/MGV.gff3"
+    "TemPhD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/TemPhD.gff3"
+    "CHVD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/CHVD.gff3"
+    "IGVD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/IGVD.gff3"
+    "IMGVR": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/IMGVR.gff3"
+    "GOV2": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/GOV2.gff3"
+    "STV": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/STV.gff3"
+    "GSV": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/GSV.gff3"
+    "UHGV": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/UHGV.gff3"
+    "HPGC": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/HPGC.gff3"
+    "URPC": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/URPC.gff3"
+    "ELGV": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/ELGV.gff3"
+    "OVD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/OVD.gff3"
+    "VMGC": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/VMGC.gff3"
+    "OPD": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/OPD.gff3"
+    "BAPS": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/BAPS.gff3"
+    "TYMEFLIES": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/TYMEFLIES_Viral.gff3"
+    "MetaVR": "https://phageapi.deepomics.org/fasta/phage_sequence/phage_gff3/MetaVR.gff3"
+
+
 # -----------------------------------
 # Metadata - Features configuration
 # -----------------------------------
