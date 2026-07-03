@@ -101,6 +101,11 @@ services:
       - JUPYTER_CONFIG_DIR=/workspace/.jupyter
       # Set PYTHONPATH for proper module imports
       - PYTHONPATH=/app
+      # Optional: set a token for JupyterLab authentication.
+      # Leave empty or commented out for no auth (default, localhost only).
+      # When set, JupyterLab requires the token to access the UI.
+      # Example: JUPYTER_TOKEN=my-secret-token
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-}
     networks:
       - pbi-network
     restart: unless-stopped
