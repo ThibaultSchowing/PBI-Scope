@@ -15,16 +15,19 @@ rule download_gff3:
     """
     Download a GFF3 file from PhageScope API.
     These are single .gff3 files per database (not tar.gz archives).
+    Uses Python download with retry, HTTP status validation, and HTML
+    error-page detection. On permanent failure an empty file is created
+    so the index builder skips it gracefully.
     """
     output:
         gff3=config["phage_gff3_output"] + "/{source}.gff3"
     params:
         url=lambda wildcards: config["phage_GFF3_urls"][wildcards.source]
     cache: True
-    shell:
-        """
-        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
-        """
+    conda:
+        "../envs/base_env.yaml"
+    script:
+        "../scripts/gff3/download_gff3.py"
 
 
 rule build_gff3_index:
