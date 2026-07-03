@@ -45,5 +45,11 @@ RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermedi
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
 
+# Copy and set up entrypoint to handle arbitrary UID/GID mapping
+COPY entrypoint.pipeline.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
 # Default command to run the pipeline #TODO change cores to all 
 CMD ["snakemake", "--cores", "all", "--use-conda", "--printshellcmds", "--cache", "--conda-prefix", "/cache/conda", "--directory", "/app/workflow", "--snakefile", "/app/workflow/Snakefile"]
