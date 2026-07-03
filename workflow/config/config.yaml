@@ -129,7 +129,7 @@ protein_fasta_urls:
     "TemPhD": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/TemPhD.tar.gz"
     "CHVD": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/CHVD.tar.gz"
     "IGVD": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/IGVD.tar.gz"
-    #"IMGVR": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/IMGVR.tar.gz" # Link broken or file not found
+    "IMGVR": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/IMGVR.tar.gz"
     "GOV2": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/GOV2.tar.gz"
     "STV": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/STV.tar.gz"
     "GSV": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/GSV.tar.gz"
@@ -505,5 +505,5 @@ antimicrobial_resistance_gene_metadata_urls:
     "OPD_Antimicrobial_Resistance_Gene_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Antimicrobial_resistance_gene_meta_data_v2/OPD_antimicrobial_resistance_gene_data.tsv"
     "BAPS_Antimicrobial_Resistance_Gene_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Antimicrobial_resistance_gene_meta_data_v2/BAPS_antimicrobial_resistance_gene_data.tsv"
     "SVD_Antimicrobial_Resistance_Gene_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Antimicrobial_resistance_gene_meta_data_v2/SVD_antimicrobial_resistance_gene_data.tsv"
-    #"TYMEFLIES_Antimicrobial_Resistance_Gene_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Antimicrobial_resistance_gene_meta_data_v2/TYMEFLIES_Viral_antimicrobial_resistance_gene_data.tsv"
+    "TYMEFLIES_Antimicrobial_Resistance_Gene_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Antimicrobial_resistance_gene_meta_data_v2/TYMEFLIES_Viral_antimicrobial_resistance_gene_data.tsv"
     "MetaVR_Antimicrobial_Resistance_Gene_Metadata_URL": "https://phageapi.deepomics.org/files/Download/Antimicrobial_resistance_gene_meta_data_v2/MetaVR_antimicrobial_resistance_gene_data.tsv"

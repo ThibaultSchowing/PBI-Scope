@@ -211,67 +211,79 @@ rule generate_report:
 
 rule download_protein_fasta:
     """
-    Télécharge un fichier .tar.gz à partir de son URL.
-    L'input est dynamique et dépend du nom.
+    Download a .tar.gz archive of protein FASTA files from PhageScope API.
+    Uses Python download with retry, HTTP status validation, and HTML
+    error-page detection. On permanent failure an empty archive is created
+    so downstream extract rules skip gracefully.
     """
     output:
-        os.path.join(config["protein_fasta_compressed_output"] , "{dataset}.tar.gz")
+        archive=os.path.join(config["protein_fasta_compressed_output"], "{dataset}.tar.gz")
     params:
-        url = lambda wildcards: config["protein_fasta_urls"] [wildcards.dataset]
-    cache: True 
-    shell:
-        """
-        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
-        """
+        url=lambda wildcards: config["protein_fasta_urls"][wildcards.dataset]
+    cache: True
+    conda:
+        "../envs/base_env.yaml"
+    script:
+        "../scripts/preprocessing/download_archive.py"
 
 rule extract_protein_fasta:
     """
-    Extrait le contenu d'une archive .tar.gz dans un dossier dédié par dataset.
-    Dépend du téléchargement de l'archive correspondante.
+    Extract a .tar.gz archive into a dedicated directory per dataset.
+    Skips extraction if the archive is too small (empty fallback from download).
     """
     input:
-        os.path.join(config["protein_fasta_compressed_output"] , "{dataset}.tar.gz")
+        os.path.join(config["protein_fasta_compressed_output"], "{dataset}.tar.gz")
     output:
         extracted_dir = temp(directory(os.path.join(config["protein_fasta_extracted_output"], "{dataset}")))
     shell:
-        """
+        r"""
         mkdir -p {output.extracted_dir}
-        tar -xzf {input} -C {output.extracted_dir}
-        
+        FILE_SIZE=$(stat -c%s "{input}" 2>/dev/null || echo 0)
+        if [ "$FILE_SIZE" -lt 100 ]; then
+            echo "WARNING: Archive {input} too small (${{FILE_SIZE}} bytes), skipping extraction" >&2
+        else
+            tar -xzf {input} -C {output.extracted_dir}
+        fi
         """        
 
 # Phage fasta files
 
 rule download_phage_fasta:
     """
-    Télécharge un fichier .tar.gz à partir de son URL.
-    L'input est dynamique et dépend du nom.
+    Download a .tar.gz archive of phage genome FASTA files from PhageScope API.
+    Uses Python download with retry, HTTP status validation, and HTML
+    error-page detection. On permanent failure an empty archive is created
+    so downstream extract rules skip gracefully.
     """
     output:
-        os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
+        archive=os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
     params:
-        url = lambda wildcards: config["phage_fasta_urls"][wildcards.dataset]
-    cache: True 
+        url=lambda wildcards: config["phage_fasta_urls"][wildcards.dataset]
+    cache: True
     threads: 8
-    shell:
-        """
-        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
-        """
+    conda:
+        "../envs/base_env.yaml"
+    script:
+        "../scripts/preprocessing/download_archive.py"
 
 rule extract_phage_fasta:
     """
-    Extrait le contenu d'une archive .tar.gz dans un dossier dédié par dataset.
-    Dépend du téléchargement de l'archive correspondante.
+    Extract a .tar.gz archive into a dedicated directory per dataset.
+    Skips extraction if the archive is too small (empty fallback from download).
     """
     input:
         os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
     output:
         extracted_dir = temp(directory(os.path.join(config["phage_fasta_extracted_output"], "{dataset}")))
     shell:
-        """
+        r"""
         mkdir -p {output.extracted_dir}
-        tar -xzf {input} -C {output.extracted_dir}
-        
+        FILE_SIZE=$(stat -c%s "{input}" 2>/dev/null || echo 0)
+        if [ "$FILE_SIZE" -lt 100 ]; then
+            echo "WARNING: Archive {input} too small (${{FILE_SIZE}} bytes), skipping extraction" >&2
+        else
+            tar -xzf {input} -C {output.extracted_dir}
+        fi
         """
 
 rule merge_protein_fasta_by_source:
