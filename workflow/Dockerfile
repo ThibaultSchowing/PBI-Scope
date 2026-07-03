@@ -45,9 +45,22 @@ RUN mkdir -p /data/processed/databases /data/processed/sequences /data/intermedi
 # Set the working directory to workflow for Snakemake
 WORKDIR /app/workflow
 
-# Copy and set up entrypoint to handle arbitrary UID/GID mapping
-COPY entrypoint.pipeline.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Create a wrapper entrypoint that patches /etc/passwd for arbitrary UID/GID.
+# When docker-compose runs as host UID that has no entry in /etc/passwd,
+# getpass.getuser() (called by Snakemake) raises OSError.
+# This wrapper adds a temporary passwd entry before exec-ing Snakemake.
+RUN cat > /entrypoint.sh << 'ENTRYPOINT_EOF'
+#!/bin/sh
+CURRENT_UID=$(id -u)
+CURRENT_GID=$(id -g)
+export USER="${USER:-pipeline}"
+export LOGNAME="${LOGNAME:-${USER}}"
+if ! getent passwd "${CURRENT_UID}" > /dev/null 2>&1 && [ -w /etc/passwd ]; then
+    echo "pipeline:x:${CURRENT_UID}:${CURRENT_GID}:Pipeline user:${HOME:-/app}:/bin/sh" >> /etc/passwd 2>/dev/null || true
+fi
+exec "$@"
+ENTRYPOINT_EOF
+    chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
