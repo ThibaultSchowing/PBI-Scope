@@ -33,7 +33,10 @@ def download(url: str, output_path: str) -> None:
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             request = urllib.request.Request(
-                url, headers={"User-Agent": "PBI-gff3-download/1.0"}
+                url, headers={
+                    "User-Agent": "PBI-gff3-download/1.0",
+                    "Accept-Encoding": "identity",
+                }
             )
             with urllib.request.urlopen(request, timeout=60) as response:
                 status = response.status

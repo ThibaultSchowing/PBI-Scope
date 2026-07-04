@@ -72,7 +72,10 @@ def _load_previous_fingerprint(manifest_path: str, feature: str, source_key: str
 
 
 def _download(url: str, output_path: str) -> tuple[dict, int]:
-    request = Request(url, headers={"User-Agent": "PBI-public-download/1.0"})
+    request = Request(url, headers={
+        "User-Agent": "PBI-public-download/1.0",
+        "Accept-Encoding": "identity",
+    })
     with urlopen(request, timeout=120) as response:  # nosec B310 - URL validated via _validate_source_url
         body = response.read()
         headers = {
