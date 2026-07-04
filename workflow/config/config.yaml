@@ -129,7 +129,7 @@ protein_fasta_urls:
     "TemPhD": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/TemPhD.tar.gz"
     "CHVD": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/CHVD.tar.gz"
     "IGVD": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/IGVD.tar.gz"
-    "IMGVR": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/IMGVR.tar.gz"
+    "IMGVR": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/IMG_VR.tar.gz"
     "GOV2": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/GOV2.tar.gz"
     "STV": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/STV.tar.gz"
     "GSV": "https://phageapi.deepomics.org/fasta/phage_sequence/proteins/GSV.tar.gz"
