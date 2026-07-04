@@ -212,19 +212,16 @@ rule generate_report:
 rule download_protein_fasta:
     """
     Download a .tar.gz archive of protein FASTA files from PhageScope API.
-    Uses Python download with retry, HTTP status validation, and HTML
-    error-page detection. On permanent failure an empty archive is created
-    so downstream extract rules skip gracefully.
     """
     output:
-        archive=os.path.join(config["protein_fasta_compressed_output"], "{dataset}.tar.gz")
+        os.path.join(config["protein_fasta_compressed_output"], "{dataset}.tar.gz")
     params:
         url=lambda wildcards: config["protein_fasta_urls"][wildcards.dataset]
     cache: True
-    conda:
-        "../envs/base_env.yaml"
-    script:
-        "../scripts/preprocessing/download_archive.py"
+    shell:
+        """
+        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
+        """
 
 rule extract_protein_fasta:
     """
@@ -235,33 +232,27 @@ rule extract_protein_fasta:
     output:
         extracted_dir = temp(directory(os.path.join(config["protein_fasta_extracted_output"], "{dataset}")))
     shell:
-        r"""
+        """
         mkdir -p {output.extracted_dir}
-        echo "=== Extracting {input} ($(stat -c%s "{input}" 2>/dev/null || echo unknown) bytes) ==="
         tar -xzf {input} -C {output.extracted_dir}
-        echo "=== Extracted $(find {output.extracted_dir} -type f | wc -l) files ==="
-        find {output.extracted_dir} -type f \( -name "*.fasta" -o -name "*.fa" \) | head -5
-        """        
+        """
 
 # Phage fasta files
 
 rule download_phage_fasta:
     """
     Download a .tar.gz archive of phage genome FASTA files from PhageScope API.
-    Uses Python download with retry, HTTP status validation, and HTML
-    error-page detection. On permanent failure an empty archive is created
-    so downstream extract rules skip gracefully.
     """
     output:
-        archive=os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
+        os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
     params:
         url=lambda wildcards: config["phage_fasta_urls"][wildcards.dataset]
     cache: True
     threads: 8
-    conda:
-        "../envs/base_env.yaml"
-    script:
-        "../scripts/preprocessing/download_archive.py"
+    shell:
+        """
+        wget -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
+        """
 
 rule extract_phage_fasta:
     """
@@ -272,12 +263,9 @@ rule extract_phage_fasta:
     output:
         extracted_dir = temp(directory(os.path.join(config["phage_fasta_extracted_output"], "{dataset}")))
     shell:
-        r"""
+        """
         mkdir -p {output.extracted_dir}
-        echo "=== Extracting {input} ($(stat -c%s "{input}" 2>/dev/null || echo unknown) bytes) ==="
         tar -xzf {input} -C {output.extracted_dir}
-        echo "=== Extracted $(find {output.extracted_dir} -type f | wc -l) files ==="
-        find {output.extracted_dir} -type f \( -name "*.fasta" -o -name "*.fa" \) | head -5
         """
 
 rule merge_protein_fasta_by_source:
