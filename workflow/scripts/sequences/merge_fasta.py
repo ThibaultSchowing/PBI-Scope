@@ -68,6 +68,11 @@ def merge_fasta_files(
         if os.path.exists(fasta_file) and os.path.getsize(fasta_file) > 0:
             valid_files.append(fasta_file)
         else:
+            # Delete stale empty files from previous failed runs so that
+            # Snakemake re-runs the download/extract chain on next execution.
+            if os.path.exists(fasta_file) and os.path.getsize(fasta_file) == 0:
+                os.remove(fasta_file)
+                logging.warning(f"🗑️  Deleted stale empty file: {fasta_file}")
             skipped_files.append(fasta_file)
             logging.warning(f"⚠️  Skipping empty or missing file: {fasta_file}")
 
