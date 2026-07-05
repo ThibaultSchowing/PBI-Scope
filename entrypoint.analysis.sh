@@ -42,6 +42,7 @@ if [ -n "${JUPYTER_TOKEN}" ]; then
     echo "=== Open http://localhost:8888/lab?token=${JUPYTER_TOKEN} ==="
 else
     CMD_ARGS+=("--ServerApp.token=")
+    CMD_ARGS+=("--ServerApp.password_required=False")
     echo "=== Jupyter Lab: running without authentication ==="
 fi
 
