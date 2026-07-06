@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .negative_examples import NegativeExampleGenerator
     from .sequence_retrieval import SequenceRetriever
     from .gff3_retrieval import GFF3Retriever
+    from .api_client import APIClient
     from .streaming_dataset import (
         PhageHostIndexedDataset,
         PhageHostStreamingDataset,
@@ -27,6 +28,7 @@ __author__ = "Thibault Schowing, CI4CB"
 __all__ = [
     'SequenceRetriever',
     'GFF3Retriever',
+    'APIClient',
     'NegativeExampleGenerator',
     'PhageHostStreamingDataset',
     'PhageHostIndexedDataset',
@@ -42,6 +44,9 @@ def __getattr__(name):
     if name == "GFF3Retriever":
         from .gff3_retrieval import GFF3Retriever
         return GFF3Retriever
+    if name == "APIClient":
+        from .api_client import APIClient
+        return APIClient
     if name == "NegativeExampleGenerator":
         from .negative_examples import NegativeExampleGenerator
         return NegativeExampleGenerator

@@ -1,12 +1,13 @@
 """
 FastAPI application for PBI database queries.
 
-The API is currently maintained for lightweight metadata/database exploration.
-High-volume sequence retrieval should use the pbi package in the analysis container.
+Provides metadata exploration, sequence retrieval, and genome access
+via a shared SequenceRetriever instance.
 """
 
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
@@ -29,16 +30,40 @@ logger = logging.getLogger('api.app')
 # Global retriever instance
 retriever: Optional[SequenceRetriever] = None
 
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+# Only allow SELECT statements to reduce SQL injection risk
+_SAFE_QUERY_RE = re.compile(r'^\s*(SELECT|WITH|SHOW|DESCRIBE|EXPLAIN)\b', re.IGNORECASE)
+
+
+def _validate_where_clause(clause: Optional[str]) -> Optional[str]:
+    """Validate a WHERE clause fragment for safety."""
+    if clause is None:
+        return None
+    clause = clause.strip()
+    if not clause:
+        return None
+    # Block common injection patterns
+    forbidden = [';', '--', '/*', '*/', 'EXEC', 'EXECUTE', 'DROP', 'DELETE',
+                 'INSERT', 'UPDATE', 'ALTER', 'CREATE', 'TRUNCATE']
+    upper = clause.upper()
+    for keyword in forbidden:
+        if re.search(r'\b' + keyword + r'\b', upper):
+            raise HTTPException(status_code=400, detail=f"Forbidden keyword in clause: {keyword}")
+    return clause
+
+
+def _df_to_records(df):
+    """Convert a DataFrame to JSON-safe list of dicts."""
+    df = df.replace([np.inf, -np.inf], None)
+    df = df.replace({np.nan: None})
+    return df.to_dict(orient='records')
+
 
 def get_data_paths():
-    """
-    Get paths to database and FASTA files from environment or defaults.
-    
-    Returns:
-        dict: Paths to data files
-    """
+    """Get paths to database and FASTA files from environment or defaults."""
     base_path = Path(os.getenv('DATA_PATH', 'data/processed'))
-    
+
     return {
         'database': str(base_path / 'databases' / 'phage_database_optimized.duckdb'),
         'phage_fasta': str(base_path / 'sequences' / 'all_phages.fasta'),
@@ -46,91 +71,103 @@ def get_data_paths():
     }
 
 
+# ── Lifespan ─────────────────────────────────────────────────────────────────
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown."""
     global retriever
-    
-    # Startup
+
     try:
         paths = get_data_paths()
         logger.info(f"Connecting to database: {paths['database']}")
         logger.info(f"Phage FASTA: {paths['phage_fasta']}")
         logger.info(f"Protein FASTA: {paths['protein_fasta']}")
-        
-        # Check if files exist
+
         for name, path in paths.items():
             if not Path(path).exists():
                 raise FileNotFoundError(f"{name.capitalize()} not found: {path}")
-        
+
         retriever = SequenceRetriever(
             paths['database'],
             paths['phage_fasta'],
             paths['protein_fasta']
         )
-        logger.info("✅ Successfully connected to database")
-        
-        # Log database statistics
+        logger.info("Successfully connected to database")
+
         stats = retriever.get_stats()
         logger.info(f"Database statistics: {stats['database']}")
-        
+
     except Exception as e:
         logger.error(f"Failed to connect to database: {e}")
         raise
-    
+
     yield
-    
-    # Shutdown
+
     if retriever:
         retriever.close()
         logger.info("Database connection closed")
 
 
-# Initialize FastAPI app with lifespan
+# ── App ──────────────────────────────────────────────────────────────────────
+
 app = FastAPI(
     title="PBI Database API",
     description="API for querying the Phage Bacteria Interactions database",
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan
 )
 
 
+# ── Request models ───────────────────────────────────────────────────────────
+
 class QueryRequest(BaseModel):
-    """Request model for SQL queries."""
     query: str
     limit: Optional[int] = 1000
 
 
 class PhageSequenceRequest(BaseModel):
-    """Request model for phage sequence retrieval."""
     query: Optional[str] = None
     phage_ids: Optional[List[str]] = None
     limit: Optional[int] = 1000
 
 
 class ProteinSequenceRequest(BaseModel):
-    """Request model for protein sequence retrieval."""
     query: Optional[str] = None
     protein_ids: Optional[List[str]] = None
     limit: Optional[int] = 1000
 
+
+# ── Utility endpoints ────────────────────────────────────────────────────────
 
 @app.get("/")
 async def root():
     """Root endpoint with API information."""
     return {
         "name": "PBI Database API",
-        "version": "0.3.0",
+        "version": "0.4.0",
         "status": "running",
         "endpoints": {
             "health": "/health",
             "stats": "/stats",
             "tables": "/tables",
             "query": "/query (POST)",
+            # Metadata
+            "phage_metadata": "/phage-metadata",
+            "host_metadata": "/host-metadata",
+            "phage_host_metadata": "/phage-host-metadata",
+            "phage_host_pairs": "/phage-host-pairs",
+            "protein_metadata": "/protein-metadata",
+            # Sequences
             "phages": "/phages (POST)",
             "proteins": "/proteins (POST)",
             "phages_fasta": "/phages/fasta (POST)",
-            "proteins_fasta": "/proteins/fasta (POST)"
+            "proteins_fasta": "/proteins/fasta (POST)",
+            "phage_sequence": "/phage/{phage_id}/sequence",
+            # Genomes
+            "phage_genome": "/phage/{phage_id}/genome",
+            "host_genome": "/host/{host_id}/genome",
+            "host_genome_stats": "/host/{host_id}/genome-stats",
         }
     }
 
@@ -140,11 +177,7 @@ async def health_check():
     """Health check endpoint."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
-    return {
-        "status": "healthy",
-        "database": "connected"
-    }
+    return {"status": "healthy", "database": "connected"}
 
 
 @app.get("/stats")
@@ -152,10 +185,8 @@ async def get_statistics():
     """Get database statistics."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
     try:
-        stats = retriever.get_stats()
-        return stats
+        return retriever.get_stats()
     except Exception as e:
         logger.error(f"Error getting statistics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -166,21 +197,17 @@ async def list_tables():
     """List all tables and views in the database."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
     try:
-        # Get all tables
         tables_result = retriever.conn.execute("SHOW TABLES").fetchdf()
         tables = tables_result['name'].tolist() if 'name' in tables_result.columns else []
-        
-        # Get all views (DuckDB shows views in SHOW TABLES, but we can also query information_schema)
+
         views_result = retriever.conn.execute(
             "SELECT table_name FROM information_schema.tables WHERE table_type = 'VIEW'"
         ).fetchdf()
         views = views_result['table_name'].tolist() if 'table_name' in views_result.columns else []
-        
-        # Separate tables and views
+
         table_names = [t for t in tables if t not in views]
-        
+
         return {
             "success": True,
             "rows": len(tables),
@@ -195,34 +222,139 @@ async def list_tables():
 
 @app.post("/query")
 async def execute_query(request: QueryRequest):
-    """
-    Execute a custom SQL query against the database.
-    
-    WARNING: Use with caution in production. Consider limiting to read-only queries.
-    """
+    """Execute a read-only SQL query against the database."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
+
+    # Enforce SELECT-only
+    if not _SAFE_QUERY_RE.match(request.query):
+        raise HTTPException(status_code=400, detail="Only SELECT queries are allowed")
+
     try:
-        # Execute query and convert to dict
         result = retriever.conn.execute(request.query).fetchdf()
-        
-        # Apply limit if specified
         if request.limit:
             result = result.head(request.limit)
-        
-        # Replace NaN and Infinity with None for JSON serialization
-        result = result.replace([np.inf, -np.inf], None)
-        result = result.replace({np.nan: None})
-        
         return {
             "success": True,
             "rows": len(result),
-            "data": result.to_dict(orient='records')
+            "data": _df_to_records(result)
         }
     except Exception as e:
         logger.error(f"Query error: {e}")
         raise HTTPException(status_code=400, detail=f"Query error: {str(e)}")
+
+
+# ── Metadata endpoints ───────────────────────────────────────────────────────
+
+@app.get("/phage-metadata")
+async def get_phage_metadata(
+    where: Optional[str] = Query(None, description="SQL WHERE clause fragment (without WHERE keyword)"),
+    limit: Optional[int] = Query(1000, ge=1, le=100000)
+):
+    """Get phage metadata from fact_phages with optional filtering."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    where = _validate_where_clause(where)
+    try:
+        df = retriever.get_phage_metadata(where_clause=where, limit=limit)
+        return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except Exception as e:
+        logger.error(f"Error getting phage metadata: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/host-metadata")
+async def get_host_metadata(
+    where: Optional[str] = Query(None, description="SQL WHERE clause fragment (without WHERE keyword)"),
+    limit: Optional[int] = Query(1000, ge=1, le=100000)
+):
+    """Get host metadata from dim_hosts with optional filtering."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    where = _validate_where_clause(where)
+    try:
+        df = retriever.get_host_metadata(where_clause=where, limit=limit)
+        return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except Exception as e:
+        logger.error(f"Error getting host metadata: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/phage-host-metadata")
+async def get_phage_host_metadata(
+    where: Optional[str] = Query(None, description="SQL WHERE clause fragment (without WHERE keyword)"),
+    limit: Optional[int] = Query(1000, ge=1, le=100000)
+):
+    """Get combined phage-host metadata with optional filtering."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    where = _validate_where_clause(where)
+    try:
+        df = retriever.get_phage_host_metadata(where_clause=where, limit=limit)
+        return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except Exception as e:
+        logger.error(f"Error getting phage-host metadata: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/phage-host-pairs")
+async def get_phage_host_pairs(
+    where: Optional[str] = Query(None, description="SQL WHERE clause fragment"),
+    limit: Optional[int] = Query(1000, ge=1, le=100000),
+    host_contig_mode: str = Query("concat", description="Host contig mode: first, concat, list, dict"),
+    phage_contig_mode: str = Query("first", description="Phage contig mode: first, concat, list, dict"),
+):
+    """Get phage-host pairs with sequences and metadata."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    where = _validate_where_clause(where)
+    try:
+        df = retriever.get_phage_host_pairs(
+            where_clause=where,
+            limit=limit,
+            host_contig_mode=host_contig_mode,
+            phage_contig_mode=phage_contig_mode,
+        )
+        return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except Exception as e:
+        logger.error(f"Error getting phage-host pairs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/protein-metadata")
+async def get_protein_metadata(
+    where: Optional[str] = Query(None, description="SQL WHERE clause fragment"),
+    limit: Optional[int] = Query(1000, ge=1, le=100000)
+):
+    """Get protein metadata from dim_proteins with optional filtering."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    where = _validate_where_clause(where)
+    try:
+        df = retriever.get_protein_metadata(where_clause=where, limit=limit)
+        return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except Exception as e:
+        logger.error(f"Error getting protein metadata: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Sequence endpoints ───────────────────────────────────────────────────────
+
+@app.get("/phage/{phage_id}/sequence")
+async def get_phage_sequence(phage_id: str):
+    """Get the DNA sequence for a single phage."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    try:
+        seq = retriever.get_phage_sequence(phage_id)
+        if seq is None:
+            raise HTTPException(status_code=404, detail=f"Phage not found: {phage_id}")
+        return {"success": True, "phage_id": phage_id, "sequence": seq, "length": len(seq)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting phage sequence: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/phages")
@@ -230,29 +362,18 @@ async def get_phages(request: PhageSequenceRequest):
     """Get phage sequences based on query or IDs."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
     try:
         if request.query:
-            result = retriever.get_phage_sequences(
-                request.query,
-                limit=request.limit
-            )
+            result = retriever.get_phage_sequences(request.query, limit=request.limit)
         elif request.phage_ids:
-            # Build SQL query from IDs
-            ids_str = "', '".join(request.phage_ids)
-            query = f"SELECT Phage_ID FROM fact_phages WHERE Phage_ID IN ('{ids_str}')"
-            result = retriever.get_phage_sequences(query)
+            placeholders = ', '.join(['?'] * len(request.phage_ids))
+            query = f"SELECT Phage_ID FROM fact_phages WHERE Phage_ID IN ({placeholders})"
+            result = retriever.get_phage_sequences(query, request.phage_ids)
         else:
-            raise HTTPException(
-                status_code=400,
-                detail="Either 'query' or 'phage_ids' must be provided"
-            )
-        
-        return {
-            "success": True,
-            "count": len(result),
-            "sequences": result.to_dict(orient='records')
-        }
+            raise HTTPException(status_code=400, detail="Either 'query' or 'phage_ids' must be provided")
+        return {"success": True, "count": len(result), "sequences": result.to_dict(orient='records')}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error retrieving phages: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -263,29 +384,18 @@ async def get_proteins(request: ProteinSequenceRequest):
     """Get protein sequences based on query or IDs."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
     try:
         if request.query:
-            result = retriever.get_protein_sequences(
-                request.query,
-                limit=request.limit
-            )
+            result = retriever.get_protein_sequences(request.query, limit=request.limit)
         elif request.protein_ids:
-            # Build SQL query from IDs
-            ids_str = "', '".join(request.protein_ids)
-            query = f"SELECT Protein_ID FROM dim_proteins WHERE Protein_ID IN ('{ids_str}')"
-            result = retriever.get_protein_sequences(query)
+            placeholders = ', '.join(['?'] * len(request.protein_ids))
+            query = f"SELECT Protein_ID FROM dim_proteins WHERE Protein_ID IN ({placeholders})"
+            result = retriever.get_protein_sequences(query, request.protein_ids)
         else:
-            raise HTTPException(
-                status_code=400,
-                detail="Either 'query' or 'protein_ids' must be provided"
-            )
-        
-        return {
-            "success": True,
-            "count": len(result),
-            "sequences": result.to_dict(orient='records')
-        }
+            raise HTTPException(status_code=400, detail="Either 'query' or 'protein_ids' must be provided")
+        return {"success": True, "count": len(result), "sequences": result.to_dict(orient='records')}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error retrieving proteins: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -296,31 +406,22 @@ async def get_phages_fasta(request: PhageSequenceRequest):
     """Get phage sequences in FASTA format."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
     try:
         if request.query:
-            result = retriever.get_phage_sequences(
-                request.query,
-                limit=request.limit
-            )
+            result = retriever.get_phage_sequences(request.query, limit=request.limit)
         elif request.phage_ids:
-            # Build SQL query from IDs
-            ids_str = "', '".join(request.phage_ids)
-            query = f"SELECT Phage_ID FROM fact_phages WHERE Phage_ID IN ('{ids_str}')"
-            result = retriever.get_phage_sequences(query)
+            placeholders = ', '.join(['?'] * len(request.phage_ids))
+            query = f"SELECT Phage_ID FROM fact_phages WHERE Phage_ID IN ({placeholders})"
+            result = retriever.get_phage_sequences(query, request.phage_ids)
         else:
-            raise HTTPException(
-                status_code=400,
-                detail="Either 'query' or 'phage_ids' must be provided"
-            )
-        
-        # Convert to FASTA format
+            raise HTTPException(status_code=400, detail="Either 'query' or 'phage_ids' must be provided")
         fasta_lines = []
         for _, row in result.iterrows():
             fasta_lines.append(f">{row['id']}")
             fasta_lines.append(row['sequence'])
-        
         return "\n".join(fasta_lines)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error generating FASTA: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -331,33 +432,105 @@ async def get_proteins_fasta(request: ProteinSequenceRequest):
     """Get protein sequences in FASTA format."""
     if retriever is None:
         raise HTTPException(status_code=503, detail="Database not connected")
-    
     try:
         if request.query:
-            result = retriever.get_protein_sequences(
-                request.query,
-                limit=request.limit
-            )
+            result = retriever.get_protein_sequences(request.query, limit=request.limit)
         elif request.protein_ids:
-            # Build SQL query from IDs
-            ids_str = "', '".join(request.protein_ids)
-            query = f"SELECT Protein_ID FROM dim_proteins WHERE Protein_ID IN ('{ids_str}')"
-            result = retriever.get_protein_sequences(query)
+            placeholders = ', '.join(['?'] * len(request.protein_ids))
+            query = f"SELECT Protein_ID FROM dim_proteins WHERE Protein_ID IN ({placeholders})"
+            result = retriever.get_protein_sequences(query, request.protein_ids)
         else:
-            raise HTTPException(
-                status_code=400,
-                detail="Either 'query' or 'protein_ids' must be provided"
-            )
-        
-        # Convert to FASTA format
+            raise HTTPException(status_code=400, detail="Either 'query' or 'protein_ids' must be provided")
         fasta_lines = []
         for _, row in result.iterrows():
             fasta_lines.append(f">{row['id']}")
             fasta_lines.append(row['sequence'])
-        
         return "\n".join(fasta_lines)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error generating FASTA: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Genome endpoints ─────────────────────────────────────────────────────────
+
+@app.get("/phage/{phage_id}/genome")
+async def get_phage_genome(
+    phage_id: str,
+    mode: str = Query("concat", description="Return mode: concat, first, list, dict"),
+    gap: int = Query(0, ge=0, description="Gap between contigs in concat mode"),
+    order: str = Query("length_desc", description="Contig order: length_desc, length_asc, natural"),
+):
+    """Get full phage genome with multi-contig assembly support."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    if mode not in ("concat", "first", "list", "dict"):
+        raise HTTPException(status_code=400, detail="mode must be one of: concat, first, list, dict")
+    try:
+        result = retriever.get_phage_genome(phage_id, mode=mode, gap=gap, order=order)
+        if result is None:
+            raise HTTPException(status_code=404, detail=f"Phage not found: {phage_id}")
+        if mode == "concat":
+            return {"success": True, "phage_id": phage_id, "mode": mode, "sequence": result, "length": len(result)}
+        elif mode == "first":
+            return {"success": True, "phage_id": phage_id, "mode": mode, "sequence": result, "length": len(result)}
+        elif mode == "list":
+            return {"success": True, "phage_id": phage_id, "mode": mode, "contigs": result, "count": len(result)}
+        else:
+            return {"success": True, "phage_id": phage_id, "mode": mode, "contigs": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting phage genome: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/host/{host_id}/genome")
+async def get_host_genome(
+    host_id: str,
+    mode: str = Query("concat", description="Return mode: concat, first, list, dict"),
+    gap: int = Query(0, ge=0, description="Gap between contigs in concat mode"),
+    order: str = Query("length_desc", description="Contig order: length_desc, length_asc, natural"),
+):
+    """Get full host genome with multi-contig assembly support."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    if mode not in ("concat", "first", "list", "dict"):
+        raise HTTPException(status_code=400, detail="mode must be one of: concat, first, list, dict")
+    try:
+        result = retriever.get_host_genome(host_id, mode=mode, gap=gap, order=order)
+        if result is None:
+            raise HTTPException(status_code=404, detail=f"Host not found: {host_id}")
+        if mode == "concat":
+            return {"success": True, "host_id": host_id, "mode": mode, "sequence": result, "length": len(result)}
+        elif mode == "first":
+            return {"success": True, "host_id": host_id, "mode": mode, "sequence": result, "length": len(result)}
+        elif mode == "list":
+            return {"success": True, "host_id": host_id, "mode": mode, "contigs": result, "count": len(result)}
+        else:
+            return {"success": True, "host_id": host_id, "mode": mode, "contigs": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting host genome: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/host/{host_id}/genome-stats")
+async def get_host_genome_stats(host_id: str):
+    """Get contig statistics for a host genome without loading full sequence."""
+    if retriever is None:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    try:
+        stats = retriever.get_host_genome_stats(host_id)
+        if stats is None:
+            raise HTTPException(status_code=404, detail=f"Host not found: {host_id}")
+        return {"success": True, "host_id": host_id, "stats": stats}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting host genome stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
