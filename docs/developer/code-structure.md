@@ -34,7 +34,7 @@ PBI/
 │   ├── negative_examples.py   # NegativeExampleGenerator class
 │   └── streaming_dataset.py   # PhageHostStreamingDataset, PhageHostIndexedDataset
 │
-├── api/                   # REST API (untested)
+├── api/                   # REST API
 │   └── app.py               # FastAPI application with endpoints
 │
 ├── notebooks/             # Jupyter notebooks
@@ -106,9 +106,9 @@ The PBI package provides the primary interface for data access and ML dataset pr
 
 **Location**: `api/`
 
-FastAPI-based REST interface — **currently untested**:
+FastAPI-based REST interface for metadata queries, sequence retrieval, and SQL exploration:
 
-- **`app.py`**: Main API application with endpoints for health check, stats, SQL queries, and FASTA export
+- **`app.py`**: Main API application with endpoints for health check, stats, metadata queries, sequence retrieval, and SQL queries
 
 ### Documentation
 
@@ -146,7 +146,7 @@ host_fasta_mapping.json → /data/processed/sequences/
 All outputs → pbi-data Docker volume
       │
       ├──▶ Analysis container (Jupyter Lab, port 8888) via pbi package
-      └──▶ API container (FastAPI, port 8000) [untested]
+      └──▶ API container (FastAPI, port 8000) for exploration
 ```
 
 ## Development Workflow
@@ -177,6 +177,50 @@ Run with:
 ```bash
 python -m pytest tests/
 ```
+
+---
+
+## Schema Contracts
+
+PBI uses YAML-based schema contracts to keep metadata preprocessing resilient to upstream changes. Each contract (`workflow/schemas/*.yaml`) declares required/optional columns, aliases, and defaults.
+
+### Contract sections
+
+| Section | Meaning | Behavior if absent |
+|---------|---------|-------------------|
+| `required` | Column must exist | Pipeline fails with `ValueError` |
+| `optional` | Column may be absent | Added with `pd.NA` or configured default |
+| `aliases` | Alternate names → canonical name | Applied silently before validation |
+| `defaults` | Default value for optional columns | Falls back to `pd.NA` |
+
+### Processing order
+
+1. Strip whitespace from column names
+2. Apply aliases (canonical wins on collision)
+3. Check required columns
+4. Add missing optional columns
+5. Preserve unknown columns (not dropped)
+6. Reorder: `required + optional + sorted(unknown)`
+
+### Schema drift report
+
+```bash
+python workflow/scripts/preprocessing/report_schema_drift.py \
+  --contract workflow/schemas/phage_metadata_merged.yaml \
+  --input path/to/source_file.tsv \
+  --dataset-name phage_metadata
+```
+
+### Change procedure
+
+| Change | Contract | `create_duckdb.py` | `pbi` package |
+|--------|----------|-------------------|---------------|
+| Column renamed | Add alias | No change | No change |
+| New column — preserve only | No change | No change | No change |
+| New column — add to DuckDB | Add to `optional:` | Add to `SELECT` | No change |
+| New column — expose via `pbi` | Add to `optional:` | Add to `SELECT` | Add to query |
+| Optional → required | Move in contract | No change | No change |
+| Required column removed | Move to `optional:` | Handle `NULL` | Handle `None` |
 
 ## Resources
 

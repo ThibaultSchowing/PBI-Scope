@@ -33,27 +33,21 @@ theme:
 
 nav:
   - Home: index.md
-  - Guides:
-      - Overview: guides/overview.md
-      - Installation (Docker): guides/installation.md
+  - Getting Started:
+      - Installation: guides/installation.md
       - Story (One Read): guides/storytelling.md
       - How It Works: guides/how-it-works.md
-      - Provenance and Version Pinning: guides/provenance-version-pinning.md
+  - Guides:
       - Analysis Container: guides/analysis-guide.md
-      - Pipeline Execution: guides/pipeline-execution.md
-      - Private Data Ingestion: guides/private-data-ingestion.md
-      - Schema Contracts: guides/schema-contracts.md
       - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md
-      - Docker Advanced: guides/docker-guide.md
+      - Private Data Ingestion: guides/private-data-ingestion.md
       - Pipeline Logs: guides/logging.md
-  - Database:
-      - Overview: database/overview.md
-      - Host Resolution: database/host-resolution.md
-  - API:
-      - Overview: api/overview.md
   - Reference:
       - Commands: reference/commands.md
+      - API Reference: api/overview.md
+      - Database: database/overview.md
+      - Host Resolution: database/host-resolution.md
   - Developer:
       - Code Structure: developer/code-structure.md
   - Future Steps: future-steps.md

@@ -21,7 +21,7 @@ def build_index(gff3_files):
     {
         "phage_id": {
             "source_db": "PhagesDB",
-            "file_path": "/data/processed/gff3/PhagesDB.gff3",
+            "file_name": "PhagesDB.gff3",
             "byte_offset": 1234,
             "byte_length": 5678
         }
@@ -33,6 +33,7 @@ def build_index(gff3_files):
 
     for gff3_path in gff3_files:
         source_db = os.path.splitext(os.path.basename(gff3_path))[0]
+        file_name = os.path.basename(gff3_path)
         print(f"Processing {gff3_path} (source_db={source_db})")
 
         if not os.path.exists(gff3_path) or os.path.getsize(gff3_path) == 0:
@@ -54,7 +55,7 @@ def build_index(gff3_files):
                         byte_length = line_start - current_start
                         index[current_phage_id] = {
                             "source_db": source_db,
-                            "file_path": gff3_path,
+                            "file_name": file_name,
                             "byte_offset": current_start,
                             "byte_length": byte_length,
                         }
@@ -70,7 +71,7 @@ def build_index(gff3_files):
                             byte_length = line_start - current_start
                             index[current_phage_id] = {
                                 "source_db": source_db,
-                                "file_path": gff3_path,
+                                "file_name": file_name,
                                 "byte_offset": current_start,
                                 "byte_length": byte_length,
                             }

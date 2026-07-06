@@ -1,6 +1,6 @@
 # Welcome to PBI Documentation
 
-**PBI — Phage Bacteria Interactions (v0.3.0)**
+**PBI — Phage Bacteria Interactions (v0.4.0)**
 
 ## What is PBI?
 
@@ -66,7 +66,7 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
                     |                                                   |
           +---------v---------+                               +---------v---------+
           | analysis container|                               | api container      |
-          | pbi package (main)|                               | legacy / limited   |
+          | pbi package (main)|                               | exploration API    |
           +-------------------+                               +-------------------+
 ```
 
@@ -79,8 +79,8 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
 | Private data handling | ✅ Stable | Dedicated ingestion/validation path; see [Private Data Ingestion](guides/private-data-ingestion.md) |
 | Host genome resolution | ✅ Stable | Multi-token host parsing + NCBI assembly resolution |
 | Analysis workflow | ✅ Stable | Analysis container is the main interface |
-| REST API | ⚠️ Not supported for sequence retrieval | Too slow for sequence-heavy usage; planned redesign for exploration-only API |
-| Documentation | 🔄 Updated for v0.3.0 | Structure simplified and aligned with current infrastructure |
+| REST API | ✅ Available (exploration) | Metadata queries, single sequence retrieval, SQL queries |
+| Documentation | 🔄 Updated for v0.4.0 | Structure simplified and aligned with current infrastructure |
 
 ## Need help?
 

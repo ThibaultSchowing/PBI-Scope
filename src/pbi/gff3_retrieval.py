@@ -75,7 +75,11 @@ class GFF3Retriever:
             return ""
 
         entry = self.index[phage_id]
-        gff3_path = Path(entry["file_path"])
+        # Support both old (file_path) and new (file_name) index formats
+        if "file_name" in entry:
+            gff3_path = self.gff3_dir / entry["file_name"]
+        else:
+            gff3_path = Path(entry["file_path"])
 
         if not gff3_path.exists():
             logger.warning("GFF3 file not found: %s", gff3_path)
@@ -102,7 +106,11 @@ class GFF3Retriever:
             return
 
         entry = self.index[phage_id]
-        gff3_path = Path(entry["file_path"])
+        # Support both old (file_path) and new (file_name) index formats
+        if "file_name" in entry:
+            gff3_path = self.gff3_dir / entry["file_name"]
+        else:
+            gff3_path = Path(entry["file_path"])
 
         if not gff3_path.exists():
             logger.warning("GFF3 file not found: %s", gff3_path)

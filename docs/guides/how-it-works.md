@@ -10,12 +10,36 @@ PBI orchestrates a full phage-host data pipeline using Snakemake and Docker.
 
 ## Public-data pinning configuration
 
-`workflow/config/config.yaml` now includes:
+`workflow/config/config.yaml` includes:
 
 - `public_data_provider.*` (`name`, `release`, `snapshot_date`, `schema_profile`, `api_base_url`, `provenance_mode`)
 - `public_data_provenance.*` controls (`require_release_or_snapshot`, checksum/header capture, schema-mismatch behavior, and manifest output paths)
 
 This keeps current `*_urls` maps intact while adding a provider/version foundation for future `phagescope_v1`/`phagescope_v2` transitions.
+
+## Data provenance
+
+During each public file download, PBI writes a sidecar record with:
+
+- source URL and local path
+- retrieval timestamp, file size
+- optional checksum (`sha256`) and HTTP headers (`ETag`, `Last-Modified`)
+- detected tabular columns + schema fingerprint
+- status/error message
+
+Sidecars are consolidated into:
+
+- `pipeline_logs/csv/public_data_manifest.json/.csv`
+- `pipeline_logs/csv/pipeline_run_provenance.json/.csv`
+
+These are loaded into DuckDB tables `dataset_provenance` and `pipeline_run_provenance`. Quick checks:
+
+```sql
+SELECT status, COUNT(*) FROM dataset_provenance GROUP BY status;
+SELECT provider_release, provider_snapshot_date FROM pipeline_run_provenance;
+```
+
+**Private-data diagnostics**: private datasets are validated source-by-source. Only `is_valid: true` sources are ingested. Check `private_data/private_manifest.json` for skipped sources and validation errors.
 
 ## Pipeline stages
 
@@ -44,7 +68,7 @@ When private source folders are present, validation and private mapping preparat
 ## Access model
 
 - **Primary**: `pbi` package in the analysis container
-- **REST API**: currently not supported for sequence-heavy retrieval (performance limitation)
+- **REST API**: metadata queries, single sequence retrieval, SQL queries (see [API Reference](../api/overview.md))
 
 ## Why host data is handled outside DuckDB
 
