@@ -68,3 +68,7 @@ tmp/
 Dockerfile*
 docker-compose*.yml
 .dockerignore
+
+# Environment files (may contain secrets)
+.env
+.env.*

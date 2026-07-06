@@ -1,69 +1,57 @@
 # Docker Guide
 
-This guide explains the current PBI container layout.
+PBI uses Docker Compose to orchestrate three services: `pipeline`, `analysis`, and `api`.
 
-## Services
-
-- `pipeline`: builds/updates data
-- `analysis`: read-only data access for users (preferred)
-- `api`: legacy REST layer (limited support)
-
-> ⚠️ **Security notice**: The `analysis` container runs Jupyter Lab with
-> authentication and XSRF protection disabled. This is intentional for
-> local/SSH-tunnelled development. **Do not expose port 8888 to untrusted
-> networks.** See [Analysis Container Guide](analysis-guide.md#-security-notice)
-> for details and hardening steps.
-
-## Non-root execution (required setup)
-
-Both the `pipeline` and `analysis` services run as your host user (`UID:GID`) to
-prevent Docker from creating root-owned files in bind-mounted directories.
-
-The `user:` field in `docker-compose.yml` reads `UID` and `GID` from the `.env`
-file.  **You must set these once after cloning:**
+## Quick Start
 
 ```bash
+# Clone and configure
+git clone https://github.com/ThibaultSchowing/PBI.git
+cd PBI
 cp .env.example .env
-# Edit .env: fill in NCBI_EMAIL (and NCBI_API_KEY if you have one)
+# Edit .env: set NCBI_EMAIL, UID, GID
 
-# Append your host UID and GID:
-echo "UID=$(id -u)" >> .env
-echo "GID=$(id -g)" >> .env
-```
-
-Without this, every file the containers write to `./notebooks`, `./outputs`, and
-`./pipeline_logs` will be owned by `root` and require `sudo` to edit or delete.
-
-> **macOS note**: Docker Desktop on macOS translates file ownership via a built-in
-> shim, so root-owned files are less common there.  Setting `UID`/`GID` is still
-> recommended for portability and consistency.
-
-## Volumes and mounts
-
-```text
-+--------------------------- docker-compose ---------------------------+
-|                                                                     |
-|  named volume: pbi-data  -> mounted at /data in all services        |
-|  named volume: pbi-cache -> mounted at /cache in pipeline           |
-|                                                                     |
-|  bind mount: ./private_data  -> /private-data (rw pipeline, ro analysis)
-|  bind mount: ./pipeline_logs -> /pipeline-logs (rw pipeline, ro analysis)
-|  bind mount: ./notebooks     -> /workspace (analysis)
-|  bind mount: ./outputs -> /results (analysis)
-+---------------------------------------------------------------------+
-```
-
-## Minimal run order
-
-```bash
+# Build and run pipeline
 docker compose build pipeline
 docker compose run --rm pipeline
 
+# Start analysis container
 docker compose build analysis
 docker compose up -d analysis
 ```
 
-## API note
+See the [Installation Guide](installation.md) for detailed setup instructions.
 
-The API container exists but is not currently supported for sequence-heavy workflows.
-Use the analysis container + `pbi` package for production usage.
+## Services
+
+| Service | Purpose | Port |
+|---------|---------|------|
+| `pipeline` | Builds/updates the database | — |
+| `analysis` | Jupyter Lab + VS Code Dev Containers | 8889 |
+| `api` | REST API for metadata queries | 8000 |
+
+## Security
+
+The `analysis` container runs Jupyter Lab with authentication disabled for local development. See [Analysis Container Guide](analysis-guide.md#️-security-notice) for details and hardening steps.
+
+## UID/GID Setup
+
+Both `pipeline` and `analysis` services run as your host user to prevent root-owned files. Set `UID` and `GID` in `.env` after cloning:
+
+```bash
+echo "UID=$(id -u)" >> .env
+echo "GID=$(id -g)" >> .env
+```
+
+See [Installation Guide](installation.md) for full explanation.
+
+## API Service
+
+The API provides metadata queries and SQL exploration without the full `pbi` package:
+
+```bash
+docker compose up api
+# Available at http://localhost:8000
+```
+
+See [API Reference](../api/overview.md) for endpoint documentation.

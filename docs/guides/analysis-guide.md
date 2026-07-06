@@ -161,4 +161,174 @@ print(stats['database'])
 - `01_database_exploration.ipynb`
 - `02_sequence_retrieval.ipynb`
 - `03_ml_streaming.ipynb`
-- `00_pipeline_logs.ipynb`
+- `08_api_client.ipynb`
+
+---
+
+## Local Execution (Without Docker)
+
+You can run the pipeline locally without Docker. This requires managing conda environments and disk space manually.
+
+```bash
+# 1. Install dependencies
+conda env create -f workflow/envs/base_environment.yaml
+conda activate pbi-env
+
+# Install PBI package
+pip install -e .
+
+# 2. Configure NCBI credentials
+# Edit workflow/config/config.yaml and set your email and API key
+
+# 3. Run the pipeline
+./run_local.sh
+# or directly:
+snakemake --directory workflow --snakefile workflow/Snakefile \
+  --cores 4 --use-conda --printshellcmds
+```
+
+**Note**: The first run downloads ~50 GB of phage data and then attempts to download ~5,500 bacterial host genomes. Total runtime is similar to Docker (~4h for phages, ~12–18h for hosts).
+
+---
+
+## Docker: force-rerun examples
+
+Use `docker compose run --rm pipeline` and pass a Snakemake command override:
+
+```bash
+# Force re-run CSV download/merge related rule(s) by rule name
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_all_tsvs merge_phage_metadata_tsvs
+
+# Force host resolution/download rule
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_host_genomes
+
+# Force host resolution and ignore persisted token-resolution cache
+docker compose run --rm pipeline \
+  snakemake --cores all --use-conda --printshellcmds \
+  --directory /app/workflow --snakefile /app/workflow/Snakefile \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
+```
+
+---
+
+## Re-executing the Pipeline
+
+Snakemake re-runs a task when:
+
+- One or more output files are missing
+- An input file is newer than an output file
+- The rule implementation changed
+- You explicitly force it (`--forcerun`, `--forceall`)
+
+If none of the above happens, Snakemake skips the rule.
+
+### Host resolution cache
+
+Host token resolution persists a cache file (`pipeline_logs/csv/host_token_resolution_cache.json`). When `reuse_host_resolution_cache: true` (default), already-resolved host tokens are reused on later runs.
+
+To force a full refresh:
+
+```bash
+snakemake --cores 4 --use-conda \
+  --forcerun download_host_genomes \
+  --config reuse_host_resolution_cache=false
+```
+
+---
+
+## Tracking Download Progress
+
+During execution, you'll see progress updates:
+
+```
+🚀 Starting optimized host genome download pipeline
+📥 Starting downloads for 5,529 species
+
+Progress: ████████░░░░░░░░░░ 1,234/5,529 (22.3%)
+✅ Success: 1,100 | ❌ Failed: 89 | 📦 Cached: 45
+ETA: 1.2 hours | Rate: 15.3 genomes/min
+```
+
+**Key Metrics:**
+
+- **Success**: Downloaded successfully
+- **Failed**: Could not download (see failure log)
+- **Cached**: Already in cache (no re-download needed)
+- **Rate**: Current download speed
+
+---
+
+## Troubleshooting
+
+### High Failure Rate
+
+**Symptoms**: >20% failures in download
+
+```bash
+# Check failure categories
+cat data/logs/failed_downloads.txt | grep "Category:"
+```
+
+**Solutions:**
+
+- If "No assembly found": Normal for some species, may need manual curation
+- If "Download failed": Check network, increase retries in config
+- If "GTDB identifiers": Expected, these are filtered out automatically
+
+### Slow Download Speed
+
+**Symptoms**: <5 genomes/minute
+
+```bash
+# Check rate limiting
+grep "Rate limiter" logs/host_download.log
+```
+
+**Solutions:**
+
+1. Add NCBI API key to config (increases from 3 to 10 req/sec)
+2. Increase `max_concurrent` in config
+3. Check network bandwidth
+
+### Incomplete Download
+
+```bash
+# Resume from checkpoint (cache prevents re-downloads)
+snakemake --cores 4 --use-conda --rerun-incomplete
+```
+
+The cache system ensures completed downloads aren't repeated.
+
+---
+
+## Best Practices
+
+### For Production Runs
+
+1. **Set NCBI Email**: Required by NCBI Terms of Service
+2. **Use API Key**: Significantly faster (3x-10x)
+3. **Enable Cache**: Avoid re-downloading on failures
+4. **Monitor Progress**: Use `--verbose` flag for detailed logs
+
+```bash
+# Production execution with logging
+snakemake --cores 8 --use-conda \
+    --config ncbi_email=your@email.com ncbi_api_key=YOUR_KEY \
+    2>&1 | tee logs/pipeline_$(date +%Y%m%d).log
+```
+
+### For Development/Testing
+
+```bash
+# Test run with 100 species
+snakemake --cores 4 --use-conda --config limit=100
+```
+
+See [Pipeline Logs](logging.md) for detailed log file reference.

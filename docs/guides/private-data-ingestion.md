@@ -69,4 +69,4 @@ This manifest explicitly lists:
 
 For provenance/version-pinning details and public-source diagnostics, see:
 
-- [Provenance and version pinning](provenance-version-pinning.md)
+- [How It Works](how-it-works.md#data-provenance)

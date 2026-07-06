@@ -2,26 +2,25 @@
 
 ## Getting started
 
-- [Installation](installation.md)
-- [Story — one read walkthrough](storytelling.md)
-- [How it works](how-it-works.md)
-- [Provenance and version pinning](provenance-version-pinning.md)
+- [Installation](installation.md) — Docker setup, first run, and analysis access
+- [Story — one read walkthrough](storytelling.md) — End-to-end narrative of what the tool does
+- [How it works](how-it-works.md) — Pipeline stages, data provenance, access model
 
 ## Usage
 
-- [Analysis container](analysis-guide.md)
-- [Pipeline execution](pipeline-execution.md)
-- [PBI package](pbi-package.md)
-- [Machine learning](machine-learning.md)
+- [Analysis container](analysis-guide.md) — VS Code Dev Containers, Jupyter Lab, local execution
+- [PBI package](pbi-package.md) — Python API for sequence retrieval and ML datasets
+- [Machine learning](machine-learning.md) — Negative examples, feature engineering, model training
+- [Private data ingestion](private-data-ingestion.md) — Adding custom datasets
+- [Pipeline logs](logging.md) — Log files, reports, and intermediate CSVs
 
-## Data and private sources
+## Reference
 
-- [Private data ingestion](private-data-ingestion.md)
-- [Database overview](../database/overview.md)
-- [Host resolution](../database/host-resolution.md)
+- [Commands](../reference/commands.md) — CLI and Docker command reference
+- [API](../api/overview.md) — REST API endpoints and examples
+- [Database](../database/overview.md) — Schema and statistics
+- [Host resolution](../database/host-resolution.md) — How host genomes are resolved
 
-## Notes
+## Developer
 
-- The REST API is currently not supported for sequence-heavy retrieval.
-- Private source folders are optional, but when present they must follow the required format.
-- The analysis container runs Jupyter Lab with authentication disabled — safe only on localhost or via SSH tunnel. See [Analysis Container Guide](analysis-guide.md#-security-notice).
+- [Code structure](../developer/code-structure.md) — Project layout, schema contracts, development workflow

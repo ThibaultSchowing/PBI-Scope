@@ -56,7 +56,7 @@ docker compose up -d analysis
 
 > ⚠️ **Security note**: The analysis container starts Jupyter Lab with authentication
 > and XSRF protection **disabled** — this is intentional for local/SSH-tunnelled
-> development. See the [Analysis Container Guide](analysis-guide.md#-security-notice)
+> development. See the [Analysis Container Guide](analysis-guide.md#️-security-notice)
 > for a full explanation and hardening steps before exposing the service to a network.
 
 If remote, use an SSH tunnel (safe because traffic stays inside the encrypted SSH connection):
@@ -81,3 +81,30 @@ For large joins/sequence retrieval, use chunked queries and avoid loading very l
 
 If you use `private_data/` sources, each source must include host FASTA files (`hosts/<Host_ID>.fna`) matching metadata Host_ID values.
 See [Private Data Ingestion](private-data-ingestion.md).
+
+---
+
+## Docker Services
+
+PBI runs three Docker services:
+
+| Service | Purpose |
+|---------|---------|
+| `pipeline` | Builds/updates the database |
+| `analysis` | Read-only data access for users (preferred) |
+| `api` | REST API for metadata queries and SQL exploration |
+
+## Volumes and Mounts
+
+```text
++--------------------------- docker-compose ---------------------------+
+|                                                                     |
+|  named volume: pbi-data  -> mounted at /data in all services        |
+|  named volume: pbi-cache -> mounted at /cache in pipeline           |
+|                                                                     |
+|  bind mount: ./private_data  -> /private-data (rw pipeline, ro analysis)
+|  bind mount: ./pipeline_logs -> /pipeline-logs (rw pipeline, ro analysis)
+|  bind mount: ./notebooks     -> /workspace (analysis)
+|  bind mount: ./outputs -> /results (analysis)
++---------------------------------------------------------------------+
+```

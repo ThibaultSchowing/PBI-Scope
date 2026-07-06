@@ -2,6 +2,18 @@
 
 PBI stores metadata and sequence assets in complementary layers.
 
+## Current Statistics
+
+| Metric | Value |
+|--------|-------|
+| Phages in DB | 1,350,644 |
+| Proteins in DB | 71,971,209 |
+| Hosts in DB | 5,529 |
+| Phage-Host Associations | 1,241,301 |
+| Phage sequences | 1,327,915 |
+| Protein sequences | 71,969,191 |
+| Host sequences | 5,517 |
+
 ## Core structure
 
 - **DuckDB**: phage-centric star schema for analytical metadata queries
