@@ -44,10 +44,18 @@ def _validate_where_clause(clause: Optional[str]) -> Optional[str]:
     if not clause:
         return None
     # Block common injection patterns
-    forbidden = [';', '--', '/*', '*/', 'EXEC', 'EXECUTE', 'DROP', 'DELETE',
-                 'INSERT', 'UPDATE', 'ALTER', 'CREATE', 'TRUNCATE']
     upper = clause.upper()
-    for keyword in forbidden:
+    
+    # Check for non-word character patterns (substring match)
+    non_word_forbidden = [';', '--', '/*', '*/']
+    for pattern in non_word_forbidden:
+        if pattern in upper:
+            raise HTTPException(status_code=400, detail=f"Forbidden pattern in clause: {pattern}")
+    
+    # Check for SQL keywords (word boundary match)
+    keyword_forbidden = ['EXEC', 'EXECUTE', 'DROP', 'DELETE',
+                         'INSERT', 'UPDATE', 'ALTER', 'CREATE', 'TRUNCATE']
+    for keyword in keyword_forbidden:
         if re.search(r'\b' + keyword + r'\b', upper):
             raise HTTPException(status_code=400, detail=f"Forbidden keyword in clause: {keyword}")
     return clause
