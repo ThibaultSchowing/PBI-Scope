@@ -1828,6 +1828,58 @@ class SequenceRetriever:
         
         return result
     
+    def get_protein_metadata(self, where_clause: str = None, limit: Optional[int] = None) -> pd.DataFrame:
+        """
+        Get protein metadata from dim_proteins
+        
+        Args:
+            where_clause: Optional SQL WHERE clause to filter proteins (without WHERE keyword)
+            limit: Optional limit on number of proteins
+        
+        Returns:
+            DataFrame with protein metadata
+        
+        Example:
+            # Get all proteins metadata
+            metadata = retriever.get_protein_metadata()
+            
+            # Get proteins from specific source
+            metadata = retriever.get_protein_metadata("Source_DB = 'PhagesDB'", limit=1000)
+        """
+        query = """
+        SELECT 
+            Protein_ID,
+            Phage_ID,
+            Source_DB,
+            Protein_source,
+            Function_prediction_source,
+            Start,
+            Stop,
+            Strand,
+            Product,
+            Protein_classification
+        FROM dim_proteins
+        """
+        
+        # Parse where_clause to separate WHERE conditions from LIMIT/OFFSET
+        where_conditions, limit_offset = parse_where_clause(where_clause)
+        
+        if where_conditions:
+            query += f" WHERE {where_conditions}"
+        
+        # If limit parameter is provided, it takes precedence over any LIMIT in where_clause
+        if limit:
+            query += f" LIMIT {limit}"
+        elif limit_offset:
+            query += f" {limit_offset}"
+        
+        logging.info(f"🔍 Querying protein metadata...")
+        result = self.conn.execute(query).fetchdf()
+        
+        logging.info(f"✅ Retrieved metadata for {len(result):,} proteins")
+        
+        return result
+    
     def help(self):
         """Print help information"""
         help_text = """
