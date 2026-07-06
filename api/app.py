@@ -283,6 +283,9 @@ async def get_host_metadata(
     try:
         df = retriever.get_host_metadata(where_clause=where, limit=limit)
         return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except ValueError as e:
+        # Host data table doesn't exist - return informative error
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Error getting host metadata: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -300,6 +303,8 @@ async def get_phage_host_metadata(
     try:
         df = retriever.get_phage_host_metadata(where_clause=where, limit=limit)
         return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Error getting phage-host metadata: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -324,6 +329,8 @@ async def get_phage_host_pairs(
             phage_contig_mode=phage_contig_mode,
         )
         return {"success": True, "rows": len(df), "data": _df_to_records(df)}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Error getting phage-host pairs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
