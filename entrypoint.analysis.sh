@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Dynamic entrypoint for the analysis container.
 #
 # 1. Patches /etc/passwd so that Python's getpass.getuser() works when the

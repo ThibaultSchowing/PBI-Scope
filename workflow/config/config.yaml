@@ -101,8 +101,8 @@ reuse_host_resolution_cache: true  # Reuse token resolution cache across reruns
 public_data_provider:
   name: "PhageScope"
   release: "rolling"
-  snapshot_date: "2026-05-11"
-  schema_profile: "phagescope_v1"
+  snapshot_date: "2026-07-05"
+  schema_profile: "phagescope_v2"
   api_base_url: "https://phageapi.deepomics.org"
   provenance_mode: "config_pinned"
 
