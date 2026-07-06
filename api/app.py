@@ -76,6 +76,8 @@ def get_data_paths():
         'database': str(base_path / 'databases' / 'phage_database_optimized.duckdb'),
         'phage_fasta': str(base_path / 'sequences' / 'all_phages.fasta'),
         'protein_fasta': str(base_path / 'sequences' / 'all_proteins.fasta'),
+        'host_mapping': str(base_path / 'sequences' / 'host_fasta_mapping.json'),
+        'host_fasta': str(base_path / 'sequences' / 'all_hosts.fasta'),
     }
 
 
@@ -92,14 +94,25 @@ async def lifespan(app: FastAPI):
         logger.info(f"Phage FASTA: {paths['phage_fasta']}")
         logger.info(f"Protein FASTA: {paths['protein_fasta']}")
 
-        for name, path in paths.items():
-            if not Path(path).exists():
-                raise FileNotFoundError(f"{name.capitalize()} not found: {path}")
+        # Check required files exist
+        for name in ['database', 'phage_fasta', 'protein_fasta']:
+            if not Path(paths[name]).exists():
+                raise FileNotFoundError(f"{name.capitalize()} not found: {paths[name]}")
+
+        # Optional host files
+        host_mapping = paths.get('host_mapping')
+        host_fasta = paths.get('host_fasta')
+        if host_mapping and Path(host_mapping).exists():
+            logger.info(f"Host mapping: {host_mapping}")
+        if host_fasta and Path(host_fasta).exists():
+            logger.info(f"Host FASTA: {host_fasta}")
 
         retriever = SequenceRetriever(
             paths['database'],
             paths['phage_fasta'],
-            paths['protein_fasta']
+            paths['protein_fasta'],
+            host_fasta_path=host_fasta if host_fasta and Path(host_fasta).exists() else None,
+            host_mapping_path=host_mapping if host_mapping and Path(host_mapping).exists() else None,
         )
         logger.info("Successfully connected to database")
 
