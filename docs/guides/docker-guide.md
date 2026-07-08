@@ -1,6 +1,6 @@
 # Docker Guide
 
-PBI uses Docker Compose to orchestrate three services: `pipeline`, `analysis`, and `api`.
+PBI-Scope uses Docker Compose to orchestrate three services: `pipeline`, `analysis`, and `api`.
 
 ## Quick Start
 

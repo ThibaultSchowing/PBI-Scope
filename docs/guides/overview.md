@@ -9,7 +9,7 @@
 ## Usage
 
 - [Analysis container](analysis-guide.md) — VS Code Dev Containers, Jupyter Lab, local execution
-- [PBI package](pbi-package.md) — Python API for sequence retrieval and ML datasets
+- [PBI-Scope package](pbi-package.md) — Python API for sequence retrieval and ML datasets
 - [Machine learning](machine-learning.md) — Negative examples, feature engineering, model training
 - [Private data ingestion](private-data-ingestion.md) — Adding custom datasets
 - [Pipeline logs](logging.md) — Log files, reports, and intermediate CSVs

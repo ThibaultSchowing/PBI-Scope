@@ -1,5 +1,5 @@
-site_name: PBI Documentation
-site_description: Phage Bacteria Interactions - Docker-first phage-host data pipeline documentation
+site_name: PBI-Scope Documentation
+site_description: PBI-Scope - Docker-first phage-host data pipeline documentation
 # Important: set the full site_url for correct absolute links when hosted under /PBI/
 site_url: https://ThibaultSchowing.github.io/PBI/
 repo_name: ThibaultSchowing/PBI

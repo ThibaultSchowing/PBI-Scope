@@ -1,6 +1,6 @@
 # Installation Guide
 
-PBI is designed to run with Docker.
+PBI-Scope is designed to run with Docker.
 
 ## Requirements
 
@@ -62,16 +62,30 @@ docker compose up -d analysis
 If remote, use an SSH tunnel (safe because traffic stays inside the encrypted SSH connection):
 
 ```bash
-ssh -L 8888:localhost:8888 user@server
+ssh -L 8887:localhost:8888 user@server
 ```
 
-Then open `http://localhost:8888`.
+Then open `http://localhost:8887`.
+
+## 4) Start API container (optional)
+
+The REST API provides a lightweight interface for querying the database without the full `pbi` package. It supports metadata queries, single sequence retrieval, and SQL exploration.
+
+```bash
+docker compose build api
+docker compose up -d api
+```
+
+API is available at `http://localhost:8000`. See [API Reference](../api/overview.md) for endpoints.
+
+---
 
 ## Preferred analysis access
 
 - **Preferred**: VS Code + **Dev Containers** attached to the running `analysis` service — provides a full IDE workflow.
   See [Analysis Container Guide](analysis-guide.md) for local and remote connection instructions.
-- **Stable fallback**: Jupyter Lab on `http://localhost:8888` (via SSH tunnel if remote).
+- **Stable fallback**: Jupyter Lab on `http://localhost:8887` (via SSH tunnel if remote).
+- **API**: Quick exploration and metadata lookups without loading the full package.
 
 ## OOM caution
 
@@ -86,13 +100,13 @@ See [Private Data Ingestion](private-data-ingestion.md).
 
 ## Docker Services
 
-PBI runs three Docker services:
+PBI-Scope runs three Docker services:
 
-| Service | Purpose |
-|---------|---------|
-| `pipeline` | Builds/updates the database |
-| `analysis` | Read-only data access for users (preferred) |
-| `api` | REST API for metadata queries and SQL exploration |
+| Service | Purpose | Port |
+|---------|---------|------|
+| `pipeline` | Builds/updates the database | — |
+| `analysis` | Read-only data access for users (preferred) | 8889 |
+| `api` | REST API for metadata queries, sequence retrieval, and SQL exploration | 8000 |
 
 ## Volumes and Mounts
 

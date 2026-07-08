@@ -1,20 +1,20 @@
-# PBI Story — one read walkthrough
+# PBI-Scope Story — one read walkthrough
 
-This page explains the full PBI flow in execution order.
+This page explains the full PBI-Scope flow in execution order.
 
 For setup and commands, use the [Installation Guide](installation.md).
 
 ## 1) What PhageScope brings
 
-PhageScope aggregates several public phage resources into consistent exports. PBI uses those exports as its main **public** phage input (metadata and FASTA).
+PhageScope aggregates several public phage resources into consistent exports. PBI-Scope uses those exports as its main **public** phage input (metadata and FASTA).
 
 ## 2) Why Docker is central
 
-PBI relies on Docker to keep paths, environments, and large intermediate data consistent.
+PBI-Scope relies on Docker to keep paths, environments, and large intermediate data consistent.
 
 - `pipeline` builds data
 - `analysis` reads data for notebooks/scripts
-- `api` is legacy and limited
+- `api` provides REST API for exploration
 
 Named volumes and bind mounts keep outputs persistent and auditable.
 
@@ -33,7 +33,7 @@ Named volumes and bind mounts keep outputs persistent and auditable.
 
 ## 4) Resulting data product
 
-After completion, PBI provides:
+After completion, PBI-Scope provides:
 
 - DuckDB database for metadata exploration
 - Indexed phage/protein FASTA files
@@ -47,10 +47,12 @@ The recommended interface is the analysis container with the `pbi` package.
 
 - Use VS Code Dev Containers for full IDE workflow (preferred)
 - Use Jupyter Lab for notebook-first workflow
+- Use the REST API for quick exploration and metadata lookups
 
 ## 6) Where to go next
 
 - [Installation](installation.md)
 - [Analysis container](analysis-guide.md)
+- [API Reference](../api/overview.md)
 - [Private data ingestion](private-data-ingestion.md)
 - [Notebooks README](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md)

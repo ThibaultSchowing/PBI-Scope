@@ -1,6 +1,6 @@
 # Analysis Container Guide
 
-The analysis container is the recommended way to consume PBI data.
+The analysis container is the recommended way to consume PBI-Scope data.
 
 ---
 

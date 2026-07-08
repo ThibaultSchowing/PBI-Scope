@@ -1,6 +1,6 @@
 # Pipeline Logs Reference
 
-All files produced by the PBI pipeline that are useful for monitoring and post-run analysis are written under **`pipeline_logs/`** (bind-mounted from `./pipeline_logs` in the repository root to `/pipeline-logs` inside the container).
+All files produced by the PBI-Scope pipeline that are useful for monitoring and post-run analysis are written under **`pipeline_logs/`** (bind-mounted from `./pipeline_logs` in the repository root to `/pipeline-logs` inside the container).
 
 The directory is organised into three sub-directories:
 

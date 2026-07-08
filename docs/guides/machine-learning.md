@@ -1,6 +1,6 @@
-# Machine Learning with PBI
+# Machine Learning with PBI-Scope
 
-Comprehensive guide for using the PBI database to build machine learning models for phage-host interaction prediction and other bioinformatics tasks.
+Comprehensive guide for using the PBI-Scope database to build machine learning models for phage-host interaction prediction and other bioinformatics tasks.
 
 ## Quick Start
 

@@ -1,6 +1,6 @@
 # Private Data Ingestion
 
-PBI can ingest private sources from `private_data/` in addition to public PhageScope data.
+PBI-Scope can ingest private sources from `private_data/` in addition to public PhageScope data.
 
 ## Required per source
 

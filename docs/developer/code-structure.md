@@ -1,11 +1,11 @@
-# Code Structure
+# PBI-Scope Code Structure
 
-Overview of the PBI project architecture and code organization.
+Overview of the PBI-Scope project architecture and code organization.
 
 ## Project Layout
 
 ```
-PBI/
+PBI-Scope/
 ├── workflow/              # Snakemake pipeline
 │   ├── Snakefile          # Main pipeline definition
 │   ├── rules/             # Modular pipeline rules
@@ -31,11 +31,13 @@ PBI/
 ├── src/pbi/               # Python package
 │   ├── __init__.py          # Package init + quick_connect(), get_default_paths()
 │   ├── sequence_retrieval.py  # SequenceRetriever class
+│   ├── api_client.py        # APIClient class (REST API wrapper)
 │   ├── negative_examples.py   # NegativeExampleGenerator class
 │   └── streaming_dataset.py   # PhageHostStreamingDataset, PhageHostIndexedDataset
 │
 ├── api/                   # REST API
-│   └── app.py               # FastAPI application with endpoints
+│   ├── app.py               # FastAPI application with endpoints
+│   └── __init__.py          # Package init
 │
 ├── notebooks/             # Jupyter notebooks
 │   ├── 01_database_exploration.ipynb  # DB stats, quality control
@@ -95,7 +97,7 @@ The pipeline orchestrates data download, processing, and database creation:
 
 **Location**: `src/pbi/`
 
-The PBI package provides the primary interface for data access and ML dataset preparation:
+The PBI-Scope package provides the primary interface for data access and ML dataset preparation:
 
 - **`__init__.py`**: Exports main classes, defines `quick_connect()` and `get_default_paths()` (reads `DATA_PATH` env var)
 - **`sequence_retrieval.py`**: `SequenceRetriever` — connects to DuckDB and FASTA files, provides metadata query methods, sequence retrieval, and phage-host pair retrieval
@@ -118,7 +120,7 @@ MkDocs-based documentation (this site):
 
 - **`guides/`**: Installation, how-it-works, analysis usage, pipeline execution
 - **`database/`**: Database schema and host resolution details
-- **`api/`**: API reference (untested)
+- **`api/`**: API reference
 - **`reference/`**: Command reference
 - **`developer/`**: This page
 - **`archive/`**: Historical/development documentation

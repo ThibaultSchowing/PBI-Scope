@@ -1,10 +1,10 @@
-# Welcome to PBI Documentation
+# Welcome to PBI-Scope Documentation
 
-**PBI — Phage Bacteria Interactions (v0.4.0)**
+**PBI-Scope — Phage Bacteria Interactions (v0.4.0)**
 
-## What is PBI?
+## What is PBI-Scope?
 
-PBI is a reproducible Docker-first pipeline that prepares phage-host data for analysis and machine learning.
+PBI-Scope is a reproducible Docker-first pipeline that prepares phage-host data for analysis and machine learning.
 
 It combines:
 
@@ -12,9 +12,9 @@ It combines:
 2. **Optional private datasets** from `private_data/`
 3. **Host genome resolution/download** from NCBI RefSeq
 
-Outputs are stored in a shared data volume and consumed through the `pbi` Python package (recommended).
+Outputs are stored in a shared data volume and consumed through the `pbi` Python package or the REST API.
 
-> PBI is **not PhageScope-only** anymore. Private source ingestion is part of the standard workflow when source folders are present.
+> PBI-Scope is **not PhageScope-only** anymore. Private source ingestion is part of the standard workflow when source folders are present.
 
 ## Start Here
 
@@ -37,6 +37,56 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
   VS Code Dev Containers (preferred) and Jupyter Lab workflow.
 
 </div>
+
+## Quick Start Examples
+
+### Using the `pbi` package (recommended for notebooks)
+
+```python
+from pbi import quick_connect
+
+# Connect to the database
+retriever = quick_connect()
+
+# Get statistics
+stats = retriever.get_stats()
+print(f"Phages: {stats['database']['phages']:,}")
+
+# Query phage metadata
+phages = retriever.get_phage_metadata(limit=10)
+print(phages[['Phage_ID', 'Source_DB', 'Length']].head())
+```
+
+### Using the API client (recommended for quick exploration)
+
+```python
+from pbi import APIClient
+
+# Connect to the API (start with: docker compose up api)
+client = APIClient("http://localhost:8000")
+
+# Get database stats
+stats = client.get_stats()
+print(f"Phages: {stats['database']['phages']:,}")
+
+# Query with filter
+refseq = client.get_phage_metadata(
+    where_clause="Source_DB = 'RefSeq' AND Length > 50000",
+    limit=10
+)
+print(refseq.head())
+```
+
+### Notebooks
+
+Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks) for detailed workflows:
+
+| Notebook | Description |
+|----------|-------------|
+| `01_database_exploration.ipynb` | Database statistics and quality control |
+| `02_sequence_retrieval.ipynb` | Retrieving phage and protein sequences |
+| `03_ml_streaming.ipynb` | ML dataset preparation with streaming |
+| `08_api_client.ipynb` | Using the REST API client |
 
 ## Pipeline overview
 
@@ -66,7 +116,7 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
                     |                                                   |
           +---------v---------+                               +---------v---------+
           | analysis container|                               | api container      |
-          | pbi package (main)|                               | exploration API    |
+          | pbi package (main)|                               | REST API           |
           +-------------------+                               +-------------------+
 ```
 
@@ -79,7 +129,7 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
 | Private data handling | ✅ Stable | Dedicated ingestion/validation path; see [Private Data Ingestion](guides/private-data-ingestion.md) |
 | Host genome resolution | ✅ Stable | Multi-token host parsing + NCBI assembly resolution |
 | Analysis workflow | ✅ Stable | Analysis container is the main interface |
-| REST API | ✅ Available (exploration) | Metadata queries, single sequence retrieval, SQL queries |
+| REST API | ✅ Supported | Metadata queries, sequence retrieval, SQL exploration; see [API Reference](api/overview.md) |
 | Documentation | 🔄 Updated for v0.4.0 | Structure simplified and aligned with current infrastructure |
 
 ## Need help?

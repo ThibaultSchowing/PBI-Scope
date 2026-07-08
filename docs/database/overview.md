@@ -1,6 +1,6 @@
 # Database Overview
 
-PBI stores metadata and sequence assets in complementary layers.
+PBI-Scope stores metadata and sequence assets in complementary layers.
 
 ## Current Statistics
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This page describes how PBI resolves phage host information to downloadable bacterial genome assemblies from NCBI RefSeq.
+This page describes how PBI-Scope resolves phage host information to downloadable bacterial genome assemblies from NCBI RefSeq.
 
 Host genome resolution is a critical step because phage metadata from PhageScope contains complex, varied host field formats. A single phage's "Host" field may contain multiple identifiers in different formats, separated by semicolons:
 

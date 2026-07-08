@@ -1,6 +1,6 @@
-# How PBI Works
+# How PBI-Scope Works
 
-PBI orchestrates a full phage-host data pipeline using Snakemake and Docker.
+PBI-Scope orchestrates a full phage-host data pipeline using Snakemake and Docker.
 
 ## Data inputs
 

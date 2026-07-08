@@ -1,6 +1,6 @@
 # Command Reference
 
-Quick reference for common PBI operations and useful commands.
+Quick reference for common PBI-Scope operations and useful commands.
 
 ## Pipeline Execution
 
@@ -388,21 +388,25 @@ curl http://localhost:8000/health
 # Get statistics
 curl http://localhost:8000/stats
 
-# Custom query
+# Get phage metadata
+curl "http://localhost:8000/phage-metadata?limit=10"
+
+# Filtered phage metadata
+curl "http://localhost:8000/phage-metadata?where=Source_DB%20%3D%20%27RefSeq%27&limit=50"
+
+# Get host metadata
+curl "http://localhost:8000/host-metadata?limit=10"
+
+# Get protein metadata
+curl "http://localhost:8000/protein-metadata?limit=10"
+
+# Single phage sequence
+curl http://localhost:8000/phage/NC_001330.1/sequence
+
+# SQL query
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
-  -d '{"query": "SELECT COUNT(*) FROM fact_phages"}'
-
-# Get phages
-curl -X POST http://localhost:8000/phages \
-  -H "Content-Type: application/json" \
-  -d '{"phage_ids": ["NC_000866"]}'
-
-# Export to FASTA
-curl -X POST http://localhost:8000/phages/fasta \
-  -H "Content-Type: application/json" \
-  -d '{"query": "SELECT Phage_ID FROM fact_phages LIMIT 5"}' \
-  > phages.fasta
+  -d '{"query": "SELECT Source_DB, COUNT(*) FROM fact_phages GROUP BY Source_DB"}'
 ```
 
 ## File Operations
