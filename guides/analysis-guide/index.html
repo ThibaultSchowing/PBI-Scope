@@ -1983,6 +1983,11 @@ container image layer; reinstalling after a container rebuild is normal.</p>
 Traffic never leaves the encrypted SSH connection, so this is safe even though
 Jupyter authentication is disabled.</p>
 </blockquote>
+<div class="admonition tip">
+<p class="admonition-title">API Access</p>
+<p>You can also access the REST API remotely via SSH tunnel (<code>ssh -L 8000:localhost:8000 ...</code>).
+See <a href="../../api/overview/#remote-access">Remote Access</a> in the API Reference.</p>
+</div>
 <hr />
 <h2 id="oom-warning">OOM warning<a class="headerlink" href="#oom-warning" title="Permanent link">&para;</a></h2>
 <p>Large joins and sequence materialization can trigger out-of-memory errors.
