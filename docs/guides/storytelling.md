@@ -55,6 +55,7 @@ The recommended interface is the analysis container with the `pbi` package.
 - [Analysis container](analysis-guide.md)
 - [Build Custom Containers](custom-containers.md)
 - [API Reference](../api/overview.md)
+- [Remote Access (API)](../api/overview.md#remote-access)
 - [Private data ingestion](private-data-ingestion.md)
 - [Notebooks README](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md)
 

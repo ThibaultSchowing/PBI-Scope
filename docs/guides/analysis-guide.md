@@ -139,6 +139,10 @@ Then open `http://localhost:8888` in your local browser.
 > Traffic never leaves the encrypted SSH connection, so this is safe even though
 > Jupyter authentication is disabled.
 
+!!! tip "API Access"
+    You can also access the REST API remotely via SSH tunnel (`ssh -L 8000:localhost:8000 ...`).
+    See [Remote Access](../api/overview.md#remote-access) in the API Reference.
+
 ---
 
 ## OOM warning
