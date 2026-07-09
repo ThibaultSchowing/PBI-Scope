@@ -262,6 +262,20 @@ docker compose up -d api
 ssh -L 8000:localhost:8000 user@your-server
 ```
 
+!!! important "Port forwarding"
+    The local port (8000) must match the API container port (8000).
+    If you changed the API port in docker-compose.yml, update the tunnel accordingly:
+    ```bash
+    ssh -L 8000:localhost:<your-api-port> user@your-server
+    ```
+
+!!! tip "Quick test"
+    Verify the tunnel works by querying the API stats from your laptop:
+    ```bash
+    python -c "from pbi import APIClient; c = APIClient('http://localhost:8000'); print(c.get_stats()); c.close()"
+    ```
+    You should see a dictionary with database statistics (phages, proteins, hosts, etc.).
+
 **3. Use it from your laptop:**
 
 ```python
@@ -277,13 +291,28 @@ The tunnel encrypts all traffic. Safe even without API authentication.
 
 ### Install `pbi` Locally
 
-The `APIClient` only needs `requests` and `pandas`. Install the package on your laptop without the full data stack:
+The `APIClient` only needs `requests` and `pandas`. Install the package on your laptop:
 
 ```bash
 git clone https://github.com/ThibaultSchowing/PBI.git
 cd PBI
 pip install -e .
 ```
+
+!!! warning "Python 3.12+ or conda: 'externally-managed-environment' error"
+    If you see this error, you have two options:
+
+    **Option A:** Use the `--break-system-packages` flag (safe in conda environments):
+    ```bash
+    pip install -e . --break-system-packages
+    ```
+
+    **Option B:** Use Python 3.11 (avoids the restriction entirely):
+    ```bash
+    conda create -n pbi_env python=3.11 -y
+    conda activate pbi_env
+    pip install -e .
+    ```
 
 You do not need `duckdb`, `pyfaidx`, or the data volume on your laptop. Those are only required for direct database access.
 
