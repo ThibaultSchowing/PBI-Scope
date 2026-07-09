@@ -1,0 +1,97 @@
+# =============================================================================
+# Custom Docker Compose for R + Python Container
+# =============================================================================
+# This file defines two services:
+#   - custom-jupyter: Starts Jupyter Lab with R and Python kernels
+#   - custom-scripts: Runs the R exploration script and exits
+#
+# Usage:
+#   # Build the custom image
+#   docker compose -f docker-compose.custom.yml build
+#
+#   # Start Jupyter Lab (accessible at http://localhost:8888)
+#   docker compose -f docker-compose.custom.yml up custom-jupyter
+#
+#   # Run the R script (saves plots to ./output/)
+#   docker compose -f docker-compose.custom.yml up custom-scripts
+#
+#   # Run a bash shell (for debugging)
+#   docker compose -f docker-compose.custom.yml run custom-jupyter bash
+#
+# Prerequisites:
+#   - The pbi-data Docker volume must exist (created by the main pipeline)
+#   - Build the custom image first with: docker compose -f docker-compose.custom.yml build
+# =============================================================================
+
+services:
+  # --- Jupyter Mode -----------------------------------------------------------
+  # Starts Jupyter Lab with both R and Python kernels.
+  # Access at http://localhost:8888
+  #
+  # The notebooks directory is bind-mounted from the host, so files persist
+  # across container restarts. You can edit files locally and see changes
+  # in the container immediately.
+  custom-jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pbi-custom-jupyter
+    # Run as the host user so files are owned by you, not root
+    user: "${UID:-1000}:${GID:-1000}"
+    ports:
+      - "8888:8888"
+    volumes:
+      # Mount the PBI-Scope data volume (read-only for safety)
+      - pbi-data:/data:ro
+      # Mount this directory for notebooks and scripts
+      # Files you edit on the host appear in /workspace inside the container
+      - .:/workspace
+      # Mount output directory for saved plots
+      - ./output:/workspace/output
+    environment:
+      - DATA_PATH=/data/processed
+      - HOME=/workspace
+    networks:
+      - pbi-network
+    command: ["jupyter"]
+
+  # --- Script Mode ------------------------------------------------------------
+  # Runs the R exploration script and exits.
+  # Plots are saved to ./output/ on the host.
+  #
+  # This mode is useful for:
+  #   - Automated analysis pipelines
+  #   - Long-running scripts that don't need interaction
+  #   - Batch processing
+  custom-scripts:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pbi-custom-scripts
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      # Mount the PBI-Scope data volume (read-only for safety)
+      - pbi-data:/data:ro
+      # Mount this directory for scripts
+      - .:/workspace
+      # Mount output directory for saved plots
+      - ./output:/workspace/output
+    environment:
+      - DATA_PATH=/data/processed
+      - HOME=/workspace
+    networks:
+      - pbi-network
+    command: ["script"]
+
+# --- Named Volume -------------------------------------------------------------
+# This references the existing pbi-data volume created by the main pipeline.
+# The `external: true` flag means Docker Compose won't try to create it.
+volumes:
+  pbi-data:
+    external: true
+
+# --- Network ------------------------------------------------------------------
+# This references the existing pbi-network created by the main pipeline.
+networks:
+  pbi-network:
+    external: true

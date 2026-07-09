@@ -39,6 +39,7 @@ nav:
       - How It Works: guides/how-it-works.md
   - Guides:
       - Analysis Container: guides/analysis-guide.md
+      - Building Custom Containers: guides/custom-containers.md
       - PBI Package: guides/pbi-package.md
       - Machine Learning: guides/machine-learning.md
       - Private Data Ingestion: guides/private-data-ingestion.md
