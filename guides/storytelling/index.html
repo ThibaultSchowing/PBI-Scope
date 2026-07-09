@@ -651,6 +651,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#7-build-your-own-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7) Build your own environment
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1332,6 +1343,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#7-build-your-own-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7) Build your own environment
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1398,10 +1420,21 @@
 <ul>
 <li><a href="../installation/">Installation</a></li>
 <li><a href="../analysis-guide/">Analysis container</a></li>
+<li><a href="../custom-containers/">Build Custom Containers</a></li>
 <li><a href="../../api/overview/">API Reference</a></li>
 <li><a href="../private-data-ingestion/">Private data ingestion</a></li>
 <li><a href="https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md">Notebooks README</a></li>
 </ul>
+<h2 id="7-build-your-own-environment">7) Build your own environment<a class="headerlink" href="#7-build-your-own-environment" title="Permanent link">&para;</a></h2>
+<p>The default analysis container comes with Python and Jupyter Lab, but you are not limited to it. If you need a different setup — for example, R and Python together, or a container that runs scripts instead of notebooks — you can build your own.</p>
+<p>A custom container connects to the same data volume as the default one, so it has full access to the database, sequences, and all other outputs. You write a simple Dockerfile, and Docker handles the rest. This is useful when you want to:</p>
+<ul>
+<li><strong>Work in R</strong> alongside Python (e.g., for ggplot2 visualization or Bioconductor packages)</li>
+<li><strong>Run automated scripts</strong> that execute without human interaction and save results to disk</li>
+<li><strong>Use a different language</strong> like Julia, Rust, or anything else that can read DuckDB or FASTA files</li>
+<li><strong>Share the database</strong> across multiple containers via the REST API, without loading data locally</li>
+</ul>
+<p>The <a href="../custom-containers/">Building Custom Containers</a> guide walks you through this step by step, with a ready-to-use R + Python example in the <a href="https://github.com/ThibaultSchowing/PBI/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory.</p>
 
 
 
