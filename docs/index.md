@@ -36,6 +36,10 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
 
   VS Code Dev Containers (preferred) and Jupyter Lab workflow.
 
+- **[Build Custom Containers](guides/custom-containers.md)**
+
+  Create your own R+Python container connected to the PBI-Scope database.
+
 </div>
 
 ## Quick Start Examples

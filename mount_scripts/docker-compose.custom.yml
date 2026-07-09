@@ -1,9 +1,10 @@
 # =============================================================================
 # Custom Docker Compose for R + Python Container
 # =============================================================================
-# This file defines two services:
+# This file defines services for working with PBI-Scope:
 #   - custom-jupyter: Starts Jupyter Lab with R and Python kernels
 #   - custom-scripts: Runs the R exploration script and exits
+#   - api: Starts the PBI-Scope API (if not already running)
 #
 # Usage:
 #   # Build the custom image
@@ -17,6 +18,12 @@
 #
 #   # Run a bash shell (for debugging)
 #   docker compose -f docker-compose.custom.yml run custom-jupyter bash
+#
+#   # Start the API (if not already running from the main docker-compose.yml)
+#   docker compose -f docker-compose.custom.yml up api
+#
+#   # Start everything (Jupyter + API)
+#   docker compose -f docker-compose.custom.yml up custom-jupyter api
 #
 # Prerequisites:
 #   - The pbi-data Docker volume must exist (created by the main pipeline)
@@ -82,6 +89,36 @@ services:
     networks:
       - pbi-network
     command: ["script"]
+
+  # --- API Mode ----------------------------------------------------------------
+  # Starts the PBI-Scope API for lightweight metadata queries.
+  # If the API is already running from the main docker-compose.yml, this
+  # will just connect to the existing instance (no conflict).
+  #
+  # The API provides read-only access to the database via HTTP endpoints.
+  # From within the custom container, query it at: http://pbi-api:8000
+  #
+  # Usage:
+  #   docker compose -f docker-compose.custom.yml up api
+  #
+  # Then in your container:
+  #   from pbi import APIClient
+  #   client = APIClient("http://pbi-api:8000")
+  api:
+    build:
+      context: ../
+      dockerfile: Dockerfile.api
+    container_name: pbi-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount the same data directory (read-only for safety)
+      - pbi-data:/data:ro
+    environment:
+      - DATA_PATH=/data/processed
+    networks:
+      - pbi-network
+    restart: unless-stopped
 
 # --- Named Volume -------------------------------------------------------------
 # This references the existing pbi-data volume created by the main pipeline.

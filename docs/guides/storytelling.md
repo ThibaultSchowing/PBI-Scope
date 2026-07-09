@@ -53,6 +53,20 @@ The recommended interface is the analysis container with the `pbi` package.
 
 - [Installation](installation.md)
 - [Analysis container](analysis-guide.md)
+- [Build Custom Containers](custom-containers.md)
 - [API Reference](../api/overview.md)
 - [Private data ingestion](private-data-ingestion.md)
 - [Notebooks README](https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md)
+
+## 7) Build your own environment
+
+The default analysis container comes with Python and Jupyter Lab, but you are not limited to it. If you need a different setup — for example, R and Python together, or a container that runs scripts instead of notebooks — you can build your own.
+
+A custom container connects to the same data volume as the default one, so it has full access to the database, sequences, and all other outputs. You write a simple Dockerfile, and Docker handles the rest. This is useful when you want to:
+
+- **Work in R** alongside Python (e.g., for ggplot2 visualization or Bioconductor packages)
+- **Run automated scripts** that execute without human interaction and save results to disk
+- **Use a different language** like Julia, Rust, or anything else that can read DuckDB or FASTA files
+- **Share the database** across multiple containers via the REST API, without loading data locally
+
+The [Building Custom Containers](custom-containers.md) guide walks you through this step by step, with a ready-to-use R + Python example in the [`mount_scripts/`](https://github.com/ThibaultSchowing/PBI/tree/main/mount_scripts) directory.

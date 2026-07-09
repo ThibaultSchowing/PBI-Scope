@@ -254,6 +254,90 @@ Rscript -e 'knitr::knit2html("explore_phages.R")'
 
 ---
 
+## Querying the API from Custom Containers
+
+You can query the PBI-Scope API from within your custom container without loading the database directly. The API runs as a separate service on the same Docker network and can be reached via `http://pbi-api:8000`.
+
+### When to Use the API
+
+| Feature | API | Direct Database Access |
+|---------|-----|------------------------|
+| Setup | No local DB needed | Requires `pbi-data` volume |
+| Speed | Network latency | Direct file read |
+| Bulk downloads | Not supported | Recommended |
+| ML streaming | Not supported | Required |
+| Shared access | Multiple containers | Single instance |
+| SQL queries | Supported | Supported |
+
+!!! note "Read-only access"
+    The API provides **read-only** access to the database. All queries are validated and restricted to SELECT statements. This makes it safe for shared environments where multiple users or containers need concurrent access.
+
+### Starting the API
+
+```bash
+# Option 1: Start from the main docker-compose.yml
+docker compose up api
+
+# Option 2: Start from the custom docker-compose.yml
+docker compose -f docker-compose.custom.yml up api
+
+# Option 3: Start everything together
+docker compose -f docker-compose.custom.yml up custom-jupyter api
+```
+
+### Python Example (using `pbi.APIClient`)
+
+```python
+from pbi import APIClient
+
+# Connect to the API (uses Docker network, not localhost)
+client = APIClient("http://pbi-api:8000")
+
+# Quick metadata lookup
+phages = client.get_phage_metadata(where_clause="Source_DB = 'RefSeq'", limit=10)
+print(phages.head())
+
+# SQL exploration
+result = client.query("SELECT Source_DB, COUNT(*) FROM fact_phages GROUP BY Source_DB")
+print(result)
+
+client.close()
+```
+
+### R Example (using `httr`)
+
+```r
+library(httr)
+library(jsonlite)
+
+# Get database stats
+response <- GET("http://pbi-api:8000/stats")
+stats <- fromJSON(content(response, "text"))
+cat("Phages:", format(stats$database$phages, big.mark = ","), "\n")
+
+# Query phage metadata
+response <- GET("http://pbi-api:8000/phage-metadata", query = list(limit = 10))
+phages <- fromJSON(content(response, "text"))
+print(phages)
+```
+
+### curl Example (command line)
+
+```bash
+# Health check
+curl http://pbi-api:8000/health
+
+# Get statistics
+curl http://pbi-api:8000/stats
+
+# Query metadata
+curl "http://pbi-api:8000/phage-metadata?limit=10"
+```
+
+See [API Reference](../api/overview.md) for full endpoint documentation.
+
+---
+
 ## Template: Build Your Own Container
 
 ### Fill-in-the-Blank Dockerfile
