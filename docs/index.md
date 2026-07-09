@@ -8,7 +8,7 @@ PBI-Scope is a reproducible Docker-first pipeline that prepares phage-host data 
 
 It combines:
 
-1. **Public phage data** from PhageScope (which itself aggregates multiple phage sources)
+1. **Public phage data** from [PhageScope](https://phagescope.deepomics.org/) (which itself aggregates multiple phage sources)
 2. **Optional private datasets** from `private_data/`
 3. **Host genome resolution/download** from NCBI RefSeq
 
@@ -39,6 +39,10 @@ Outputs are stored in a shared data volume and consumed through the `pbi` Python
 - **[Build Custom Containers](guides/custom-containers.md)**
 
   Create your own R+Python container connected to the PBI-Scope database.
+
+- **[Database Reports](reports/database_validation.html)**
+
+  Quick overview of all PhageScope tables and database validation.
 
 </div>
 
@@ -135,6 +139,13 @@ Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI/tree/mai
 | Analysis workflow | ✅ Stable | Analysis container is the main interface |
 | REST API | ✅ Supported | Metadata queries, sequence retrieval, SQL exploration; see [API Reference](api/overview.md) |
 | Documentation | 🔄 Updated for v0.4.0 | Structure simplified and aligned with current infrastructure |
+
+## Work in Progress
+
+!!! warning "Host prediction bias"
+    Most host assignments in PhageScope are **predicted by [DeepHost](https://academic.oup.com/bib/article/23/1/bbab385/6374063)**, not experimentally validated. This introduces a significant bias: if you build a host prediction model using this data, you are training on already-predicted labels rather than curated ground truth.
+
+    We are in communication with the DeepHost authors to address this issue and improve host assignment quality in future releases.
 
 ## Need help?
 

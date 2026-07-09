@@ -4,6 +4,11 @@
 
 This page describes how PBI-Scope resolves phage host information to downloadable bacterial genome assemblies from NCBI RefSeq.
 
+!!! warning "Host prediction bias"
+    Most host assignments in PhageScope are **predicted by [DeepHost](https://academic.oup.com/bib/article/23/1/bbab385/6374063)**, not experimentally validated. This introduces a significant bias: if you build a host prediction model using this data, you are training on already-predicted labels rather than curated ground truth.
+
+    We are in communication with the DeepHost authors to address this issue. See [Work in Progress](../index.md#work-in-progress) for details.
+
 Host genome resolution is a critical step because phage metadata from PhageScope contains complex, varied host field formats. A single phage's "Host" field may contain multiple identifiers in different formats, separated by semicolons:
 
 ```

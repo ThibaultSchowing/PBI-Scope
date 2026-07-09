@@ -2,6 +2,9 @@
 
 PBI-Scope stores metadata and sequence assets in complementary layers.
 
+!!! info "Database Reports"
+    For a quick visual overview of all PhageScope tables and data quality, see the [Database Validation Report](../reports/database_validation.html) and [Phage Metadata Report](../reports/phage_metadata_report.html).
+
 ## Current Statistics
 
 | Metric | Value |
