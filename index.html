@@ -566,6 +566,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#work-in-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Work in Progress
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#need-help" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1395,6 +1406,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#work-in-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Work in Progress
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#need-help" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1431,7 +1453,7 @@
 <p>PBI-Scope is a reproducible Docker-first pipeline that prepares phage-host data for analysis and machine learning.</p>
 <p>It combines:</p>
 <ol>
-<li><strong>Public phage data</strong> from PhageScope (which itself aggregates multiple phage sources)</li>
+<li><strong>Public phage data</strong> from <a href="https://phagescope.deepomics.org/">PhageScope</a> (which itself aggregates multiple phage sources)</li>
 <li><strong>Optional private datasets</strong> from <code>private_data/</code></li>
 <li><strong>Host genome resolution/download</strong> from NCBI RefSeq</li>
 </ol>
@@ -1461,6 +1483,10 @@
 <li><strong><a href="guides/custom-containers/">Build Custom Containers</a></strong></li>
 </ul>
 <p>Create your own R+Python container connected to the PBI-Scope database.</p>
+<ul>
+<li><strong><a href="reports/database_validation.html">Database Reports</a></strong></li>
+</ul>
+<p>Quick overview of all PhageScope tables and database validation.</p>
 </div>
 <h2 id="quick-start-examples">Quick Start Examples<a class="headerlink" href="#quick-start-examples" title="Permanent link">&para;</a></h2>
 <h3 id="using-the-pbi-package-recommended-for-notebooks">Using the <code>pbi</code> package (recommended for notebooks)<a class="headerlink" href="#using-the-pbi-package-recommended-for-notebooks" title="Permanent link">&para;</a></h3>
@@ -1598,6 +1624,12 @@
 </tr>
 </tbody>
 </table>
+<h2 id="work-in-progress">Work in Progress<a class="headerlink" href="#work-in-progress" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Host prediction bias</p>
+<p>Most host assignments in PhageScope are <strong>predicted by <a href="https://academic.oup.com/bib/article/23/1/bbab385/6374063">DeepHost</a></strong>, not experimentally validated. This introduces a significant bias: if you build a host prediction model using this data, you are training on already-predicted labels rather than curated ground truth.</p>
+<p>We are in communication with the DeepHost authors to address this issue and improve host assignment quality in future releases.</p>
+</div>
 <h2 id="need-help">Need help?<a class="headerlink" href="#need-help" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Use the <a href="guides/overview/">Guides overview</a></li>

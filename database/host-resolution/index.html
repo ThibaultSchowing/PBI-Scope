@@ -1489,6 +1489,11 @@
 <h1 id="host-genome-resolution">Host Genome Resolution<a class="headerlink" href="#host-genome-resolution" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>This page describes how PBI-Scope resolves phage host information to downloadable bacterial genome assemblies from NCBI RefSeq.</p>
+<div class="admonition warning">
+<p class="admonition-title">Host prediction bias</p>
+<p>Most host assignments in PhageScope are <strong>predicted by <a href="https://academic.oup.com/bib/article/23/1/bbab385/6374063">DeepHost</a></strong>, not experimentally validated. This introduces a significant bias: if you build a host prediction model using this data, you are training on already-predicted labels rather than curated ground truth.</p>
+<p>We are in communication with the DeepHost authors to address this issue. See <a href="../../#work-in-progress">Work in Progress</a> for details.</p>
+</div>
 <p>Host genome resolution is a critical step because phage metadata from PhageScope contains complex, varied host field formats. A single phage's "Host" field may contain multiple identifiers in different formats, separated by semicolons:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>NA;GCA 900066335.1;UBA9502;Blautia obeum
 </code></pre></div>
