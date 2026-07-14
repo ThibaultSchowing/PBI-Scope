@@ -79,7 +79,7 @@
     <body>
         <div class="header">
             <h1>🧬 PhageScope Database Validation Report</h1>
-            <p><strong>Generated:</strong> 2026-01-20T16:45:48.826230</p>
+            <p><strong>Generated:</strong> 2026-07-06T13:44:09.182311</p>
             <p><strong>Database:</strong> /data/processed/databases/phage_database_optimized.duckdb</p>
         </div>
         
@@ -88,39 +88,39 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-title">Phages</div>
-                    <div class="stat-value">873,718</div>
+                    <div class="stat-value">1,350,644</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Proteins</div>
-                    <div class="stat-value">36,718,799</div>
+                    <div class="stat-value">71,971,209</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Terminators</div>
-                    <div class="stat-value">4,640,129</div>
+                    <div class="stat-value">6,885,944</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Anti-CRISPR</div>
-                    <div class="stat-value">299,832</div>
+                    <div class="stat-value">418,595</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Virulent Factors</div>
-                    <div class="stat-value">23,774</div>
+                    <div class="stat-value">34,244</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Transmembrane</div>
-                    <div class="stat-value">4,020,770</div>
+                    <div class="stat-value">9,735,407</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">tRNA/tmRNA</div>
-                    <div class="stat-value">1,298,181</div>
+                    <div class="stat-value">1,734,794</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">CRISPR Arrays</div>
-                    <div class="stat-value">56,652</div>
+                    <div class="stat-value">98,143</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">AMR Genes</div>
-                    <div class="stat-value">2,602</div>
+                    <div class="stat-value">3,107</div>
                 </div>
             </div>
         </div>
@@ -135,14 +135,14 @@
                     <div class="table-box">
                         <div class="table-name">dim_proteins</div>
                         <div class="table-info">
-                            36,718,799 rows<br>
+                            71,971,209 rows<br>
                             FK: Phage_ID
                         </div>
                     </div>
                     <div class="table-box">
                         <div class="table-name">dim_terminators</div>
                         <div class="table-info">
-                            4,640,129 rows<br>
+                            6,885,944 rows<br>
                             FK: Phage_ID
                         </div>
                     </div>
@@ -152,7 +152,7 @@
                     <div class="table-box central">
                         <div class="table-name central">fact_phages</div>
                         <div class="table-info">
-                            873,718 rows<br>
+                            1,350,644 rows<br>
                             PK: Phage_ID
                         </div>
                     </div>
@@ -162,21 +162,21 @@
                     <div class="table-box">
                         <div class="table-name">dim_anti_crispr</div>
                         <div class="table-info">
-                            299,832 rows<br>
+                            418,595 rows<br>
                             FK: Phage_ID
                         </div>
                     </div>
                     <div class="table-box">
                         <div class="table-name">dim_virulent_factors</div>
                         <div class="table-info">
-                            23,774 rows<br>
+                            34,244 rows<br>
                             FK: Phage_ID
                         </div>
                     </div>
                     <div class="table-box">
                         <div class="table-name">dim_crispr_arrays</div>
                         <div class="table-info">
-                            56,652 rows<br>
+                            98,143 rows<br>
                             FK: Phage_ID
                         </div>
                     </div>
@@ -186,21 +186,21 @@
                 <div class="table-box">
                     <div class="table-name">dim_transmembrane_proteins</div>
                     <div class="table-info">
-                        4,020,770 rows<br>
+                        9,735,407 rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
                 <div class="table-box">
                     <div class="table-name">dim_trna_tmrna</div>
                     <div class="table-info">
-                        1,298,181 rows<br>
+                        1,734,794 rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
                 <div class="table-box">
                     <div class="table-name">dim_antimicrobial_resistance_genes</div>
                     <div class="table-info">
-                        2,602 rows<br>
+                        3,107 rows<br>
                         FK: Phage_ID
                     </div>
                 </div>
@@ -208,158 +208,254 @@
         </div>
     
         <div class="section">
+            <h2>🏷️ Provider Version & Provenance</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Provider Name</div>
+                    <div class="stat-value" style="font-size: 20px;">PhageScope</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Pinned Release</div>
+                    <div class="stat-value" style="font-size: 20px;">rolling</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Pinned Snapshot Date</div>
+                    <div class="stat-value" style="font-size: 20px;">2026-05-11</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Schema Profile</div>
+                    <div class="stat-value" style="font-size: 20px;">phagescope_v1</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Provenance Mode</div>
+                    <div class="stat-value" style="font-size: 20px;">config_pinned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">PBI Version</div>
+                    <div class="stat-value" style="font-size: 20px;">None</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Git Commit</div>
+                    <div class="stat-value" style="font-size: 14px;">None</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Provenance Rows</div>
+                    <div class="stat-value">229</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Non-success Provenance Rows</div>
+                    <div class="stat-value">13</div>
+                </div>
+            </div>
+        
+            <h3 style="margin-top: 20px;">Public Data Provenance Status Distribution</h3>
+            <table>
+                <tr><th>Status</th><th>Count</th></tr>
+            <tr><td>success</td><td>216</td></tr><tr><td>failed</td><td>13</td></tr></table></div>
+        <div class="section">
             <h2>📋 Table Details</h2>
             <div class="stats-grid">
         
                 <div class="stat-card">
                     <div class="stat-title">fact_phages</div>
-                    <div class="stat-value">873,718</div>
+                    <div class="stat-value">1,350,644</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 10<br>
-                        <strong>Columns with NULLs:</strong> 3<br>
+                        <strong>Columns:</strong> 18<br>
+                        <strong>Columns with NULLs:</strong> 14<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 8</li><li>INTEGER: 1</li><li>DOUBLE: 1</li>
+                <li>VARCHAR: 16</li><li>INTEGER: 1</li><li>DOUBLE: 1</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>Length</code> (INTEGER)</li><li><code>GC_content</code> (DOUBLE)</li><li><code>Taxonomy</code> (VARCHAR)</li><li><code>Completeness</code> (VARCHAR)</li><li><code>Host</code> (VARCHAR)</li><li><code>Lifestyle</code> (VARCHAR)</li><li><code>Cluster</code> (VARCHAR)</li><li><code>Subcluster</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>Length</code> (INTEGER)</li><li><code>GC_content</code> (DOUBLE)</li><li><code>Taxonomy</code> (VARCHAR)</li><li><code>Completeness</code> (VARCHAR)</li><li><code>Host</code> (VARCHAR)</li><li><code>Lifestyle</code> (VARCHAR)</li><li><code>Cluster</code> (VARCHAR)</li><li><code>Subcluster</code> (VARCHAR)</li><li><code>Provider_Name</code> (VARCHAR)</li><li><code>Provider_Release</code> (VARCHAR)</li><li><code>Provider_Snapshot_Date</code> (VARCHAR)</li><li><code>Provider_Schema_Profile</code> (VARCHAR)</li><li><code>Input_Source_Key</code> (VARCHAR)</li><li><code>Input_File</code> (VARCHAR)</li><li><code>Input_Retrieved_At</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_proteins</div>
-                    <div class="stat-value">36,718,799</div>
+                    <div class="stat-value">71,971,209</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 19<br>
-                        <strong>Columns with NULLs:</strong> 4<br>
+                        <strong>Columns:</strong> 20<br>
+                        <strong>Columns with NULLs:</strong> 3<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 8</li><li>INTEGER: 2</li><li>DOUBLE: 9</li>
+                <li>VARCHAR: 9</li><li>INTEGER: 2</li><li>DOUBLE: 9</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>Protein_source</code> (VARCHAR)</li><li><code>Function_prediction_source</code> (VARCHAR)</li><li><code>Start</code> (INTEGER)</li><li><code>Stop</code> (INTEGER)</li><li><code>Strand</code> (VARCHAR)</li><li><code>Product</code> (VARCHAR)</li><li><code>Protein_classification</code> (VARCHAR)</li><li><code>Molecular_weight</code> (DOUBLE)</li><li><code>Aromaticity</code> (DOUBLE)</li><li><code>Instability_index</code> (DOUBLE)</li><li><code>Isoelectric_point</code> (DOUBLE)</li><li><code>Helix_fraction</code> (DOUBLE)</li><li><code>Turn_fraction</code> (DOUBLE)</li><li><code>Sheet_fraction</code> (DOUBLE)</li><li><code>Reduced_coefficient</code> (DOUBLE)</li><li><code>Oxidized_coefficient</code> (DOUBLE)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>Protein_source</code> (VARCHAR)</li><li><code>Function_prediction_source</code> (VARCHAR)</li><li><code>Start</code> (INTEGER)</li><li><code>Stop</code> (INTEGER)</li><li><code>Strand</code> (VARCHAR)</li><li><code>Product</code> (VARCHAR)</li><li><code>Protein_classification</code> (VARCHAR)</li><li><code>Molecular_weight</code> (DOUBLE)</li><li><code>Aromaticity</code> (DOUBLE)</li><li><code>Instability_index</code> (DOUBLE)</li><li><code>Isoelectric_point</code> (DOUBLE)</li><li><code>Helix_fraction</code> (DOUBLE)</li><li><code>Turn_fraction</code> (DOUBLE)</li><li><code>Sheet_fraction</code> (DOUBLE)</li><li><code>Reduced_coefficient</code> (DOUBLE)</li><li><code>Oxidized_coefficient</code> (DOUBLE)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_terminators</div>
-                    <div class="stat-value">4,640,129</div>
+                    <div class="stat-value">6,885,944</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 8<br>
+                        <strong>Columns:</strong> 9<br>
                         <strong>Columns with NULLs:</strong> 0<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 5</li><li>INTEGER: 2</li><li>DOUBLE: 1</li>
+                <li>VARCHAR: 6</li><li>INTEGER: 2</li><li>DOUBLE: 1</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>terminator_type</code> (VARCHAR)</li><li><code>terminator_start</code> (INTEGER)</li><li><code>terminator_end</code> (INTEGER)</li><li><code>confidence_score</code> (DOUBLE)</li><li><code>Sense</code> (VARCHAR)</li><li><code>Loc</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>terminator_type</code> (VARCHAR)</li><li><code>terminator_start</code> (INTEGER)</li><li><code>terminator_end</code> (INTEGER)</li><li><code>confidence_score</code> (DOUBLE)</li><li><code>Sense</code> (VARCHAR)</li><li><code>Loc</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_anti_crispr</div>
-                    <div class="stat-value">299,832</div>
+                    <div class="stat-value">418,595</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 4<br>
+                        <strong>Columns:</strong> 5<br>
                         <strong>Columns with NULLs:</strong> 0<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 4</li>
+                <li>VARCHAR: 5</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>Source</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>Source</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_virulent_factors</div>
-                    <div class="stat-value">23,774</div>
+                    <div class="stat-value">34,244</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 4<br>
+                        <strong>Columns:</strong> 5<br>
                         <strong>Columns with NULLs:</strong> 0<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 4</li>
+                <li>VARCHAR: 5</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>aligned_protein_vfdb</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>aligned_protein_vfdb</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_transmembrane_proteins</div>
-                    <div class="stat-value">4,020,770</div>
+                    <div class="stat-value">9,735,407</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 18<br>
-                        <strong>Columns with NULLs:</strong> 1<br>
+                        <strong>Columns:</strong> 19<br>
+                        <strong>Columns with NULLs:</strong> 10<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 7</li><li>INTEGER: 8</li><li>DOUBLE: 3</li>
+                <li>VARCHAR: 8</li><li>INTEGER: 8</li><li>DOUBLE: 3</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>protein_length</code> (INTEGER)</li><li><code>predicted_tmhs_number</code> (INTEGER)</li><li><code>exp_aa_in_tmhs</code> (DOUBLE)</li><li><code>exp_first_60_aa</code> (DOUBLE)</li><li><code>total_prob_n_in</code> (DOUBLE)</li><li><code>possible_n_term</code> (VARCHAR)</li><li><code>inside_source</code> (VARCHAR)</li><li><code>inside_start</code> (INTEGER)</li><li><code>inside_end</code> (INTEGER)</li><li><code>tm_helix_source</code> (VARCHAR)</li><li><code>tm_helix_start</code> (INTEGER)</li><li><code>tm_helix_end</code> (INTEGER)</li><li><code>outside_source</code> (VARCHAR)</li><li><code>outside_start</code> (INTEGER)</li><li><code>outside_end</code> (INTEGER)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>protein_length</code> (INTEGER)</li><li><code>predicted_tmhs_number</code> (INTEGER)</li><li><code>exp_aa_in_tmhs</code> (DOUBLE)</li><li><code>exp_first_60_aa</code> (DOUBLE)</li><li><code>total_prob_n_in</code> (DOUBLE)</li><li><code>possible_n_term</code> (VARCHAR)</li><li><code>inside_source</code> (VARCHAR)</li><li><code>inside_start</code> (INTEGER)</li><li><code>inside_end</code> (INTEGER)</li><li><code>tm_helix_source</code> (VARCHAR)</li><li><code>tm_helix_start</code> (INTEGER)</li><li><code>tm_helix_end</code> (INTEGER)</li><li><code>outside_source</code> (VARCHAR)</li><li><code>outside_start</code> (INTEGER)</li><li><code>outside_end</code> (INTEGER)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_trna_tmrna</div>
-                    <div class="stat-value">1,298,181</div>
+                    <div class="stat-value">1,734,794</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 11<br>
+                        <strong>Columns:</strong> 12<br>
                         <strong>Columns with NULLs:</strong> 3<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 8</li><li>INTEGER: 3</li>
+                <li>VARCHAR: 9</li><li>INTEGER: 3</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>trna_tmrna_id</code> (VARCHAR)</li><li><code>source</code> (VARCHAR)</li><li><code>trna_type</code> (VARCHAR)</li><li><code>start_pos</code> (INTEGER)</li><li><code>stop_pos</code> (INTEGER)</li><li><code>Strand</code> (VARCHAR)</li><li><code>length</code> (INTEGER)</li><li><code>permuted</code> (VARCHAR)</li><li><code>sequence</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>trna_tmrna_id</code> (VARCHAR)</li><li><code>source</code> (VARCHAR)</li><li><code>trna_type</code> (VARCHAR)</li><li><code>start_pos</code> (INTEGER)</li><li><code>stop_pos</code> (INTEGER)</li><li><code>Strand</code> (VARCHAR)</li><li><code>length</code> (INTEGER)</li><li><code>permuted</code> (VARCHAR)</li><li><code>sequence</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_crispr_arrays</div>
-                    <div class="stat-value">56,652</div>
+                    <div class="stat-value">98,143</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 26<br>
+                        <strong>Columns:</strong> 27<br>
                         <strong>Columns with NULLs:</strong> 0<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 8</li><li>INTEGER: 9</li><li>DOUBLE: 9</li>
+                <li>VARCHAR: 9</li><li>INTEGER: 9</li><li>DOUBLE: 9</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>crispr_id</code> (VARCHAR)</li><li><code>duplicated_spacers</code> (INTEGER)</li><li><code>crispr_start</code> (INTEGER)</li><li><code>crispr_end</code> (INTEGER)</li><li><code>crispr_length</code> (INTEGER)</li><li><code>potential_orientation_at_percent</code> (VARCHAR)</li><li><code>crispr_direction</code> (VARCHAR)</li><li><code>consensus_repeat</code> (VARCHAR)</li><li><code>repeat_id_crisprdb</code> (VARCHAR)</li><li><code>nb_crisprs_same_repeat</code> (INTEGER)</li><li><code>repeat_length</code> (INTEGER)</li><li><code>spacers_count</code> (INTEGER)</li><li><code>mean_spacer_size</code> (DOUBLE)</li><li><code>std_dev_spacers</code> (DOUBLE)</li><li><code>repeats_matching_consensus</code> (INTEGER)</li><li><code>ratio_repeats_match_total</code> (DOUBLE)</li><li><code>conservation_repeats_pct</code> (DOUBLE)</li><li><code>ebcons_repeats</code> (DOUBLE)</li><li><code>conservation_spacers_pct</code> (DOUBLE)</li><li><code>ebcons_spacers</code> (DOUBLE)</li><li><code>repeat_plus_spacer_length</code> (DOUBLE)</li><li><code>ratio_repeat_spacer_length</code> (DOUBLE)</li><li><code>crispr_found_in_db</code> (VARCHAR)</li><li><code>evidence_level</code> (INTEGER)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>crispr_id</code> (VARCHAR)</li><li><code>duplicated_spacers</code> (INTEGER)</li><li><code>crispr_start</code> (INTEGER)</li><li><code>crispr_end</code> (INTEGER)</li><li><code>crispr_length</code> (INTEGER)</li><li><code>potential_orientation_at_percent</code> (VARCHAR)</li><li><code>crispr_direction</code> (VARCHAR)</li><li><code>consensus_repeat</code> (VARCHAR)</li><li><code>repeat_id_crisprdb</code> (VARCHAR)</li><li><code>nb_crisprs_same_repeat</code> (INTEGER)</li><li><code>repeat_length</code> (INTEGER)</li><li><code>spacers_count</code> (INTEGER)</li><li><code>mean_spacer_size</code> (DOUBLE)</li><li><code>std_dev_spacers</code> (DOUBLE)</li><li><code>repeats_matching_consensus</code> (INTEGER)</li><li><code>ratio_repeats_match_total</code> (DOUBLE)</li><li><code>conservation_repeats_pct</code> (DOUBLE)</li><li><code>ebcons_repeats</code> (DOUBLE)</li><li><code>conservation_spacers_pct</code> (DOUBLE)</li><li><code>ebcons_spacers</code> (DOUBLE)</li><li><code>repeat_plus_spacer_length</code> (DOUBLE)</li><li><code>ratio_repeat_spacer_length</code> (DOUBLE)</li><li><code>crispr_found_in_db</code> (VARCHAR)</li><li><code>evidence_level</code> (INTEGER)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-title">dim_antimicrobial_resistance_genes</div>
-                    <div class="stat-value">2,602</div>
+                    <div class="stat-value">3,107</div>
                     <div style="margin-top: 10px;">
-                        <strong>Columns:</strong> 4<br>
-                        <strong>Columns with NULLs:</strong> 1<br>
+                        <strong>Columns:</strong> 5<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
                         <strong>Data Types:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                <li>VARCHAR: 4</li>
+                <li>VARCHAR: 5</li>
                         </ul>
                         <strong>Column Names:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
-                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_id</code> (VARCHAR)</li><li><code>aligned_protein_card</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li>
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Protein_ID</code> (VARCHAR)</li><li><code>aligned_protein_card</code> (VARCHAR)</li><li><code>Source_DB</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_hosts</div>
+                    <div class="stat-value">5,529</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 12<br>
+                        <strong>Columns with NULLs:</strong> 8<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 10</li><li>BIGINT: 1</li><li>DOUBLE: 1</li>
+                        </ul>
+                        <strong>Column Names:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
+                <li><code>Host_ID</code> (VARCHAR)</li><li><code>Species_Name</code> (VARCHAR)</li><li><code>Strain_Name</code> (VARCHAR)</li><li><code>Assembly_Accession</code> (VARCHAR)</li><li><code>Assembly_Name</code> (VARCHAR)</li><li><code>Assembly_Level</code> (VARCHAR)</li><li><code>Genome_Length</code> (BIGINT)</li><li><code>GC_Content</code> (DOUBLE)</li><li><code>RefSeq_Category</code> (VARCHAR)</li><li><code>Download_Date</code> (VARCHAR)</li><li><code>Source</code> (VARCHAR)</li><li><code>source_type</code> (VARCHAR)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_assembly_metadata</div>
+                    <div class="stat-value">5,524</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 17<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 12</li><li>INTEGER: 2</li><li>BOOLEAN: 3</li>
+                        </ul>
+                        <strong>Column Names:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
+                <li><code>Assembly_Accession</code> (VARCHAR)</li><li><code>Assembly_Name</code> (VARCHAR)</li><li><code>Organism_Name</code> (VARCHAR)</li><li><code>Species_TaxID</code> (INTEGER)</li><li><code>Strain</code> (VARCHAR)</li><li><code>Assembly_Level</code> (VARCHAR)</li><li><code>RefSeq_Category</code> (VARCHAR)</li><li><code>BioSample</code> (VARCHAR)</li><li><code>BioProject</code> (VARCHAR)</li><li><code>FTP_Path</code> (VARCHAR)</li><li><code>Submission_Date</code> (VARCHAR)</li><li><code>Is_Latest</code> (BOOLEAN)</li><li><code>Quality_Score</code> (INTEGER)</li><li><code>Is_RefSeq</code> (BOOLEAN)</li><li><code>Download_Status</code> (VARCHAR)</li><li><code>Download_Date</code> (VARCHAR)</li><li><code>Metadata_Only</code> (BOOLEAN)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-title">dim_phage_host_links</div>
+                    <div class="stat-value">1,241,293</div>
+                    <div style="margin-top: 10px;">
+                        <strong>Columns:</strong> 7<br>
+                        <strong>Columns with NULLs:</strong> 0<br>
+                        <strong>Data Types:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>VARCHAR: 7</li>
+                        </ul>
+                        <strong>Column Names:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px; font-size: 11px;">
+                <li><code>Phage_ID</code> (VARCHAR)</li><li><code>Host_Species</code> (VARCHAR)</li><li><code>Host_Full_Name</code> (VARCHAR)</li><li><code>Assembly_Accession</code> (VARCHAR)</li><li><code>Assembly_Level</code> (VARCHAR)</li><li><code>RefSeq_Category</code> (VARCHAR)</li><li><code>Link_Quality</code> (VARCHAR)</li>
                         </ul>
                     </div>
                 </div>
@@ -378,10 +474,10 @@
     
                 <tr>
                     <td>Duplicate Phage IDs</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="error">
+                        ❌ FAIL
                     </td>
-                    <td>0 duplicates found</td>
+                    <td>22720 duplicates found</td>
                 </tr>
         
                 <tr>
@@ -396,7 +492,7 @@
                     <td class="warning">
                         ⚠️ WARNING
                     </td>
-                    <td>1912 duplicate protein IDs</td>
+                    <td>1447750 duplicate protein IDs</td>
                 </tr>
         
                 <tr>
@@ -409,32 +505,32 @@
         
                 <tr>
                     <td>Orphaned Anti-CRISPR</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="warning">
+                        ⚠️ WARNING
                     </td>
-                    <td>0 anti-CRISPR entries without matching phages</td>
+                    <td>28468 anti-CRISPR entries without matching phages</td>
                 </tr>
                 <tr>
                     <td>Duplicate Protein IDs (Anti-CRISPR)</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="warning">
+                        ⚠️ WARNING
                     </td>
-                    <td>0 duplicate protein IDs</td>
+                    <td>2732 duplicate protein IDs</td>
                 </tr>
         
                 <tr>
                     <td>Orphaned Virulent Factors</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="warning">
+                        ⚠️ WARNING
                     </td>
-                    <td>0 virulent factors without matching phages</td>
+                    <td>4 virulent factors without matching phages</td>
                 </tr>
                 <tr>
                     <td>Duplicate Protein IDs (Virulent Factors)</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="warning">
+                        ⚠️ WARNING
                     </td>
-                    <td>0 duplicate protein IDs</td>
+                    <td>1 duplicate protein IDs</td>
                 </tr>
         
                 <tr>
@@ -454,7 +550,7 @@
                 <tr>
                     <td>TMH Statistics</td>
                     <td class="success">ℹ️ INFO</td>
-                    <td>Avg TMHs: 1.86, Range: 1-48</td>
+                    <td>Avg TMHs: 0.86, Range: 0-56</td>
                 </tr>
         
                 <tr>
@@ -484,7 +580,7 @@
                     <td class="warning">
                         ⚠️ WARNING
                     </td>
-                    <td>31 duplicate CRISPR IDs</td>
+                    <td>1277 duplicate CRISPR IDs</td>
                 </tr>
         
                 <tr>
@@ -496,10 +592,10 @@
                 </tr>
                 <tr>
                     <td>Duplicate Protein IDs (AMR)</td>
-                    <td class="success">
-                        ✅ PASS
+                    <td class="warning">
+                        ⚠️ WARNING
                     </td>
-                    <td>0 duplicate protein IDs</td>
+                    <td>77 duplicate protein IDs</td>
                 </tr>
         
             </table>
@@ -507,9 +603,47 @@
         
         <div class="section">
             <h2>🔧 Database Objects</h2>
-            <p><strong>Indexes:</strong> idx_amr_phage, idx_amr_protein, idx_amr_source, idx_anti_crispr_phage, idx_anti_crispr_source, idx_crispr_evidence, idx_crispr_id, idx_crispr_phage, idx_crispr_source, idx_phages_id, idx_phages_source, idx_proteins_phage, idx_proteins_source, idx_terminators_phage, idx_terminators_source, idx_transmembrane_phage, idx_transmembrane_source, idx_trna_phage, idx_trna_source, idx_virulent_phage, idx_virulent_source</p>
-            <p><strong>Views:</strong> amr_gene_summary, crispr_array_summary, crispr_evidence_distribution, host_amr_profile, host_crispr_profile, phage_complete_profile, phage_defense_profile, phage_size_distribution, phage_summary</p>
+            <p><strong>Indexes:</strong> idx_amr_phage, idx_amr_protein, idx_amr_source, idx_amr_source_type, idx_anti_crispr_phage, idx_anti_crispr_source, idx_anti_crispr_source_type, idx_assembly_accession, idx_assembly_organism, idx_assembly_taxid, idx_crispr_evidence, idx_crispr_id, idx_crispr_phage, idx_crispr_source, idx_crispr_source_type, idx_dataset_provenance_feature, idx_dataset_provenance_source_key, idx_hosts_accession, idx_hosts_id, idx_hosts_source_type, idx_hosts_species, idx_phages_id, idx_phages_source, idx_phages_source_type, idx_phage_host_assembly, idx_phage_host_phage, idx_proteins_phage, idx_proteins_source, idx_proteins_source_type, idx_terminators_phage, idx_terminators_source, idx_terminators_source_type, idx_transmembrane_phage, idx_transmembrane_source, idx_transmembrane_source_type, idx_trna_phage, idx_trna_source, idx_trna_source_type, idx_virulent_phage, idx_virulent_source, idx_virulent_source_type</p>
+            <p><strong>Views:</strong> amr_gene_summary, crispr_array_summary, crispr_evidence_distribution, host_amr_profile, host_crispr_profile, host_genome_summary, phage_complete_profile, phage_defense_profile, phage_host_associations, phage_host_genomes, phage_size_distribution, phage_summary</p>
         </div>
+    
+        <div class="section">
+            <h2>🔒 Private Data Overview</h2>
+            <p style="color: #6c757d;">Private data is ingested from local sources and merged with the public PhageScope database.</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Private Phages</div>
+                    <div class="stat-value">8</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Private Hosts</div>
+                    <div class="stat-value">5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Private Interactions</div>
+                    <div class="stat-value">8</div>
+                </div>
+            </div>
+        
+            <h3 style="margin-top: 20px;">Interactions per Private Source</h3>
+            <div class="chart-container">
+            
+                <div class="bar">
+                    <span class="bar-label">test_private</span>
+                    <div class="bar-fill" style="width: 300px;"></div>
+                    <span class="bar-value">5</span>
+                </div>
+                
+                <div class="bar">
+                    <span class="bar-label">test_private_2</span>
+                    <div class="bar-fill" style="width: 180px;"></div>
+                    <span class="bar-value">3</span>
+                </div>
+                </div>
+            <h3 style="margin-top: 20px;">Lifestyle / Interaction Distribution</h3>
+            <table>
+                <tr><th>Interaction Type</th><th>Count</th></tr>
+            <tr><td>virulent</td><td>5</td></tr><tr><td>temperate</td><td>3</td></tr></table></div>
     </body>
     </html>
     
