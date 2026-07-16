@@ -1498,7 +1498,7 @@ for a full explanation and hardening steps before exposing the service to a netw
 <h2 id="4-start-api-container-optional">4) Start API container (optional)<a class="headerlink" href="#4-start-api-container-optional" title="Permanent link">&para;</a></h2>
 <p>The REST API provides a lightweight interface for querying the database without the full <code>pbi</code> package. It supports metadata queries, single sequence retrieval, and SQL exploration.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>api
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>api
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>api
 </code></pre></div>
 <p>API is available at <code>http://localhost:8000</code>. See <a href="../../api/overview/">API Reference</a> for endpoints.</p>
 <hr />
