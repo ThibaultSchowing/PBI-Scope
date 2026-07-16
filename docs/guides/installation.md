@@ -73,7 +73,7 @@ The REST API provides a lightweight interface for querying the database without 
 
 ```bash
 docker compose build api
-docker compose up -d api
+docker compose up api
 ```
 
 API is available at `http://localhost:8000`. See [API Reference](../api/overview.md) for endpoints.

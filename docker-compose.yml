@@ -65,7 +65,8 @@ services:
     # UID and GID are read from the .env file (see .env.example).
     user: "${UID:-1000}:${GID:-1000}"
     ports:
-      - "8887:8888"
+      # connect to the JupyterLab server at http://localhost:8886 by using 'ssh -L 8886:localhost:8888 <host>' to forward the port through SSH.
+      - "8886:8888"
     volumes:
       # Mount data directory (read-only for safety)
       - pbi-data:/data:ro
