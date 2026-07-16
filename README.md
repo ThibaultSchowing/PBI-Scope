@@ -1,6 +1,7 @@
 ![alt](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema_Note.png)
 
-# PBI - Phage Bacteria Interactions
+# PBI-Scope
+## Dockerized Phage Bacteria Interactions toolkit based on PhageScope
 
 > A proof-of-concept dockerized bioinformatics pipeline that makes phage genomic data from [PhageScope](https://phagescope.deepomics.org/database) and their hosts available in an efficient, structured format for training neural networks and AI models for phage-host interaction prediction. 
 
@@ -10,15 +11,15 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18961927.svg)](https://doi.org/10.5281/zenodo.18961927)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19232887.svg)](https://doi.org/10.5281/zenodo.19232887)
 
-## 🎯 What is PBI?
+## 🎯 What is PBI-Scope?
 
-PBI builds a unified data product from:
+PBI-Scope builds a unified data product from:
 
 - Public phage metadata/sequences from PhageScope
 - Optional private datasets from `private_data/` (validated and merged by source)
 - Host genomes resolved from NCBI RefSeq
 
-> **Note**: PBI is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, unavailable data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information. **PhageScope updates available shortly !**
+> **Note**: PBI-Scope is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, unavailable data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information.
 
 Outputs are stored in a shared Docker volume and exposed through:
 
@@ -27,7 +28,7 @@ Outputs are stored in a shared Docker volume and exposed through:
 - `pbi` Python package (recommended access path)
 - Analysis container (Jupyter Lab + VS Code Dev Containers)
 
-> The REST API is currently not supported for sequence-heavy usage because it is too slow for large retrieval workloads. It will be redesigned later for database exploration-first access.
+> The REST API is now supported for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks)**
 
 ![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema_Note_HighRes.jpg)
 
@@ -67,6 +68,11 @@ docker compose run --rm pipeline
 docker compose build analysis
 docker compose up -d analysis
 
+
+# analysis container (run in a dedicated terminal e.g. tmux session)
+docker compose build api
+docker compose up api
+
 ```
 
 Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8888 user@server`).
@@ -89,7 +95,7 @@ Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8888 user@
 |      /cache)     |      +-----------+-----------+      +---------+--------+
 +--------+---------+                  |                            |
          |                    +-------v-------+          +---------v---------+
-         |                    | api (legacy)  |          | bind mounts       |
+         |                    | api           |          | bind mounts       |
          |                    | (ro on /data) |          | [analysis only]   |
          |                    +---------------+          | ./notebooks       |
          |                                               |  -> /workspace(rw)|
