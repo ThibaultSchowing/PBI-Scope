@@ -1,4 +1,4 @@
-![alt](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/github-header-banner%20(1).png)
+![alt](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema_Note.png)
 
 # PBI - Phage Bacteria Interactions
 
