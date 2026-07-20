@@ -468,3 +468,162 @@ def test_ingest_private_sources_resyncs_deleted_sources_and_prevents_duplicates(
         "SELECT Host_ID, source_type FROM dim_hosts WHERE source_type = 'private' ORDER BY Host_ID"
     ).fetchall()
     assert host_rows == [("HA", "private")]
+
+
+# ── Phage-only source tests ─────────────────────────────────────────────────
+
+
+def test_validate_private_source_phage_only_without_hosts_dir_is_valid(tmp_path):
+    """Phage-only sources with Host_ID='unknown' and no hosts/ should be valid."""
+    source = tmp_path / "PhageOnly_Project"
+    source.mkdir()
+    pd.DataFrame(
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "unknown",
+                "Host_name": "unknown",
+                "Source_DB": "PhageOnly_Project",
+                "interaction": "virulent",
+            },
+            {
+                "Phage_ID": "P2",
+                "Host_ID": "unknown",
+                "Host_name": "unknown",
+                "Source_DB": "PhageOnly_Project",
+                "interaction": "temperate",
+            },
+        ]
+    ).to_csv(source / "metadata.csv", index=False)
+    _write_text(source / "phage.fasta", ">P1 desc\nATGC\n>P2 desc\nGCTA\n")
+    # No hosts/ directory — this should be fine for phage-only sources
+
+    result = validate_private_source(source)
+    assert result.is_valid
+    assert result.stats["unique_phages"] == 2
+    assert result.stats["unique_hosts"] == 1  # single "unknown" host
+
+
+def test_validate_private_source_mixed_host_ids_without_hosts_dir_is_invalid(tmp_path):
+    """Mixing real Host_IDs with 'unknown' without hosts/ should be invalid."""
+    source = tmp_path / "Mixed_Project"
+    source.mkdir()
+    pd.DataFrame(
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "H1",
+                "Host_name": "Real Host",
+                "Source_DB": "Mixed_Project",
+                "interaction": "virulent",
+            },
+            {
+                "Phage_ID": "P2",
+                "Host_ID": "unknown",
+                "Host_name": "unknown",
+                "Source_DB": "Mixed_Project",
+                "interaction": "temperate",
+            },
+        ]
+    ).to_csv(source / "metadata.csv", index=False)
+    _write_text(source / "phage.fasta", ">P1 desc\nATGC\n>P2 desc\nGCTA\n")
+    # No hosts/ directory — invalid because H1 is a real host ID
+
+    result = validate_private_source(source)
+    assert not result.is_valid
+    assert any("Missing required host sequences" in e for e in result.errors)
+
+
+def test_prepare_private_sequence_artifacts_phage_only(tmp_path):
+    """Phage-only sources should produce phage mapping but no host mapping."""
+    source = tmp_path / "PhageOnly_Source"
+    source.mkdir()
+    pd.DataFrame(
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "unknown",
+                "Host_name": "unknown",
+                "Source_DB": "PhageOnly_Source",
+                "interaction": "virulent",
+            }
+        ]
+    ).to_csv(source / "metadata.csv", index=False)
+    _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
+
+    manifest = {
+        "sources": [
+            {
+                "source_db": "PhageOnly_Source",
+                "source_dir": str(source),
+                "is_valid": True,
+            }
+        ]
+    }
+
+    private_phage_dir = tmp_path / "private" / "phages"
+    private_phage_mapping = tmp_path / "private" / "private_phage_mapping.json"
+    private_host_mapping = tmp_path / "private" / "private_host_mapping.json"
+
+    stats = prepare_private_sequence_artifacts(
+        manifest=manifest,
+        private_phage_dir=private_phage_dir,
+        private_phage_mapping_path=private_phage_mapping,
+        private_host_mapping_path=private_host_mapping,
+    )
+
+    assert stats["sources_processed"] == 1
+    assert stats["phages_written"] == 1
+    assert stats["hosts_written"] == 0
+
+    # Phage mapping should exist and point to the copied FASTA
+    with private_phage_mapping.open("r", encoding="utf-8") as handle:
+        pmapping = json.load(handle)
+    assert "PhageOnly_Source" in pmapping
+    phage_fasta_path = Path(pmapping["PhageOnly_Source"])
+    assert phage_fasta_path.exists()
+    assert ">P1 desc" in phage_fasta_path.read_text(encoding="utf-8")
+
+    # Host mapping should be empty
+    assert json.loads(private_host_mapping.read_text(encoding="utf-8")) == {}
+
+
+def test_ingest_private_sources_phage_only(tmp_path):
+    """Phage-only sources should ingest phages but not create dim_hosts entries for 'unknown'."""
+    source = tmp_path / "PhageOnly_Ingest"
+    source.mkdir()
+    pd.DataFrame(
+        [
+            {
+                "Phage_ID": "P1",
+                "Host_ID": "unknown",
+                "Host_name": "unknown",
+                "Source_DB": "PhageOnly_Ingest",
+                "interaction": "virulent",
+            }
+        ]
+    ).to_csv(source / "metadata.csv", index=False)
+    _write_text(source / "phage.fasta", ">P1 desc\nATGC\n")
+
+    conn = duckdb.connect(":memory:")
+    _prepare_minimal_db(conn)
+
+    summary = ingest_private_sources_into_db(conn, [str(source)])
+    assert len(summary["ingested"]) == 1
+    assert summary["ingested"][0]["unique_phages"] == 1
+
+    # Phage should be in fact_phages
+    phage_count = conn.execute("SELECT COUNT(*) FROM fact_phages WHERE source_type = 'private'").fetchone()[0]
+    assert phage_count == 1
+
+    # Interaction should exist in private_interactions
+    interaction_rows = conn.execute(
+        "SELECT Phage_ID, Host_ID FROM private_interactions ORDER BY Phage_ID"
+    ).fetchall()
+    assert interaction_rows == [("P1", "unknown")]
+
+    # dim_hosts should NOT contain an "unknown" entry
+    host_rows = conn.execute(
+        "SELECT Host_ID FROM dim_hosts WHERE source_type = 'private'"
+    ).fetchall()
+    assert host_rows == []

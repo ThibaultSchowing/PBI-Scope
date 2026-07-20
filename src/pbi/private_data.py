@@ -197,7 +197,17 @@ def validate_private_source(source_dir: Path, include_dataframe: bool = False) -
                 f"{invalid_host_files[:MAX_ERROR_EXAMPLES]}"
             )
     else:
-        errors.append("Missing required host sequences: provide a hosts/<Host_ID>.fna file for each Host_ID")
+        # hosts/ directory absent — only valid if all Host_ID values are "unknown"
+        unknown_only = all(hid == "unknown" for hid in csv_host_ids)
+        if not unknown_only:
+            errors.append(
+                "Missing required host sequences: provide a hosts/<Host_ID>.fna file for each Host_ID"
+            )
+        else:
+            warnings.append(
+                "No hosts/ directory found; all Host_ID values are 'unknown'. "
+                "Host sequences will not be available for these phages."
+            )
 
     duplicated_rows = int(df.duplicated(subset=["Phage_ID", "Host_ID", "Source_DB"]).sum())
     if duplicated_rows:
@@ -580,6 +590,7 @@ def ingest_private_sources_into_db(conn: duckdb.DuckDBPyConnection, source_dirs:
             SELECT DISTINCT Host_ID, Host_name
             FROM private_interactions
             WHERE source_type = 'private'
+              AND Host_ID != 'unknown'
         )
         """
     )
@@ -748,36 +759,38 @@ def prepare_private_sequence_artifacts(
         # ── Host sequences ─────────────────────────────────────────────────────
         # Host FASTA files live in the source's hosts/ directory.
         # Map each Host_ID directly to its file — no copying needed.
-        if not (host_dir_path.exists() and host_dir_path.is_dir()):
-            raise FileNotFoundError(
-                f"Missing hosts/ directory for private source '{source_db}': "
-                f"expected {host_dir_path}"
+        if host_dir_path.exists() and host_dir_path.is_dir():
+            logger.info("Using hosts/ directory for private source '%s'", source_db)
+            found_hosts: Set[str] = set()
+            for host_id in sorted(wanted_hosts):
+                source_host_file = _resolve_host_file(host_dir_path, host_id)
+                if source_host_file is None:
+                    continue
+
+                found_hosts.add(host_id)
+                seq_hash = _hash_file(source_host_file)
+
+                if host_id in host_mapping:
+                    existing_seq_hash = host_hashes.get(host_id)
+                    if existing_seq_hash == seq_hash:
+                        stats["host_duplicates_identical"] += 1
+                    else:
+                        stats["host_duplicates_conflicting"] += 1
+                    continue
+
+                # Point directly at the source file — no copy under any intermediate dir.
+                host_mapping[host_id] = str(source_host_file)
+                host_hashes[host_id] = seq_hash
+                stats["hosts_written"] += 1
+
+            stats["missing_host_ids"] += len(wanted_hosts - found_hosts)
+        else:
+            # No hosts/ directory — valid for phage-only sources where all
+            # Host_ID values are "unknown".  Skip host mapping entirely.
+            logger.info(
+                "No hosts/ directory for private source '%s'; skipping host sequence mapping",
+                source_db,
             )
-
-        logger.info("Using hosts/ directory for private source '%s'", source_db)
-        found_hosts: Set[str] = set()
-        for host_id in sorted(wanted_hosts):
-            source_host_file = _resolve_host_file(host_dir_path, host_id)
-            if source_host_file is None:
-                continue
-
-            found_hosts.add(host_id)
-            seq_hash = _hash_file(source_host_file)
-
-            if host_id in host_mapping:
-                existing_seq_hash = host_hashes.get(host_id)
-                if existing_seq_hash == seq_hash:
-                    stats["host_duplicates_identical"] += 1
-                else:
-                    stats["host_duplicates_conflicting"] += 1
-                continue
-
-            # Point directly at the source file — no copy under any intermediate dir.
-            host_mapping[host_id] = str(source_host_file)
-            host_hashes[host_id] = seq_hash
-            stats["hosts_written"] += 1
-
-        stats["missing_host_ids"] += len(wanted_hosts - found_hosts)
 
     private_phage_mapping_path.write_text(
         json.dumps(dict(sorted(phage_mapping.items())), indent=2),
