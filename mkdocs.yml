@@ -1,9 +1,9 @@
 site_name: PBI-Scope Documentation
 site_description: PBI-Scope - Docker-first phage-host data pipeline documentation
 # Important: set the full site_url for correct absolute links when hosted under /PBI/
-site_url: https://ThibaultSchowing.github.io/PBI/
-repo_name: ThibaultSchowing/PBI
-repo_url: https://github.com/ThibaultSchowing/PBI
+site_url: https://ThibaultSchowing.github.io/PBI-Scope/
+repo_name: ThibaultSchowing/PBI-Scope
+repo_url: https://github.com/ThibaultSchowing/PBI-Scope
 
 theme:
   name: material
@@ -76,6 +76,6 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/ThibaultSchowing/PBI
+      link: https://github.com/ThibaultSchowing/PBI-Scope
   version:
     provider: mike

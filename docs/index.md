@@ -15,7 +15,7 @@ It combines:
 Outputs are stored in a shared data volume and consumed through the `pbi` Python package or the REST API.
 
 !!! info "Database overview and data sample available here: "
-    For a quick visual overview of all PhageScope tables and data quality, see the [Database Validation Report](../reports/database_validation.html) and [Phage Metadata Report](../reports/phage_metadata_report.html).
+    For a quick visual overview of all PhageScope tables and data quality, see the [Database Validation Report](reports/database_validation.html) and [Phage Metadata Report](reports/phage_metadata_report.html).
 
 > PBI-Scope is **not PhageScope-only** anymore. Private source ingestion is part of the standard workflow when source folders are present.
 
