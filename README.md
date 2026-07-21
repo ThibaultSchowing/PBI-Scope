@@ -8,7 +8,7 @@
 **Install - Wait - Work** The pipeline takes care of everything within Docker !
 
 [![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18961927.svg)](https://doi.org/10.5281/zenodo.21469490)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo-blue.svg)](https://doi.org/10.5281/zenodo.21469490)
 
 
 ## 🎯 What is PBI-Scope?
