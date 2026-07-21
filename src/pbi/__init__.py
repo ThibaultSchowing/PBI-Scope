@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
 
 # Package metadata
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __author__ = "Thibault Schowing, CI4CB"
 
 # Public exports used by `from pbi import *`
