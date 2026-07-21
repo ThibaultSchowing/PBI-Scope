@@ -1170,7 +1170,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="[Unreleased]">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040-2026-07-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.0] - 2026-07-20
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.0] - 2026-07-20">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1293,7 +1304,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="[Unreleased]">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#040-2026-07-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [0.4.0] - 2026-07-20
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="[0.4.0] - 2026-07-20">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1396,14 +1418,17 @@
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
 <p>All notable changes to this project are documented here.</p>
 <h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h2 id="040-2026-07-20">[0.4.0] - 2026-07-20<a class="headerlink" href="#040-2026-07-20" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <ul>
+<li>Phage-only private data ingestion: the <code>hosts/</code> directory is now optional for private sources. When all <code>Host_ID</code> and <code>Host_name</code> values are <code>unknown</code>, the source is valid without host FASTA files.</li>
 <li>Detailed VS Code remote connection guide (SSH + Dev Containers) in <a href="../guides/analysis-guide/">Analysis Container Guide</a>.</li>
 <li>Security warning section in analysis-guide.md, installation.md, and docker-guide.md explaining the implications of <code>--ServerApp.disable_check_xsrf=True</code> and the broader lack of authentication.</li>
 </ul>
 <h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Expanded <code>Dockerfile.analysis</code> CMD comment to explicitly document the security risks of disabling token auth, password auth, and XSRF protection, with guidance on hardening steps.</li>
+<li>Updated private data ingestion documentation with phage-only mode examples and updated directory structure requirements.</li>
 </ul>
 <h2 id="030-2026-04-20">[0.3.0] - 2026-04-20<a class="headerlink" href="#030-2026-04-20" title="Permanent link">&para;</a></h2>
 <h3 id="changed_1">Changed<a class="headerlink" href="#changed_1" title="Permanent link">&para;</a></h3>
