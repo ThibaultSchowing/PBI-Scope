@@ -7,7 +7,7 @@
 
 **Install - Wait - Work** The pipeline takes care of everything within Docker !
 
-[![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI/)
+[![Documentation](https://img.shields.io/badge/docs-github%20pages-blue)](https://thibaultschowing.github.io/PBI-Scope/)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo-blue.svg)](https://doi.org/10.5281/zenodo.21469490)
 
 
@@ -28,7 +28,7 @@ Outputs are stored in a shared Docker volume and exposed through:
 - `pbi` Python package (recommended access path)
 - Analysis container (Jupyter Lab + VS Code Dev Containers)
 
-> The REST API is now supported for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI/tree/main/notebooks)**
+> The REST API is now supported for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI-Scope/tree/main/notebooks)**
 
 ![](https://github.com/ThibaultSchowing/PBI/blob/main/docs/img/PBI_Schema_Note_HighRes.jpg)
 
