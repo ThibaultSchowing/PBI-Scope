@@ -38,7 +38,8 @@ rule merge_phage_fasta:
             source=PHAGE_FASTA_SOURCES
         )
     output:
-        config["all_phages_fasta"]
+        fasta=config["all_phages_fasta"],
+        per_source_counts=config["per_source_phage_counts"]
     log:
         config["merge_phage_fasta_log"]
     params:
@@ -55,7 +56,8 @@ rule merge_protein_fasta:
             source=PROTEIN_FASTA_SOURCES
         )
     output:
-        config["all_proteins_fasta"]
+        fasta=config["all_proteins_fasta"],
+        per_source_counts=config["per_source_protein_counts"]
     log:
         config["merge_protein_fasta_log"]
     params:

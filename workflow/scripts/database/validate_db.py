@@ -17,6 +17,9 @@ def validate_database():
     db_path = snakemake.input.db
     report_path = snakemake.output.report
     
+    # Optional: per-source protein counts JSON from the merge step
+    per_source_protein_counts_path = getattr(snakemake.input, "per_source_protein_counts", None)
+    
     # Create output directory
     os.makedirs(os.path.dirname(report_path), exist_ok=True)
     
@@ -33,8 +36,18 @@ def validate_database():
         'tables': {},
         'data_quality': {},
         'provenance': {},
-        'summary': {}
+        'summary': {},
+        'per_source_protein_counts': {},
     }
+    
+    # Load per-source protein counts if available
+    if per_source_protein_counts_path and os.path.exists(per_source_protein_counts_path):
+        try:
+            with open(per_source_protein_counts_path, 'r', encoding='utf-8') as f:
+                validation_results['per_source_protein_counts'] = json.load(f)
+            logging.info(f"Loaded per-source protein counts from {per_source_protein_counts_path}")
+        except Exception as e:
+            logging.warning(f"Failed to load per-source protein counts: {e}")
     
     try:
         # 1. Check tables exist
@@ -869,7 +882,41 @@ def generate_html_report(results, report_path):
                 </div>
             </div>
         </div>
-        
+    """
+
+    # Per-source protein counts section (from merge_fasta.py sidecar JSON)
+    per_source_protein = results.get('per_source_protein_counts', {})
+    if per_source_protein:
+        total_proteins_from_sources = sum(per_source_protein.values())
+        html_content += """
+        <div class="section">
+            <h2>📊 Protein Sequences per Source</h2>
+            <p style="color: #6c757d; margin-bottom: 15px;">
+                Sequence counts from individual PhageScope source databases (FASTA headers counted during merge).
+            </p>
+            <table>
+                <tr><th>Source</th><th>Sequence Count</th><th>% of Total</th></tr>
+        """
+        for source, count in sorted(per_source_protein.items(), key=lambda x: -x[1]):
+            pct = (count / total_proteins_from_sources * 100) if total_proteins_from_sources else 0
+            html_content += f"""
+                <tr>
+                    <td>{source}</td>
+                    <td>{count:,}</td>
+                    <td>{pct:.1f}%</td>
+                </tr>
+            """
+        html_content += f"""
+                <tr style="font-weight: bold; border-top: 2px solid #dee2e6;">
+                    <td>Total</td>
+                    <td>{total_proteins_from_sources:,}</td>
+                    <td>100.0%</td>
+                </tr>
+            </table>
+        </div>
+        """
+
+    html_content += """
         <div class="section">
             <h2>🗂️ Database Schema & Relationships</h2>
             <p style="text-align: center; color: #6c757d; margin-bottom: 20px;">

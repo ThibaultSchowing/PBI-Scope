@@ -60,7 +60,8 @@ rule optimize_database:
 
 rule validate_database:
     input:
-        db=config["optimized_duckdb_output"]
+        db=config["optimized_duckdb_output"],
+        per_source_protein_counts=config["per_source_protein_counts"]
     output:
         report=config["database_validation_report_output"]  
     conda:

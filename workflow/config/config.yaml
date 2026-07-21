@@ -86,6 +86,10 @@ merge_protein_fasta_log: "/pipeline-logs/logs/merge_protein_fasta.log"
 index_phage_sequences_log: "/pipeline-logs/logs/index_phage_sequences.log"
 index_protein_sequences_log: "/pipeline-logs/logs/index_protein_sequences.log"
 
+# Per-source sequence counts produced during FASTA merge
+per_source_phage_counts: "/pipeline-logs/csv/per_source_phage_counts.json"
+per_source_protein_counts: "/pipeline-logs/csv/per_source_protein_counts.json"
+
 # Host download settings
 ncbi_email: "phage.pipeline@example.com"  # Fallback only — set NCBI_EMAIL env variable instead (see .env.example)
 max_host_download_retries: 3
