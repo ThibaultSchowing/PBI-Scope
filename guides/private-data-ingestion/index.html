@@ -1564,6 +1564,12 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;container_name&gt;<span class="w"> </span>rm<span class="w"> </span>/private-data/private_manifest.json
 </code></pre></div>
 <p>Without this step, the pipeline will reuse the cached manifest and your changes will be ignored.</p>
+<p><strong>ℹ️ Included example:</strong> the repository ships a tiny synthetic dataset under
+<code>private_data/test_private/</code> (<code>metadata.csv</code>, <code>phage.fasta</code>, <code>hosts/</code>) so the
+notebooks can demonstrate private-data ingestion end to end. Before running the
+pipeline on real data, either delete <code>private_data/test_private/</code> or exclude it
+explicitly in your queries (e.g. <code>WHERE Source_DB != 'test_private'</code>),
+otherwise the synthetic phages/hosts will be ingested alongside real data.</p>
 </blockquote>
 <p>PBI-Scope can ingest private sources from <code>private_data/</code> in addition to public PhageScope data.</p>
 <h2 id="directory-structure">Directory structure<a class="headerlink" href="#directory-structure" title="Permanent link">&para;</a></h2>
