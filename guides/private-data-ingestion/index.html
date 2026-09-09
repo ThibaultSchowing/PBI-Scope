@@ -1559,19 +1559,18 @@
 
 
 <h1 id="private-data-ingestion">Private Data Ingestion<a class="headerlink" href="#private-data-ingestion" title="Permanent link">&para;</a></h1>
-<blockquote>
-<p><strong>⚠️ Important:</strong> After adding, removing, or modifying private data sources, you <strong>must</strong> delete the manifest file to force the pipeline to re-scan your data:</p>
+<p>PBI-Scope can ingest private sources from <code>private_data/</code> in addition to public PhageScope data.</p>
+<div class="admonition danger">
+<p class="admonition-title">Example data is ingested — remove it before running</p>
+<p>The repository ships a tiny synthetic dataset under <code>private_data/test_private/</code> (<code>metadata.csv</code>, <code>phage.fasta</code>, <code>hosts/</code>) so the notebooks can demonstrate private-data ingestion end to end. Observe its structure to model your own sources, then <strong>rename the folder, empty it, or delete it before running the pipeline</strong> — otherwise the synthetic phages/hosts WILL be ingested alongside your real data. (Alternatively, exclude it explicitly in your queries, e.g. <code>WHERE Source_DB != 'test_private'</code>.)</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Delete the manifest after changing private data</p>
+<p>After adding, removing, or modifying private data sources, you <strong>must</strong> delete the manifest file to force the pipeline to re-scan your data:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>&lt;container_name&gt;<span class="w"> </span>rm<span class="w"> </span>/private-data/private_manifest.json
 </code></pre></div>
 <p>Without this step, the pipeline will reuse the cached manifest and your changes will be ignored.</p>
-<p><strong>ℹ️ Included example:</strong> the repository ships a tiny synthetic dataset under
-<code>private_data/test_private/</code> (<code>metadata.csv</code>, <code>phage.fasta</code>, <code>hosts/</code>) so the
-notebooks can demonstrate private-data ingestion end to end. Before running the
-pipeline on real data, either delete <code>private_data/test_private/</code> or exclude it
-explicitly in your queries (e.g. <code>WHERE Source_DB != 'test_private'</code>),
-otherwise the synthetic phages/hosts will be ingested alongside real data.</p>
-</blockquote>
-<p>PBI-Scope can ingest private sources from <code>private_data/</code> in addition to public PhageScope data.</p>
+</div>
 <h2 id="directory-structure">Directory structure<a class="headerlink" href="#directory-structure" title="Permanent link">&para;</a></h2>
 <p>Each private source is a subdirectory under the private data root. There are two modes:</p>
 <h3 id="phage-host-mode-full">Phage + Host mode (full)<a class="headerlink" href="#phage-host-mode-full" title="Permanent link">&para;</a></h3>

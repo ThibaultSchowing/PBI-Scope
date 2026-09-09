@@ -1427,7 +1427,12 @@
 <li><strong>Download host FASTAs</strong> from NCBI RefSeq</li>
 <li><strong>Create DuckDB database</strong> and optimize analytical access</li>
 <li><strong>Store reports and logs</strong> (validation, quality, failure logs)</li>
+<li><strong>Build BLAST databases</strong> (phages, proteins, hosts, private, combined)</li>
 </ol>
+<div class="admonition warning">
+<p class="admonition-title">Expect long runtime on first execution</p>
+<p>Steps 1–3, 7, 8, and 11 (downloading, file merging, host resolution, host download, and BLAST database building) are <strong>time-consuming</strong> on first run. The pipeline may appear stalled — especially during BLAST database building, which is just long — but it is performing I/O-heavy operations on large genomic datasets. These tasks typically take 10+ hours on first execution.</p>
+</div>
 <h2 id="4-resulting-data-product">4) Resulting data product<a class="headerlink" href="#4-resulting-data-product" title="Permanent link">&para;</a></h2>
 <p>After completion, PBI-Scope provides:</p>
 <ul>
@@ -1435,6 +1440,8 @@
 <li>Indexed phage/protein FASTA files</li>
 <li>Host FASTA mapping for host retrieval</li>
 <li>Private phage mapping when private sources are present</li>
+<li>GFF3 gene annotations with index</li>
+<li>BLAST databases for sequence similarity searches (phages, proteins, hosts, private, combined)</li>
 <li>Pipeline logs and reports for traceability</li>
 </ul>
 <h2 id="5-how-users-work-with-it">5) How users work with it<a class="headerlink" href="#5-how-users-work-with-it" title="Permanent link">&para;</a></h2>
@@ -1452,7 +1459,7 @@
 <li><a href="../../api/overview/">API Reference</a></li>
 <li><a href="../../api/overview/#remote-access">Remote Access (API)</a></li>
 <li><a href="../private-data-ingestion/">Private data ingestion</a></li>
-<li><a href="https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/README.md">Notebooks README</a></li>
+<li><a href="https://github.com/ThibaultSchowing/PBI-Scope/blob/main/notebooks/README.md">Notebooks README</a></li>
 </ul>
 <h2 id="7-build-your-own-environment">7) Build your own environment<a class="headerlink" href="#7-build-your-own-environment" title="Permanent link">&para;</a></h2>
 <p>The default analysis container comes with Python and Jupyter Lab, but you are not limited to it. If you need a different setup — for example, R and Python together, or a container that runs scripts instead of notebooks — you can build your own.</p>
@@ -1463,7 +1470,7 @@
 <li><strong>Use a different language</strong> like Julia, Rust, or anything else that can read DuckDB or FASTA files</li>
 <li><strong>Share the database</strong> across multiple containers via the REST API, without loading data locally</li>
 </ul>
-<p>The <a href="../custom-containers/">Building Custom Containers</a> guide walks you through this step by step, with a ready-to-use R + Python example in the <a href="https://github.com/ThibaultSchowing/PBI/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory.</p>
+<p>The <a href="../custom-containers/">Building Custom Containers</a> guide walks you through this step by step, with a ready-to-use R + Python example in the <a href="https://github.com/ThibaultSchowing/PBI-Scope/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory.</p>
 
 
 

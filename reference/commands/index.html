@@ -2479,8 +2479,20 @@
 <a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="c1"># Or point to an explicit root</span>
 <a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>pbi<span class="w"> </span>validate-private<span class="w"> </span>--path<span class="w"> </span>/path/to/private_root
 <a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>
-<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="c1"># Uninstall</span>
-<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>pip<span class="w"> </span>uninstall<span class="w"> </span>pbi
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="c1"># List available BLAST databases and their build status</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>pbi<span class="w"> </span>blast-search<span class="w"> </span>--list-databases
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a><span class="c1"># Search a sequence against a BLAST database</span>
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>pbi<span class="w"> </span>blast-search<span class="w"> </span><span class="s2">"ATGCGTTTACG..."</span><span class="w"> </span>--program<span class="w"> </span>blastn<span class="w"> </span>--db<span class="w"> </span>phages<span class="w"> </span>--max-hits<span class="w"> </span><span class="m">10</span>
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>
+<a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a><span class="c1"># Search from a FASTA file, save hits to CSV</span>
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>pbi<span class="w"> </span>blast-search<span class="w"> </span>--input<span class="w"> </span>query.fasta<span class="w"> </span>--program<span class="w"> </span>blastp<span class="w"> </span>--db<span class="w"> </span>proteins<span class="w"> </span>--output<span class="w"> </span>hits.csv
+<a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>
+<a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a><span class="c1"># Diagnose BLAST installation and databases (with a test search)</span>
+<a id="__codelineno-14-27" name="__codelineno-14-27" href="#__codelineno-14-27"></a>pbi<span class="w"> </span>blast-diagnose<span class="w"> </span>--test-search
+<a id="__codelineno-14-28" name="__codelineno-14-28" href="#__codelineno-14-28"></a>
+<a id="__codelineno-14-29" name="__codelineno-14-29" href="#__codelineno-14-29"></a><span class="c1"># Uninstall</span>
+<a id="__codelineno-14-30" name="__codelineno-14-30" href="#__codelineno-14-30"></a>pip<span class="w"> </span>uninstall<span class="w"> </span>pbi
 </code></pre></div>
 <h3 id="snakemake-cache">Snakemake Cache<a class="headerlink" href="#snakemake-cache" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Create cache directory</span>
@@ -2671,7 +2683,7 @@
 <h3 id="complete-fresh-installation-without-docker-not-a-good-idea-unless-you-know-what-you-are-doing">Complete Fresh Installation without Docker (not a good idea unless you know what you are doing)<a class="headerlink" href="#complete-fresh-installation-without-docker-not-a-good-idea-unless-you-know-what-you-are-doing" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># 1. Clone repository</span>
 <a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI-Scope.git
-<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nb">cd</span><span class="w"> </span>PBI
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="nb">cd</span><span class="w"> </span>PBI-Scope
 <a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>
 <a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="c1"># 2. Create conda environment</span>
 <a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>pbi<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.10

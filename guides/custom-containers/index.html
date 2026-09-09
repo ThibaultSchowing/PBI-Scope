@@ -2284,7 +2284,7 @@
 <p>This guide explains how to create your own Docker container connected to the PBI-Scope database. You can use any language (R, Python, Julia, Rust, etc.) and any workflow (Jupyter, scripts, both).</p>
 <div class="admonition info">
 <p class="admonition-title">Source Files</p>
-<p>All example files are in the <a href="https://github.com/ThibaultSchowing/PBI/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory at the repository root. The Dockerfile and scripts contain extensive comments explaining each section.</p>
+<p>All example files are in the <a href="https://github.com/ThibaultSchowing/PBI-Scope/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory at the repository root. The Dockerfile and scripts contain extensive comments explaining each section.</p>
 </div>
 <hr />
 <h2 id="how-docker-volumes-work">How Docker Volumes Work<a class="headerlink" href="#how-docker-volumes-work" title="Permanent link">&para;</a></h2>
@@ -2333,7 +2333,7 @@
 </code></pre></div>
 <hr />
 <h2 id="quick-start-r-python-container">Quick Start: R + Python Container<a class="headerlink" href="#quick-start-r-python-container" title="Permanent link">&para;</a></h2>
-<p>The <a href="https://github.com/ThibaultSchowing/PBI/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory contains a complete working example.</p>
+<p>The <a href="https://github.com/ThibaultSchowing/PBI-Scope/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory contains a complete working example.</p>
 <h3 id="step-1-build-the-container">Step 1: Build the Container<a class="headerlink" href="#step-1-build-the-container" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span>mount_scripts/
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>docker-compose.custom.yml<span class="w"> </span>build
@@ -2863,7 +2863,7 @@
 </ul>
 <hr />
 <h2 id="example-complete-r-python-workflow">Example: Complete R + Python Workflow<a class="headerlink" href="#example-complete-r-python-workflow" title="Permanent link">&para;</a></h2>
-<p>The <a href="https://github.com/ThibaultSchowing/PBI/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory contains a complete working example:</p>
+<p>The <a href="https://github.com/ThibaultSchowing/PBI-Scope/tree/main/mount_scripts"><code>mount_scripts/</code></a> directory contains a complete working example:</p>
 <table>
 <thead>
 <tr>
@@ -2924,7 +2924,7 @@
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="../analysis-guide/">Analysis Container Guide</a> — The default PBI-Scope container</li>
-<li><a href="../pbi-package/">PBI Package Reference</a> — Python API for data access</li>
+<li><a href="../pbi-package/"><code>pbi</code> Package Reference</a> — Python API for data access</li>
 <li><a href="../docker-guide/">Docker Guide</a> — Docker Compose setup and configuration</li>
 <li><a href="../../api/overview/">API Reference</a> — REST API for metadata queries</li>
 </ul>

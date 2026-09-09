@@ -2645,7 +2645,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Add PBI package to path</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Add the `pbi` package to path</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">'src'</span><span class="p">))</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pbi</span><span class="w"> </span><span class="kn">import</span> <span class="n">quick_connect</span><span class="p">,</span> <span class="n">NegativeExampleGenerator</span>
@@ -2687,7 +2687,7 @@
 </code></pre></div>
 <h2 id="understanding-the-data">Understanding the Data<a class="headerlink" href="#understanding-the-data" title="Permanent link">&para;</a></h2>
 <h3 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h3>
-<p>The PBI database uses a star schema:</p>
+<p>The PBI-Scope database uses a star schema:</p>
 <p><strong>Fact Tables:</strong>
 - <code>fact_phages</code> - Core phage metadata (Phage_ID, Length, GC_content, Host, Lifestyle)</p>
 <p><strong>Dimension Tables:</strong>
@@ -3256,7 +3256,7 @@
 <h2 id="resources">Resources<a class="headerlink" href="#resources" title="Permanent link">&para;</a></h2>
 <h3 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="../../api/overview/">PBI API Reference</a></li>
+<li><a href="../../api/overview/">PBI-Scope API Reference</a></li>
 <li><a href="../../database/overview/">Database Schema</a></li>
 <li><a href="../../notebooks/">Example Notebooks</a></li>
 </ul>
@@ -3276,9 +3276,9 @@
 </ul>
 <h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Check the <a href="https://github.com/ThibaultSchowing/PBI/blob/main/notebooks/03_ml_streaming.ipynb">ML/streaming notebook</a></li>
+<li>Check the <a href="https://github.com/ThibaultSchowing/PBI-Scope/blob/main/notebooks/03_ml_streaming.ipynb">ML/streaming notebook</a></li>
 <li>Review <a href="../../database/overview/">database documentation</a></li>
-<li>Open an issue on <a href="https://github.com/ThibaultSchowing/PBI/issues">GitHub</a></li>
+<li>Open an issue on <a href="https://github.com/ThibaultSchowing/PBI-Scope/issues">GitHub</a></li>
 </ul>
 
 

@@ -1478,8 +1478,8 @@
 <li>16 GB RAM minimum (32 GB recommended)</li>
 </ul>
 <h2 id="1-clone-and-configure">1) Clone and configure<a class="headerlink" href="#1-clone-and-configure" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI.git
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>PBI
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI-Scope.git
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>PBI-Scope
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Copy the example env file and open it to fill in NCBI credentials:</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
@@ -1502,12 +1502,17 @@ is still safe and recommended for portability.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>pipeline
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>pipeline
 </code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">First run takes hours</p>
+<p>On the first execution, downloading public data, resolving/downloading host genomes, merging files, and building BLAST databases are <strong>time-consuming operations</strong> (often 10+ hours depending on data size and network). The pipeline is not stalled — it is processing large genomic files. Subsequent runs are much faster as they reuse cached data.</p>
+</div>
 <p>Pipeline order:</p>
 <ol>
 <li>public phage download + merge</li>
 <li>private source validation/ingestion (if present)</li>
 <li>host resolution/download from NCBI</li>
-<li>database + indexes + reports</li>
+<li>database + indexes + GFF3 + reports</li>
+<li>BLAST database build (phages, proteins, hosts, private, combined)</li>
 </ol>
 <h2 id="3-start-analysis-container">3) Start analysis container<a class="headerlink" href="#3-start-analysis-container" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
@@ -1540,8 +1545,15 @@ for a full explanation and hardening steps before exposing the service to a netw
 <h2 id="oom-caution">OOM caution<a class="headerlink" href="#oom-caution" title="Permanent link">&para;</a></h2>
 <p>For large joins/sequence retrieval, use chunked queries and avoid loading very large tables into memory in a single cell.</p>
 <h2 id="private-data-note">Private data note<a class="headerlink" href="#private-data-note" title="Permanent link">&para;</a></h2>
-<p>If you use <code>private_data/</code> sources, each source must include host FASTA files (<code>hosts/&lt;Host_ID&gt;.fna</code>) matching metadata Host_ID values.
-See <a href="../private-data-ingestion/">Private Data Ingestion</a>.</p>
+<p>If you use <code>private_data/</code> sources, see <a href="../private-data-ingestion/">Private Data Ingestion</a> for the required layout. Host FASTA files (<code>hosts/&lt;Host_ID&gt;.fna</code>) are only required when your metadata uses real <code>Host_ID</code> values — sources with <code>Host_ID</code>/<code>Host_name</code> set to <code>unknown</code> run in phage-only mode without a <code>hosts/</code> directory.</p>
+<div class="admonition danger">
+<p class="admonition-title">Example data is ingested — remove it before running</p>
+<p>The repository ships a synthetic example dataset (<code>private_data/test_private/</code>). Use it to observe the expected folder structure, then <strong>rename the folder, empty it, or delete it before running the pipeline</strong> — anything left in <code>private_data/</code> WILL be ingested into your database.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Inspect the example structure, then remove it (keep the directory)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>ls<span class="w"> </span>-la<span class="w"> </span>private_data/
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>rm<span class="w"> </span>-rf<span class="w"> </span>private_data/test_private
+</code></pre></div>
+</div>
 <hr />
 <h2 id="docker-services">Docker Services<a class="headerlink" href="#docker-services" title="Permanent link">&para;</a></h2>
 <p>PBI-Scope runs three Docker services:</p>
@@ -1572,16 +1584,16 @@ See <a href="../private-data-ingestion/">Private Data Ingestion</a>.</p>
 </tbody>
 </table>
 <h2 id="volumes-and-mounts">Volumes and Mounts<a class="headerlink" href="#volumes-and-mounts" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>+--------------------------- docker-compose ---------------------------+
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>|                                                                     |
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>|  named volume: pbi-data  -&gt; mounted at /data in all services        |
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>|  named volume: pbi-cache -&gt; mounted at /cache in pipeline           |
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>|                                                                     |
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>|  bind mount: ./private_data  -&gt; /private-data (rw pipeline, ro analysis)
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>|  bind mount: ./pipeline_logs -&gt; /pipeline-logs (rw pipeline, ro analysis)
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>|  bind mount: ./notebooks     -&gt; /workspace (analysis)
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>|  bind mount: ./outputs -&gt; /results (analysis)
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>+---------------------------------------------------------------------+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>+--------------------------- docker-compose ---------------------------+
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>|                                                                     |
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>|  named volume: pbi-data  -&gt; mounted at /data in all services        |
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>|  named volume: pbi-cache -&gt; mounted at /cache in pipeline           |
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>|                                                                     |
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>|  bind mount: ./private_data  -&gt; /private-data (rw pipeline, ro analysis)
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>|  bind mount: ./pipeline_logs -&gt; /pipeline-logs (rw pipeline, ro analysis)
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>|  bind mount: ./notebooks     -&gt; /workspace (analysis)
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>|  bind mount: ./outputs -&gt; /results (analysis)
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>+---------------------------------------------------------------------+
 </code></pre></div>
 
 

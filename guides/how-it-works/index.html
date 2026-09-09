@@ -1418,7 +1418,7 @@
 </ul>
 <p>This keeps current <code>*_urls</code> maps intact while adding a provider/version foundation for future <code>phagescope_v1</code>/<code>phagescope_v2</code> transitions.</p>
 <h2 id="data-provenance">Data provenance<a class="headerlink" href="#data-provenance" title="Permanent link">&para;</a></h2>
-<p>During each public file download, PBI writes a sidecar record with:</p>
+<p>During each public file download, PBI-Scope writes a sidecar record with:</p>
 <ul>
 <li>source URL and local path</li>
 <li>retrieval timestamp, file size</li>
@@ -1443,8 +1443,14 @@
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   +-- database.smk    -&gt; merge metadata + build/optimize DuckDB
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>   +-- sequences.smk   -&gt; build/index phage &amp; protein FASTA
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>   +-- hosts.smk       -&gt; parse host fields, resolve assemblies, download host FASTA
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>   +-- gff3.smk        -&gt; download/index phage GFF3 annotations
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>   +-- blast.smk       -&gt; build BLAST databases (phages, proteins, hosts, private, combined)
 </code></pre></div>
 <p>When private source folders are present, validation and private mapping preparation run automatically before final outputs are finalized.</p>
+<div class="admonition warning">
+<p class="admonition-title">First run is slow — this is expected</p>
+<p>Downloading, host resolution, file merging, and BLAST database building are <strong>time-consuming tasks</strong> on the first execution (often 10+ hours). The pipeline may seem stalled — in particular, the <code>makeblastdb</code> / BLAST database building step is just long — but it is processing large genomic files. Monitor progress via the Snakemake logs. Subsequent runs reuse cached data and complete significantly faster.</p>
+</div>
 <h2 id="main-outputs">Main outputs<a class="headerlink" href="#main-outputs" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>phage_database_optimized.duckdb</code></li>
@@ -1452,6 +1458,8 @@
 <li><code>all_proteins.fasta(.fai)</code></li>
 <li><code>host_fasta_mapping.json</code></li>
 <li><code>private_phage_mapping.json</code> (if private sources exist)</li>
+<li>GFF3 annotations + index (<code>gff3/</code>, <code>gff3_index.json</code>)</li>
+<li><code>blast_db/</code> — BLAST databases (phages, proteins, hosts, private, combined)</li>
 <li><code>public_data_manifest.json/.csv</code> (public-source provenance)</li>
 <li><code>pipeline_run_provenance.json/.csv</code> (run-level provider pinning)</li>
 <li>reports and logs</li>
