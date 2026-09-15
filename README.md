@@ -30,7 +30,7 @@ PBI-Scope builds a unified data product from:
 - Optional private datasets from `private_data/` (validated and merged by source)
 - Host genomes resolved from NCBI RefSeq
 
-> **Note**: PBI-Scope is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, unavailable data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information.
+> **Note**: PBI-Scope is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, part of the data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information.
 
 Outputs are stored in a shared Docker volume and exposed through:
 
@@ -39,7 +39,7 @@ Outputs are stored in a shared Docker volume and exposed through:
 - `pbi` Python package (recommended access path)
 - Analysis container (Jupyter Lab + VS Code Dev Containers)
 
-> The REST API is now supported for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI-Scope/tree/main/notebooks)**
+> A REST API is now available for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI-Scope/tree/main/notebooks)**
 
 ## 📚 Documentation
 
@@ -47,6 +47,7 @@ For more details, check [the documentation](https://thibaultschowing.github.io/P
 
 - Quick start
 - Workflow description
+- Usage of `pbi` Python package and the API
 - Code snippets
 - Debug and error handling
 - And more !
@@ -63,6 +64,8 @@ Direct entry points:
 
 ## 🚀 Quick Start
 
+**It is as simple as this!** Only these few commands can get you started provided you have docker and docker compose installed and ~12 hours of building time. 
+
 ```bash
 git clone https://github.com/ThibaultSchowing/PBI-Scope.git
 cd PBI-Scope
@@ -75,7 +78,7 @@ echo "GID=$(id -g)" >> .env
 # Then edit .env and fill in NCBI_EMAIL (and NCBI_API_KEY if you have one).
 
 # Set up SSH port forwarding first (on your local machine):
-# ssh -L 8888:localhost:8888 username@your-server
+# ssh -L 8888:localhost:8886 username@your-server
 
 tmux new -s pbi
 
@@ -90,11 +93,11 @@ docker compose up -d analysis
 
 # api container (run in a dedicated terminal e.g. tmux session)
 docker compose build api
-docker compose up api
+docker compose up -d api
 
 ```
 
-Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8888 user@server`).
+Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8886 user@server`).
 
 ## 🏗️ Infrastructure overview
 
