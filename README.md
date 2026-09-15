@@ -30,7 +30,7 @@ PBI-Scope builds a unified data product from:
 - Optional private datasets from `private_data/` (validated and merged by source)
 - Host genomes resolved from NCBI RefSeq
 
-> **Note**: PBI-Scope is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, unavailable data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information.
+> **Note**: PBI-Scope is dependent on PhageScope as its primary data source. Regarding data such as Host range or lifestyle, part of the data were predicted using various tools (e.g. DeepHost). Refer to [the publication](https://academic.oup.com/nar/article/52/D1/D756/7334092) for more information.
 
 Outputs are stored in a shared Docker volume and exposed through:
 
@@ -39,7 +39,7 @@ Outputs are stored in a shared Docker volume and exposed through:
 - `pbi` Python package (recommended access path)
 - Analysis container (Jupyter Lab + VS Code Dev Containers)
 
-> The REST API is now supported for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI-Scope/tree/main/notebooks)**
+> A REST API is now available for database exploration ! For sequence-heavy usage, load the database's sequence retriever directly from the analysis container. **Check Notebook examples [in the notebooks folder !](https://github.com/ThibaultSchowing/PBI-Scope/tree/main/notebooks)**
 
 ## 📚 Documentation
 
@@ -47,6 +47,7 @@ For more details, check [the documentation](https://thibaultschowing.github.io/P
 
 - Quick start
 - Workflow description
+- Usage of `pbi` Python package and the API
 - Code snippets
 - Debug and error handling
 - And more !
