@@ -74,12 +74,14 @@ class TestRobustHostGenomeDownloader(unittest.TestCase):
         )
         
         species = downloader.extract_unique_hosts()
-        
-        # Should extract 3 unique species (filtering out invalid hosts)
+
+        # Raw host values are preserved (see extract_unique_hosts), so
+        # 'Escherichia coli' and 'Escherichia coli K12' are distinct.
         self.assertIn("Escherichia coli", species)
+        self.assertIn("Escherichia coli K12", species)
         self.assertIn("Staphylococcus aureus", species)
         self.assertIn("Bacillus subtilis", species)
-        self.assertEqual(len(species), 3)
+        self.assertEqual(len(species), 4)
     
     def test_metadata_only_mode(self):
         """Test metadata-only mode (no downloads)"""
@@ -240,9 +242,101 @@ class TestRobustHostGenomeDownloader(unittest.TestCase):
         empty_fasta.write_text("")
         
         length_empty, gc_empty = downloader.calculate_genome_stats(empty_fasta)
-        
+
         self.assertIsNone(length_empty, "Empty file should return None for length")
         self.assertIsNone(gc_empty, "Empty file should return None for GC content")
+
+    def test_calculate_genome_stats_streaming_parity(self):
+        """Streaming byte-counter must match legacy SeqIO semantics."""
+        downloader = RobustHostGenomeDownloader(
+            phage_csv_path=str(self.phage_csv),
+            output_dir=str(self.temp_path / "genomes"),
+            metadata_output=str(self.temp_path / "host_metadata.csv"),
+            assembly_metadata_output=str(self.temp_path / "assembly_metadata.csv"),
+            phage_host_links_output=str(self.temp_path / "phage_host_links.csv"),
+            ncbi_email=self.ncbi_email,
+            metadata_only=True,
+        )
+
+        seq = "aTgCnX" * 1000  # mixed case + ambiguous; length counts all
+        fasta = self.temp_path / "parity.fna"
+        fasta.write_text(f">c1\n{seq}\n>c2\nGGCC\n")
+        length, gc = downloader.calculate_genome_stats(fasta)
+        # c1: 6000 bases, 2000 G/C; c2: 4 bases, 4 G/C
+        self.assertEqual(length, 6004)
+        self.assertAlmostEqual(gc, round(2004 / 6004 * 100, 2))
+
+    def test_calculate_genome_stats_size_guard(self):
+        """Oversized files are skipped without reading."""
+        downloader = RobustHostGenomeDownloader(
+            phage_csv_path=str(self.phage_csv),
+            output_dir=str(self.temp_path / "genomes"),
+            metadata_output=str(self.temp_path / "host_metadata.csv"),
+            assembly_metadata_output=str(self.temp_path / "assembly_metadata.csv"),
+            phage_host_links_output=str(self.temp_path / "phage_host_links.csv"),
+            ncbi_email=self.ncbi_email,
+            metadata_only=True,
+            max_fasta_bytes=10,
+        )
+        fasta = self.temp_path / "big.fna"
+        fasta.write_text(">c1\n" + "ATGC" * 100 + "\n")
+        length, gc = downloader.calculate_genome_stats(fasta)
+        self.assertIsNone(length)
+        self.assertIsNone(gc)
+
+    def test_create_host_fasta_chunked_roundtrip(self):
+        """Chunked decompress must reproduce source content atomically."""
+        from download_host_genomes_robust import GenomeFileType
+
+        genomes_dir = self.temp_path / "genomes"
+        downloader = RobustHostGenomeDownloader(
+            phage_csv_path=str(self.phage_csv),
+            output_dir=str(genomes_dir),
+            metadata_output=str(self.temp_path / "host_metadata.csv"),
+            assembly_metadata_output=str(self.temp_path / "assembly_metadata.csv"),
+            phage_host_links_output=str(self.temp_path / "phage_host_links.csv"),
+            ncbi_email=self.ncbi_email,
+        )
+
+        class _Asm:
+            assembly_accession = "GCF_000000000.1"
+
+        src_dir = genomes_dir / "assemblies" / "GCF_000000000.1"
+        src_dir.mkdir(parents=True, exist_ok=True)
+        body = ">contig1\n" + "ATGC" * 5000 + "\n"
+        src = src_dir / "x_genomic.fna.gz"
+        with gzip.open(src, 'wt') as f:
+            f.write(body)
+
+        out = downloader.create_host_fasta(
+            _Asm(), {GenomeFileType.GENOMIC_FNA: src}
+        )
+        self.assertIsNotNone(out)
+        self.assertTrue(out.exists())
+        self.assertFalse(out.with_suffix(out.suffix + ".tmp").exists())
+        self.assertEqual(out.read_text(), body)
+        # Second call hits skip-existing fast path
+        out2 = downloader.create_host_fasta(
+            _Asm(), {GenomeFileType.GENOMIC_FNA: src}
+        )
+        self.assertEqual(out2, out)
+
+    def test_checkpoint_resume_loads_progress(self):
+        """Killed-run checkpoints must seed existing_metadata on re-init."""
+        checkpoint = self.temp_path / "assembly_metadata.checkpoint.csv"
+        checkpoint.write_text(
+            "Assembly_Accession,Assembly_Name\nGCF_014191245.1,ASM1419124v1\n"
+        )
+        downloader = RobustHostGenomeDownloader(
+            phage_csv_path=str(self.phage_csv),
+            output_dir=str(self.temp_path / "genomes"),
+            metadata_output=str(self.temp_path / "host_metadata.csv"),
+            assembly_metadata_output=str(self.temp_path / "assembly_metadata.csv"),
+            phage_host_links_output=str(self.temp_path / "phage_host_links.csv"),
+            ncbi_email=self.ncbi_email,
+        )
+        # Final output missing; checkpoint seeds resume
+        self.assertIn("GCF_014191245.1", downloader.existing_metadata)
 
 
 def main():

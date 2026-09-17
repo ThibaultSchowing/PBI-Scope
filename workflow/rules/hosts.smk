@@ -45,7 +45,10 @@ rule download_host_genomes:
         metadata_only = config.get("metadata_only_mode", False),
         skip_existing = config.get("skip_existing_downloads", True),
         validate_checksums = config.get("validate_file_checksums", True),
-        reuse_resolution_cache = config.get("reuse_host_resolution_cache", True)
+        reuse_resolution_cache = config.get("reuse_host_resolution_cache", True),
+        stats_timeout = config.get("host_stats_timeout", 60.0),
+        checkpoint_every = config.get("host_checkpoint_every", 100),
+        max_fasta_bytes = config.get("host_max_fasta_bytes", 500 * 1024 * 1024)
     log:
         config["host_download_log"]
     conda:
