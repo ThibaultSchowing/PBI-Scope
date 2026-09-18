@@ -100,6 +100,9 @@ metadata_only_mode: false  # Set to true to skip downloads and only gather metad
 skip_existing_downloads: true  # Skip already downloaded genomes
 validate_file_checksums: true  # Validate downloaded file integrity
 reuse_host_resolution_cache: true  # Reuse token resolution cache across reruns
+host_stats_timeout: 60.0  # Per-file genome stats timeout (s); timeout records stats_failed, never hangs loop
+host_checkpoint_every: 100  # Flush Stage-4 host/assembly checkpoint CSVs every N accessions for resume
+host_max_fasta_bytes: 524288000  # Skip stats for FASTA files larger than this (500MB)
 
 # -----------------------------------
 # BLAST database configuration

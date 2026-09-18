@@ -24,6 +24,7 @@ Key Features:
 
 import os
 import re
+import shutil
 import sys
 import time
 import logging
@@ -31,6 +32,7 @@ import hashlib
 import urllib.request
 import urllib.error
 import gzip
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set
@@ -351,7 +353,10 @@ class RobustHostGenomeDownloader:
                  phage_host_candidates_output: Optional[str] = None,
                  phage_host_assemblies_output: Optional[str] = None,
                  host_resolution_cache_output: Optional[str] = None,
-                 reuse_resolution_cache: bool = True):
+                 reuse_resolution_cache: bool = True,
+                 stats_timeout: float = 60.0,
+                 checkpoint_every: int = 100,
+                 max_fasta_bytes: int = 500 * 1024 * 1024):
         """
         Initialize RobustHostGenomeDownloader
 
@@ -376,6 +381,13 @@ class RobustHostGenomeDownloader:
                 ``_token_resolution_cache.json`` suffix.
             reuse_resolution_cache: If True, reuse cached token resolutions from
                 previous runs to avoid repeated NCBI lookups.
+            stats_timeout: Per-file timeout in seconds for genome statistics.
+                A timeout returns ``(None, None)`` instead of hanging the
+                whole 5516-genome loop (e.g. bad-block ``D``-state reads).
+            checkpoint_every: Flush Stage-4 progress to checkpoint CSVs every
+                N accessions so a killed run can resume via ``skip_existing``.
+            max_fasta_bytes: Files larger than this are skipped for stats
+                (returns ``(None, None)``) to bound memory/time.
         """
         self.phage_csv_path = Path(phage_csv_path)
         self.output_dir = Path(output_dir)
@@ -401,6 +413,24 @@ class RobustHostGenomeDownloader:
             host_resolution_cache_output or f"{_base}_token_resolution_cache.json"
         )
         self.reuse_resolution_cache = reuse_resolution_cache
+        self.stats_timeout = float(stats_timeout) if stats_timeout else 60.0
+        self.checkpoint_every = int(checkpoint_every) if checkpoint_every else 100
+        self.max_fasta_bytes = int(max_fasta_bytes) if max_fasta_bytes else 500 * 1024 * 1024
+
+        # Sidecar paths (not Snakemake outputs): periodic Stage-4 progress so
+        # a killed run can resume. Final outputs overwrite these on success.
+        self.assembly_checkpoint_output = self.assembly_metadata_output.with_name(
+            self.assembly_metadata_output.stem + ".checkpoint.csv"
+        )
+        self.host_checkpoint_output = self.metadata_output.with_name(
+            self.metadata_output.stem + ".checkpoint.csv"
+        )
+        self.bacterial_cache_output = self.host_resolution_cache_output.with_name(
+            self.host_resolution_cache_output.stem.replace(
+                "_token_resolution_cache", "_bacterial_cache"
+            ) + ".json"
+        )
+        self._bacterial_cache: Dict[str, Optional[bool]] = self._load_bacterial_cache()
 
         # Create output directories
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -434,6 +464,7 @@ class RobustHostGenomeDownloader:
         logging.info(f"   Validate checksums: {self.validate_checksums}")
         logging.info(f"   Reuse resolution cache: {self.reuse_resolution_cache}")
         logging.info(f"   Resolution cache file: {self.host_resolution_cache_output}")
+        logging.info(f"   Stats timeout: {self.stats_timeout}s, checkpoint every: {self.checkpoint_every}")
         if self.existing_metadata:
             logging.info(f"   Found {len(self.existing_metadata)} existing genomes")
         if self.token_resolution_cache:
@@ -518,20 +549,89 @@ class RobustHostGenomeDownloader:
                 tmp_path.unlink(missing_ok=True)
     
     def _load_existing_metadata(self) -> Dict[str, Dict]:
-        """Load existing assembly metadata to avoid re-processing"""
-        if not self.assembly_metadata_output.exists():
+        """Load existing assembly metadata to avoid re-processing.
+
+        Falls back to the Stage-4 checkpoint CSV when the final output
+        does not exist yet (killed run), so ``skip_existing`` resumes
+        instead of re-statting all 5516 genomes.
+        """
+        for candidate in (self.assembly_metadata_output, self.assembly_checkpoint_output):
+            if not candidate.exists():
+                continue
+            try:
+                df = pd.read_csv(candidate)
+                if df.empty or 'Assembly_Accession' not in df.columns:
+                    continue
+                metadata = {}
+                for _, row in df.iterrows():
+                    key = row['Assembly_Accession']
+                    metadata[key] = row.to_dict()
+                if candidate != self.assembly_metadata_output and metadata:
+                    logging.info(
+                        f"   ↩️  Resuming from checkpoint: {len(metadata)} "
+                        f"assemblies in {candidate.name}"
+                    )
+                return metadata
+            except Exception as e:
+                logging.warning(f"⚠️  Could not load existing metadata from {candidate}: {e}")
+                continue
+        return {}
+
+    def _load_bacterial_cache(self) -> Dict[str, Optional[bool]]:
+        """Load persisted TaxID→bacterial cache (avoids 5516 Entrez re-lookups)."""
+        path = getattr(self, 'bacterial_cache_output', None)
+        if path is None or not Path(path).exists():
             return {}
-        
         try:
-            df = pd.read_csv(self.assembly_metadata_output)
-            metadata = {}
-            for _, row in df.iterrows():
-                key = row['Assembly_Accession']
-                metadata[key] = row.to_dict()
-            return metadata
-        except Exception as e:
-            logging.warning(f"⚠️  Could not load existing metadata: {e}")
+            with open(path, 'r') as f:
+                raw = json.load(f)
+            return {str(k): (None if v is None else bool(v)) for k, v in raw.items()}
+        except Exception as exc:
+            logging.warning(f"⚠️  Could not load bacterial cache: {exc}")
             return {}
+
+    def _save_bacterial_cache(self) -> None:
+        """Atomically persist the TaxID→bacterial cache sidecar."""
+        try:
+            tmp_path = self.bacterial_cache_output.with_suffix(
+                self.bacterial_cache_output.suffix + ".tmp"
+            )
+            with open(tmp_path, 'w') as f:
+                json.dump({str(k): v for k, v in self._bacterial_cache.items()}, f, sort_keys=True)
+            tmp_path.replace(self.bacterial_cache_output)
+        except Exception as exc:
+            logging.debug(f"Could not write bacterial cache: {exc}")
+
+    @staticmethod
+    def _is_fresh(path: Path, ref: Path) -> bool:
+        """True if *path* exists, is non-empty and not older than *ref*."""
+        try:
+            if not path.exists() or path.stat().st_size == 0:
+                return False
+            if not ref.exists():
+                return True
+            return path.stat().st_mtime >= ref.stat().st_mtime - 1.0
+        except OSError:
+            return False
+
+    @staticmethod
+    def _atomic_write_csv(df: 'pd.DataFrame', path: Path) -> None:
+        """Write CSV atomically via tmp+replace so kills never corrupt it."""
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        df.to_csv(tmp_path, index=False)
+        tmp_path.replace(path)
+
+    def _flush_checkpoints(
+        self, host_records: List[Dict], assembly_records: List[Dict]
+    ) -> None:
+        """Flush Stage-4 progress sidecars (best-effort, never raises)."""
+        try:
+            if assembly_records:
+                self._atomic_write_csv(pd.DataFrame(assembly_records), self.assembly_checkpoint_output)
+            if host_records:
+                self._atomic_write_csv(pd.DataFrame(host_records), self.host_checkpoint_output)
+        except Exception as exc:
+            logging.debug(f"Checkpoint flush failed: {exc}")
     
     def extract_unique_hosts(self) -> List[str]:
         """
@@ -713,92 +813,140 @@ class RobustHostGenomeDownloader:
     
     def _validate_file(self, file_path: Path) -> bool:
         """
-        Validate file integrity
-        
+        Validate file integrity (fast path for resume loops).
+
         Checks:
         1. File exists and has non-zero size
-        2. For FASTA files, validates basic structure
-        
+        2. For ``*.fna.gz`` files, peek at the first 64KB for a FASTA
+           header + sequence content instead of scanning the whole file.
+           Full scans made every ``skip_existing`` resume re-read ~40GB.
+
         Note: Could be enhanced with MD5 checksum validation using NCBI's
         checksum files for more rigorous validation.
         """
         if not file_path.exists():
             return False
-        
-        if file_path.stat().st_size == 0:
+
+        try:
+            if file_path.stat().st_size == 0:
+                return False
+        except OSError:
             return False
-        
-        # For FASTA files, validate structure more thoroughly
+
+        # Lightweight header peek for gzipped FASTA (skip full-file scan).
         if file_path.suffix == '.gz' and '.fna' in file_path.name:
             try:
                 with gzip.open(file_path, 'rt') as f:
-                    # Read file in chunks to detect corruption throughout
-                    chunk_size = 1024 * 1024  # 1MB chunks
-                    has_header = False
-                    has_sequence = False
-                    
-                    while True:
-                        chunk = f.read(chunk_size)
-                        if not chunk:
-                            break
-                        
-                        # Check for FASTA headers
-                        if '>' in chunk:
-                            has_header = True
-                        
-                        # Check for sequence content
-                        if any(c in chunk for c in 'ACGTN'):
-                            has_sequence = True
-                    
-                    # Valid FASTA must have both headers and sequences
-                    return has_header and has_sequence
-                    
+                    head = f.read(65536)
+                if not head:
+                    return False
+                return ('>' in head) and any(c in head for c in 'ACGTN')
             except Exception as e:
                 logging.debug(f"FASTA validation failed for {file_path}: {e}")
                 return False
-        
+
+        # Plain .fna: size check + 4K header probe (avoids hanging on
+        # bad-block extents beyond the first pages during resume skips).
+        if '.fna' in file_path.name:
+            try:
+                with open(file_path, 'r') as f:
+                    head = f.read(4096)
+                if not head:
+                    return False
+                # Accept headerless sequence files as long as non-empty;
+                # stats step will decide.
+                return True
+            except Exception as e:
+                logging.debug(f"FASTA validation failed for {file_path}: {e}")
+                return False
+
         return True
     
+    @staticmethod
+    def _stream_genome_stats(fasta_path: Path) -> Tuple[Optional[int], Optional[float]]:
+        """Byte-streaming length/GC count without Biopython object overhead.
+
+        Skips ``>`` header lines, counts all other non-whitespace bases
+        towards length (matching legacy ``len(seq)`` semantics) and
+        ``G``/``C`` (case-insensitive) towards GC. Reads 1MB binary chunks
+        so single huge contig lines never materialise as giant strings.
+        """
+        opener = gzip.open if str(fasta_path).endswith('.gz') else open
+        total_length = 0
+        gc_count = 0
+        buf = b''
+        with opener(fasta_path, 'rb') as fh:
+            while True:
+                chunk = fh.read(1024 * 1024)
+                if not chunk:
+                    break
+                data = buf + chunk
+                lines = data.split(b'\n')
+                buf = lines.pop()
+                for line in lines:
+                    s = line.strip()
+                    if not s or s.startswith(b'>'):
+                        continue
+                    total_length += len(s)
+                    up = s.upper()
+                    gc_count += up.count(b'G') + up.count(b'C')
+            if buf:
+                s = buf.strip()
+                if s and not s.startswith(b'>'):
+                    total_length += len(s)
+                    up = s.upper()
+                    gc_count += up.count(b'G') + up.count(b'C')
+        if total_length > 0:
+            return total_length, round((gc_count / total_length) * 100, 2)
+        return None, None
+
     def calculate_genome_stats(self, fasta_path: Path) -> Tuple[Optional[int], Optional[float]]:
         """
-        Calculate genome length and GC content from FASTA file
-        
+        Calculate genome length and GC content from FASTA file.
+
+        Hardened vs legacy ``SeqIO.parse`` loop:
+        * size guard (``max_fasta_bytes``) bounds memory/time,
+        * worker-thread timeout (``stats_timeout``) returns
+          ``(None, None)`` instead of hanging the 5516-genome loop on a
+          stuck read (e.g. bad-block ``D``-state like GCF_014191245.1).
+
+        Note: an uninterruptible kernel read cannot be killed from
+        userspace; on timeout the worker thread lingers but the parent
+        loop continues and the accession is recorded as stats-failed.
+
         Args:
             fasta_path: Path to FASTA file (can be gzipped)
-            
+
         Returns:
             Tuple of (genome_length, gc_content_percentage)
         """
         try:
-            # Determine if file is gzipped
-            is_gzipped = str(fasta_path).endswith('.gz')
-            
-            total_length = 0
-            gc_count = 0
-            
-            # Open file appropriately using context manager
-            if is_gzipped:
-                with gzip.open(fasta_path, 'rt') as handle:
-                    # Parse sequences and calculate stats
-                    for record in SeqIO.parse(handle, 'fasta'):
-                        seq_str = str(record.seq).upper()
-                        total_length += len(seq_str)
-                        gc_count += seq_str.count('G') + seq_str.count('C')
-            else:
-                with open(fasta_path, 'r') as handle:
-                    # Parse sequences and calculate stats
-                    for record in SeqIO.parse(handle, 'fasta'):
-                        seq_str = str(record.seq).upper()
-                        total_length += len(seq_str)
-                        gc_count += seq_str.count('G') + seq_str.count('C')
-            
-            # Calculate GC percentage
-            if total_length > 0:
-                gc_content = round((gc_count / total_length) * 100, 2)
-                return total_length, gc_content
-            else:
+            try:
+                if Path(fasta_path).stat().st_size > self.max_fasta_bytes:
+                    logging.warning(
+                        f"   ⚠️  Skipping stats for oversized file "
+                        f"{Path(fasta_path).name} "
+                        f"({Path(fasta_path).stat().st_size:,} bytes)"
+                    )
+                    return None, None
+            except OSError as e:
+                logging.warning(f"   ⚠️  Could not stat genome file: {e}")
                 return None, None
-                
+
+            executor = ThreadPoolExecutor(max_workers=1)
+            try:
+                future = executor.submit(self._stream_genome_stats, Path(fasta_path))
+                try:
+                    return future.result(timeout=self.stats_timeout)
+                except FuturesTimeoutError:
+                    logging.warning(
+                        f"   ⚠️  Genome stats timed out after "
+                        f"{self.stats_timeout}s: {Path(fasta_path).name} "
+                        f"— recording as failed, continuing"
+                    )
+                    return None, None
+            finally:
+                executor.shutdown(wait=False, cancel_futures=True)
         except Exception as e:
             logging.warning(f"   ⚠️  Could not calculate genome stats: {e}")
             return None, None
@@ -832,19 +980,45 @@ class RobustHostGenomeDownloader:
                 # Remove corrupted file
                 output_file.unlink()
         
-        # Decompress and write
+        # Decompress via chunked binary copy to .tmp + atomic replace
+        # (legacy f_in.read() materialised the whole genome as one str).
+        tmp_file = output_file.with_suffix(output_file.suffix + ".tmp")
         try:
-            with gzip.open(source_file, 'rt') as f_in:
-                with open(output_file, 'w') as f_out:
-                    f_out.write(f_in.read())
-            
+            with gzip.open(source_file, 'rb') as f_in:
+                with open(tmp_file, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out, length=1024 * 1024)
+                    f_out.flush()
+                    try:
+                        os.fsync(f_out.fileno())
+                    except OSError:
+                        pass
+            # 4K readability probe before publishing
+            try:
+                with open(tmp_file, 'rb') as probe:
+                    if not probe.read(4096):
+                        raise IOError("decompressed file is empty")
+            except Exception as probe_exc:
+                tmp_file.unlink(missing_ok=True)
+                raise IOError(f"readability probe failed: {probe_exc}")
+            tmp_file.replace(output_file)
+
             logging.info(f"   ✅ Created host FASTA: {output_file.name}")
             return output_file
-            
+
         except Exception as e:
             logging.error(f"   ❌ Failed to create host FASTA: {e}")
+            try:
+                tmp_file.unlink(missing_ok=True)
+            except OSError:
+                pass
             if output_file.exists():
-                output_file.unlink()  # Clean up partial file
+                try:
+                    # Leave pre-existing valid file alone; only remove if
+                    # we just created a partial file (size 0).
+                    if output_file.stat().st_size == 0:
+                        output_file.unlink()
+                except OSError:
+                    pass
             return None
     
     def _generate_candidates(self, phage_df: pd.DataFrame) -> pd.DataFrame:
@@ -984,7 +1158,18 @@ class RobustHostGenomeDownloader:
                     )
                     bacterial_assemblies.append(asm)
                     continue
-                is_bacterial = self.resolver.is_bacterial_taxid(asm.species_taxid)
+                tax_key = str(asm.species_taxid)
+                if tax_key in self._bacterial_cache:
+                    is_bacterial = self._bacterial_cache[tax_key]
+                else:
+                    try:
+                        is_bacterial = self.resolver.is_bacterial_taxid(asm.species_taxid)
+                    except Exception as exc:
+                        logging.warning(
+                            f"⚠️  Bacterial check failed for TaxID {asm.species_taxid}: {exc}"
+                        )
+                        is_bacterial = None
+                    self._bacterial_cache[tax_key] = is_bacterial
                 if is_bacterial is False:
                     logging.warning(
                         f"⚠️  Non-bacterial host skipped: token '{tok}' resolved to "
@@ -1004,6 +1189,7 @@ class RobustHostGenomeDownloader:
             token_to_assemblies[tok] = bacterial_assemblies
             if token_has_non_bacterial and not bacterial_assemblies:
                 non_bacterial_tokens.append(tok)
+        self._save_bacterial_cache()
         return token_to_assemblies, non_bacterial_tokens
 
     def process_all_hosts(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -1031,16 +1217,31 @@ class RobustHostGenomeDownloader:
         logging.info("📋 Starting multi-host processing pipeline...")
 
         # ------------------------------------------------------------------
-        # Stage 1: Parse host fields into candidates
+        # Stage 1: Parse host fields into candidates (seed-reuse on resume)
         # ------------------------------------------------------------------
-        phage_df = pd.read_csv(self.phage_csv_path)
-        candidates_df = self._generate_candidates(phage_df)
+        candidates_df = None
+        if self.skip_existing and self._is_fresh(
+            self.phage_host_candidates_output, self.phage_csv_path
+        ):
+            try:
+                candidates_df = pd.read_csv(self.phage_host_candidates_output)
+                if not candidates_df.empty and 'Host_Token' in candidates_df.columns:
+                    logging.info(
+                        f"   ↩️  Reusing {len(candidates_df)} candidate rows from "
+                        f"{self.phage_host_candidates_output.name} (skipped re-parse)"
+                    )
+            except Exception as exc:
+                logging.warning(f"⚠️  Could not reuse candidates CSV: {exc}")
+                candidates_df = None
+        if candidates_df is None:
+            phage_df = pd.read_csv(self.phage_csv_path)
+            candidates_df = self._generate_candidates(phage_df)
 
-        candidates_df.to_csv(self.phage_host_candidates_output, index=False)
-        logging.info(
-            f"✅ Written {len(candidates_df)} candidate rows to "
-            f"{self.phage_host_candidates_output}"
-        )
+            self._atomic_write_csv(candidates_df, self.phage_host_candidates_output)
+            logging.info(
+                f"✅ Written {len(candidates_df)} candidate rows to "
+                f"{self.phage_host_candidates_output}"
+            )
 
         # ------------------------------------------------------------------
         # Stage 2: Resolve each unique token to assemblies
@@ -1127,84 +1328,196 @@ class RobustHostGenomeDownloader:
         host_records: List[Dict] = []
         assembly_records: List[Dict] = []
 
-        for i, (accession, assembly) in enumerate(all_assembly_meta.items(), 1):
-            logging.info(
-                f"[{i}/{len(all_assembly_meta)}] Processing "
-                f"{assembly.organism_name} ({accession})…"
-            )
-
-            # Skip if already downloaded and cached
-            if accession in self.existing_metadata and self.skip_existing:
-                logging.info("   ✓ Already processed, skipping")
-                assembly_records.append(self.existing_metadata[accession])
+        # Host seed for resume: skipped accessions still need a host row
+        # (legacy code `continue`d before creating one, dropping them from
+        # host_metadata.csv on resume). Prefer checkpoint, then final output.
+        host_seed: Dict[str, Dict] = {}
+        for host_candidate in (self.host_checkpoint_output, self.metadata_output):
+            if not host_candidate.exists():
                 continue
+            try:
+                _hdf = pd.read_csv(host_candidate)
+                if not _hdf.empty and 'Assembly_Accession' in _hdf.columns:
+                    for _, _hrow in _hdf.iterrows():
+                        host_seed[str(_hrow['Assembly_Accession'])] = _hrow.to_dict()
+                    if host_seed:
+                        logging.info(
+                            f"   ↩️  Loaded {len(host_seed)} host seed rows from "
+                            f"{host_candidate.name}"
+                        )
+                        break
+            except Exception as exc:
+                logging.debug(f"Could not load host seed from {host_candidate}: {exc}")
 
-            # Download files (unless metadata-only mode)
-            downloaded_files: Dict[str, Path] = {}
-            download_success = True
-            host_fasta = None
-            genome_length = None
-            gc_content = None
-
-            if not self.metadata_only:
-                assembly_subdir = self.output_dir / "assemblies" / accession
-                download_success, downloaded_files = self.download_assembly_ftp(
-                    assembly, assembly_subdir
+        for i, (accession, assembly) in enumerate(all_assembly_meta.items(), 1):
+            try:
+                logging.info(
+                    f"[{i}/{len(all_assembly_meta)}] Processing "
+                    f"{assembly.organism_name} ({accession})…"
                 )
 
-                if download_success:
-                    host_fasta = self.create_host_fasta(assembly, downloaded_files)
-                    if host_fasta and host_fasta.exists():
-                        logging.info("   📊 Calculating genome statistics…")
-                        genome_length, gc_content = self.calculate_genome_stats(host_fasta)
-                        if genome_length is not None:
-                            logging.info(f"   ✅ Length: {genome_length:,} bp, GC: {gc_content}%")
-                else:
-                    logging.warning(f"   ⚠️  Download failed for {accession}")
-                    assembly_subdir_path = self.output_dir / "assemblies" / accession
-                    if assembly_subdir_path.exists():
-                        import shutil
-                        try:
-                            shutil.rmtree(assembly_subdir_path)
-                            logging.info("   🧹 Cleaned up partial download directory")
-                        except Exception as exc:
-                            logging.warning(f"   ⚠️  Could not clean up directory: {exc}")
+                # Skip if already downloaded and cached
+                if accession in self.existing_metadata and self.skip_existing:
+                    logging.info("   ✓ Already processed, skipping")
+                    assembly_records.append(self.existing_metadata[accession])
+                    if accession in host_seed:
+                        host_records.append(host_seed[accession])
+                    else:
+                        # Reconstruct minimal host row; stats recomputed
+                        # bounded (timeout) from the existing .fna if present.
+                        _gl, _gc = None, None
+                        _existing_fna = self.output_dir / f"{accession.replace('.', '_')}.fna"
+                        if _existing_fna.exists():
+                            _gl, _gc = self.calculate_genome_stats(_existing_fna)
+                        host_records.append({
+                            'Host_ID': accession.replace('.', '_'),
+                            'Species_Name': assembly.organism_name,
+                            'Strain_Name': assembly.strain or '-',
+                            'Assembly_Accession': accession,
+                            'Assembly_Name': assembly.assembly_name,
+                            'Assembly_Level': assembly.assembly_level,
+                            'Genome_Length': str(_gl) if _gl is not None else '-',
+                            'GC_Content': str(_gc) if _gc is not None else '-',
+                            'RefSeq_Category': assembly.refseq_category,
+                            'Download_Date': datetime.now().strftime('%Y-%m-%d'),
+                            'Source': 'assembly_resolver',
+                        })
+                    if self.checkpoint_every and (len(assembly_records) % self.checkpoint_every == 0):
+                        self._flush_checkpoints(host_records, assembly_records)
+                    continue
 
-            assembly_record = {
-                'Assembly_Accession': assembly.assembly_accession,
-                'Assembly_Name': assembly.assembly_name,
-                'Organism_Name': assembly.organism_name,
-                'Species_TaxID': assembly.species_taxid,
-                'Strain': assembly.strain or '-',
-                'Assembly_Level': assembly.assembly_level,
-                'RefSeq_Category': assembly.refseq_category,
-                'BioSample': assembly.biosample or '-',
-                'BioProject': assembly.bioproject or '-',
-                'FTP_Path': assembly.ftp_path or '-',
-                'Submission_Date': assembly.submission_date or '-',
-                'Is_Latest': assembly.is_latest,
-                'Quality_Score': assembly.get_quality_score(),
-                'Is_RefSeq': assembly.is_refseq(),
-                'Download_Status': 'success' if download_success or self.metadata_only else 'failed',
-                'Download_Date': datetime.now().strftime('%Y-%m-%d'),
-                'Metadata_Only': self.metadata_only,
-            }
-            assembly_records.append(assembly_record)
+                # Download files (unless metadata-only mode)
+                downloaded_files: Dict[str, Path] = {}
+                download_success = True
+                host_fasta = None
+                genome_length = None
+                gc_content = None
 
-            host_record = {
-                'Host_ID': assembly.assembly_accession.replace('.', '_'),
-                'Species_Name': assembly.organism_name,
-                'Strain_Name': assembly.strain or '-',
-                'Assembly_Accession': assembly.assembly_accession,
-                'Assembly_Name': assembly.assembly_name,
-                'Assembly_Level': assembly.assembly_level,
-                'Genome_Length': str(genome_length) if genome_length is not None else '-',
-                'GC_Content': str(gc_content) if gc_content is not None else '-',
-                'RefSeq_Category': assembly.refseq_category,
-                'Download_Date': datetime.now().strftime('%Y-%m-%d'),
-                'Source': 'assembly_resolver',
-            }
-            host_records.append(host_record)
+                if not self.metadata_only:
+                    assembly_subdir = self.output_dir / "assemblies" / accession
+                    download_success, downloaded_files = self.download_assembly_ftp(
+                        assembly, assembly_subdir
+                    )
+
+                    if download_success:
+                        host_fasta = self.create_host_fasta(assembly, downloaded_files)
+                        if host_fasta and host_fasta.exists():
+                            logging.info("   📊 Calculating genome statistics…")
+                            genome_length, gc_content = self.calculate_genome_stats(host_fasta)
+                            if genome_length is not None:
+                                logging.info(f"   ✅ Length: {genome_length:,} bp, GC: {gc_content}%")
+                            else:
+                                logging.warning(
+                                    f"   ⚠️  Stats unavailable for {accession} "
+                                    f"(recorded as failed, continuing)"
+                                )
+                    else:
+                        logging.warning(f"   ⚠️  Download failed for {accession}")
+                        assembly_subdir_path = self.output_dir / "assemblies" / accession
+                        if assembly_subdir_path.exists():
+                            try:
+                                shutil.rmtree(assembly_subdir_path)
+                                logging.info("   🧹 Cleaned up partial download directory")
+                            except Exception as exc:
+                                logging.warning(f"   ⚠️  Could not clean up directory: {exc}")
+
+                assembly_record = {
+                    'Assembly_Accession': assembly.assembly_accession,
+                    'Assembly_Name': assembly.assembly_name,
+                    'Organism_Name': assembly.organism_name,
+                    'Species_TaxID': assembly.species_taxid,
+                    'Strain': assembly.strain or '-',
+                    'Assembly_Level': assembly.assembly_level,
+                    'RefSeq_Category': assembly.refseq_category,
+                    'BioSample': assembly.biosample or '-',
+                    'BioProject': assembly.bioproject or '-',
+                    'FTP_Path': assembly.ftp_path or '-',
+                    'Submission_Date': assembly.submission_date or '-',
+                    'Is_Latest': assembly.is_latest,
+                    'Quality_Score': assembly.get_quality_score(),
+                    'Is_RefSeq': assembly.is_refseq(),
+                    'Download_Status': (
+                        'success' if download_success or self.metadata_only
+                        else 'failed' if genome_length is None and not download_success
+                        else 'stats_failed' if genome_length is None
+                        else 'success'
+                    ),
+                    'Download_Date': datetime.now().strftime('%Y-%m-%d'),
+                    'Metadata_Only': self.metadata_only,
+                }
+                # Refine status: download ok but stats failed (e.g. bad-block
+                # GCF_014191245.1 retry) must not look like success.
+                if (download_success or self.metadata_only) and genome_length is None and not self.metadata_only:
+                    assembly_record['Download_Status'] = (
+                        'success' if accession in self.existing_metadata else 'stats_failed'
+                    )
+                    # Fresh downloads with failed stats keep their files for
+                    # forensics but don't block the loop.
+                assembly_records.append(assembly_record)
+
+                host_record = {
+                    'Host_ID': assembly.assembly_accession.replace('.', '_'),
+                    'Species_Name': assembly.organism_name,
+                    'Strain_Name': assembly.strain or '-',
+                    'Assembly_Accession': assembly.assembly_accession,
+                    'Assembly_Name': assembly.assembly_name,
+                    'Assembly_Level': assembly.assembly_level,
+                    'Genome_Length': str(genome_length) if genome_length is not None else '-',
+                    'GC_Content': str(gc_content) if gc_content is not None else '-',
+                    'RefSeq_Category': assembly.refseq_category,
+                    'Download_Date': datetime.now().strftime('%Y-%m-%d'),
+                    'Source': 'assembly_resolver',
+                }
+                host_records.append(host_record)
+
+                if self.checkpoint_every and (len(assembly_records) % self.checkpoint_every == 0):
+                    self._flush_checkpoints(host_records, assembly_records)
+                    logging.info(
+                        f"   💾 Checkpoint: {len(assembly_records)} assemblies flushed "
+                        f"({self.assembly_checkpoint_output.name})"
+                    )
+            except Exception as exc:
+                # Per-accession isolation: one bad genome (bad blocks,
+                # NCBI hiccup) must never kill the 5516-loop.
+                logging.error(f"   ❌ Failed processing {accession}: {exc} — continuing")
+                try:
+                    assembly_records.append({
+                        'Assembly_Accession': accession,
+                        'Assembly_Name': getattr(assembly, 'assembly_name', '-'),
+                        'Organism_Name': getattr(assembly, 'organism_name', '-'),
+                        'Species_TaxID': getattr(assembly, 'species_taxid', '-'),
+                        'Strain': getattr(assembly, 'strain', '-') or '-',
+                        'Assembly_Level': getattr(assembly, 'assembly_level', '-'),
+                        'RefSeq_Category': getattr(assembly, 'refseq_category', '-'),
+                        'BioSample': getattr(assembly, 'biosample', '-') or '-',
+                        'BioProject': getattr(assembly, 'bioproject', '-') or '-',
+                        'FTP_Path': getattr(assembly, 'ftp_path', '-') or '-',
+                        'Submission_Date': getattr(assembly, 'submission_date', '-') or '-',
+                        'Is_Latest': getattr(assembly, 'is_latest', True),
+                        'Quality_Score': 0,
+                        'Is_RefSeq': False,
+                        'Download_Status': 'failed',
+                        'Download_Date': datetime.now().strftime('%Y-%m-%d'),
+                        'Metadata_Only': self.metadata_only,
+                    })
+                    host_records.append({
+                        'Host_ID': accession.replace('.', '_'),
+                        'Species_Name': getattr(assembly, 'organism_name', '-'),
+                        'Strain_Name': getattr(assembly, 'strain', '-') or '-',
+                        'Assembly_Accession': accession,
+                        'Assembly_Name': getattr(assembly, 'assembly_name', '-'),
+                        'Assembly_Level': getattr(assembly, 'assembly_level', '-'),
+                        'Genome_Length': '-',
+                        'GC_Content': '-',
+                        'RefSeq_Category': getattr(assembly, 'refseq_category', '-'),
+                        'Download_Date': datetime.now().strftime('%Y-%m-%d'),
+                        'Source': 'assembly_resolver',
+                    })
+                except Exception:
+                    pass
+
+        # Final checkpoint flush so a kill during Stage 5 still resumes Stage 4.
+        self._flush_checkpoints(host_records, assembly_records)
 
         # ------------------------------------------------------------------
         # Stage 5: Build backward-compat phage_host_links from assembly_links
@@ -1313,6 +1626,14 @@ class RobustHostGenomeDownloader:
         # (phage_host_candidates and phage_host_assemblies already written by
         # process_all_hosts() so Snakemake can track them as rule outputs.)
 
+        # Checkpoints served their purpose — remove so the next run with
+        # different inputs cannot accidentally reuse stale progress.
+        for _cp in (self.assembly_checkpoint_output, self.host_checkpoint_output):
+            try:
+                _cp.unlink(missing_ok=True)
+            except OSError as exc:
+                logging.debug(f"Could not remove checkpoint {_cp}: {exc}")
+
         # Summary
         elapsed = time.time() - start_time
         logging.info("=" * 80)
@@ -1388,6 +1709,9 @@ def main():
             phage_host_assemblies_output=snakemake.output.get('phage_host_assemblies'),
             host_resolution_cache_output=snakemake.output.get('host_resolution_cache'),
             reuse_resolution_cache=snakemake.params.get('reuse_resolution_cache', True),
+            stats_timeout=snakemake.params.get('stats_timeout', 60.0),
+            checkpoint_every=snakemake.params.get('checkpoint_every', 100),
+            max_fasta_bytes=snakemake.params.get('max_fasta_bytes', 500 * 1024 * 1024),
         )
         downloader.run()
     else:
@@ -1416,6 +1740,12 @@ def main():
         parser.add_argument('--no-resolution-cache', dest='reuse_resolution_cache', action='store_false',
                             help='Disable reuse of token resolution cache')
         parser.set_defaults(reuse_resolution_cache=True)
+        parser.add_argument('--stats-timeout', type=float, default=60.0,
+                            help='Per-file genome stats timeout in seconds')
+        parser.add_argument('--checkpoint-every', type=int, default=100,
+                            help='Flush Stage-4 checkpoints every N accessions')
+        parser.add_argument('--max-fasta-bytes', type=int, default=500 * 1024 * 1024,
+                            help='Skip stats for FASTA files larger than this')
 
         args = parser.parse_args()
 
@@ -1441,6 +1771,9 @@ def main():
             phage_host_assemblies_output=args.phage_host_assemblies,
             host_resolution_cache_output=args.host_resolution_cache,
             reuse_resolution_cache=args.reuse_resolution_cache,
+            stats_timeout=args.stats_timeout,
+            checkpoint_every=args.checkpoint_every,
+            max_fasta_bytes=args.max_fasta_bytes,
         )
         downloader.run()
 
