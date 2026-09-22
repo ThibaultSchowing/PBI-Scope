@@ -40,13 +40,20 @@ def phage_key(header: str) -> str:
 def protein_key(header: str) -> str:
     """Canonical protein key = second token (Protein_ID) for Variant B.
 
-    Falls back to token0 when header has only one token (e.g. unmerged protein
-    file with bare >Protein_ID).
+    Handles heterogeneous headers:
+    - New canonical: >Phage_ID Protein_ID Source_DB [rest]  -> token1
+    - Old Prodigal:  >Protein_ID # 2 # 685 ...               -> token0 (since token1 == "#")
+    - Bare:          >Protein_ID                              -> token0
     """
     toks = _tokens(header)
+    if not toks:
+        return ""
+    if len(toks) >= 2 and toks[1] == "#":
+        # Old style without phage prefix: first token is the actual Protein_ID
+        return toks[0]
     if len(toks) >= 2:
         return toks[1]
-    return toks[0] if toks else ""
+    return toks[0]
 
 
 def source_of_phage_header(header: str) -> str | None:

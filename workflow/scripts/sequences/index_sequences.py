@@ -203,7 +203,15 @@ def _write_sequence(outfile, full_header, seq_parts, seen_ids, duplicate_stats, 
     toks = full_header.strip().split()
     if not toks:
         return False
-    canonical_key = toks[1] if is_protein and len(toks) >= 2 else toks[0]
+    if is_protein:
+        if len(toks) >= 2 and toks[1] == "#":
+            canonical_key = toks[0]
+        elif len(toks) >= 2:
+            canonical_key = toks[1]
+        else:
+            canonical_key = toks[0]
+    else:
+        canonical_key = toks[0]
 
     if canonical_key in seen_ids:
         # Duplicate found
@@ -392,10 +400,14 @@ def index_fasta(fasta_path):
     logging.info(f"📇 Creating index for: {fasta_path}")
     try:
         if is_protein:
-            logging.info(f"   Using canonical protein key: token1 (Protein_ID) Variant B")
+            logging.info(f"   Using canonical protein key: token1 (Protein_ID) Variant B with # fallback")
             def _protein_k(h):
                 toks = h.split()
-                return toks[1] if len(toks) >= 2 else toks[0] if toks else h
+                if not toks:
+                    return h
+                if len(toks) >= 2 and toks[1] == "#":
+                    return toks[0]
+                return toks[1] if len(toks) >= 2 else toks[0]
             fasta = pyfaidx.Fasta(
                 str(fasta_path),
                 read_long_names=True,

@@ -222,6 +222,15 @@ def test_index_dedup_phage_pipe_and_colon():
         f.close()
 
 
+def test_prodigal_hash_header_protein_key():
+    """Prodigal GFF-style header: >Protein # 2 # 685 ... -> protein is token0."""
+    assert protein_key("3300006028.a:Ga0070717_10000169_1 # 2 # 685 # 1 # ID=1_1;partial=10") == "3300006028.a:Ga0070717_10000169_1"
+    assert protein_key("3300006028.a:Ga0070717_10000169_1 # 688 # 1161 # -1 # ID=1_2") == "3300006028.a:Ga0070717_10000169_1"
+    # New canonical with Source_DB inserted: >Phage Protein Source # 2 ...
+    assert protein_key("Ga0070717_10000169 3300006028.a:Ga0070717_10000169_1 GPD # 2 # 685") == "3300006028.a:Ga0070717_10000169_1"
+    assert protein_key("AE002163.1 AAF39720.1 Genbank") == "AAF39720.1"
+
+
 def test_normalize_rejects_whitespace_in_id():
     # phage_id param with space should be rejected (direct validation)
     with pytest.raises(ValueError):
