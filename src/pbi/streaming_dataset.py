@@ -117,15 +117,12 @@ def phage_host_collate_fn(batch):
     
     return collated
 
-# FASTA file configuration constants
-# key_function extracts just the accession (first word before any space) from FASTA headers,
-# so lookups by bare ID (e.g. "BK000583.1") work even when headers contain descriptions.
-def _fasta_key_function(header: str) -> str:
-    """Extract the accession ID (first whitespace-delimited token) from a FASTA header."""
-    parts = header.split()
-    return parts[0] if parts else header
+# FASTA file configuration constants — canonical Variant B
+from .fasta_ids import phage_key as _fasta_key_function
+from .fasta_ids import protein_key as _protein_key_function
 
 FASTA_KEY_FUNCTION = _fasta_key_function
+PROTEIN_KEY_FUNCTION = _protein_key_function
 FASTA_DUPLICATE_ACTION = 'first'  # Use first occurrence when duplicates exist
 
 # Maximum number of host FASTA files to keep open simultaneously

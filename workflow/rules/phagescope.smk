@@ -291,28 +291,11 @@ rule merge_protein_fasta_by_source:
     params:
         source_dir = lambda wildcards: os.path.join(config["protein_fasta_extracted_output"], wildcards.dataset),
         merged_fasta_dir = config["protein_fasta_merged_output"]
-    shell:
-        # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
-        # This ensures we don’t waste time unnecessarily merging a single file.
-        r'''
-        mkdir -p {params.merged_fasta_dir}
-        
-        # Find all fasta files and store in an array
-        mapfile -t fasta_files < <(find {params.source_dir} -type f \( -name "*.fasta" -o -name "*.fa" \))
-        
-        # Check if any files were found
-        if [ "${{#fasta_files[@]}}" -eq 0 ]; then
-            echo "⚠️ WARNING: No FASTA files found in {params.source_dir} - creating empty file" >&2
-            touch {output.merged_fasta}
-        elif [ "${{#fasta_files[@]}}" -eq 1 ]; then
-            # Only one file, just copy it
-            cp "${{fasta_files[0]}}" {output.merged_fasta}
-        else
-            # Multiple files, merge them
-            python scripts/preprocessing/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
-        fi
-        '''
-    
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/preprocessing/mergers/merge_protein_fasta_by_source.py"
+
 rule merge_phage_fasta_by_source:
     input:
         source_dir = os.path.join(config["phage_fasta_extracted_output"], "{dataset}")
@@ -321,27 +304,10 @@ rule merge_phage_fasta_by_source:
     params:
         source_dir = lambda wildcards: os.path.join(config["phage_fasta_extracted_output"], wildcards.dataset),
         merged_fasta_dir = config["phage_fasta_merged_output"]
-    shell:
-        # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
-        # This ensures we don’t waste time unnecessarily merging a single file.
-        r'''
-        mkdir -p {params.merged_fasta_dir}
-        
-        # Find all fasta files and store in an array
-        mapfile -t fasta_files < <(find {params.source_dir} -type f \( -name "*.fasta" -o -name "*.fa" \))
-        
-        # Check if any files were found
-        if [ "${{#fasta_files[@]}}" -eq 0 ]; then
-            echo "⚠️ WARNING: No FASTA files found in {params.source_dir} - creating empty file" >&2
-            touch {output.merged_fasta}
-        elif [ "${{#fasta_files[@]}}" -eq 1 ]; then
-            # Only one file, just copy it
-            cp "${{fasta_files[0]}}" {output.merged_fasta}
-        else
-            # Multiple files, merge them
-            python scripts/preprocessing/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
-        fi
-        '''
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/preprocessing/mergers/merge_phage_fasta_by_source.py"
 
 rule cleanup_extracted_phage_fasta:
     input:

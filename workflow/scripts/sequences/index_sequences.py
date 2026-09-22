@@ -39,8 +39,19 @@ def _setup_logging(log_file: str, also_stderr: bool = True) -> None:
             root.addHandler(sh)
 
 
+def _canonical_key_for_indexing(header: str, is_protein: bool) -> str:
+    """Return canonical dedup key: token0 for phage, token1 for protein (Variant B)."""
+    toks = header.strip().split()
+    if not toks:
+        return ""
+    if is_protein:
+        return toks[1] if len(toks) >= 2 else toks[0]
+    return toks[0]
+
+
 def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_width=80, 
-                                               duplicate_report_path=None):
+                                               duplicate_report_path=None,
+                                               is_protein: bool | None = None):
     """
     Memory-efficient FASTA normalization and deduplication using streaming
     
@@ -48,26 +59,36 @@ def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_wi
     - Ensures consistent line width
     - Tracks duplicates without loading all sequences
     - Generates detailed duplicate report
-    - Uses FULL header line as sequence ID
+    - Uses canonical key (Variant B): token0 for phage, token1 for protein
     
     Args:
         input_fasta: Path to input FASTA file
         output_fasta: Path to output normalized FASTA file
         line_width: Number of characters per line (default: 80)
         duplicate_report_path: Path to save duplicate analysis report (optional)
+        is_protein: If None, auto-detected from filename (contains 'protein')
     """
     
+    if is_protein is None:
+        is_protein = "protein" in str(input_fasta).lower()
+
     logging.info(f"🔧 Normalizing and deduplicating FASTA: {input_fasta}")
-    logging.info(f"📋 Using FULL header line as sequence ID")
+    logging.info(f"📋 Using canonical key (is_protein={is_protein}): {'token1 (Protein_ID)' if is_protein else 'token0 (Phage_ID)'}")
     
-    # Track seen IDs and their hashes
-    seen_ids = {}  # full_header -> hash
+    # Track seen IDs and their hashes — canonical key -> hash
+    seen_ids = {}  # canonical_key -> hash
     duplicate_stats = defaultdict(lambda: {'identical': 0, 'different': 0, 'sequences': []})
+    # also track cross-source conflicts for phage duplicates with same key but different source
+    cross_source_conflicts = defaultdict(set)  # canonical_key -> set of source tokens seen
     total_sequences = 0
     sequences_written = 0
     
-    # Create temporary file
-    temp_output = output_fasta + '.tmp'
+    # Create temporary file — NEVER write in-place onto Snakemake input;
+    # caller must ensure output_fasta != input_fasta or use tmp then move via Snakemake output
+    if str(input_fasta) == str(output_fasta):
+        temp_output = output_fasta + '.dedup.tmp'
+    else:
+        temp_output = output_fasta + '.tmp'
     
     try:
         with open(input_fasta, 'r') as infile, open(temp_output, 'w') as outfile:
@@ -82,7 +103,8 @@ def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_wi
                     if current_header is not None:
                         written = _write_sequence(
                             outfile, current_header, current_seq,
-                            seen_ids, duplicate_stats, line_width
+                            seen_ids, duplicate_stats, line_width,
+                            is_protein=is_protein
                         )
                         if written:
                             sequences_written += 1
@@ -92,8 +114,13 @@ def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_wi
                         if total_sequences % 100000 == 0:
                             logging.info(f"   📊 Processed {total_sequences:,} sequences, kept {sequences_written:,}...")
                     
-                    # Store full header (without '>')
+                    # Store canonical header (without '>')
                     current_header = line[1:].strip()
+                    # Validate no empty header
+                    if not current_header:
+                        logging.warning(f"⚠️ Empty header at line {line_num} in {input_fasta}, skipping")
+                        current_seq = []
+                        continue
                     current_seq = []
                     
                 else:
@@ -105,13 +132,15 @@ def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_wi
             if current_header is not None:
                 written = _write_sequence(
                     outfile, current_header, current_seq,
-                    seen_ids, duplicate_stats, line_width
+                    seen_ids, duplicate_stats, line_width,
+                    is_protein=is_protein
                 )
                 if written:
                     sequences_written += 1
                 total_sequences += 1
         
-        # Replace original with normalized
+        # Replace original with normalized — if input==output, this is in-place dedup via tmp;
+        # otherwise this writes to the intended output path (no mutation of Snakemake input is now handled by caller)
         logging.info(f"🔄 Replacing original with normalized file")
         shutil.move(temp_output, output_fasta)
         
@@ -146,20 +175,21 @@ def normalize_and_deduplicate_fasta_streaming(input_fasta, output_fasta, line_wi
             os.remove(temp_output)
         raise e
 
-def _write_sequence(outfile, full_header, seq_parts, seen_ids, duplicate_stats, line_width):
+def _write_sequence(outfile, full_header, seq_parts, seen_ids, duplicate_stats, line_width, is_protein: bool = False):
     """
     Write a single sequence to output file
     
     Handles duplicate detection and line width normalization
-    Uses full header as sequence ID
+    Uses canonical key (token0 for phage, token1 for protein - Variant B)
     
     Args:
         outfile: Output file handle
         full_header: Complete header line (without '>')
         seq_parts: List of sequence line fragments
-        seen_ids: Dictionary tracking seen IDs
+        seen_ids: Dictionary tracking seen IDs (canonical_key -> hash)
         duplicate_stats: Dictionary tracking duplicate statistics
         line_width: Characters per line for sequence
+        is_protein: True for protein FASTA (dedupe on token1), False for phage (token0)
     
     Returns:
         bool: True if sequence was written, False if skipped
@@ -167,27 +197,32 @@ def _write_sequence(outfile, full_header, seq_parts, seen_ids, duplicate_stats, 
     # Join sequence parts
     seq_str = ''.join(seq_parts)
     
-    # Calculate hash for duplicate detection
-    seq_hash = hashlib.md5(seq_str.encode()).hexdigest()
+    # Calculate hash case-insensitively (matches fasta_qc.py)
+    seq_hash = hashlib.md5(seq_str.upper().encode()).hexdigest()
     
-    if full_header in seen_ids:
+    toks = full_header.strip().split()
+    if not toks:
+        return False
+    canonical_key = toks[1] if is_protein and len(toks) >= 2 else toks[0]
+
+    if canonical_key in seen_ids:
         # Duplicate found
-        if seen_ids[full_header] == seq_hash:
+        if seen_ids[canonical_key] == seq_hash:
             # Exact duplicate - skip
-            duplicate_stats[full_header]['identical'] += 1
+            duplicate_stats[canonical_key]['identical'] += 1
         else:
             # Different sequence with same ID - skip
-            duplicate_stats[full_header]['different'] += 1
-            duplicate_stats[full_header]['sequences'].append({
+            duplicate_stats[canonical_key]['different'] += 1
+            duplicate_stats[canonical_key]['sequences'].append({
                 'hash': seq_hash,
                 'length': len(seq_str)
             })
         return False
     
     # Mark as seen
-    seen_ids[full_header] = seq_hash
+    seen_ids[canonical_key] = seq_hash
     
-    # Write header (full header line)
+    # Write header (full header line, preserving Source_DB provenance)
     outfile.write(f">{full_header}\n")
     
     # Write sequence with consistent line width
@@ -342,27 +377,44 @@ def validate_fasta(fasta_path):
     logging.info(f"✅ FASTA file validation passed: {fasta_path}")
     return True
 
+# wrapper for legacy callers that expect exception outside try
+
+
 def index_fasta(fasta_path):
-    """Create .fai index for FASTA file with validation"""
+    """Create .fai index for FASTA file with validation using canonical keys."""
     
     fasta_path = Path(fasta_path)
+    is_protein = "protein" in str(fasta_path).lower()
     
     logging.info(f"🔍 Validating FASTA file: {fasta_path}")
     validate_fasta(fasta_path)
     
     logging.info(f"📇 Creating index for: {fasta_path}")
-    logging.info(f"   Using FULL header as sequence ID (not split on whitespace)")
-    
     try:
-        # Create index using a split character that doesn't exist in headers
-        # This forces pyfaidx to use the ENTIRE header line as the key
-        # We use '\x00' (null byte) which should never appear in FASTA headers
-        fasta = pyfaidx.Fasta(
-            str(fasta_path),
-            split_char='\x00',  # Use null byte as split char (never appears in headers)
-            rebuild=True,       # Force rebuild of index
-            read_long_names=True  # Read full header lines
-        )
+        if is_protein:
+            logging.info(f"   Using canonical protein key: token1 (Protein_ID) Variant B")
+            def _protein_k(h):
+                toks = h.split()
+                return toks[1] if len(toks) >= 2 else toks[0] if toks else h
+            fasta = pyfaidx.Fasta(
+                str(fasta_path),
+                read_long_names=True,
+                split_char="\x00",
+                key_function=_protein_k,
+                rebuild=True,
+            )
+        else:
+            logging.info(f"   Using canonical phage key: token0 (Phage_ID)")
+            def _phage_k(h):
+                toks = h.split()
+                return toks[0] if toks else h
+            fasta = pyfaidx.Fasta(
+                str(fasta_path),
+                read_long_names=True,
+                split_char="\x00",
+                key_function=_phage_k,
+                rebuild=True,
+            )
         
         # Get statistics
         num_sequences = len(fasta.keys())
