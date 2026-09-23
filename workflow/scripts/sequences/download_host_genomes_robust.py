@@ -933,20 +933,43 @@ class RobustHostGenomeDownloader:
                 logging.warning(f"   ⚠️  Could not stat genome file: {e}")
                 return None, None
 
-            executor = ThreadPoolExecutor(max_workers=1)
+            # Use daemon thread so timeout does not block process exit (previous non-daemon worker kept PID 128 alive)
+            import threading
+            executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="genome_stats")
+            # Force worker threads to be daemon — allows Snakemake to exit even if read is stuck in kernel
+            try:
+                # Private but stable: ThreadPoolExecutor stores threads in _threads
+                for t in getattr(executor, "_threads", set()):
+                    t.daemon = True
+            except Exception:
+                pass
             try:
                 future = executor.submit(self._stream_genome_stats, Path(fasta_path))
+                # Also mark newly created thread as daemon (race-safe)
+                try:
+                    for t in getattr(executor, "_threads", set()):
+                        t.daemon = True
+                except Exception:
+                    pass
                 try:
                     return future.result(timeout=self.stats_timeout)
                 except FuturesTimeoutError:
                     logging.warning(
                         f"   ⚠️  Genome stats timed out after "
                         f"{self.stats_timeout}s: {Path(fasta_path).name} "
+                        f"({Path(fasta_path).stat().st_size if Path(fasta_path).exists() else 'missing'} bytes) "
                         f"— recording as failed, continuing"
                     )
+                    try:
+                        future.cancel()
+                    except Exception:
+                        pass
                     return None, None
             finally:
-                executor.shutdown(wait=False, cancel_futures=True)
+                try:
+                    executor.shutdown(wait=False, cancel_futures=True)
+                except Exception:
+                    pass
         except Exception as e:
             logging.warning(f"   ⚠️  Could not calculate genome stats: {e}")
             return None, None
@@ -1368,7 +1391,14 @@ class RobustHostGenomeDownloader:
                         _gl, _gc = None, None
                         _existing_fna = self.output_dir / f"{accession.replace('.', '_')}.fna"
                         if _existing_fna.exists():
+                            try:
+                                _size = _existing_fna.stat().st_size
+                            except OSError:
+                                _size = -1
+                            logging.info(f"   ↻ Re-stat {accession} {_existing_fna.name} {_size:,} bytes…")
                             _gl, _gc = self.calculate_genome_stats(_existing_fna)
+                            if _gl is None:
+                                logging.warning(f"   ⚠️  Re-stat failed for {accession} — keeping '-' and continuing")
                         host_records.append({
                             'Host_ID': accession.replace('.', '_'),
                             'Species_Name': assembly.organism_name,
