@@ -354,6 +354,7 @@ class RobustHostGenomeDownloader:
                  phage_host_assemblies_output: Optional[str] = None,
                  host_resolution_cache_output: Optional[str] = None,
                  reuse_resolution_cache: bool = True,
+                 host_resolution_cache_ttl_days: Optional[int] = 120,
                  stats_timeout: float = 60.0,
                  checkpoint_every: int = 100,
                  max_fasta_bytes: int = 500 * 1024 * 1024):
@@ -381,6 +382,10 @@ class RobustHostGenomeDownloader:
                 ``_token_resolution_cache.json`` suffix.
             reuse_resolution_cache: If True, reuse cached token resolutions from
                 previous runs to avoid repeated NCBI lookups.
+            host_resolution_cache_ttl_days: TTL in days for the token resolution
+                cache. ``120`` ≈ 4 months. Cache file older than TTL is ignored.
+                ``0`` or ``None``/``False`` disables TTL (cache never expires).
+                Also applied to bacterial TaxID cache.
             stats_timeout: Per-file timeout in seconds for genome statistics.
                 A timeout returns ``(None, None)`` instead of hanging the
                 whole 5516-genome loop (e.g. bad-block ``D``-state reads).
@@ -413,6 +418,16 @@ class RobustHostGenomeDownloader:
             host_resolution_cache_output or f"{_base}_token_resolution_cache.json"
         )
         self.reuse_resolution_cache = reuse_resolution_cache
+        # TTL: 0/None/False = never expire; otherwise days -> seconds
+        try:
+            _ttl_raw = host_resolution_cache_ttl_days
+            if _ttl_raw is None or _ttl_raw is False:
+                self.host_resolution_cache_ttl_days = None
+            else:
+                _ttl_int = int(_ttl_raw)
+                self.host_resolution_cache_ttl_days = _ttl_int if _ttl_int > 0 else None
+        except Exception:
+            self.host_resolution_cache_ttl_days = 120
         self.stats_timeout = float(stats_timeout) if stats_timeout else 60.0
         self.checkpoint_every = int(checkpoint_every) if checkpoint_every else 100
         self.max_fasta_bytes = int(max_fasta_bytes) if max_fasta_bytes else 500 * 1024 * 1024
@@ -463,6 +478,8 @@ class RobustHostGenomeDownloader:
         logging.info(f"   Skip existing: {self.skip_existing}")
         logging.info(f"   Validate checksums: {self.validate_checksums}")
         logging.info(f"   Reuse resolution cache: {self.reuse_resolution_cache}")
+        ttl_str = f"{self.host_resolution_cache_ttl_days}d" if self.host_resolution_cache_ttl_days else "never expires"
+        logging.info(f"   Resolution cache TTL: {ttl_str}")
         logging.info(f"   Resolution cache file: {self.host_resolution_cache_output}")
         logging.info(f"   Stats timeout: {self.stats_timeout}s, checkpoint every: {self.checkpoint_every}")
         if self.existing_metadata:
@@ -508,11 +525,34 @@ class RobustHostGenomeDownloader:
             submission_date=data.get('submission_date'),
         )
 
+    def _is_cache_stale(self, path: Path) -> bool:
+        """Return True if *path* is older than TTL (4 months default)."""
+        if self.host_resolution_cache_ttl_days is None:
+            return False
+        try:
+            age_days = (time.time() - path.stat().st_mtime) / 86400
+            if age_days > self.host_resolution_cache_ttl_days:
+                logging.info(
+                    f"   ⏰ Cache stale: {path.name} is {age_days:.1f}d old "
+                    f"(TTL {self.host_resolution_cache_ttl_days}d) — ignoring"
+                )
+                return True
+            # Log remaining TTL once for visibility
+            logging.info(
+                f"   ✓ Cache fresh: {path.name} is {age_days:.1f}d old "
+                f"(TTL {self.host_resolution_cache_ttl_days}d, {self.host_resolution_cache_ttl_days - age_days:.0f}d remaining)"
+            )
+            return False
+        except OSError:
+            return True
+
     def _load_token_resolution_cache(self) -> Dict[str, List[AssemblyMetadata]]:
-        """Load persistent token→assemblies cache from previous runs."""
+        """Load persistent token→assemblies cache from previous runs (with TTL)."""
         if not self.reuse_resolution_cache:
             return {}
         if not self.host_resolution_cache_output.exists():
+            return {}
+        if self._is_cache_stale(self.host_resolution_cache_output):
             return {}
 
         try:
@@ -578,9 +618,11 @@ class RobustHostGenomeDownloader:
         return {}
 
     def _load_bacterial_cache(self) -> Dict[str, Optional[bool]]:
-        """Load persisted TaxID→bacterial cache (avoids 5516 Entrez re-lookups)."""
+        """Load persisted TaxID→bacterial cache (avoids 5516 Entrez re-lookups) with TTL."""
         path = getattr(self, 'bacterial_cache_output', None)
         if path is None or not Path(path).exists():
+            return {}
+        if self._is_cache_stale(Path(path)):
             return {}
         try:
             with open(path, 'r') as f:
@@ -1739,6 +1781,7 @@ def main():
             phage_host_assemblies_output=snakemake.output.get('phage_host_assemblies'),
             host_resolution_cache_output=snakemake.output.get('host_resolution_cache'),
             reuse_resolution_cache=snakemake.params.get('reuse_resolution_cache', True),
+            host_resolution_cache_ttl_days=snakemake.params.get('host_resolution_cache_ttl_days', 120),
             stats_timeout=snakemake.params.get('stats_timeout', 60.0),
             checkpoint_every=snakemake.params.get('checkpoint_every', 100),
             max_fasta_bytes=snakemake.params.get('max_fasta_bytes', 500 * 1024 * 1024),
