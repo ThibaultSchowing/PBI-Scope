@@ -135,6 +135,12 @@ public_data_provider:
   schema_profile: "phagescope_v2"
   api_base_url: "https://phageapi.deepomics.org"
   provenance_mode: "config_pinned"
+  # SSL verification for phageapi.deepomics.org.
+  # As of 2026-09 the site's cert is expired (CERTIFICATE_VERIFY_FAILED).
+  #   true  (default) — try verified TLS first, auto-fallback to unverified on cert error with warning
+  #   false — always use unverified context / --no-check-certificate (suppress warnings)
+  # Env override: PBI_INSECURE_SSL=1 forces insecure mode for all Python downloaders.
+  verify_ssl: true
 
 public_data_provenance:
   require_release_or_snapshot: true

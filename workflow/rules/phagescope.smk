@@ -227,6 +227,10 @@ rule generate_report:
 rule download_protein_fasta:
     """
     Download a .tar.gz archive of protein FASTA files from PhageScope API.
+    Note: --no-check-certificate is required as of 2026-09 due to expired
+    certificate on phageapi.deepomics.org (phageapi.deepomics.org: CERTIFICATE_VERIFY_FAILED).
+    Remove once the site renews its cert. See workflow/scripts/preprocessing/download_public_file.py
+    for the Python-side unverified-context fallback.
     """
     output:
         os.path.join(config["protein_fasta_compressed_output"], "{dataset}.tar.gz")
@@ -235,7 +239,7 @@ rule download_protein_fasta:
     cache: True
     shell:
         """
-        wget --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
+        wget --no-check-certificate --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
         """
 
 rule extract_protein_fasta:
@@ -257,6 +261,8 @@ rule extract_protein_fasta:
 rule download_phage_fasta:
     """
     Download a .tar.gz archive of phage genome FASTA files from PhageScope API.
+    Note: --no-check-certificate is required as of 2026-09 due to expired
+    certificate on phageapi.deepomics.org.
     """
     output:
         os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
@@ -266,7 +272,7 @@ rule download_phage_fasta:
     threads: 8
     shell:
         """
-        wget --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
+        wget --no-check-certificate --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
         """
 
 rule extract_phage_fasta:
