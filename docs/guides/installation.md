@@ -58,6 +58,13 @@ docker compose build analysis
 docker compose up -d analysis
 ```
 
+> **Port mapping — quick reference**
+> | Scope | Port | Where it is defined |
+> |-------|------|---------------------|
+> | Inside container | `8888` | `Dockerfile.analysis:57` (`EXPOSE 8888`) · `Dockerfile.analysis:100` (`--port=8888`) · `entrypoint.analysis.sh:33` (`--port=8888`) · healthcheck `Dockerfile.analysis:88` (`curl http://localhost:8888/api`) |
+> | On host (mapped) | `8886` | `docker-compose.yml:69` (`"8886:8888"` → `host:container`) |
+> Host `8886` → container `8888`. If `8886` is already in use on the host, change the left side in `docker-compose.yml:69` (e.g. `"8887:8888"`) and use that host port in the URL/tunnel below. Jupyter is always `8888` inside the container.
+
 > ⚠️ **Security note**: The analysis container starts Jupyter Lab with authentication
 > and XSRF protection **disabled** — this is intentional for local/SSH-tunnelled
 > development. See the [Analysis Container Guide](analysis-guide.md#️-security-notice)
@@ -66,10 +73,14 @@ docker compose up -d analysis
 If remote, use an SSH tunnel (safe because traffic stays inside the encrypted SSH connection):
 
 ```bash
-ssh -L 8887:localhost:8888 user@server
+# host 8886 (docker-compose.yml:69) → container 8888 (Dockerfile.analysis:57)
+# forward remote host:8886 to local 8888:
+ssh -L 8888:localhost:8886 user@server
+# if you changed the host port to 8887 in docker-compose.yml:69, use instead:
+# ssh -L 8888:localhost:8887 user@server
 ```
 
-Then open `http://localhost:8887`.
+Then open `http://localhost:8888` (or `http://localhost:8887` if you used the `8887:8888` mapping / `8887:localhost:8887` tunnel).
 
 ## 4) Start API container (optional)
 
@@ -88,7 +99,7 @@ API is available at `http://localhost:8000`. See [API Reference](../api/overview
 
 - **Preferred**: VS Code + **Dev Containers** attached to the running `analysis` service — provides a full IDE workflow.
   See [Analysis Container Guide](analysis-guide.md) for local and remote connection instructions.
-- **Stable fallback**: Jupyter Lab on `http://localhost:8887` (via SSH tunnel if remote).
+- **Stable fallback**: Jupyter Lab on `http://localhost:8888` locally (`http://localhost:8886` on the server host via `docker-compose.yml:69` `8886:8888` → `ssh -L 8888:localhost:8886 user@server`). If you remapped the host port to `8887`, use `http://localhost:8887` / `ssh -L 8887:localhost:8887`.
 - **API**: Quick exploration and metadata lookups without loading the full package.
 
 ## OOM caution
@@ -114,11 +125,11 @@ If you use `private_data/` sources, see [Private Data Ingestion](private-data-in
 
 PBI-Scope runs three Docker services:
 
-| Service | Purpose | Port |
-|---------|---------|------|
+| Service | Purpose | Host → Container Port |
+|---------|---------|-----------------------|
 | `pipeline` | Builds/updates the database | — |
-| `analysis` | Read-only data access for users (preferred) | 8889 |
-| `api` | REST API for metadata queries, sequence retrieval, and SQL exploration | 8000 |
+| `analysis` | Read-only data access for users (preferred) — Jupyter Lab | `8886` → `8888` (`docker-compose.yml:69` `8886:8888`; container `8888` defined in `Dockerfile.analysis:57` `EXPOSE 8888` / `Dockerfile.analysis:100` `--port=8888`) |
+| `api` | REST API for metadata queries, sequence retrieval, and SQL exploration | `8000` → `8000` (`docker-compose.yml:44`) |
 
 ## Volumes and Mounts
 
