@@ -226,7 +226,7 @@ class SequenceRetriever(MetadataQueriesMixin, SequenceOpsMixin):
             start = time.time()
 
             with self._protein_lock:
-                self._protein_fasta = _load_protein_fasta(self._protein_fasta_path)
+                self._protein_fasta = load_protein_fasta(self._protein_fasta_path)
                 self._protein_count = len(self._protein_fasta.keys())
 
             elapsed = time.time() - start
@@ -284,7 +284,7 @@ class SequenceRetriever(MetadataQueriesMixin, SequenceOpsMixin):
                 if self._protein_fasta is None:
                     logging.info(f"📂 Loading protein FASTA on-demand: {self._protein_fasta_path}")
                     start = time.time()
-                    self._protein_fasta = _load_protein_fasta(self._protein_fasta_path)
+                    self._protein_fasta = load_protein_fasta(self._protein_fasta_path)
                     elapsed = time.time() - start
                     logging.info(f"   ✅ Loaded in {elapsed:.2f}s")
         return self._protein_fasta
