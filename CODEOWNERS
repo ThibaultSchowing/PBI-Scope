@@ -1,0 +1,8 @@
+# Default owners
+*                       @ThibaultSchowing
+
+# Pipeline
+workflow/                @ThibaultSchowing
+src/pbi/                 @ThibaultSchowing
+api/                     @ThibaultSchowing
+tests/                   @ThibaultSchowing
