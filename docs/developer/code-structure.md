@@ -30,10 +30,20 @@ PBI-Scope/
 │
 ├── src/pbi/               # Python package
 │   ├── __init__.py          # Package init + quick_connect(), get_default_paths()
-│   ├── sequence_retrieval.py  # SequenceRetriever class
-│   ├── api_client.py        # APIClient class (REST API wrapper)
+│   ├── sequence_retrieval.py  # SequenceRetriever facade (orchestration + lifecycle)
+│   ├── metadata_queries.py    # MetadataQueriesMixin (DuckDB metadata queries)
+│   ├── sequence_ops.py        # SequenceOpsMixin (low-level sequence fetch)
+│   ├── fasta_index.py         # FASTA loading, caching, key functions
+│   ├── fasta_ids.py           # Canonical FASTA key/normalization (single source of truth)
+│   ├── fasta_utils.py         # assemble_genome, get_genome_stats
+│   ├── query_utils.py         # parse_where_clause (SQL query parsing)
+│   ├── api_client.py          # APIClient class (REST API wrapper)
 │   ├── negative_examples.py   # NegativeExampleGenerator class
-│   └── streaming_dataset.py   # PhageHostStreamingDataset, PhageHostIndexedDataset
+│   ├── streaming_dataset.py   # PhageHostStreamingDataset, PhageHostIndexedDataset
+│   ├── blast_search.py        # BlastSearcher class
+│   ├── gff3_retrieval.py      # GFF3Retriever class
+│   ├── private_data.py        # Private data ingestion utilities
+│   └── cli.py                 # Command-line interface
 │
 ├── api/                   # REST API
 │   ├── app.py               # FastAPI application with endpoints
