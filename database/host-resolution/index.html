@@ -1105,13 +1105,52 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#snakemake-caching-idempotency" class="md-nav__link">
+  <a href="#caching-and-ttl" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Snakemake caching (idempotency)
+        Caching and TTL
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Caching and TTL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#snakemake-file-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Snakemake file tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-resolution-cache-4-month-ttl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token resolution cache (4-month TTL)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-control-re-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to control re-execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1451,13 +1490,52 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#snakemake-caching-idempotency" class="md-nav__link">
+  <a href="#caching-and-ttl" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Snakemake caching (idempotency)
+        Caching and TTL
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Caching and TTL">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#snakemake-file-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Snakemake file tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-resolution-cache-4-month-ttl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Token resolution cache (4-month TTL)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-control-re-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to control re-execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1666,27 +1744,73 @@ even if linked to many phages (deduplication).</p>
 <li><code>phage_host_links.csv</code> – phage→assembly links (extended, one row per unique
   (Phage_ID, Assembly_Accession) pair).</li>
 </ul>
-<h2 id="snakemake-caching-idempotency">Snakemake caching (idempotency)<a class="headerlink" href="#snakemake-caching-idempotency" title="Permanent link">&para;</a></h2>
+<h2 id="caching-and-ttl">Caching and TTL<a class="headerlink" href="#caching-and-ttl" title="Permanent link">&para;</a></h2>
+<h3 id="snakemake-file-tracking">Snakemake file tracking<a class="headerlink" href="#snakemake-file-tracking" title="Permanent link">&para;</a></h3>
 <p>Snakemake's file-based dependency tracking ensures the <code>download_host_genomes</code>
 rule is <strong>not re-executed</strong> when all output files already exist and are newer
 than the input phage CSV.</p>
-<p>The new outputs (<code>phage_host_candidates</code> and <code>phage_host_assemblies</code>) are
-declared as rule outputs in <code>hosts.smk</code>, so Snakemake tracks them automatically.</p>
-<p>Within a single run, the <code>skip_existing=True</code> parameter (default) prevents
-re-downloading individual genome files that were already successfully retrieved.</p>
-<p>Across reruns, host token resolution also uses a persistent cache file:</p>
+<p>Within a single run, <code>skip_existing_downloads: true</code> (default in
+<code>workflow/config/config.yaml</code>) prevents re-downloading individual genome files
+that were already successfully retrieved (validated via size + <code>&gt;ACGT</code> peek in
+<code>download_host_genomes_robust.py:_validate_file</code>).</p>
+<h3 id="token-resolution-cache-4-month-ttl">Token resolution cache (4-month TTL)<a class="headerlink" href="#token-resolution-cache-4-month-ttl" title="Permanent link">&para;</a></h3>
+<p>Host token resolution (NCBI Assembly + Taxonomy lookups for ~1800 unique tokens)
+is also cached persistently:</p>
 <ul>
-<li><code>host_token_resolution_cache.json</code> (default path:
-  <code>pipeline_logs/csv/host_token_resolution_cache.json</code>)</li>
+<li><code>host_token_resolution_cache.json</code> (default: <code>pipeline_logs/csv/host_token_resolution_cache.json</code>)</li>
+<li><code>bacterial_cache.json</code> (TaxID → is-bacterial, same directory)</li>
 </ul>
-<p>When <code>reuse_host_resolution_cache: true</code> (default in <code>workflow/config/config.yaml</code>),
-previously resolved tokens are reused, so expensive taxonomy/assembly lookups are
-not repeated unnecessarily.</p>
-<p>To force a fresh token resolution pass, disable cache reuse for that run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>snakemake<span class="w"> </span>--cores<span class="w"> </span><span class="m">4</span><span class="w"> </span>--use-conda<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--forcerun<span class="w"> </span>download_host_genomes<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--config<span class="w"> </span><span class="nv">reuse_host_resolution_cache</span><span class="o">=</span><span class="nb">false</span>
+<p><code>workflow/config/config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">reuse_host_resolution_cache</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">   </span><span class="c1"># reuse cache when fresh</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">host_resolution_cache_ttl_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span><span class="w">  </span><span class="c1"># 4 months — stale cache is ignored</span>
 </code></pre></div>
+<ul>
+<li><code>reuse_host_resolution_cache: false</code> → cache never reused (force NCBI).</li>
+<li><code>host_resolution_cache_ttl_days: 0</code> or <code>null</code> → TTL disabled (cache never expires).</li>
+<li><code>120</code> (default) → file <code>mtime</code> older than <code>120d</code> is considered stale: logged as
+  <code>⏰ Cache stale: ... is 130.2d old (TTL 120d) — ignoring</code> and re-resolved.</li>
+</ul>
+<p>Bacterial cache uses the same TTL.</p>
+<p>The downloader logs cache freshness on each run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>✓ Cache fresh: host_token_resolution_cache.json is 3.2d old (TTL 120d, 117d remaining)
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>⏰ Cache stale: bacterial_cache.json is 125.0d old (TTL 120d) — ignoring
+</code></pre></div>
+<h3 id="how-to-control-re-execution">How to control re-execution<a class="headerlink" href="#how-to-control-re-execution" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Force fresh NCBI resolution for this run only</strong></td>
+<td><code>snakemake --cores all --use-conda --config reuse_host_resolution_cache=false --forcerun download_host_genomes</code></td>
+</tr>
+<tr>
+<td><strong>Force refresh after 4 months</strong></td>
+<td>Delete caches: <code>rm /pipeline-logs/csv/host_token_resolution_cache.json /pipeline-logs/csv/bacterial_cache.json</code> then <code>snakemake --cores all --use-conda --forcerun download_host_genomes</code></td>
+</tr>
+<tr>
+<td><strong>Change TTL</strong></td>
+<td>Edit <code>workflow/config/config.yaml: host_resolution_cache_ttl_days: 30</code> (1 month) or <code>0</code> (never expire), then <code>snakemake --cores all --use-conda</code></td>
+</tr>
+<tr>
+<td><strong>Force re-download of one host</strong></td>
+<td><code>rm /data/intermediate/fasta/hosts/GCF_xxx.fna*</code> then <code>snakemake --cores all --use-conda</code> (with <code>skip_existing: true</code> others are skipped)</td>
+</tr>
+<tr>
+<td><strong>Resume after kill (checkpoint)</strong></td>
+<td><code>snakemake</code> automatically reuses <code>host_metadata.csv.checkpoint</code> / <code>assembly_metadata.csv.checkpoint</code> flushed every <code>host_checkpoint_every: 100</code> accessions — just re-run <code>docker compose run --rm pipeline</code></td>
+</tr>
+<tr>
+<td><strong>Full host refresh</strong></td>
+<td><code>rm /pipeline-logs/csv/host_token_resolution_cache.json /pipeline-logs/csv/phage_host_*.csv; snakemake --forcerun download_host_genomes --config host_resolution_cache_ttl_days=0</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>host_stats_timeout: 60</code> and <code>host_max_fasta_bytes: 500M</code> bound per-genome <code>GC</code> calculation so a single bad-block <code>5.1M</code> file (e.g. <code>GCF_005671395.1</code>) cannot hang the <code>5518</code>-genome loop — it is recorded as <code>GC=-</code> and the pipeline continues.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <p>New unit tests in <code>tests/test_multi_host_parsing.py</code>:</p>
 <ul>
@@ -1698,19 +1822,19 @@ not repeated unnecessarily.</p>
 </ul>
 <p>All 31 tests pass without NCBI credentials.</p>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">download_host_genomes_robust</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_host_field</span><span class="p">,</span> <span class="n">resolve_host_token</span><span class="p">,</span> <span class="n">HostToken</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># Parse a complex Host field into tokens</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">tokens</span> <span class="o">=</span> <span class="n">parse_host_field</span><span class="p">(</span><span class="s2">"NA;GCA 900066335.1;UBA9502;Blautia obeum"</span><span class="p">)</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># → [HostToken('GCA_900066335.1', 'assembly_accession', 2),</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1">#    HostToken('UBA9502', 'other', 3),</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1">#    HostToken('Blautia obeum', 'species_name', 4)]</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># Resolve a token to assembly links (requires NCBI credentials)</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="kn">from</span><span class="w"> </span><span class="nn">assembly_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">AssemblyResolver</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="n">resolver</span> <span class="o">=</span> <span class="n">AssemblyResolver</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">'user@example.org'</span><span class="p">)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">links</span> <span class="o">=</span> <span class="n">resolve_host_token</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resolver</span><span class="p">,</span> <span class="n">phage_id</span><span class="o">=</span><span class="s1">'p1'</span><span class="p">,</span> <span class="n">host_raw</span><span class="o">=</span><span class="s1">'NA;GCA 900066335.1;...'</span><span class="p">)</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1"># → [ResolvedAssemblyLink(assembly_accession='GCA_900066335.1', confidence=0.95, ...)]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">download_host_genomes_robust</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_host_field</span><span class="p">,</span> <span class="n">resolve_host_token</span><span class="p">,</span> <span class="n">HostToken</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Parse a complex Host field into tokens</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">tokens</span> <span class="o">=</span> <span class="n">parse_host_field</span><span class="p">(</span><span class="s2">"NA;GCA 900066335.1;UBA9502;Blautia obeum"</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># → [HostToken('GCA_900066335.1', 'assembly_accession', 2),</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1">#    HostToken('UBA9502', 'other', 3),</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1">#    HostToken('Blautia obeum', 'species_name', 4)]</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Resolve a token to assembly links (requires NCBI credentials)</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="kn">from</span><span class="w"> </span><span class="nn">assembly_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">AssemblyResolver</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">resolver</span> <span class="o">=</span> <span class="n">AssemblyResolver</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="s1">'user@example.org'</span><span class="p">)</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">links</span> <span class="o">=</span> <span class="n">resolve_host_token</span><span class="p">(</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">resolver</span><span class="p">,</span> <span class="n">phage_id</span><span class="o">=</span><span class="s1">'p1'</span><span class="p">,</span> <span class="n">host_raw</span><span class="o">=</span><span class="s1">'NA;GCA 900066335.1;...'</span><span class="p">)</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># → [ResolvedAssemblyLink(assembly_accession='GCA_900066335.1', confidence=0.95, ...)]</span>
 </code></pre></div>
 <h2 id="files-changed">Files Changed<a class="headerlink" href="#files-changed" title="Permanent link">&para;</a></h2>
 <ol>
