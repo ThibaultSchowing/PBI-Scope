@@ -14,6 +14,7 @@ Called by Snakemake rule download_gff3.
 import http.client
 import logging
 import os
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -26,9 +27,36 @@ RETRY_BACKOFF = [2, 4, 8]  # seconds between retries
 CHUNK_SIZE = 1024 * 1024  # 1 MB chunks
 
 
+def _is_cert_verify_error(exc: BaseException) -> bool:
+    msg = str(exc)
+    return "CERTIFICATE_VERIFY_FAILED" in msg or "certificate verify failed" in msg.lower()
+
+
+def _get_ssl_context() -> ssl.SSLContext | None:
+    # Allow insecure fallback via env or snakemake config.
+    # Check snakemake.config if available (when run via snakemake)
+    try:
+        cfg = snakemake.config.get("public_data_provider", {})  # type: ignore[name-defined]
+        if cfg.get("verify_ssl") is False:
+            LOGGER.warning("SSL verification disabled via config public_data_provider.verify_ssl=false — using unverified context")
+            return ssl._create_unverified_context()
+    except Exception:
+        pass
+    env_val = os.getenv("PBI_INSECURE_SSL", "").strip().lower()
+    if env_val in ("1", "true", "yes", "on"):
+        LOGGER.warning("SSL verification disabled via PBI_INSECURE_SSL — using unverified context")
+        return ssl._create_unverified_context()
+    return None
+
+
 def download(url: str, output_path: str) -> None:
     tmp_path = f"{output_path}.tmp"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    # Resolve initial SSL context (None = verified, unverified = forced insecure)
+    ssl_context = _get_ssl_context()
+    # Track if we already fell back to unverified due to cert error
+    cert_fallback_done = ssl_context is not None
 
     last_error = None
     for attempt in range(1, MAX_RETRIES + 1):
@@ -39,7 +67,12 @@ def download(url: str, output_path: str) -> None:
                     "Accept-Encoding": "identity",
                 }
             )
-            with urllib.request.urlopen(request, timeout=60) as response:
+            # Use context if set; otherwise default verified context
+            if ssl_context is None:
+                ctx_arg: dict = {}
+            else:
+                ctx_arg = {"context": ssl_context}
+            with urllib.request.urlopen(request, timeout=60, **ctx_arg) as response:  # type: ignore[arg-type]
                 status = response.status
                 if status < 200 or status >= 300:
                     raise urllib.error.HTTPError(
@@ -82,6 +115,34 @@ def download(url: str, output_path: str) -> None:
             http.client.IncompleteRead,
         ) as exc:
             last_error = exc
+
+            # --- Expired-cert fallback: retry once with unverified context ---
+            if _is_cert_verify_error(exc) and not cert_fallback_done:
+                LOGGER.warning(
+                    "Certificate verification failed for %s: %s — retrying with unverified SSL context (cert likely expired). "
+                    "Set public_data_provider.verify_ssl=false or PBI_INSECURE_SSL=1 to force insecure from start.",
+                    url, exc,
+                )
+                ssl_context = ssl._create_unverified_context()
+                cert_fallback_done = True
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                # Do not count this as a consumed attempt — retry immediately
+                # by continuing loop; we adjust attempt counter by decrementing
+                # via a small trick: sleep 0 and let loop increment.
+                # Simpler: just continue and next iteration will be attempt+1,
+                # but we want to preserve retries. So we keep attempt loop as-is
+                # and log that we are retrying outside normal backoff.
+                if attempt < MAX_RETRIES:
+                    LOGGER.warning("Retrying %s with unverified context (attempt %d/%d)", url, attempt + 1, MAX_RETRIES)
+                    time.sleep(1)
+                    continue
+                # If we are on last attempt, fall through to retry logic below
+                # but with new context on next outer retry would not happen;
+                # so we reset last_error and try one more time inline:
+                # Instead, handle by converting to transient and forcing retry
+                # We'll force a retry by not breaking here.
+
             is_server_error = isinstance(exc, urllib.error.HTTPError) and exc.code >= 500
             is_transient = is_server_error or isinstance(
                 exc, (
@@ -91,6 +152,10 @@ def download(url: str, output_path: str) -> None:
                     http.client.IncompleteRead,
                 )
             )
+
+            # Also treat cert errors as transient if we haven't exhausted fallback
+            if _is_cert_verify_error(exc):
+                is_transient = True
 
             # Clean up partial download before retry
             if os.path.exists(tmp_path):

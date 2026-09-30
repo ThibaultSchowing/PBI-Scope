@@ -100,6 +100,7 @@ metadata_only_mode: false  # Set to true to skip downloads and only gather metad
 skip_existing_downloads: true  # Skip already downloaded genomes
 validate_file_checksums: true  # Validate downloaded file integrity
 reuse_host_resolution_cache: true  # Reuse token resolution cache across reruns
+host_resolution_cache_ttl_days: 120  # 4 months — cache older than this is considered stale and re-resolved (0 = never expire, null/false = disable TTL)
 host_stats_timeout: 60.0  # Per-file genome stats timeout (s); timeout records stats_failed, never hangs loop
 host_checkpoint_every: 100  # Flush Stage-4 host/assembly checkpoint CSVs every N accessions for resume
 host_max_fasta_bytes: 524288000  # Skip stats for FASTA files larger than this (500MB)
@@ -134,6 +135,12 @@ public_data_provider:
   schema_profile: "phagescope_v2"
   api_base_url: "https://phageapi.deepomics.org"
   provenance_mode: "config_pinned"
+  # SSL verification for phageapi.deepomics.org.
+  # As of 2026-09 the site's cert is expired (CERTIFICATE_VERIFY_FAILED).
+  #   true  (default) — try verified TLS first, auto-fallback to unverified on cert error with warning
+  #   false — always use unverified context / --no-check-certificate (suppress warnings)
+  # Env override: PBI_INSECURE_SSL=1 forces insecure mode for all Python downloaders.
+  verify_ssl: true
 
 public_data_provenance:
   require_release_or_snapshot: true

@@ -46,6 +46,7 @@ rule download_host_genomes:
         skip_existing = config.get("skip_existing_downloads", True),
         validate_checksums = config.get("validate_file_checksums", True),
         reuse_resolution_cache = config.get("reuse_host_resolution_cache", True),
+        host_resolution_cache_ttl_days = config.get("host_resolution_cache_ttl_days", 120),
         stats_timeout = config.get("host_stats_timeout", 60.0),
         checkpoint_every = config.get("host_checkpoint_every", 100),
         max_fasta_bytes = config.get("host_max_fasta_bytes", 500 * 1024 * 1024)

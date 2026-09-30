@@ -25,9 +25,15 @@ MAX_HOST_FASTA_CACHE_SIZE = 100
 
 
 def _fasta_key_function(header: str) -> str:
-    """Extract the accession ID (first whitespace-delimited token) from a FASTA header."""
-    parts = header.split()
-    return parts[0] if parts else header
+    """Extract Phage_ID (first token) — canonical for phage/host FASTAs."""
+    from .fasta_ids import phage_key
+    return phage_key(header)
+
+
+def _protein_key_function(header: str) -> str:
+    """Extract Protein_ID (second token) — canonical Variant B."""
+    from .fasta_ids import protein_key
+    return protein_key(header)
 
 
 def _normalize_source_type(source_type: Optional[str]) -> str:
@@ -60,34 +66,32 @@ def _should_rebuild_fai(fasta_path: Union[str, Path]) -> bool:
 
 def _load_protein_fasta(path: str) -> "Fasta":
     """
-    Load a protein FASTA file using full headers as keys.
+    Load a protein FASTA file using canonical second-token key (Variant B).
 
-    Protein FASTA headers have the phage accession as the first token
-    (e.g. ">AE002163.1 CDS_1 hypothetical protein"), so multiple proteins
-    from the same phage share the same first token.  Using only the first
-    token as the key therefore causes pyfaidx to raise ``Duplicate key``.
-
-    Using ``split_char='\\x00'`` (a character that never appears in FASTA
-    headers) together with ``read_long_names=True`` makes pyfaidx read the
-    *full* header line directly from the FASTA file and use it as the key,
-    giving every protein sequence a unique, unambiguous identifier.
+    Protein headers are ``>Phage_ID Protein_ID Source_DB [rest]``, so the
+    Protein_ID is the second whitespace-delimited token. This gives each
+    protein a unique key while preserving phage provenance for find-back.
+    Requires ``split_char='\\x00'`` + ``read_long_names=True`` so pyfaidx
+    passes the full header to ``key_function`` (default splits on space and
+    would only pass the first token).
     """
     try:
         return Fasta(
             path,
             read_long_names=True,
-            split_char='\x00',
+            split_char="\x00",
+            key_function=_protein_key_function,
         )
     except ValueError as e:
         if 'Duplicate key' in str(e):
-            # The existing .fai was built with first-token keys; rebuild it.
             logging.warning(
-                f"⚠️  Duplicate keys in protein FASTA index, rebuilding: {path}"
+                f"⚠️  Duplicate protein keys, rebuilding index: {path}"
             )
             return Fasta(
                 path,
                 read_long_names=True,
-                split_char='\x00',
+                split_char="\x00",
+                key_function=_protein_key_function,
                 rebuild=True,
             )
         raise

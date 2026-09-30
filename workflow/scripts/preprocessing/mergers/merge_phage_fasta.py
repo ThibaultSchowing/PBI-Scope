@@ -3,18 +3,33 @@
 import sys
 from pathlib import Path
 
+
 def merge_fasta_files(source_dir: Path, output_file: Path):
     source_dir = Path(source_dir)
+    # Source_DB is the dataset name = output filename stem (e.g. RefSeq.fasta -> RefSeq)
+    # This is more reliable than source_dir name for synthetic tests where source_dir is temp.
+    source_db = output_file.stem if output_file.stem else source_dir.name
+
     with output_file.open('w') as out_f:
         for fasta_file in sorted(source_dir.rglob("*.fa")) + sorted(source_dir.rglob("*.fasta")):
             if not fasta_file.is_file():
                 continue
-            #phage = fasta_file.parent.name # copied from protein script, but not needed for phage fasta as no phage name is added to the header
-            
             with fasta_file.open('r') as in_f:
                 for line in in_f:
                     if line.startswith('>'):
-                        out_f.write(f">{line[1:]}") # shorter than protein as no phage name is needed (already in the sequence header)
+                        raw = line.rstrip('\n\r')
+                        # Canonical: >Phage_ID Source_DB [rest]
+                        toks = raw[1:].strip().split()
+                        if not toks:
+                            continue
+                        phage_id = toks[0]
+                        if not phage_id or any(c.isspace() for c in phage_id):
+                            raise ValueError(f"Invalid phage header contains whitespace: {raw!r}")
+                        rest = " ".join(" ".join(toks[1:]).split())
+                        if rest:
+                            out_f.write(f">{phage_id} {source_db} {rest}\n")
+                        else:
+                            out_f.write(f">{phage_id} {source_db}\n")
                     else:
                         out_f.write(line)
 

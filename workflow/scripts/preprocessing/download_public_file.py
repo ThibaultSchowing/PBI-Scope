@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import os
+import ssl
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
@@ -71,18 +72,76 @@ def _load_previous_fingerprint(manifest_path: str, feature: str, source_key: str
     return ""
 
 
-def _download(url: str, output_path: str) -> tuple[dict, int]:
+def _is_cert_verify_error(exc: BaseException) -> bool:
+    msg = str(exc)
+    return "CERTIFICATE_VERIFY_FAILED" in msg or "certificate verify failed" in msg.lower()
+
+
+def _should_use_insecure_context(api_base_url: str = "", provider_cfg: dict | None = None) -> bool:
+    # Explicit opt-in via config or env var.  Also used as fallback hint.
+    cfg = provider_cfg or {}
+    # New config knob: public_data_provider.verify_ssl (default True).
+    # If set to False, skip verification entirely.
+    if cfg.get("verify_ssl") is False:
+        return True
+    # Env var escape hatch for expired certs: PBI_INSECURE_SSL=1 / true / yes
+    env_val = os.getenv("PBI_INSECURE_SSL", "").strip().lower()
+    if env_val in ("1", "true", "yes", "on"):
+        return True
+    return False
+
+
+def _download(url: str, output_path: str, *, provider_cfg: dict | None = None, api_base_url: str = "") -> tuple[dict, int]:
     request = Request(url, headers={
         "User-Agent": "PBI-public-download/1.0",
         "Accept-Encoding": "identity",
     })
-    with urlopen(request, timeout=120) as response:  # nosec B310 - URL validated via _validate_source_url
-        body = response.read()
-        headers = {
-            "etag": response.headers.get("ETag"),
-            "last_modified": response.headers.get("Last-Modified"),
-            "content_type": response.headers.get("Content-Type"),
-        }
+
+    def _fetch(context: ssl.SSLContext | None):
+        # urlopen accepts `context` for https; None = default verified context
+        if context is None:
+            with urlopen(request, timeout=120) as response:  # nosec B310 - URL validated via _validate_source_url
+                body = response.read()
+                headers = {
+                    "etag": response.headers.get("ETag"),
+                    "last_modified": response.headers.get("Last-Modified"),
+                    "content_type": response.headers.get("Content-Type"),
+                }
+                return headers, body
+        else:
+            with urlopen(request, timeout=120, context=context) as response:  # nosec B310
+                body = response.read()
+                headers = {
+                    "etag": response.headers.get("ETag"),
+                    "last_modified": response.headers.get("Last-Modified"),
+                    "content_type": response.headers.get("Content-Type"),
+                }
+                return headers, body
+
+    # Determine if we should start unverified (config/env forced)
+    force_insecure = _should_use_insecure_context(api_base_url, provider_cfg)
+    unverified_ctx = ssl._create_unverified_context()
+
+    headers: dict
+    body: bytes
+    if force_insecure:
+        LOGGER.warning("SSL verification disabled via config/env — using unverified context for %s", url)
+        headers, body = _fetch(unverified_ctx)
+    else:
+        try:
+            headers, body = _fetch(None)
+        except Exception as exc:
+            if _is_cert_verify_error(exc):
+                LOGGER.warning(
+                    "Certificate verification failed for %s: %s — retrying with unverified SSL context (cert likely expired). "
+                    "Set public_data_provider.verify_ssl=false or PBI_INSECURE_SSL=1 to silence this fallback. "
+                    "This is insecure but matches browser 'proceed anyway' behavior.",
+                    url, exc,
+                )
+                headers, body = _fetch(unverified_ctx)
+            else:
+                raise
+
     tmp_path = f"{output_path}.tmp"
     with open(tmp_path, "wb") as handle:
         handle.write(body)
@@ -141,7 +200,9 @@ def main():
     error_message = ""
 
     try:
-        response_headers, file_size = _download(source_url, output_tsv)
+        response_headers, file_size = _download(
+            source_url, output_tsv, provider_cfg=provider_cfg, api_base_url=str(provider_cfg.get("api_base_url", "") or "")
+        )
         detected_columns = _read_tsv_header(output_tsv) if output_tsv.lower().endswith(".tsv") else []
         schema_fingerprint = _schema_fingerprint(detected_columns)
         if provenance_cfg.get("capture_checksums", True):

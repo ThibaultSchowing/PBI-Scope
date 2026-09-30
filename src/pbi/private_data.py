@@ -784,14 +784,13 @@ def prepare_private_sequence_artifacts(
                 _write_fasta_record(phage_out, header, sequence)
                 stats["phages_written"] += 1
 
-        # Index the copied FASTA with pyfaidx using the same split_char as the
-        # main phage index so that SequenceRetriever's key_function works identically.
+        # Index the copied FASTA with canonical phage key (Variant B: token0)
         try:
+            from pbi.fasta_ids import phage_key
             pyfaidx.Fasta(
                 str(dest_phage_fasta),
-                split_char="\x00",
+                key_function=phage_key,
                 rebuild=True,
-                read_long_names=True,
             )
             logger.info("Indexed private phage FASTA for source '%s': %s", source_db, dest_phage_fasta)
         except Exception as exc:

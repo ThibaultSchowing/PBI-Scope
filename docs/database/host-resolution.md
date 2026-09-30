@@ -90,34 +90,60 @@ The following outputs remain unchanged (same columns):
 * `phage_host_links.csv` – phage→assembly links (extended, one row per unique
   (Phage_ID, Assembly_Accession) pair).
 
-## Snakemake caching (idempotency)
+## Caching and TTL
+
+### Snakemake file tracking
 
 Snakemake's file-based dependency tracking ensures the `download_host_genomes`
 rule is **not re-executed** when all output files already exist and are newer
 than the input phage CSV.
 
-The new outputs (`phage_host_candidates` and `phage_host_assemblies`) are
-declared as rule outputs in `hosts.smk`, so Snakemake tracks them automatically.
+Within a single run, `skip_existing_downloads: true` (default in
+`workflow/config/config.yaml`) prevents re-downloading individual genome files
+that were already successfully retrieved (validated via size + `>ACGT` peek in
+`download_host_genomes_robust.py:_validate_file`).
 
-Within a single run, the `skip_existing=True` parameter (default) prevents
-re-downloading individual genome files that were already successfully retrieved.
+### Token resolution cache (4-month TTL)
 
-Across reruns, host token resolution also uses a persistent cache file:
+Host token resolution (NCBI Assembly + Taxonomy lookups for ~1800 unique tokens)
+is also cached persistently:
 
-- `host_token_resolution_cache.json` (default path:
-  `pipeline_logs/csv/host_token_resolution_cache.json`)
+- `host_token_resolution_cache.json` (default: `pipeline_logs/csv/host_token_resolution_cache.json`)
+- `bacterial_cache.json` (TaxID → is-bacterial, same directory)
 
-When `reuse_host_resolution_cache: true` (default in `workflow/config/config.yaml`),
-previously resolved tokens are reused, so expensive taxonomy/assembly lookups are
-not repeated unnecessarily.
+`workflow/config/config.yaml`:
 
-To force a fresh token resolution pass, disable cache reuse for that run:
-
-```bash
-snakemake --cores 4 --use-conda \
-  --forcerun download_host_genomes \
-  --config reuse_host_resolution_cache=false
+```yaml
+reuse_host_resolution_cache: true   # reuse cache when fresh
+host_resolution_cache_ttl_days: 120  # 4 months — stale cache is ignored
 ```
+
+- `reuse_host_resolution_cache: false` → cache never reused (force NCBI).
+- `host_resolution_cache_ttl_days: 0` or `null` → TTL disabled (cache never expires).
+- `120` (default) → file `mtime` older than `120d` is considered stale: logged as
+  `⏰ Cache stale: ... is 130.2d old (TTL 120d) — ignoring` and re-resolved.
+
+Bacterial cache uses the same TTL.
+
+The downloader logs cache freshness on each run:
+
+```
+✓ Cache fresh: host_token_resolution_cache.json is 3.2d old (TTL 120d, 117d remaining)
+⏰ Cache stale: bacterial_cache.json is 125.0d old (TTL 120d) — ignoring
+```
+
+### How to control re-execution
+
+| Goal | Command |
+|------|---------|
+| **Force fresh NCBI resolution for this run only** | `snakemake --cores all --use-conda --config reuse_host_resolution_cache=false --forcerun download_host_genomes` |
+| **Force refresh after 4 months** | Delete caches: `rm /pipeline-logs/csv/host_token_resolution_cache.json /pipeline-logs/csv/bacterial_cache.json` then `snakemake --cores all --use-conda --forcerun download_host_genomes` |
+| **Change TTL** | Edit `workflow/config/config.yaml: host_resolution_cache_ttl_days: 30` (1 month) or `0` (never expire), then `snakemake --cores all --use-conda` |
+| **Force re-download of one host** | `rm /data/intermediate/fasta/hosts/GCF_xxx.fna*` then `snakemake --cores all --use-conda` (with `skip_existing: true` others are skipped) |
+| **Resume after kill (checkpoint)** | `snakemake` automatically reuses `host_metadata.csv.checkpoint` / `assembly_metadata.csv.checkpoint` flushed every `host_checkpoint_every: 100` accessions — just re-run `docker compose run --rm pipeline` |
+| **Full host refresh** | `rm /pipeline-logs/csv/host_token_resolution_cache.json /pipeline-logs/csv/phage_host_*.csv; snakemake --forcerun download_host_genomes --config host_resolution_cache_ttl_days=0` |
+
+`host_stats_timeout: 60` and `host_max_fasta_bytes: 500M` bound per-genome `GC` calculation so a single bad-block `5.1M` file (e.g. `GCF_005671395.1`) cannot hang the `5518`-genome loop — it is recorded as `GC=-` and the pipeline continues.
 
 ## Testing
 

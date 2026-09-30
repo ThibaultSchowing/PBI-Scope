@@ -227,6 +227,10 @@ rule generate_report:
 rule download_protein_fasta:
     """
     Download a .tar.gz archive of protein FASTA files from PhageScope API.
+    Note: --no-check-certificate is required as of 2026-09 due to expired
+    certificate on phageapi.deepomics.org (phageapi.deepomics.org: CERTIFICATE_VERIFY_FAILED).
+    Remove once the site renews its cert. See workflow/scripts/preprocessing/download_public_file.py
+    for the Python-side unverified-context fallback.
     """
     output:
         os.path.join(config["protein_fasta_compressed_output"], "{dataset}.tar.gz")
@@ -235,7 +239,7 @@ rule download_protein_fasta:
     cache: True
     shell:
         """
-        wget --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
+        wget --no-check-certificate --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
         """
 
 rule extract_protein_fasta:
@@ -257,6 +261,8 @@ rule extract_protein_fasta:
 rule download_phage_fasta:
     """
     Download a .tar.gz archive of phage genome FASTA files from PhageScope API.
+    Note: --no-check-certificate is required as of 2026-09 due to expired
+    certificate on phageapi.deepomics.org.
     """
     output:
         os.path.join(config["phage_fasta_compressed_output"], "{dataset}.tar.gz")
@@ -266,7 +272,7 @@ rule download_phage_fasta:
     threads: 8
     shell:
         """
-        wget --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
+        wget --no-check-certificate --timeout=300 --tries=3 -c -O {output}.tmp {params.url} && mv {output}.tmp {output} || (rm -f {output}.tmp; exit 1)
         """
 
 rule extract_phage_fasta:
@@ -291,28 +297,11 @@ rule merge_protein_fasta_by_source:
     params:
         source_dir = lambda wildcards: os.path.join(config["protein_fasta_extracted_output"], wildcards.dataset),
         merged_fasta_dir = config["protein_fasta_merged_output"]
-    shell:
-        # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
-        # This ensures we don’t waste time unnecessarily merging a single file.
-        r'''
-        mkdir -p {params.merged_fasta_dir}
-        
-        # Find all fasta files and store in an array
-        mapfile -t fasta_files < <(find {params.source_dir} -type f \( -name "*.fasta" -o -name "*.fa" \))
-        
-        # Check if any files were found
-        if [ "${{#fasta_files[@]}}" -eq 0 ]; then
-            echo "⚠️ WARNING: No FASTA files found in {params.source_dir} - creating empty file" >&2
-            touch {output.merged_fasta}
-        elif [ "${{#fasta_files[@]}}" -eq 1 ]; then
-            # Only one file, just copy it
-            cp "${{fasta_files[0]}}" {output.merged_fasta}
-        else
-            # Multiple files, merge them
-            python scripts/preprocessing/mergers/merge_protein_fasta.py "{params.source_dir}" "{output.merged_fasta}"
-        fi
-        '''
-    
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/preprocessing/mergers/merge_protein_fasta_by_source.py"
+
 rule merge_phage_fasta_by_source:
     input:
         source_dir = os.path.join(config["phage_fasta_extracted_output"], "{dataset}")
@@ -321,27 +310,10 @@ rule merge_phage_fasta_by_source:
     params:
         source_dir = lambda wildcards: os.path.join(config["phage_fasta_extracted_output"], wildcards.dataset),
         merged_fasta_dir = config["phage_fasta_merged_output"]
-    shell:
-        # If only one fasta is present, just copy and rename. Otherwise, run the Python merge script.
-        # This ensures we don’t waste time unnecessarily merging a single file.
-        r'''
-        mkdir -p {params.merged_fasta_dir}
-        
-        # Find all fasta files and store in an array
-        mapfile -t fasta_files < <(find {params.source_dir} -type f \( -name "*.fasta" -o -name "*.fa" \))
-        
-        # Check if any files were found
-        if [ "${{#fasta_files[@]}}" -eq 0 ]; then
-            echo "⚠️ WARNING: No FASTA files found in {params.source_dir} - creating empty file" >&2
-            touch {output.merged_fasta}
-        elif [ "${{#fasta_files[@]}}" -eq 1 ]; then
-            # Only one file, just copy it
-            cp "${{fasta_files[0]}}" {output.merged_fasta}
-        else
-            # Multiple files, merge them
-            python scripts/preprocessing/mergers/merge_phage_fasta.py "{params.source_dir}" "{output.merged_fasta}"
-        fi
-        '''
+    conda:
+        "../envs/sequences.yaml"
+    script:
+        "../scripts/preprocessing/mergers/merge_phage_fasta_by_source.py"
 
 rule cleanup_extracted_phage_fasta:
     input:
