@@ -44,6 +44,7 @@ nav:
       - Machine Learning: guides/machine-learning.md
       - Private Data Ingestion: guides/private-data-ingestion.md
       - Pipeline Logs: guides/logging.md
+      - Docker Guide: guides/docker-guide.md
   - Reference:
       - Commands: reference/commands.md
       - API Reference: api/overview.md
@@ -52,6 +53,7 @@ nav:
   - Developer:
       - Code Structure: developer/code-structure.md
       - CI Tests: developer/ci-tests.md
+      - AI Workflow: developer/ai-workflow.md
   - Future Steps: future-steps.md
   - Changelog: changelog.md
 

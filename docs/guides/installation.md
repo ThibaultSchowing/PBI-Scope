@@ -67,7 +67,7 @@ docker compose up -d analysis
 
 > ⚠️ **Security note**: The analysis container starts Jupyter Lab with authentication
 > and XSRF protection **disabled** — this is intentional for local/SSH-tunnelled
-> development. See the [Analysis Container Guide](analysis-guide.md#️-security-notice)
+> development. See the [Analysis Container Guide](analysis-guide.md#security-notice)
 > for a full explanation and hardening steps before exposing the service to a network.
 
 If remote, use an SSH tunnel (safe because traffic stays inside the encrypted SSH connection):
@@ -145,3 +145,5 @@ PBI-Scope runs three Docker services:
 |  bind mount: ./outputs -> /results (analysis)
 +---------------------------------------------------------------------+
 ```
+
+

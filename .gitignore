@@ -42,6 +42,7 @@ notebooks/.cache/
 *~
 *.pyc
 *.swp
+workflow/dag/
 
 docs/_build
 apidocs/_build

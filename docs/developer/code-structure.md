@@ -110,7 +110,12 @@ The pipeline orchestrates data download, processing, and database creation:
 The PBI-Scope package provides the primary interface for data access and ML dataset preparation:
 
 - **`__init__.py`**: Exports main classes, defines `quick_connect()` and `get_default_paths()` (reads `DATA_PATH` env var)
-- **`sequence_retrieval.py`**: `SequenceRetriever` — connects to DuckDB and FASTA files, provides metadata query methods, sequence retrieval, and phage-host pair retrieval
+- **`sequence_retrieval.py`**: `SequenceRetriever` facade — orchestrates FASTA loading, lifecycle, and high-level pair retrieval. Inherits from `MetadataQueriesMixin` and `SequenceOpsMixin`
+- **`metadata_queries.py`**: `MetadataQueriesMixin` — DuckDB metadata query methods (`get_phages`, `get_interactions`, `get_phage_metadata`, etc.)
+- **`sequence_ops.py`**: `SequenceOpsMixin` — low-level sequence fetch methods (`_get_phage_sequence`, `_fetch_phage_sequences`, `_fuzzy_protein_lookup`, etc.)
+- **`fasta_index.py`**: FASTA loading, caching (`HostFastaCache`, `PrivatePhageFastaCache`), key functions
+- **`fasta_ids.py`**: Canonical FASTA key/normalization functions (single source of truth)
+- **`query_utils.py`**: `parse_where_clause` — SQL query parsing
 - **`negative_examples.py`**: `NegativeExampleGenerator` — generates non-interacting phage-host pairs for ML training (multiple strategies: random, taxonomy-aware, etc.)
 - **`streaming_dataset.py`**: `PhageHostStreamingDataset`, `PhageHostIndexedDataset`, `phage_host_collate_fn` — PyTorch-compatible dataset classes for memory-efficient streaming
 

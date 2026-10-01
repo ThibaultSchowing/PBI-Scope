@@ -11,7 +11,9 @@ For architecture details, see `code-structure.md`. For CI, see `ci-tests.md`.
 |--------|--------------|--------------|
 | New PhageScope source | `config.yaml` (URLs), `phagescope.smk` | `test_fasta_ids_and_naming.py` |
 | New metadata column | `workflow/schemas/*.yaml`, `create_duckdb.py` | `test_schema_contracts.py` |
-| New pbi method | `src/pbi/sequence_retrieval.py` | `test_sequence_retrieval.py` |
+| New metadata query method | `src/pbi/metadata_queries.py` | `test_sequence_retrieval.py` |
+| New sequence fetch method | `src/pbi/sequence_ops.py` | `test_sequence_retrieval.py` |
+| New FASTA key/normalization | `src/pbi/fasta_ids.py` | `test_fasta_ids_and_naming.py` |
 | New API endpoint | `api/app.py` | `test_api.py` |
 | New private data field | `src/pbi/private_data.py` | `test_private_data_ingestion.py` |
 
@@ -32,7 +34,7 @@ For architecture details, see `code-structure.md`. For CI, see `ci-tests.md`.
 
 ### Adding a pbi method
 
-1. Add method to `src/pbi/sequence_retrieval.py` (or new module if splitting)
+1. Add method to `src/pbi/metadata_queries.py` (DuckDB queries) or `src/pbi/sequence_ops.py` (sequence fetch)
 2. Add type hints + docstring
 3. Add test to `tests/`
 4. Run: `python -m pytest tests/ -v`

@@ -32,7 +32,7 @@ See the [Installation Guide](installation.md) for detailed setup instructions.
 
 ## Security
 
-The `analysis` container runs Jupyter Lab with authentication disabled for local development. See [Analysis Container Guide](analysis-guide.md#️-security-notice) for details and hardening steps.
+The `analysis` container runs Jupyter Lab with authentication disabled for local development. See [Analysis Container Guide](analysis-guide.md#security-notice) for details and hardening steps.
 
 ## UID/GID Setup
 
@@ -55,3 +55,4 @@ docker compose up api
 ```
 
 See [API Reference](../api/overview.md) for endpoint documentation.
+
