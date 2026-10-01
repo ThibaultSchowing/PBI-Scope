@@ -13,6 +13,10 @@
         <link rel="canonical" href="https://ThibaultSchowing.github.io/PBI-Scope/developer/ai-workflow/">
       
       
+        <link rel="prev" href="../ci-tests/">
+      
+      
+        <link rel="next" href="../../future-steps/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>AI Agent Workflow - PBI-Scope Documentation</title>
+        <title>AI Workflow - PBI-Scope Documentation</title>
       
     
     
@@ -112,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              AI Agent Workflow
+              AI Workflow
             
           </span>
         </div>
@@ -302,10 +306,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../code-structure/" class="md-tabs__link">
           
   
@@ -795,6 +801,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/docker-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -979,28 +1013,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1018,7 +1055,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1080,6 +1117,197 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Workflow
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-use-this-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to use this guide
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#change-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Change matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-new-phagescope-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a new PhageScope data source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modifying-schema-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modifying schema contracts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-pbi-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a pbi method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-pipeline-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging pipeline failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pitfalls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pitfalls
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-development-without-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local development without Docker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ci-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1333,9 +1561,19 @@ For architecture details, see <code>code-structure.md</code>. For CI, see <code>
 <td><code>test_schema_contracts.py</code></td>
 </tr>
 <tr>
-<td>New pbi method</td>
-<td><code>src/pbi/sequence_retrieval.py</code></td>
+<td>New metadata query method</td>
+<td><code>src/pbi/metadata_queries.py</code></td>
 <td><code>test_sequence_retrieval.py</code></td>
+</tr>
+<tr>
+<td>New sequence fetch method</td>
+<td><code>src/pbi/sequence_ops.py</code></td>
+<td><code>test_sequence_retrieval.py</code></td>
+</tr>
+<tr>
+<td>New FASTA key/normalization</td>
+<td><code>src/pbi/fasta_ids.py</code></td>
+<td><code>test_fasta_ids_and_naming.py</code></td>
 </tr>
 <tr>
 <td>New API endpoint</td>
@@ -1365,7 +1603,7 @@ For architecture details, see <code>code-structure.md</code>. For CI, see <code>
 </ol>
 <h3 id="adding-a-pbi-method">Adding a pbi method<a class="headerlink" href="#adding-a-pbi-method" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Add method to <code>src/pbi/sequence_retrieval.py</code> (or new module if splitting)</li>
+<li>Add method to <code>src/pbi/metadata_queries.py</code> (DuckDB queries) or <code>src/pbi/sequence_ops.py</code> (sequence fetch)</li>
 <li>Add type hints + docstring</li>
 <li>Add test to <code>tests/</code></li>
 <li>Run: <code>python -m pytest tests/ -v</code></li>
