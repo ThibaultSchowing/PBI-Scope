@@ -167,7 +167,7 @@ Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI-Scope/tr
 
 ## Reference Pages
 
-New to the project? Start with the [Guides overview](guides/overview.md) above. When you need details, these reference pages document each part of the system:
+New to the project? Start with the [Installation Guide](guides/installation.md) above. When you need details, these reference pages document each part of the system:
 
 | Reference Page | Description |
 |----------------|-------------|
@@ -180,6 +180,6 @@ New to the project? Start with the [Guides overview](guides/overview.md) above. 
 
 ## Need help?
 
-- Use the [Guides overview](guides/overview.md)
+- Use the [Installation Guide](guides/installation.md)
 - Read [How it works](guides/how-it-works.md)
 - Open issues on [GitHub](https://github.com/ThibaultSchowing/PBI-Scope/issues)
