@@ -445,6 +445,7 @@ def ingest_private_sources_into_db(
             continue
         validations.append(validation)
 
+    conn.execute("BEGIN TRANSACTION")
     current_source_dbs = sorted({validation.source_db for validation in validations})
     _delete_private_rows_for_sources("fact_phages", current_source_dbs)
     _delete_private_rows_for_sources("private_interactions", current_source_dbs)
@@ -624,6 +625,7 @@ def ingest_private_sources_into_db(
         )
         """
     )
+    conn.execute("COMMIT")
 
     # Run duplicate detection against public BLAST DB if available
     duplicate_stats: Dict = {"checked": 0, "duplicates_found": 0}

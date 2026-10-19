@@ -19,7 +19,6 @@ import logging
 import os
 import threading
 import time
-from collections import OrderedDict
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -28,23 +27,15 @@ import pandas as pd
 from pyfaidx import Fasta
 
 from .fasta_index import (
-    MAX_HOST_FASTA_CACHE_SIZE,
     HostFastaCache,
     PrivatePhageFastaCache,
     _fasta_key_function,
     load_protein_fasta,
-    _should_rebuild_fai,
 )
 from .fasta_utils import assemble_genome, get_genome_stats
 from .metadata_queries import MetadataQueriesMixin
 from .query_utils import parse_where_clause
 from .sequence_ops import SequenceOpsMixin
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
 
 def _normalize_source_type(source_type: Optional[str]) -> str:
     """Normalize source type to canonical public/private labels."""
@@ -249,15 +240,14 @@ class SequenceRetriever(MetadataQueriesMixin, SequenceOpsMixin):
             elif self._use_host_mapping:
                 logging.info(f"   ℹ️  Using on-demand loading for {self._host_count:,} individual host files")
 
-            self._loading_complete.set()
-
             total_elapsed = time.time() - start_total
             logging.info(f"🎉 All FASTA files loaded in {total_elapsed:.2f}s")
 
         except Exception as e:
-            logging.error(f"❌ Error loading FASTA files: {e}")
-            import traceback
-            traceback.print_exc()
+            logging.exception("❌ Error loading FASTA files")
+
+        finally:
+            self._loading_complete.set()
 
     @property
     def phage_fasta(self):
@@ -564,13 +554,14 @@ class SequenceRetriever(MetadataQueriesMixin, SequenceOpsMixin):
         if self._private_phage_mapping:
             try:
                 row = self.conn.execute(
-                    "SELECT Source_DB, source_type FROM fact_phages WHERE Phage_ID = ? LIMIT 1",
+                    "SELECT Source_DB, source_type FROM fact_phages WHERE Phage_ID = ? "
+                    "ORDER BY Source_DB LIMIT 1",
                     [phage_id],
                 ).fetchone()
                 if row:
                     source_db, source_type_val = row
-            except Exception:
-                pass
+            except Exception as e:
+                logging.warning("⚠️  Could not resolve source for phage %s: %s", phage_id, e)
 
         seq = self._get_phage_sequence(phage_id, source_db=source_db, source_type=source_type_val)
         if seq is None:
@@ -1110,6 +1101,26 @@ class SequenceRetriever(MetadataQueriesMixin, SequenceOpsMixin):
         logging.info(f"✅ Completed iteration over {batch_num} batches")
 
     def close(self):
-        """Close database connection."""
-        self.conn.close()
+        """Close database connection, FASTA handles, caches, and join loader thread."""
+        self._loading_complete.wait(timeout=5)
+        if hasattr(self, "_load_thread") and self._load_thread.is_alive():
+            self._load_thread.join(timeout=5)
+        try:
+            self._host_fasta_cache.close_all()
+        except Exception:
+            pass
+        try:
+            self._private_phage_fasta_cache.close_all()
+        except Exception:
+            pass
+        for fasta in (self._phage_fasta, self._protein_fasta, self._host_fasta):
+            if fasta is not None and hasattr(fasta, "close"):
+                try:
+                    fasta.close()
+                except Exception:
+                    pass
+        try:
+            self.conn.close()
+        except Exception:
+            pass
         logging.info("🔒 Database connection closed")

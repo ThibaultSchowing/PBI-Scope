@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-print(f"Using python from: {sys.executable}")
 import pandas as pd
 import numpy as np  
 import os
