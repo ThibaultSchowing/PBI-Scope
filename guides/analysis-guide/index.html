@@ -1942,8 +1942,8 @@
 <h2 id="security-notice">⚠️ Security notice<a class="headerlink" href="#security-notice" title="Permanent link">&para;</a></h2>
 <p>The analysis container starts Jupyter Lab with <strong>all authentication disabled</strong>:</p>
 <ul>
-<li>No token (<code>--ServerApp.token=</code>)</li>
-<li>No password (<code>--ServerApp.password=</code>)</li>
+<li>No token (<code>--IdentityProvider.token=</code>)</li>
+<li>No password (<code>--IdentityProvider.password=</code>)</li>
 <li>No XSRF protection (<code>--ServerApp.disable_check_xsrf=True</code>)</li>
 </ul>
 <p>XSRF (Cross-Site Request Forgery) protection is the browser-level safeguard that
@@ -1979,8 +1979,8 @@ Disabling it means <strong>any page that can reach port 8888 can run arbitrary c
 <p><strong>Before exposing the container to a shared or internet-facing network:</strong></p>
 <ol>
 <li>Set a real token and/or password:</li>
-<li><code>--ServerApp.token=&lt;your-secret&gt;</code> (token-based access), <strong>or</strong></li>
-<li><code>--ServerApp.password=&lt;hashed-password&gt;</code> (use <code>jupyter server password</code> to generate the hash).</li>
+<li><code>--IdentityProvider.token=&lt;your-secret&gt;</code> (token-based access), <strong>or</strong></li>
+<li><code>--IdentityProvider.password=&lt;hashed-password&gt;</code> (use <code>jupyter server password</code> to generate the hash).</li>
 <li>Remove <code>--ServerApp.disable_check_xsrf=True</code>.</li>
 <li>Place the service behind a reverse proxy (nginx, Caddy, …) with TLS.</li>
 </ol>
