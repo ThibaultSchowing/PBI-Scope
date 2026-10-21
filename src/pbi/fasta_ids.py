@@ -20,8 +20,6 @@ equals DB Protein_ID. Source_DB is token1 (phage) / token2 (protein) provenance.
 
 from __future__ import annotations
 
-import re
-
 
 def _tokens(header: str) -> list[str]:
     """Split header (without leading '>') into whitespace-delimited tokens."""
@@ -125,7 +123,3 @@ def normalize_protein_header(raw_header: str, phage_id: str, source_db: str) -> 
 # pyfaidx key functions (aliases for callers)
 PHAGE_KEY_FUNCTION = phage_key
 PROTEIN_KEY_FUNCTION = protein_key
-
-# Optional regex to sanity-check accession vs dirty IDs (not used for gating,
-# only for tests/documentation). Accepts simple accessions and long composite.
-_CLEAN_ACCESSION_RE = re.compile(r"^[A-Za-z0-9_.\-:|]+$")

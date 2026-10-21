@@ -82,6 +82,7 @@ def get_data_paths():
         'protein_fasta': str(base_path / 'sequences' / 'all_proteins.fasta'),
         'host_mapping': str(base_path / 'sequences' / 'host_fasta_mapping.json'),
         'host_fasta': str(base_path / 'sequences' / 'all_hosts.fasta'),
+        'blast_db': str(base_path / 'blast_db'),
         'gff3_dir': str(base_path / 'gff3'),
         'gff3_index': str(base_path / 'gff3' / 'gff3_index.json'),
     }
@@ -143,7 +144,7 @@ async def lifespan(app: FastAPI):
             logger.warning("GFF3 index not found, GFF3 endpoints will be unavailable")
 
         # Initialize BLAST searcher (optional)
-        blast_db_dir = base_path / "blast_db"
+        blast_db_dir = Path(paths['blast_db'])
         if blast_db_dir.exists():
             try:
                 blast_searcher = BlastSearcher(blast_db_dir)

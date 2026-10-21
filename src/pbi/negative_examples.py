@@ -11,11 +11,6 @@ import logging
 from typing import Optional, List
 from pbi.sequence_retrieval import SequenceRetriever
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
 
 class NegativeExampleGenerator:
     """
@@ -440,41 +435,3 @@ class NegativeExampleGenerator:
         return dataset
 
 
-# Example usage
-if __name__ == "__main__":
-    from pbi import quick_connect
-    
-    print("🧪 Testing NegativeExampleGenerator")
-    print("="*80)
-    
-    # Connect to database
-    retriever = quick_connect()
-    
-    # Initialize generator
-    gen = NegativeExampleGenerator(retriever)
-    
-    # Get positive pairs (limited for testing)
-    print("\n📥 Fetching positive pairs...")
-    positives = retriever.get_phage_host_pairs(limit=100)
-    print(f"✅ Got {len(positives)} positive pairs")
-    
-    # Test random negatives
-    print("\n🎲 Testing random negatives...")
-    random_neg = gen.generate_random_negatives(positives, ratio=1.0)
-    print(f"✅ Generated {len(random_neg)} random negatives")
-    
-    # Test GC-based negatives
-    print("\n🧬 Testing GC-based negatives...")
-    gc_neg = gen.generate_gc_based_negatives(positives, ratio=0.5, min_gc_difference=15.0)
-    print(f"✅ Generated {len(gc_neg)} GC-based negatives")
-    
-    # Test balanced dataset
-    print("\n🔨 Testing balanced dataset...")
-    dataset = gen.generate_balanced_dataset(
-        positive_pairs=positives,
-        strategy='mixed',
-        positive_ratio=0.5
-    )
-    print(f"✅ Generated dataset with {len(dataset)} samples")
-    
-    print("\n✅ All tests passed!")

@@ -8,8 +8,10 @@
 #    - JUPYTER_TOKEN env var not set / empty: no authentication (default)
 #    - JUPYTER_TOKEN env var set: token-based auth required
 #
-# The CMD from Dockerfile is ignored — this entrypoint owns the full command
-# so that auth flags can be injected based on environment variables.
+# The image CMD ("jupyter lab ...") arrives as positional arguments on every
+# `docker compose up`. It is NOT executed as-is: the entrypoint owns the final
+# command so that auth flags can be injected. Any other explicit command
+# (e.g. `docker compose run --rm analysis bash`) is executed directly.
 
 # ---------------------------------------------------------------------------
 # /etc/passwd patching for arbitrary UID support
@@ -37,20 +39,20 @@ CMD_ARGS=(
 )
 
 if [ -n "${JUPYTER_TOKEN}" ]; then
-    CMD_ARGS+=("--ServerApp.token=${JUPYTER_TOKEN}")
+    CMD_ARGS+=("--IdentityProvider.token=${JUPYTER_TOKEN}")
     echo "=== Jupyter Lab: token authentication enabled ==="
     echo "=== Open http://localhost:8888/lab?token=${JUPYTER_TOKEN} ==="
 else
-    CMD_ARGS+=("--ServerApp.token=")
-    CMD_ARGS+=("--ServerApp.password=")
+    CMD_ARGS+=("--IdentityProvider.token=")
+    CMD_ARGS+=("--IdentityProvider.password=")
     CMD_ARGS+=("--ServerApp.allow_remote_access=True")
     echo "=== Jupyter Lab: running without authentication ==="
 fi
 
-# If arguments were passed to `docker compose run`, exec them directly.
-# Otherwise start Jupyter Lab (the default service).
-if [ $# -gt 0 ]; then
+# The image CMD starts with "jupyter" and must be replaced by the flagged
+# command above — otherwise Jupyter would run WITHOUT auth flags and generate
+# a random token. Any other explicit command (bash, python, ...) runs as-is.
+if [ $# -gt 0 ] && [ "$1" != "jupyter" ]; then
     exec "$@"
-else
-    exec jupyter lab "${CMD_ARGS[@]}"
 fi
+exec jupyter lab "${CMD_ARGS[@]}"

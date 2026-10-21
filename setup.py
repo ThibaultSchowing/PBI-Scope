@@ -70,7 +70,6 @@ setup(
         "console_scripts": [
             "pbi=pbi.cli:main",
             "pbi-blast=pbi.cli:main",
-            "pbi-retrieve=pbi.sequence_retrieval:main",  # If you add a main() function
         ],
     },
     

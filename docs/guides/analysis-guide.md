@@ -8,8 +8,8 @@ The analysis container is the recommended way to consume PBI-Scope data.
 
 The analysis container starts Jupyter Lab with **all authentication disabled**:
 
-- No token (`--ServerApp.token=`)
-- No password (`--ServerApp.password=`)
+- No token (`--IdentityProvider.token=`)
+- No password (`--IdentityProvider.password=`)
 - No XSRF protection (`--ServerApp.disable_check_xsrf=True`)
 
 XSRF (Cross-Site Request Forgery) protection is the browser-level safeguard that
@@ -28,8 +28,8 @@ This configuration is intentional for **local or SSH-tunnelled development only*
 **Before exposing the container to a shared or internet-facing network:**
 
 1. Set a real token and/or password:
-   - `--ServerApp.token=<your-secret>` (token-based access), **or**
-   - `--ServerApp.password=<hashed-password>` (use `jupyter server password` to generate the hash).
+   - `--IdentityProvider.token=<your-secret>` (token-based access), **or**
+   - `--IdentityProvider.password=<hashed-password>` (use `jupyter server password` to generate the hash).
 2. Remove `--ServerApp.disable_check_xsrf=True`.
 3. Place the service behind a reverse proxy (nginx, Caddy, …) with TLS.
 
