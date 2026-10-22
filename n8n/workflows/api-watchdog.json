@@ -1,0 +1,165 @@
+{
+  "name": "PBI API Watchdog",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": [
+          {
+            "name": "Hourly",
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 1
+              }
+            ]
+          }
+        ]
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule (hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://api:8000/health",
+        "method": "GET",
+        "responseFormat": "json",
+        "options": {
+          "fullResponse": false
+        },
+        "authentication": "none",
+        "headerParametersJson": {
+          "X-API-Key": "={{ $env.PBI_API_KEY }}"
+        }
+      },
+      "id": "check-health",
+      "name": "GET /health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "notEquals",
+              "value2": "healthy"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "branch-health",
+      "name": "Healthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "db_connected",
+              "name": "database_connected",
+              "value": "={{ $json.database_connected }}",
+              "type": "boolean"
+            },
+            {
+              "id": "blast_available",
+              "name": "blast_available",
+              "value": "={{ $json.blast_available }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "degraded-details",
+      "name": "Degraded details",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "text": "=:*PBI API degraded*\\nStatus: {{ $json.status }}\\nDB connected: {{ $json.database_connected }}\\nBLAST available: {{ $json.blast_available }}",
+        "channel": "={{ $json.notify_to || \"#phage-alerts\" }}"
+      },
+      "id": "slack-alert",
+      "name": "Slack alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1120, 480],
+      "credentials": {
+        "slackApi": ""
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (hourly)": {
+      "main": [
+        [
+          {
+            "node": "GET /health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /health": {
+      "main": [
+        [
+          {
+            "node": "Healthy?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Healthy?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Degraded details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Degraded details": {
+      "main": [
+        [
+          {
+            "node": "Slack alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "pbi-api-watchdog-workflow",
+  "meta": {
+    "instanceId": "pbi-local"
+  },
+  "versionId": "1",
+  "tags": []
+}

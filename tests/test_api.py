@@ -455,3 +455,149 @@ class TestGetDataPathsGFF3:
         assert "gff3_index" in paths
         assert "gff3" in paths["gff3_dir"]
         assert "gff3_index.json" in paths["gff3_index"]
+
+
+# ---------------------------------------------------------------------------
+# API key auth (n8n integration)
+# ---------------------------------------------------------------------------
+
+class TestApiKeyAuth:
+    def test_health_exempt_from_auth(self, monkeypatch):
+        """Health check stays open when PBI_API_KEY is set (Docker HEALTHCHECK)."""
+        monkeypatch.setenv("PBI_API_KEY", "secret-key")
+        from fastapi.testclient import TestClient
+        import api.app as app_module
+
+        client = TestClient(app_module.app)
+        resp = client.get("/health")
+        assert resp.status_code == 200
+
+    def test_non_exempt_endpoint_requires_key(self, monkeypatch):
+        """A non-exempt endpoint returns 401 without the X-API-Key header."""
+        monkeypatch.setenv("PBI_API_KEY", "secret-key")
+        from fastapi.testclient import TestClient
+        import api.app as app_module
+
+        client = TestClient(app_module.app)
+        resp = client.post("/blast/search", json={"sequence": "ACGT"})
+        assert resp.status_code == 401
+        assert "API key" in resp.json()["detail"]
+
+    def test_wrong_key_rejected(self, monkeypatch):
+        monkeypatch.setenv("PBI_API_KEY", "secret-key")
+        from fastapi.testclient import TestClient
+        import api.app as app_module
+
+        client = TestClient(app_module.app)
+        resp = client.post(
+            "/blast/search",
+            json={"sequence": "ACGT"},
+            headers={"X-API-Key": "wrong-key"},
+        )
+        assert resp.status_code == 401
+
+    def test_valid_key_passes_auth(self, monkeypatch):
+        """A valid key passes auth; the request then reaches the route logic."""
+        monkeypatch.setenv("PBI_API_KEY", "secret-key")
+        from fastapi.testclient import TestClient
+        import api.app as app_module
+        from unittest.mock import patch
+
+        client = TestClient(app_module.app)
+        with patch.object(app_module, "blast_searcher", None):
+            resp = client.post(
+                "/blast/search",
+                json={"sequence": "ACGT"},
+                headers={"X-API-Key": "secret-key"},
+            )
+            # Auth passed; now 503 because no BLAST databases are configured.
+            assert resp.status_code == 503
+
+    def test_auth_disabled_when_key_unset(self, monkeypatch):
+        """Without PBI_API_KEY, auth is skipped (local/dev behaviour preserved)."""
+        monkeypatch.delenv("PBI_API_KEY", raising=False)
+        from fastapi.testclient import TestClient
+        import api.app as app_module
+
+        client = TestClient(app_module.app)
+        resp = client.post("/blast/search", json={"sequence": "ACGT"})
+        # No auth; hits 503 (no BLAST DB) rather than 401.
+        assert resp.status_code == 503
+
+
+# ---------------------------------------------------------------------------
+# Async BLAST jobs (n8n polling workflow)
+# ---------------------------------------------------------------------------
+
+class TestBlastJobs:
+    @pytest.fixture(autouse=True)
+    def _clear_jobs(self):
+        import api.app as app_module
+        app_module._BLAST_JOBS.clear()
+        yield
+        app_module._BLAST_JOBS.clear()
+
+    def test_create_job_returns_202(self):
+        import api.app as app_module
+        from fastapi.testclient import TestClient
+        from unittest.mock import patch
+        import pandas as pd
+
+        client = TestClient(app_module.app)
+        mock_df = pd.DataFrame({"hit_id": ["h1"], "pident": [99.0]})
+        with patch.object(app_module, "blast_searcher") as mock_bs:
+            mock_bs.search_sequence.return_value = mock_df
+            resp = client.post("/blast/jobs", json={"sequence": "ACGT"})
+
+        assert resp.status_code == 202
+        data = resp.json()
+        assert data["status"] == "queued"
+        assert "job_id" in data
+        # Job is registered in the in-memory store for polling.
+        assert data["job_id"] in app_module._BLAST_JOBS
+
+    def test_get_job_unknown_returns_404(self):
+        import api.app as app_module
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app_module.app)
+        resp = client.get("/blast/jobs/does-not-exist")
+        assert resp.status_code == 404
+
+    def test_get_job_returns_stored_job(self):
+        import api.app as app_module
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app_module.app)
+        job_id = "test-job-1"
+        now = app_module.time.time()
+        app_module._BLAST_JOBS[job_id] = {
+            "job_id": job_id,
+            "status": "done",
+            "created_at": now,
+            "completed_at": now + 1.0,
+            "hits": 3,
+            "results": [{"hit_id": "h1"}],
+            "program": "blastn",
+        }
+        resp = client.get(f"/blast/jobs/{job_id}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["job_id"] == job_id
+        assert data["status"] == "done"
+        assert data["hits"] == 3
+        assert len(data["results"]) == 1
+
+    def test_list_jobs(self):
+        import api.app as app_module
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app_module.app)
+        now = app_module.time.time()
+        app_module._BLAST_JOBS["j1"] = {
+            "job_id": "j1", "status": "queued", "created_at": now
+        }
+        resp = client.get("/blast/jobs")
+        assert resp.status_code == 200
+        assert isinstance(resp.json()["jobs"], list)
+        assert len(resp.json()["jobs"]) >= 1

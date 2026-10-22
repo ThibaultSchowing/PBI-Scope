@@ -130,6 +130,7 @@ PBI-Scope runs three Docker services:
 | `pipeline` | Builds/updates the database | — |
 | `analysis` | Read-only data access for users (preferred) — Jupyter Lab | `8886` → `8888` (`docker-compose.yml:69` `8886:8888`; container `8888` defined in `Dockerfile.analysis:57` `EXPOSE 8888` / `Dockerfile.analysis:100` `--port=8888`) |
 | `api` | REST API for metadata queries, sequence retrieval, and SQL exploration | `8000` → `8000` (`docker-compose.yml:44`) |
+| `n8n` | Workflow automation (BLAST screening, data digests, API health alerts) | `5678` → `5678` (`docker-compose.yml` n8n service) |
 
 ## Volumes and Mounts
 

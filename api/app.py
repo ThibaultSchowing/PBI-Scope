@@ -5,16 +5,20 @@ Provides metadata exploration, sequence retrieval, and genome access
 via a shared SequenceRetriever instance.
 """
 
+import asyncio
 import logging
 import os
 import re
+import time
+import uuid
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
 import numpy as np
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel, Field
 import duckdb
 
@@ -33,6 +37,36 @@ logger = logging.getLogger('api.app')
 retriever: Optional[SequenceRetriever] = None
 gff3_retriever: Optional[GFF3Retriever] = None
 blast_searcher: Optional[BlastSearcher] = None
+
+# ── Auth ─────────────────────────────────────────────────────────────────────
+
+# API key (optional). When PBI_API_KEY is set, all non-exempt routes require
+# the X-API-Key header. n8n runs inside the same compose network and sends the
+# key via the HTTP Request node header. Enforced by the api_key_auth middleware
+# below (not by a route dependency).
+
+# Paths that do not require authentication (health checks, Swagger UI, OpenAPI
+# spec import). Kept open so Docker HEALTHCHECK and n8n spec import work without
+# a key; n8n workflows call authenticated endpoints with the header instead.
+_AUTH_EXEMPT_PATHS = {"/", "/health", "/docs", "/redoc", "/openapi.json", "/favicon.ico"}
+
+# ── Async BLAST jobs ─────────────────────────────────────────────────────────
+
+# In-memory job store (single uvicorn worker in Dockerfile.api). Suitable for
+# n8n polling workflows; jobs are TTL-evicted on access.
+_BLAST_JOBS: Dict[str, dict] = {}
+_BLAST_JOB_TTL_SECONDS = 3600
+
+
+def _evict_expired_blast_jobs() -> None:
+    now = time.time()
+    expired = [
+        jid for jid, job in _BLAST_JOBS.items()
+        if now - job.get("created_at", 0) > _BLAST_JOB_TTL_SECONDS
+    ]
+    for jid in expired:
+        _BLAST_JOBS.pop(jid, None)
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -177,6 +211,40 @@ app = FastAPI(
 )
 
 
+@app.middleware("http")
+async def api_key_auth(request: Request, call_next):
+    """Require X-API-Key on non-exempt routes when PBI_API_KEY is set."""
+    path = request.url.path
+    if path in _AUTH_EXEMPT_PATHS or path.startswith("/docs/") or path == "/openapi.json":
+        return await call_next(request)
+    api_key = os.getenv("PBI_API_KEY")
+    if api_key:
+        provided = request.headers.get("X-API-Key")
+        if not provided or provided != api_key:
+            return JSONResponse(status_code=401, content={"detail": "Missing or invalid API key"})
+    return await call_next(request)
+
+
+def custom_openapi():
+    """Expose an ApiKeyHeader security scheme so /docs and n8n spec import work."""
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    openapi_schema.setdefault("components", {}).setdefault("securitySchemes", {})[
+        "ApiKeyHeader"
+    ] = {"type": "apiKey", "in": "header", "name": "X-API-Key"}
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
+
 # ── Request models ───────────────────────────────────────────────────────────
 
 class QueryRequest(BaseModel):
@@ -202,6 +270,30 @@ class BlastSearchRequest(BaseModel):
     db: Optional[str] = None
     max_hits: int = Field(default=10, ge=1, le=100, description="Max hits to return (1-100)")
     evalue: float = 1e-5
+    timeout: int = Field(default=1800, ge=1, le=86400, description="BLAST timeout in seconds (default 1800 = 30 min)")
+    num_threads: int = Field(default=1, ge=1, le=16, description="Number of BLAST threads (default 1)")
+
+
+class BlastJobCreateResponse(BaseModel):
+    job_id: str
+    status: str = "queued"
+
+
+class BlastJobResponse(BaseModel):
+    job_id: str
+    status: str
+    created_at: float
+    started_at: Optional[float] = None
+    completed_at: Optional[float] = None
+    program: Optional[str] = None
+    db: Optional[str] = None
+    hits: Optional[int] = None
+    results: Optional[List[dict]] = None
+    error: Optional[str] = None
+
+
+class BlastJobListResponse(BaseModel):
+    jobs: List[dict]
 
 
 # ── Utility endpoints ────────────────────────────────────────────────────────
@@ -675,9 +767,42 @@ if __name__ == "__main__":
 
 # ── BLAST endpoints ───────────────────────────────────────────────────────────
 
+async def _run_blast_job(job_id: str, request: BlastSearchRequest) -> None:
+    """Run a BLAST search in a worker thread and update the in-memory job store."""
+    _BLAST_JOBS[job_id]["status"] = "running"
+    _BLAST_JOBS[job_id]["started_at"] = time.time()
+    try:
+        loop = asyncio.get_event_loop()
+        df = await loop.run_in_executor(
+            None,
+            lambda: blast_searcher.search_sequence(
+                request.sequence,
+                program=request.program,
+                db=request.db,
+                max_hits=request.max_hits,
+                evalue=request.evalue,
+                timeout=request.timeout,
+                num_threads=request.num_threads,
+            ),
+        )
+        _BLAST_JOBS[job_id]["status"] = "done"
+        _BLAST_JOBS[job_id]["hits"] = len(df)
+        _BLAST_JOBS[job_id]["results"] = _df_to_records(df)
+        _BLAST_JOBS[job_id]["completed_at"] = time.time()
+    except Exception as e:
+        logger.error(f"BLAST job {job_id} failed: {e}")
+        _BLAST_JOBS[job_id]["status"] = "failed"
+        _BLAST_JOBS[job_id]["error"] = str(e)
+        _BLAST_JOBS[job_id]["completed_at"] = time.time()
+
+
 @app.post("/blast/search")
-async def blast_search(request: BlastSearchRequest):
-    """Search a sequence against BLAST databases."""
+def blast_search(request: BlastSearchRequest):
+    """Search a sequence against BLAST databases (synchronous, blocks until done).
+
+    Runs in FastAPI's threadpool so it does not block the event loop; prefer
+    /blast/jobs for long searches called from n8n.
+    """
     if blast_searcher is None:
         raise HTTPException(status_code=503, detail="BLAST databases not available")
     try:
@@ -687,6 +812,8 @@ async def blast_search(request: BlastSearchRequest):
             db=request.db,
             max_hits=request.max_hits,
             evalue=request.evalue,
+            timeout=request.timeout,
+            num_threads=request.num_threads,
         )
         return {
             "success": True,
@@ -702,6 +829,40 @@ async def blast_search(request: BlastSearchRequest):
     except Exception as e:
         logger.error(f"BLAST search error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/blast/jobs", response_model=BlastJobCreateResponse, status_code=202)
+async def create_blast_job(request: BlastSearchRequest):
+    """Queue a BLAST search and return a job id for polling (n8n-friendly)."""
+    if blast_searcher is None:
+        raise HTTPException(status_code=503, detail="BLAST databases not available")
+    job_id = str(uuid.uuid4())
+    _BLAST_JOBS[job_id] = {
+        "job_id": job_id,
+        "status": "queued",
+        "created_at": time.time(),
+        "program": request.program,
+        "db": request.db,
+    }
+    asyncio.create_task(_run_blast_job(job_id, request))
+    return {"job_id": job_id, "status": "queued"}
+
+
+@app.get("/blast/jobs/{job_id}", response_model=BlastJobResponse)
+async def get_blast_job(job_id: str):
+    """Poll a BLAST job: queued | running | done | failed."""
+    _evict_expired_blast_jobs()
+    job = _BLAST_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+
+@app.get("/blast/jobs", response_model=BlastJobListResponse)
+async def list_blast_jobs():
+    """List active BLAST jobs (expired jobs are evicted on each call)."""
+    _evict_expired_blast_jobs()
+    return {"jobs": list(_BLAST_JOBS.values())}
 
 
 @app.get("/blast/databases")

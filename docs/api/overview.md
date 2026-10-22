@@ -90,11 +90,16 @@ client.close()
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/blast/search` | Search a sequence against a BLAST database |
+| POST | `/blast/search` | Search a sequence against a BLAST database (synchronous; blocks until done) |
+| POST | `/blast/jobs` | Queue a BLAST search and return a `job_id` (202) for polling (n8n-friendly) |
+| GET | `/blast/jobs/{job_id}` | Poll a BLAST job: `queued` \| `running` \| `done` \| `failed` |
+| GET | `/blast/jobs` | List active BLAST jobs |
 | GET | `/blast/databases` | List BLAST databases and their build status |
 | GET | `/blast/status` | BLAST installation and database status |
 
 Available databases: `phages`, `proteins`, `hosts`, `private`, `combined`. Available programs: `blastn`, `blastp`, `blastx`, `tblastn`, `tblastx` (database auto-selected when omitted). Searches return tabular hits as JSON records.
+
+Long searches should use `/blast/jobs` (async) rather than `/blast/search` (sync, 30-minute default timeout) so the caller is not blocked for the full search duration.
 
 ### SQL Queries
 
@@ -230,6 +235,17 @@ curl -X POST http://localhost:8000/blast/search \
   -H "Content-Type: application/json" \
   -d '{"sequence": "ATGCGTTTACG...", "program": "blastn", "db": "phages", "max_hits": 10}'
 
+# Async BLAST job (n8n-friendly): queue, then poll
+curl -X POST http://localhost:8000/blast/jobs \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: <your-PBI_API_KEY>" \
+  -d '{"sequence": "ATGCGTTTACG...", "program": "blastn", "db": "phages", "max_hits": 10}'
+# → 202 {"job_id": "<uuid>", "status": "queued"}
+
+curl -H "X-API-Key: <your-PBI_API_KEY>" \
+  "http://localhost:8000/blast/jobs/<job_id>"
+# → {"job_id": "...", "status": "done", "hits": 3, "results": [...]}
+
 # SQL query
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
@@ -298,6 +314,27 @@ client.close()
 - All queries are read-only (SELECT only)
 - WHERE clauses are validated against injection patterns
 - The API runs inside the Docker network; expose only if needed
+
+## Authentication
+
+When the `PBI_API_KEY` environment variable is set on the `api` service, all routes **except** `/`, `/health`, `/docs`, `/redoc`, and `/openapi.json` require the `X-API-Key` header:
+
+```bash
+curl -X POST http://localhost:8000/blast/jobs \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: <your-PBI_API_KEY>" \
+  -d '{"sequence": "ACGT", "program": "blastn"}'
+```
+
+Requests without a valid key receive `401 {"detail": "Missing or invalid API key"}`.
+
+The OpenAPI spec (`/openapi.json`) exposes an `ApiKeyHeader` security scheme, so the `/docs` UI and n8n spec import recognize the header. Generate a key with:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+and set it in `.env` as `PBI_API_KEY`.
 
 ---
 

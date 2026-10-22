@@ -1,0 +1,337 @@
+{
+  "name": "PBI BLAST Screening + Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blast-screening",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook (sequence in)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "pbi-blast-screening"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "seq",
+              "name": "sequence",
+              "value": "={{ $json.sequence }}",
+              "type": "string"
+            },
+            {
+              "id": "prog",
+              "name": "program",
+              "value": "={{ $json.program || \"blastn\" }}",
+              "type": "string"
+            },
+            {
+              "id": "db",
+              "name": "db",
+              "value": "={{ $json.db || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "notify",
+              "name": "notify_to",
+              "value": "={{ $json.notify_to }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "normalize-input",
+      "name": "Normalize input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://api:8000/blast/jobs",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {
+          "fullResponse": false
+        },
+        "bodyParametersJson": {
+          "sequence": "={{ $json.sequence }}",
+          "program": "={{ $json.program }}",
+          "db": "={{ $json.db }}",
+          "max_hits": 10,
+          "evalue": 1e-5,
+          "timeout": 600,
+          "num_threads": 1
+        },
+        "authentication": "none",
+        "headerParametersJson": {
+          "X-API-Key": "={{ $env.PBI_API_KEY }}"
+        }
+      },
+      "id": "create-blast-job",
+      "name": "Queue BLAST job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300],
+      "credentials": {
+        "headerAuth": ""
+      }
+    },
+    {
+      "parameters": {
+        "waitFor": {
+          "seconds": 5
+        }
+      },
+      "id": "wait",
+      "name": "Wait 5s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://api:8000/blast/jobs/{{ $json[\"job_id\"] }}",
+        "method": "GET",
+        "responseFormat": "json",
+        "options": {
+          "fullResponse": false
+        },
+        "authentication": "none",
+        "headerParametersJson": {
+          "X-API-Key": "={{ $env.PBI_API_KEY }}"
+        }
+      },
+      "id": "poll-job",
+      "name": "Poll BLAST job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1120, 300],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equals",
+              "value2": "done"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "branch-status",
+      "name": "Job status?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "job_id",
+              "name": "job_id",
+              "value": "={{ $json.job_id }}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "name": "error",
+              "value": "={{ $json.error }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "job-failed",
+      "name": "Job failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1340, 480]
+    },
+    {
+      "parameters": {
+        "url": "http://api:8000/phage-metadata",
+        "method": "GET",
+        "queryParameters": {
+          "where": "Phage_ID IN ('{{ $json.top_hit_phage_id }}')",
+          "limit": "5"
+        },
+        "responseFormat": "json",
+        "options": {
+          "fullResponse": false
+        },
+        "authentication": "none",
+        "headerParametersJson": {
+          "X-API-Key": "={{ $env.PBI_API_KEY }}"
+        }
+      },
+      "id": "annotate-top-hit",
+      "name": "Annotate top hit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 200],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "summary",
+              "name": "summary",
+              "value": "={{ \"*BLAST screening complete*\\nJob: \" + $json.job_id + \"\\nProgram: \" + $json.program + \"\\nHits: \" + ($json.hits || 0) + \"\\nTop hit: \" + $json.top_hit_phage_id + \" (evalue: \" + $json.top_hit_evalue + \")\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-report",
+      "name": "Format report",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1780, 200]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.summary }}",
+        "channel": "={{ $json.notify_to || \"#phage-alerts\" }}",
+        "attachments": {
+          "options": {}
+        }
+      },
+      "id": "slack-alert",
+      "name": "Slack alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [2000, 200],
+      "credentials": {
+        "slackApi": ""
+      }
+    }
+  ],
+  "connections": {
+    "Webhook (sequence in)": {
+      "main": [
+        [
+          {
+            "node": "Normalize input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize input": {
+      "main": [
+        [
+          {
+            "node": "Queue BLAST job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue BLAST job": {
+      "main": [
+        [
+          {
+            "node": "Wait 5s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s": {
+      "main": [
+        [
+          {
+            "node": "Poll BLAST job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll BLAST job": {
+      "main": [
+        [
+          {
+            "node": "Job status?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job status?": {
+      "main": [
+        [
+          {
+            "node": "Annotate top hit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Job failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annotate top hit": {
+      "main": [
+        [
+          {
+            "node": "Format report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format report": {
+      "main": [
+        [
+          {
+            "node": "Slack alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "pbi-blast-screening-workflow",
+  "meta": {
+    "instanceId": "pbi-local"
+  },
+  "versionId": "1",
+  "tags": []
+}
