@@ -20,7 +20,15 @@ internal Docker network at `http://api:8000`.
    - `blast-screening.json` — webhook-driven BLAST screening + Telegram alert
    - `api-watchdog.json` — hourly `/health` poll + degraded alert
 
-4. In each imported workflow, configure the **Telegram credentials** node
+4. **Create the API key credential** (one-time setup):
+   - In n8n, go to **Credentials** → **New** → **Header Auth**
+   - **Name**: `X-API-Key`
+   - **Value**: your `PBI_API_KEY` from `.env`
+   - Save as "PBI API Key"
+   - Open each HTTP Request node in the imported workflows and select
+     this credential under **Authentication → Header Auth**
+
+5. In each imported workflow, configure the **Telegram credentials** node
    (bot token from @BotFather) and set `notify_to` to your chat ID.
 
 ## How a screening run works

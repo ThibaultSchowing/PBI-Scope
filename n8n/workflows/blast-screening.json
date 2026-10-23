@@ -56,32 +56,32 @@
     {
       "parameters": {
         "url": "http://api:8000/blast/jobs",
-        "method": "POST",
-        "jsonParameters": true,
-        "options": {
-          "fullResponse": false
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ sequence: $json.sequence, program: $json.program, db: $json.db || null, max_hits: 10, evalue: 1e-5, timeout: 600, num_threads: 1 }) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
         },
-        "bodyParametersJson": {
-          "sequence": "={{ $json.sequence }}",
-          "program": "={{ $json.program }}",
-          "db": "={{ $json.db }}",
-          "max_hits": 10,
-          "evalue": 1e-5,
-          "timeout": 600,
-          "num_threads": 1
-        },
-        "authentication": "none",
-        "headerParametersJson": {
-          "X-API-Key": "={{ $env.PBI_API_KEY }}"
-        }
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
       },
       "id": "create-blast-job",
       "name": "Queue BLAST job",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "typeVersion": 4.5,
       "position": [680, 300],
       "credentials": {
-        "headerAuth": ""
+        "httpHeaderAuth": {
+          "id": "pbi-api-key",
+          "name": "PBI API Key"
+        }
       }
     },
     {
@@ -99,22 +99,21 @@
     {
       "parameters": {
         "url": "http://api:8000/blast/jobs/{{ $json[\"job_id\"] }}",
-        "method": "GET",
-        "responseFormat": "json",
-        "options": {
-          "fullResponse": false
-        },
-        "authentication": "none",
-        "headerParametersJson": {
-          "X-API-Key": "={{ $env.PBI_API_KEY }}"
-        }
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
       },
       "id": "poll-job",
       "name": "Poll BLAST job",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "typeVersion": 4.5,
       "position": [1120, 300],
-      "credentials": {}
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pbi-api-key",
+          "name": "PBI API Key"
+        }
+      }
     },
     {
       "parameters": {
@@ -170,26 +169,34 @@
     {
       "parameters": {
         "url": "http://api:8000/phage-metadata",
-        "method": "GET",
+        "sendQuery": true,
         "queryParameters": {
-          "where": "Phage_ID IN ('{{ $json.top_hit_phage_id }}')",
-          "limit": "5"
+          "parameters": [
+            {
+              "name": "where",
+              "value": "Phage_ID IN ('={{ $json.top_hit_phage_id }}')"
+            },
+            {
+              "name": "limit",
+              "value": "5"
+            }
+          ]
         },
-        "responseFormat": "json",
-        "options": {
-          "fullResponse": false
-        },
-        "authentication": "none",
-        "headerParametersJson": {
-          "X-API-Key": "={{ $env.PBI_API_KEY }}"
-        }
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
       },
       "id": "annotate-top-hit",
       "name": "Annotate top hit",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "typeVersion": 4.5,
       "position": [1560, 200],
-      "credentials": {}
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pbi-api-key",
+          "name": "PBI API Key"
+        }
+      }
     },
     {
       "parameters": {

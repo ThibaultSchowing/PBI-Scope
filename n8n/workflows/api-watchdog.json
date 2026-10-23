@@ -24,20 +24,12 @@
     {
       "parameters": {
         "url": "http://api:8000/health",
-        "method": "GET",
-        "responseFormat": "json",
-        "options": {
-          "fullResponse": false
-        },
-        "authentication": "none",
-        "headerParametersJson": {
-          "X-API-Key": "={{ $env.PBI_API_KEY }}"
-        }
+        "options": {}
       },
       "id": "check-health",
       "name": "GET /health",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "typeVersion": 4.5,
       "position": [460, 300],
       "credentials": {}
     },

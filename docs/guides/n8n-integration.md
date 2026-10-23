@@ -71,10 +71,11 @@ n8n will prompt you to create an admin account on first login. After logging in,
 
 1. Go to **Workflows** → **Import**
 2. Select `n8n/workflows/blast-screening.json` (and/or `api-watchdog.json`) from a local clone of the repo
-3. In each workflow, configure the **Telegram** credential node (bot token from
-4. Save and toggle **Active**
+3. **Create the API key credential** (one-time): go to **Credentials** → **New** → **Header Auth** — set **Name** to `X-API-Key`, **Value** to your `PBI_API_KEY`, save as "PBI API Key". Then open each HTTP Request node in the workflow and select this credential under **Authentication → Header Auth**.
+4. Configure the **Telegram** credential node (bot token from [@BotFather](https://t.me/botfather)) and set your chat ID (from `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`) as `notify_to`.
+5. Save and click **Publish** (top-right) to register the production webhook URL.
 
-> The n8n HTTP Request nodes already target `http://api:8000` (internal network) and send `X-API-Key` from the `PBI_API_KEY` env var, so no further config is needed once the env is set.
+> The n8n HTTP Request nodes already target `http://api:8000` (internal network). The `X-API-Key` header is sent via the Header Auth credential (stored encrypted inside the n8n container).
 
 ## 3) Test the API endpoints directly
 
@@ -127,17 +128,25 @@ http://localhost:8000/docs
 
 ## 4) Test the n8n screening workflow
 
-1. Make sure `blast-screening.json` is imported and **Active** in n8n.
-2. Copy the webhook URL shown on the workflow's Webhook node (e.g. `http://localhost:5678/webhook/blast-screening` through your tunnel).
-3. POST a sequence to it:
+**Test URL** (works immediately, no publish needed): click **"Execute workflow"** in the n8n editor, then POST to the test webhook URL shown on the Webhook node:
+
+```bash
+curl -X POST http://localhost:5678/webhook-test/blast-screening \
+  -H "Content-Type: application/json" \
+  -d '{"sequence": "ACGT...", "program": "blastn", "db": "phages", "notify_to": "47781757"}'
+```
+
+**Production URL** (only works after clicking **Publish** in the n8n editor):
 
 ```bash
 curl -X POST http://localhost:5678/webhook/blast-screening \
   -H "Content-Type: application/json" \
-  -d '{"sequence": "ACGT...", "program": "blastn", "db": "phages", "notify_to": "#phage-alerts"}'
+  -d '{"sequence": "ACGT...", "program": "blastn", "db": "phages", "notify_to": "47781757"}'
 ```
 
-n8n queues the BLAST job, polls until completion, annotates the top hit, and sends a summary to Telegram.
+> The test URL (`/webhook-test/`) only works for one call after you click "Execute workflow". The production URL (`/webhook/`) requires the workflow to be **Published** (top-right button in the editor).
+
+Check **n8n UI → Executions** tab to confirm the run, and your Telegram chat for the message.
 
 ## Architecture
 
