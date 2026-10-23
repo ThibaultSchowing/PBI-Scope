@@ -94,16 +94,18 @@
     },
     {
       "parameters": {
+        "resource": "message",
+        "operation": "send",
         "text": "=:*PBI API degraded*\\nStatus: {{ $json.status }}\\nDB connected: {{ $json.database_connected }}\\nBLAST available: {{ $json.blast_available }}",
-        "channel": "={{ $json.notify_to || \"#phage-alerts\" }}"
+        "chatId": "={{ $json.notify_to }}"
       },
-      "id": "slack-alert",
-      "name": "Slack alert",
-      "type": "n8n-nodes-base.slack",
+      "id": "telegram-alert",
+      "name": "Telegram alert",
+      "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [1120, 480],
       "credentials": {
-        "slackApi": ""
+        "telegramApi": ""
       }
     }
   ],
@@ -146,7 +148,7 @@
       "main": [
         [
           {
-            "node": "Slack alert",
+            "node": "Telegram alert",
             "type": "main",
             "index": 0
           }

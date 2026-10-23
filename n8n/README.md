@@ -17,11 +17,11 @@ internal Docker network at `http://api:8000`.
 
 3. Open n8n at `http://<server>:5678`, create your admin account, then import
    the workflows under `n8n/workflows/`:
-   - `blast-screening.json` — webhook-driven BLAST screening + Slack alert
+   - `blast-screening.json` — webhook-driven BLAST screening + Telegram alert
    - `api-watchdog.json` — hourly `/health` poll + degraded alert
 
-4. In each imported workflow, configure the **Slack credentials** node
-   (or swap Slack for Email/Teams/Discord) and set `notify_to` to your channel.
+4. In each imported workflow, configure the **Telegram credentials** node
+   (bot token from @BotFather) and set `notify_to` to your chat ID.
 
 ## How a screening run works
 
@@ -32,14 +32,14 @@ internal Docker network at `http://api:8000`.
      "sequence": "ACGT...",
      "program": "blastn",
      "db": "phages",
-     "notify_to": "#phage-alerts"
+     "notify_to": "<your-telegram-chat-id>"
    }
    ```
 2. n8n calls `POST /blast/jobs` with `X-API-Key`, gets a `job_id` (202).
 3. After 5s it polls `GET /blast/jobs/{id}` until `done`/`failed`.
 4. On `done`: fetches metadata for the top hit via `GET /phage-metadata`,
-   formats a report, and posts to Slack.
-5. On `failed`: posts the error to Slack.
+   formats a report, and sends it to Telegram.
+5. On `failed`: sends the error to Telegram.
 
 ## API changes (see `api/app.py`)
 

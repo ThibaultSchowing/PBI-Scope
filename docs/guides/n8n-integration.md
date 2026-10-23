@@ -8,8 +8,8 @@ PBI-Scope includes an optional **n8n** workflow automation container. n8n lets y
 
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
-| **BLAST screening** | Webhook receives a sequence | Queues a BLAST job (`POST /blast/jobs`), polls until done, annotates top hits via `/phage-metadata`, sends a Slack/email report |
-| **API watchdog** | Schedule (hourly) | Polls `GET /health`, alerts when the API is degraded or BLAST is unavailable |
+| **BLAST screening** | Webhook receives a sequence | Queues a BLAST job (`POST /blast/jobs`), polls until done, annotates top hits via `/phage-metadata`, sends a Telegram message |
+| **API watchdog** | Schedule (hourly) | Polls `GET /health`, sends a Telegram message when the API is degraded or BLAST is unavailable |
 
 Workflows are committed to the repo under `n8n/workflows/` and imported into the n8n UI:
 - `blast-screening.json` — webhook-driven BLAST screening + alerts
@@ -71,7 +71,7 @@ n8n will prompt you to create an admin account on first login. After logging in,
 
 1. Go to **Workflows** → **Import**
 2. Select `n8n/workflows/blast-screening.json` (and/or `api-watchdog.json`) from a local clone of the repo
-3. In each workflow, configure the **Slack** (or Email) credential node and set your notify channel (e.g. `#phage-alerts`)
+3. In each workflow, configure the **Telegram** credential node (bot token from
 4. Save and toggle **Active**
 
 > The n8n HTTP Request nodes already target `http://api:8000` (internal network) and send `X-API-Key` from the `PBI_API_KEY` env var, so no further config is needed once the env is set.
@@ -137,7 +137,7 @@ curl -X POST http://localhost:5678/webhook/blast-screening \
   -d '{"sequence": "ACGT...", "program": "blastn", "db": "phages", "notify_to": "#phage-alerts"}'
 ```
 
-n8n queues the BLAST job, polls until completion, annotates the top hit, and posts a summary to Slack.
+n8n queues the BLAST job, polls until completion, annotates the top hit, and sends a summary to Telegram.
 
 ## Architecture
 

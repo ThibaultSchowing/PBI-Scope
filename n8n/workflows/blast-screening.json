@@ -213,19 +213,18 @@
     },
     {
       "parameters": {
-        "text": "={{ $json.summary }}",
-        "channel": "={{ $json.notify_to || \"#phage-alerts\" }}",
-        "attachments": {
-          "options": {}
-        }
+        "resource": "message",
+        "operation": "send",
+        "text": "={{ $json.summary || (\"BLAST job failed for job \" + $json.job_id + \": \" + $json.error) }}",
+        "chatId": "={{ $json.notify_to }}"
       },
-      "id": "slack-alert",
-      "name": "Slack alert",
-      "type": "n8n-nodes-base.slack",
+      "id": "telegram-alert",
+      "name": "Telegram alert",
+      "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [2000, 200],
       "credentials": {
-        "slackApi": ""
+        "telegramApi": ""
       }
     }
   ],
@@ -318,7 +317,18 @@
       "main": [
         [
           {
-            "node": "Slack alert",
+            "node": "Telegram alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job failed": {
+      "main": [
+        [
+          {
+            "node": "Telegram alert",
             "type": "main",
             "index": 0
           }
