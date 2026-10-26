@@ -54,8 +54,7 @@ class APIClient:
         self._timeout = timeout
         self._session = requests.Session()
         self._session.headers.update({"Content-Type": "application/json"})
-
-        key = api_key or os.getenv("PBI_API_KEY")
+        key = os.getenv("PBI_API_KEY")
         if key:
             self._session.headers["X-API-Key"] = key
 
