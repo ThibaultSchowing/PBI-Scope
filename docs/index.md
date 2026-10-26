@@ -44,6 +44,10 @@ Outputs are stored in a shared data volume and made available through the `pbi` 
 
   Create your own R+Python container connected to the PBI-Scope database.
 
+- **[n8n Workflows](guides/n8n-integration.md)**
+
+  Automate BLAST screening, data digests, and API health alerts with n8n.
+
 - **[Database Reports](reports/database_validation.html)**
 
   Quick overview of all PhageScope tables and database validation.
@@ -142,7 +146,13 @@ Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI-Scope/tr
            +---------v---------+                               +---------v---------+
            | analysis container|                               | api container      |
            | pbi package (main)|                               | REST API           |
-           +-------------------+                               +-------------------+
+            +-------------------+                               +-------------------+
+                               |
+                               v
+             +----------------+----------------------------------+
+             | n8n container   | workflow automation             |
+             |                 | BLAST screening + alerts        |
+             +----------------+----------------------------------+
 ```
 
 ## Current status
@@ -156,6 +166,7 @@ Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI-Scope/tr
 | BLAST databases | ✅ Stable | Five pre-built databases (phages, proteins, hosts, private, combined); see notebook `09_blast_search.ipynb` |
 | Analysis workflow | ✅ Stable | Analysis container is the main interface |
 | REST API | ✅ Supported | Metadata queries, sequence retrieval, GFF3 annotations, BLAST search, SQL exploration; see [API Reference](api/overview.md) |
+| n8n workflows | ✅ Supported | BLAST screening, data digests, API health alerts via n8n; see [n8n Workflows](guides/n8n-integration.md) |
 | Documentation | 🔄 Updated for v0.6.0 | Structure simplified and aligned with current infrastructure |
 
 ## Work in Progress

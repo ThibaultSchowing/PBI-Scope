@@ -1,0 +1,341 @@
+{
+  "name": "PBI BLAST Screening + Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blast-screening",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "c40de488-6719-4905-aa09-4553200617d1",
+      "name": "Webhook (sequence in)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "pbi-blast-screening"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": []
+        },
+        "options": {}
+      },
+      "id": "27665a30-de2f-4200-b68e-8f0e694a9552",
+      "name": "Normalize input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:8000/blast/jobs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": ""
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "5e5d5650-7279-4e7c-b416-b7b519152c44",
+      "name": "Queue BLAST job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "id": "7adb2023-77aa-470f-965a-8cc7da0af532",
+      "name": "Wait 5s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        672,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://api:8000/blast/jobs/{{ $json[\"job_id\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "988e7ff4-0066-4038-b124-035ba3b7ff6f",
+      "name": "Poll BLAST job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        880,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "done"
+            }
+          ]
+        }
+      },
+      "id": "e1f39295-22bf-4377-915c-e01f6a3fafbf",
+      "name": "Job status?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "802903dd-9017-4030-8a85-6b08220caa39",
+      "name": "Job failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://api:8000/phage-metadata",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "where",
+              "value": "=Phage_ID IN ('{{ $json.results.map(r => r.sseqid).join(\"','\") }}')"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "380f007d-7e78-49a5-993e-3ba770b515c7",
+      "name": "Annotate top hit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1328,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "fac10e4e-0739-4f21-bbdd-4a4a75a26559",
+      "name": "Format report",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        32
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Convert the incoming BLAST JSON object into a formatted string\nconst jsonString = JSON.stringify($json, null, 2);\n\n// 2. Extract a Job ID or timestamp for a clean filename\nconst jobId = $json.job_id || $json.body?.job_id || Date.now();\nconst fileName = `blast_result_${jobId}.json`;\n\n// 3. Output both JSON metadata and the Binary data payload\nreturn {\n  json: {\n    job_id: jobId,\n    status: $json.status || 'COMPLETED',\n    file_name: fileName\n  },\n  binary: {\n    data: {\n      data: Buffer.from(jsonString).toString('base64'),\n      mimeType: 'application/json',\n      fileName: fileName\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -128
+      ],
+      "id": "7ad47785-ca9e-4693-9594-e3e12b37280d",
+      "name": "Convert JSON to File"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1904,
+        64
+      ],
+      "id": "c2f09364-6368-4d5e-8431-3eb6ea31e1e6",
+      "name": "Send a document"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (sequence in)": {
+      "main": [
+        [
+          {
+            "node": "Normalize input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize input": {
+      "main": [
+        [
+          {
+            "node": "Queue BLAST job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue BLAST job": {
+      "main": [
+        [
+          {
+            "node": "Wait 5s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s": {
+      "main": [
+        [
+          {
+            "node": "Poll BLAST job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll BLAST job": {
+      "main": [
+        [
+          {
+            "node": "Job status?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job status?": {
+      "main": [
+        [
+          {
+            "node": "Annotate top hit",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Job failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Annotate top hit": {
+      "main": [
+        [
+          {
+            "node": "Format report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert JSON to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format report": {
+      "main": [
+        []
+      ]
+    },
+    "Job failed": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert JSON to File": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": [],
+  "tags": []
+}

@@ -45,6 +45,7 @@ nav:
       - Private Data Ingestion: guides/private-data-ingestion.md
       - Pipeline Logs: guides/logging.md
       - Docker Guide: guides/docker-guide.md
+      - n8n Workflows: guides/n8n-integration.md
   - Reference:
       - Commands: reference/commands.md
       - API Reference: api/overview.md

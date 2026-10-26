@@ -1,0 +1,159 @@
+{
+  "name": "PBI API Watchdog",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": [
+          {
+            "name": "Hourly",
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 1
+              }
+            ]
+          }
+        ]
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule (hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://api:8000/health",
+        "options": {}
+      },
+      "id": "check-health",
+      "name": "GET /health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "notEquals",
+              "value2": "healthy"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "branch-health",
+      "name": "Healthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "db_connected",
+              "name": "database_connected",
+              "value": "={{ $json.database_connected }}",
+              "type": "boolean"
+            },
+            {
+              "id": "blast_available",
+              "name": "blast_available",
+              "value": "={{ $json.blast_available }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "degraded-details",
+      "name": "Degraded details",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "text": "=:*PBI API degraded*\\nStatus: {{ $json.status }}\\nDB connected: {{ $json.database_connected }}\\nBLAST available: {{ $json.blast_available }}",
+        "chatId": "={{ $json.notify_to }}"
+      },
+      "id": "telegram-alert",
+      "name": "Telegram alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1120, 480],
+      "credentials": {
+        "telegramApi": ""
+      }
+    }
+  ],
+  "connections": {
+    "Schedule (hourly)": {
+      "main": [
+        [
+          {
+            "node": "GET /health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /health": {
+      "main": [
+        [
+          {
+            "node": "Healthy?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Healthy?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Degraded details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Degraded details": {
+      "main": [
+        [
+          {
+            "node": "Telegram alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "pbi-api-watchdog-workflow",
+  "meta": {
+    "instanceId": "pbi-local"
+  },
+  "versionId": "1",
+  "tags": []
+}

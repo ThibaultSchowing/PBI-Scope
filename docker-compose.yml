@@ -47,8 +47,29 @@ services:
       - pbi-data:/data:ro
     environment:
       - DATA_PATH=/data/processed
+      - PBI_API_KEY=${PBI_API_KEY}
     #depends_on:
     #  - pipeline
+    networks:
+      - pbi-network
+    restart: unless-stopped
+
+  # n8n workflow automation — server only. Talks to the API over the internal
+  # network (http://api:8000). Import workflows from n8n/workflows/ into the UI.
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: pbi-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - PBI_API_URL=http://api:8000
+      - PBI_API_KEY=${PBI_API_KEY}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    volumes:
+      # n8n credentials, workflows and execution data persist here.
+      - n8n-data:/home/node/.n8n
     networks:
       - pbi-network
     restart: unless-stopped
@@ -104,6 +125,7 @@ services:
       # Set PYTHONPATH for proper module imports
       - PYTHONPATH=/app
       - PBI_API_URL=http://api:8000
+      - PBI_API_KEY=${PBI_API_KEY}
       # Optional: set a token for JupyterLab authentication.
       # Leave empty or commented out for no auth (default, localhost only).
       # When set, JupyterLab requires the token to access the UI.
@@ -114,6 +136,8 @@ services:
       #- NVIDIA_VISIBLE_DEVICES=all
       #- TF_CUDNN_USE_AUTOTUNER=0
       #- TF_XLA_FLAGS=--tf_xla_enable_xla_devices=false
+      
+
     # Uncomment to reserve GPU resources for this container.
     # Requires nvidia-container-toolkit installed on the host.
     #deploy:
@@ -134,6 +158,9 @@ volumes:
   # Named volume for Snakemake cache (conda environments, metadata, logs)
   # This persists across container runs to avoid re-downloading dependencies
   pbi-cache:
+    driver: local
+  # Named volume for n8n credentials, workflows and execution data.
+  n8n-data:
     driver: local
 
 networks:
