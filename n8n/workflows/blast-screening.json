@@ -8,112 +8,97 @@
         "responseMode": "lastNode",
         "options": {}
       },
-      "id": "webhook-trigger",
+      "id": "c40de488-6719-4905-aa09-4553200617d1",
       "name": "Webhook (sequence in)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [240, 300],
+      "position": [
+        0,
+        112
+      ],
       "webhookId": "pbi-blast-screening"
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "seq",
-              "name": "sequence",
-              "value": "={{ $json.sequence }}",
-              "type": "string"
-            },
-            {
-              "id": "prog",
-              "name": "program",
-              "value": "={{ $json.program || \"blastn\" }}",
-              "type": "string"
-            },
-            {
-              "id": "db",
-              "name": "db",
-              "value": "={{ $json.db || \"\" }}",
-              "type": "string"
-            },
-            {
-              "id": "notify",
-              "name": "notify_to",
-              "value": "={{ $json.notify_to }}",
-              "type": "string"
-            }
-          ]
+        "values": {
+          "string": []
         },
         "options": {}
       },
-      "id": "normalize-input",
+      "id": "27665a30-de2f-4200-b68e-8f0e694a9552",
       "name": "Normalize input",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [460, 300]
+      "position": [
+        224,
+        112
+      ]
     },
     {
       "parameters": {
+        "method": "POST",
         "url": "http://api:8000/blast/jobs",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ sequence: $json.sequence, program: $json.program, db: $json.db || null, max_hits: 10, evalue: 1e-5, timeout: 600, num_threads: 1 }) }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
-              "name": "Content-Type",
-              "value": "application/json"
+              "name": "X-API-Key",
+              "value": ""
             }
           ]
         },
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
         "options": {}
       },
-      "id": "create-blast-job",
+      "id": "5e5d5650-7279-4e7c-b416-b7b519152c44",
       "name": "Queue BLAST job",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [680, 300],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "pbi-api-key",
-          "name": "PBI API Key"
-        }
-      }
+      "typeVersion": 4.1,
+      "position": [
+        448,
+        112
+      ]
     },
     {
       "parameters": {
-        "waitFor": {
-          "seconds": 5
-        }
+        "amount": 15,
+        "unit": "seconds"
       },
-      "id": "wait",
+      "id": "7adb2023-77aa-470f-965a-8cc7da0af532",
       "name": "Wait 5s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1,
-      "position": [900, 300]
+      "position": [
+        672,
+        112
+      ]
     },
     {
       "parameters": {
-        "url": "http://api:8000/blast/jobs/{{ $json[\"job_id\"] }}",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "url": "=http://api:8000/blast/jobs/{{ $json[\"job_id\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": ""
+            }
+          ]
+        },
         "options": {}
       },
-      "id": "poll-job",
+      "id": "988e7ff4-0066-4038-b124-035ba3b7ff6f",
       "name": "Poll BLAST job",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [1120, 300],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "pbi-api-key",
-          "name": "PBI API Key"
-        }
-      }
+      "typeVersion": 4.1,
+      "position": [
+        880,
+        112
+      ]
     },
     {
       "parameters": {
@@ -121,120 +106,113 @@
           "string": [
             {
               "value1": "={{ $json.status }}",
-              "operation": "equals",
               "value2": "done"
             }
           ]
-        },
-        "options": {}
+        }
       },
-      "id": "branch-status",
+      "id": "e1f39295-22bf-4377-915c-e01f6a3fafbf",
       "name": "Job status?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [1340, 200]
+      "position": [
+        1104,
+        0
+      ]
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "job_id",
-              "name": "job_id",
-              "value": "={{ $json.job_id }}",
-              "type": "string"
-            },
-            {
-              "id": "status",
-              "name": "status",
-              "value": "={{ $json.status }}",
-              "type": "string"
-            },
-            {
-              "id": "error",
-              "name": "error",
-              "value": "={{ $json.error }}",
-              "type": "string"
-            }
-          ]
-        },
         "options": {}
       },
-      "id": "job-failed",
+      "id": "802903dd-9017-4030-8a85-6b08220caa39",
       "name": "Job failed",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [1340, 480]
+      "position": [
+        1568,
+        320
+      ]
     },
     {
       "parameters": {
         "url": "http://api:8000/phage-metadata",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
               "name": "where",
-              "value": "Phage_ID IN ('={{ $json.top_hit_phage_id }}')"
-            },
-            {
-              "name": "limit",
-              "value": "5"
+              "value": "=Phage_ID IN ('{{ $json.results.map(r => r.sseqid).join(\"','\") }}')"
             }
           ]
         },
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": ""
+            }
+          ]
+        },
         "options": {}
       },
-      "id": "annotate-top-hit",
+      "id": "380f007d-7e78-49a5-993e-3ba770b515c7",
       "name": "Annotate top hit",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.5,
-      "position": [1560, 200],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "pbi-api-key",
-          "name": "PBI API Key"
-        }
-      }
+      "typeVersion": 4.1,
+      "position": [
+        1328,
+        0
+      ]
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "summary",
-              "name": "summary",
-              "value": "={{ \"*BLAST screening complete*\\nJob: \" + $json.job_id + \"\\nProgram: \" + $json.program + \"\\nHits: \" + ($json.hits || 0) + \"\\nTop hit: \" + $json.top_hit_phage_id + \" (evalue: \" + $json.top_hit_evalue + \")\" }}",
-              "type": "string"
-            }
-          ]
-        },
         "options": {}
       },
-      "id": "format-report",
+      "id": "fac10e4e-0739-4f21-bbdd-4a4a75a26559",
       "name": "Format report",
       "type": "n8n-nodes-base.set",
       "typeVersion": 1,
-      "position": [1780, 200]
+      "position": [
+        1552,
+        32
+      ],
+      "alwaysOutputData": false
     },
     {
       "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "text": "={{ $json.summary || (\"BLAST job failed for job \" + $json.job_id + \": \" + $json.error) }}",
-        "chatId": "={{ $json.notify_to }}"
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Convert the incoming BLAST JSON object into a formatted string\nconst jsonString = JSON.stringify($json, null, 2);\n\n// 2. Extract a Job ID or timestamp for a clean filename\nconst jobId = $json.job_id || $json.body?.job_id || Date.now();\nconst fileName = `blast_result_${jobId}.json`;\n\n// 3. Output both JSON metadata and the Binary data payload\nreturn {\n  json: {\n    job_id: jobId,\n    status: $json.status || 'COMPLETED',\n    file_name: fileName\n  },\n  binary: {\n    data: {\n      data: Buffer.from(jsonString).toString('base64'),\n      mimeType: 'application/json',\n      fileName: fileName\n    }\n  }\n};"
       },
-      "id": "telegram-alert",
-      "name": "Telegram alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -128
+      ],
+      "id": "7ad47785-ca9e-4693-9594-e3e12b37280d",
+      "name": "Convert JSON to File"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "",
+        "binaryData": true,
+        "additionalFields": {}
+      },
       "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1,
-      "position": [2000, 200],
-      "credentials": {
-        "telegramApi": ""
-      }
+      "typeVersion": 1.2,
+      "position": [
+        1904,
+        64
+      ],
+      "id": "c2f09364-6368-4d5e-8431-3eb6ea31e1e6",
+      "name": "Send a document"
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook (sequence in)": {
       "main": [
@@ -316,26 +294,36 @@
             "node": "Format report",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Format report": {
-      "main": [
-        [
+          },
           {
-            "node": "Telegram alert",
+            "node": "Convert JSON to File",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
+    "Format report": {
+      "main": [
+        []
+      ]
+    },
     "Job failed": {
       "main": [
         [
           {
-            "node": "Telegram alert",
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert JSON to File": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
             "type": "main",
             "index": 0
           }
@@ -343,12 +331,11 @@
       ]
     }
   },
-  "active": false,
-  "settings": {},
-  "id": "pbi-blast-screening-workflow",
-  "meta": {
-    "instanceId": "pbi-local"
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
-  "versionId": "1",
+  "nodeGroups": [],
   "tags": []
 }
