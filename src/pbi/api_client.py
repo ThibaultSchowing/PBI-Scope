@@ -31,6 +31,8 @@ from typing import Optional, Dict, List, Any, Union
 import pandas as pd
 import requests
 
+import os
+
 logger = logging.getLogger(__name__)
 
 
@@ -43,6 +45,8 @@ class APIClient:
         Base URL of the PBI API (e.g. ``"http://pbi-api:8000"``).
     timeout:
         HTTP request timeout in seconds.
+    api_key:
+        API key for authentication.
     """
 
     def __init__(self, base_url: str = "http://localhost:8000", timeout: int = 120):
@@ -50,6 +54,10 @@ class APIClient:
         self._timeout = timeout
         self._session = requests.Session()
         self._session.headers.update({"Content-Type": "application/json"})
+
+        key = api_key or os.getenv("PBI_API_KEY")
+        if key:
+            self._session.headers["X-API-Key"] = key
 
     # ── Internal helpers ──────────────────────────────────────────────────
 

@@ -125,6 +125,7 @@ services:
       # Set PYTHONPATH for proper module imports
       - PYTHONPATH=/app
       - PBI_API_URL=http://api:8000
+      - PBI_API_KEY=${PBI_API_KEY}
       # Optional: set a token for JupyterLab authentication.
       # Leave empty or commented out for no auth (default, localhost only).
       # When set, JupyterLab requires the token to access the UI.
@@ -135,6 +136,8 @@ services:
       #- NVIDIA_VISIBLE_DEVICES=all
       #- TF_CUDNN_USE_AUTOTUNER=0
       #- TF_XLA_FLAGS=--tf_xla_enable_xla_devices=false
+      
+
     # Uncomment to reserve GPU resources for this container.
     # Requires nvidia-container-toolkit installed on the host.
     #deploy:
