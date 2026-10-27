@@ -1609,7 +1609,10 @@
 
 
 <h1 id="n8n-workflows">n8n Workflows<a class="headerlink" href="#n8n-workflows" title="Permanent link">&para;</a></h1>
-<p>PBI-Scope includes an optional <strong>n8n</strong> workflow automation container. n8n lets you build visual workflows on top of the PBI REST API without writing code — for example, screening an unknown sequence with BLAST and alerting on the result, running a daily data digest, or watching the API health.</p>
+<blockquote>
+<p><strong>Quick example only.</strong> The PBI-Scope REST API is n8n-compatible, so you can build your own custom workflows with n8n's HTTP Request node. The bundled container and workflows are a demonstration, not part of the core stack (<code>pipeline</code>, <code>analysis</code>, <code>api</code>).</p>
+</blockquote>
+<p>PBI-Scope includes an optional <strong>n8n</strong> workflow automation container. n8n lets you build visual workflows on top of the PBI REST API without writing code — for example, screening an unknown sequence with BLAST and alerting on the result, or watching the API health.</p>
 <blockquote>
 <p><strong>Important:</strong> n8n runs <strong>only on the remote server</strong> — it is not part of local development. It talks to the API over the internal Docker network at <code>http://api:8000</code>. You reach it from your laptop through an SSH tunnel.</p>
 </blockquote>
@@ -1679,9 +1682,10 @@
 <p>You should see <code>pbi-api</code> and <code>pbi-n8n</code> both <code>Up</code>.</p>
 <h2 id="2-connect-to-n8n-from-your-laptop-ssh-port-forwarding">2) Connect to n8n from your laptop (SSH port forwarding)<a class="headerlink" href="#2-connect-to-n8n-from-your-laptop-ssh-port-forwarding" title="Permanent link">&para;</a></h2>
 <p>Because n8n only runs on the server, forward its port through SSH. From your <strong>laptop</strong>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Forward local 5678 → server host 5678 → container 5678</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">5678</span>:localhost:5678<span class="w"> </span>user@your-server
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Forward Jupyter (8888→8886), API (8000) and n8n (5678) in one session</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8886<span class="w"> </span>-L<span class="w"> </span><span class="m">8000</span>:localhost:8000<span class="w"> </span>-L<span class="w"> </span><span class="m">5678</span>:localhost:5678<span class="w"> </span>user@your-server
 </code></pre></div>
+<p>To forward only n8n: <code>ssh -L 5678:localhost:5678 user@your-server</code>.</p>
 <p>Keep that SSH session open. Then open in your browser:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>http://localhost:5678
 </code></pre></div>
@@ -1698,7 +1702,7 @@
 </blockquote>
 <h2 id="3-test-the-api-endpoints-directly">3) Test the API endpoints directly<a class="headerlink" href="#3-test-the-api-endpoints-directly" title="Permanent link">&para;</a></h2>
 <p>You can test the new BLAST job endpoints from your laptop through the same SSH tunnel (forward port 8000 as well):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># In a second terminal on your laptop:</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Not needed if you used the three-port tunnel above; otherwise, in a second terminal:</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8000</span>:localhost:8000<span class="w"> </span>user@your-server
 </code></pre></div>
 <h3 id="without-auth-pbi_api_key-set-expect-401">Without auth (PBI_API_KEY set) — expect 401<a class="headerlink" href="#without-auth-pbi_api_key-set-expect-401" title="Permanent link">&para;</a></h3>
@@ -1744,28 +1748,29 @@
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>+----------------+      internal network      +----------------+
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>|   Your laptop  | &lt;---------- SSH ---------&gt; |   Server host  |
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>|  (browser,     |   -L 5678:localhost:5678   |  docker-compose|
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>|  (browser,     |   -L 8888:localhost:8886   |  docker-compose|
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>|   curl, ssh)   |   -L 8000:localhost:8000   +----------------+
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>+----------------+                                       |
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>                                                         v
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>                                          +-------------+-------------+
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>                                          |      n8n container        |
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>                                          |  port 5678 → 5678         |
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>                                          |  workflows (imported JSON) |
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>                                          +-------------+-------------+
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>                                                         |
-<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>                                                         | http://api:8000 + X-API-Key
-<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>                                                         v
-<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>                                          +-------------+-------------+
-<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>                                          |      api container        |
-<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>                                          |  port 8000 → 8000         |
-<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>                                          |  /blast/jobs, /health ... |
-<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>                                          +---------------------------+
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>|                |   -L 5678:localhost:5678   |                |
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>+----------------+                                       |
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>                                                         v
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>                                          +-------------+-------------+
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>                                          |      n8n container        |
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>                                          |  port 5678 → 5678         |
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>                                          |  workflows (imported JSON) |
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>                                          +-------------+-------------+
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>                                                         |
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>                                                         | http://api:8000 + X-API-Key
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>                                                         v
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>                                          +-------------+-------------+
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>                                          |      api container        |
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>                                          |  port 8000 → 8000         |
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>                                          |  /blast/jobs, /health ... |
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>                                          +---------------------------+
 </code></pre></div>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
 <ul>
 <li>n8n is <strong>not exposed to the internet</strong>. Access it only via the SSH tunnel (<code>ssh -L 5678:localhost:5678</code>).</li>
-<li>The API requires <code>X-API-Key</code> on all routes except <code>/</code>, <code>/health</code>, and the OpenAPI docs (<code>/docs</code>, <code>/openapi.json</code>). n8n sends the key automatically from <code>PBI_API_KEY</code>.</li>
+<li>When <code>PBI_API_KEY</code> is set, the API requires <code>X-API-Key</code> on all routes except <code>/</code>, <code>/health</code>, <code>/favicon.ico</code>, and the OpenAPI docs (<code>/docs</code>, <code>/redoc</code>, <code>/openapi.json</code>). n8n sends the key via its Header Auth credential.</li>
 <li>If you ever expose n8n or the API beyond the tunnel, put them behind a reverse proxy with HTTPS and authentication first.</li>
 </ul>
 <h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>

@@ -1551,7 +1551,7 @@
 <h2 id="access-model">Access model<a class="headerlink" href="#access-model" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Primary</strong>: <code>pbi</code> package in the analysis container</li>
-<li><strong>REST API</strong>: metadata queries, single sequence retrieval, SQL queries (see <a href="../../api/overview/">API Reference</a>)</li>
+<li><strong>REST API</strong>: metadata queries, sequence retrieval, SQL exploration, and BLAST search/jobs; it can be used by custom HTTP workflows such as n8n (see <a href="../../api/overview/">API Reference</a> and the <a href="../n8n-integration/">optional n8n example</a>)</li>
 </ul>
 <h2 id="why-host-data-is-handled-outside-duckdb">Why host data is handled outside DuckDB<a class="headerlink" href="#why-host-data-is-handled-outside-duckdb" title="Permanent link">&para;</a></h2>
 <p>Host genomes are large and variable; they are stored as individual FASTA files and mapped through JSON/CSV link files for efficient retrieval.</p>

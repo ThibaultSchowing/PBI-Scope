@@ -1995,7 +1995,7 @@ Disabling it means <strong>any page that can reach port 8888 can run arbitrary c
 <td>✅ Safe</td>
 </tr>
 <tr>
-<td>Server port 8888 open to the internet</td>
+<td>Server port 8886 open to the internet</td>
 <td>❌ <strong>Dangerous</strong></td>
 </tr>
 <tr>
@@ -2087,17 +2087,18 @@ container image layer; reinstalling after a container rebuild is normal.</p>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># On your local machine</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8888<span class="w"> </span>user@your-server
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8886<span class="w"> </span>user@your-server
 </code></pre></div>
 <p>Then open <code>http://localhost:8888</code> in your local browser.</p>
 <blockquote>
-<p>The SSH tunnel forwards local port 8888 to the server's port 8888.
+<p>Docker maps server port 8886 to Jupyter's container port 8888. The SSH tunnel
+forwards local port 8888 to the server's port 8886.
 Traffic never leaves the encrypted SSH connection, so this is safe even though
 Jupyter authentication is disabled.</p>
 </blockquote>
 <div class="admonition tip">
 <p class="admonition-title">API Access</p>
-<p>You can also access the REST API remotely via SSH tunnel (<code>ssh -L 8000:localhost:8000 ...</code>).
+<p>You can also access the REST API remotely via SSH tunnel (<code>ssh -L 8000:localhost:8000 ...</code>). To access Jupyter, the API, and the optional n8n example through one tunnel, use <code>ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server</code>.
 See <a href="../../api/overview/#remote-access">Remote Access</a> in the API Reference.</p>
 </div>
 <hr />

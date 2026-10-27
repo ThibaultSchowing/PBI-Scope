@@ -2343,7 +2343,7 @@
 <tr>
 <td>POST</td>
 <td><code>/query</code></td>
-<td>Arbitrary SQL (SELECT only)</td>
+<td>Read-only SQL (<code>SELECT</code>, <code>WITH</code>, <code>SHOW</code>, <code>DESCRIBE</code>, or <code>EXPLAIN</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -2564,12 +2564,12 @@
 <hr />
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
 <ul>
-<li>All queries are read-only (SELECT only)</li>
+<li>SQL query requests are read-only (<code>SELECT</code>, <code>WITH</code>, <code>SHOW</code>, <code>DESCRIBE</code>, or <code>EXPLAIN</code>)</li>
 <li>WHERE clauses are validated against injection patterns</li>
 <li>The API runs inside the Docker network; expose only if needed</li>
 </ul>
 <h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h2>
-<p>When the <code>PBI_API_KEY</code> environment variable is set on the <code>api</code> service, all routes <strong>except</strong> <code>/</code>, <code>/health</code>, <code>/docs</code>, <code>/redoc</code>, and <code>/openapi.json</code> require the <code>X-API-Key</code> header:</p>
+<p>When the <code>PBI_API_KEY</code> environment variable is set on the <code>api</code> service, all routes <strong>except</strong> <code>/</code>, <code>/health</code>, <code>/docs</code>, <code>/redoc</code>, <code>/openapi.json</code>, and <code>/favicon.ico</code> require the <code>X-API-Key</code> header:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8000/blast/jobs<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">"X-API-Key: &lt;your-PBI_API_KEY&gt;"</span><span class="w"> </span><span class="se">\</span>

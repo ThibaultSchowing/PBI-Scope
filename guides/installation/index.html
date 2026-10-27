@@ -1650,7 +1650,7 @@ for a full explanation and hardening steps before exposing the service to a netw
 </div>
 <hr />
 <h2 id="docker-services">Docker Services<a class="headerlink" href="#docker-services" title="Permanent link">&para;</a></h2>
-<p>PBI-Scope runs three Docker services:</p>
+<p>PBI-Scope runs three core Docker services, plus an optional n8n example container:</p>
 <table>
 <thead>
 <tr>
@@ -1675,24 +1675,39 @@ for a full explanation and hardening steps before exposing the service to a netw
 <td>REST API for metadata queries, sequence retrieval, and SQL exploration</td>
 <td><code>8000</code> → <code>8000</code> (<code>docker-compose.yml:44</code>)</td>
 </tr>
+</tbody>
+</table>
+<p><strong>Optional example (not part of the core stack):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Purpose</th>
+<th>Host → Container Port</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td><code>n8n</code></td>
-<td>Workflow automation (BLAST screening, data digests, API health alerts)</td>
+<td>Quick example of n8n workflows calling the API (BLAST screening, API health alerts); see <a href="../n8n-integration/">n8n Workflows</a></td>
 <td><code>5678</code> → <code>5678</code> (<code>docker-compose.yml</code> n8n service)</td>
 </tr>
 </tbody>
 </table>
+<p>Reach all three user-facing services (Jupyter, API, n8n) with a single tunnel:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8886<span class="w"> </span>-L<span class="w"> </span><span class="m">8000</span>:localhost:8000<span class="w"> </span>-L<span class="w"> </span><span class="m">5678</span>:localhost:5678<span class="w"> </span>user@your-server
+</code></pre></div>
 <h2 id="volumes-and-mounts">Volumes and Mounts<a class="headerlink" href="#volumes-and-mounts" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>+--------------------------- docker-compose ---------------------------+
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>|                                                                     |
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>|  named volume: pbi-data  -&gt; mounted at /data in all services        |
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>|  named volume: pbi-cache -&gt; mounted at /cache in pipeline           |
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>|                                                                     |
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>|  bind mount: ./private_data  -&gt; /private-data (rw pipeline, ro analysis)
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>|  bind mount: ./pipeline_logs -&gt; /pipeline-logs (rw pipeline, ro analysis)
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>|  bind mount: ./notebooks     -&gt; /workspace (analysis)
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>|  bind mount: ./outputs -&gt; /results (analysis)
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>+---------------------------------------------------------------------+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>+--------------------------- docker-compose ---------------------------+
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>|                                                                     |
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>|  named volume: pbi-data  -&gt; mounted at /data in all services        |
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>|  named volume: pbi-cache -&gt; mounted at /cache in pipeline           |
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>|                                                                     |
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>|  bind mount: ./private_data  -&gt; /private-data (rw pipeline, ro analysis)
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>|  bind mount: ./pipeline_logs -&gt; /pipeline-logs (rw pipeline, ro analysis)
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>|  bind mount: ./notebooks     -&gt; /workspace (analysis)
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>|  bind mount: ./outputs -&gt; /results (analysis)
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>+---------------------------------------------------------------------+
 </code></pre></div>
 
 

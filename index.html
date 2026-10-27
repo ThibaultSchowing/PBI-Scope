@@ -1623,9 +1623,9 @@
 </ul>
 <p>Create your own R+Python container connected to the PBI-Scope database.</p>
 <ul>
-<li><strong><a href="guides/n8n-integration/">n8n Workflows</a></strong></li>
+<li><strong><a href="guides/n8n-integration/">n8n Workflows (optional example)</a></strong></li>
 </ul>
-<p>Automate BLAST screening, data digests, and API health alerts with n8n.</p>
+<p>The REST API is n8n-compatible for custom workflows. A quick example container shows BLAST screening and API health alerts.</p>
 <ul>
 <li><strong><a href="reports/database_validation.html">Database Reports</a></strong></li>
 </ul>
@@ -1749,13 +1749,23 @@
 <a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>           +---------v---------+                               +---------v---------+
 <a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>           | analysis container|                               | api container      |
 <a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>           | pbi package (main)|                               | REST API           |
-<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>            +-------------------+                               +-------------------+
-<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>                               |
-<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>                               v
-<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>             +----------------+----------------------------------+
-<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>             | n8n container   | workflow automation             |
-<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>             |                 | BLAST screening + alerts        |
-<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>             +----------------+----------------------------------+
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>           +-------------------+                               +---------+---------+
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>                                                                         .
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>                                                                         . optional
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>                                                               +---------v---------+
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>                                                               | n8n container     |
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>                                                               | (quick example)   |
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>                                                               | calls API with    |
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>                                                               | X-API-Key         |
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>                                                               +-------------------+
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">n8n is an optional example</p>
+<p>The REST API works with <a href="https://n8n.io">n8n</a> (or any HTTP client) for custom workflows. The bundled <code>n8n</code> container is only a quick demonstration, not part of the core stack (<code>pipeline</code>, <code>analysis</code>, <code>api</code>).</p>
+</div>
+<p>Connect to all three user-facing services from your laptop with one SSH command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8886<span class="w"> </span>-L<span class="w"> </span><span class="m">8000</span>:localhost:8000<span class="w"> </span>-L<span class="w"> </span><span class="m">5678</span>:localhost:5678<span class="w"> </span>user@your-server
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># Jupyter: http://localhost:8888 | API: http://localhost:8000/docs | n8n: http://localhost:5678</span>
 </code></pre></div>
 <h2 id="current-status">Current status<a class="headerlink" href="#current-status" title="Permanent link">&para;</a></h2>
 <table>
@@ -1803,9 +1813,9 @@
 <td>Metadata queries, sequence retrieval, GFF3 annotations, BLAST search, SQL exploration; see <a href="api/overview/">API Reference</a></td>
 </tr>
 <tr>
-<td>n8n workflows</td>
-<td>✅ Supported</td>
-<td>BLAST screening, data digests, API health alerts via n8n; see <a href="guides/n8n-integration/">n8n Workflows</a></td>
+<td>n8n compatibility</td>
+<td>🧪 Example</td>
+<td>API is usable from n8n for custom workflows; an optional example container ships BLAST screening and health-alert workflows; see <a href="guides/n8n-integration/">n8n Workflows</a></td>
 </tr>
 <tr>
 <td>Documentation</td>

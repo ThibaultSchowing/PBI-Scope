@@ -1775,11 +1775,12 @@
 <a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>├── tests/                 # Unit tests
 <a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>│   └── test_multi_host_parsing.py  # Host parsing and resolution tests
 <a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>│
-<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>├── docker-compose.yml     # Docker orchestration (pipeline, analysis, api)
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>├── docker-compose.yml     # Docker orchestration (pipeline, analysis, api; optional n8n example)
 <a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a>├── Dockerfile.analysis    # Analysis container (Jupyter Lab + pbi package)
 <a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>├── Dockerfile.api         # API container (FastAPI)
-<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>├── setup.py               # Package configuration
-<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>└── mkdocs.yml             # Documentation configuration
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>├── n8n/                   # Optional n8n example (README + workflows/*.json)
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>├── setup.py               # Package configuration
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a>└── mkdocs.yml             # Documentation configuration
 </code></pre></div>
 <h2 id="key-components">Key Components<a class="headerlink" href="#key-components" title="Permanent link">&para;</a></h2>
 <h3 id="snakemake-pipeline">Snakemake Pipeline<a class="headerlink" href="#snakemake-pipeline" title="Permanent link">&para;</a></h3>
@@ -1888,6 +1889,7 @@
 <a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>      │
 <a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>      ├──▶ Analysis container (Jupyter Lab, port 8888) via pbi package
 <a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>      └──▶ API container (FastAPI, port 8000) for exploration
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>                └──▶ (optional example) n8n container, port 5678, calls the API
 </code></pre></div>
 <h2 id="development-workflow">Development Workflow<a class="headerlink" href="#development-workflow" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1903,7 +1905,7 @@
 <li><strong><code>workflow/envs/*.yaml</code></strong>: Conda environment specifications</li>
 <li><strong><code>setup.py</code></strong>: Python package metadata and dependencies</li>
 <li><strong><code>mkdocs.yml</code></strong>: Documentation configuration</li>
-<li><strong><code>docker-compose.yml</code></strong>: Container orchestration (pipeline, analysis, api services)</li>
+<li><strong><code>docker-compose.yml</code></strong>: Container orchestration (pipeline, analysis, api services; optional n8n example)</li>
 <li><strong><code>.gitignore</code></strong>: Excludes <code>data/</code> directory (too large for git)</li>
 </ul>
 <h2 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h2>

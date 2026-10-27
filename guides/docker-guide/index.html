@@ -1443,7 +1443,7 @@
 
 
 <h1 id="docker-guide">Docker Guide<a class="headerlink" href="#docker-guide" title="Permanent link">&para;</a></h1>
-<p>PBI-Scope uses Docker Compose to orchestrate four services: <code>pipeline</code>, <code>analysis</code>, <code>api</code>, and <code>n8n</code>.</p>
+<p>PBI-Scope uses Docker Compose to orchestrate three core services (<code>pipeline</code>, <code>analysis</code>, <code>api</code>) plus an optional <code>n8n</code> example container.</p>
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Clone and configure</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ThibaultSchowing/PBI-Scope.git
@@ -1459,9 +1459,12 @@
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>analysis
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>analysis
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1"># Start API + n8n workflow automation</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1"># Start the API</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>docker<span class="w"> </span>compose<span class="w"> </span>build<span class="w"> </span>api
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>api<span class="w"> </span>n8n
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>api
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># Optional: n8n example (the API is n8n-compatible for custom workflows)</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>n8n
 </code></pre></div>
 <p>See the <a href="../installation/">Installation Guide</a> for detailed setup instructions.</p>
 <h2 id="services">Services<a class="headerlink" href="#services" title="Permanent link">&para;</a></h2>
@@ -1482,32 +1485,47 @@
 <tr>
 <td><code>analysis</code></td>
 <td>Jupyter Lab + VS Code Dev Containers</td>
-<td>8889</td>
+<td>8886 (host) → 8888 (container)</td>
 </tr>
 <tr>
 <td><code>api</code></td>
 <td>REST API for metadata queries</td>
 <td>8000</td>
 </tr>
+</tbody>
+</table>
+<p>Optional example (not part of the core stack):</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Purpose</th>
+<th>Port</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td><code>n8n</code></td>
-<td>Workflow automation (BLAST screening, alerts)</td>
+<td>Quick n8n workflow example calling the API (BLAST screening, alerts)</td>
 <td>5678</td>
 </tr>
 </tbody>
 </table>
+<p>Connect to all three user-facing services from your laptop:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ssh<span class="w"> </span>-L<span class="w"> </span><span class="m">8888</span>:localhost:8886<span class="w"> </span>-L<span class="w"> </span><span class="m">8000</span>:localhost:8000<span class="w"> </span>-L<span class="w"> </span><span class="m">5678</span>:localhost:5678<span class="w"> </span>user@your-server
+</code></pre></div>
 <h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
-<p>The <code>analysis</code> container runs Jupyter Lab with authentication disabled for local development. The <code>n8n</code> container requires you to create an admin account on first login. Both are meant to be accessed via SSH tunnel, not exposed directly to the internet. See <a href="../analysis-guide/#security-notice">Analysis Container Guide</a> and <a href="../n8n-integration/#security">n8n Workflows</a> for details and hardening steps.</p>
+<p>The <code>analysis</code> container runs Jupyter Lab with authentication disabled for local development. The optional <code>n8n</code> example requires you to create an admin account on first login. Jupyter and n8n should be accessed via an SSH tunnel, not exposed directly to the internet; the API can also be forwarded over SSH and should be protected with <code>PBI_API_KEY</code> when used beyond a trusted network. See <a href="../analysis-guide/#security-notice">Analysis Container Guide</a>, <a href="../n8n-integration/#security">n8n Workflows</a>, and <a href="../../api/overview/#authentication">API Reference</a> for details.</p>
 <h2 id="uidgid-setup">UID/GID Setup<a class="headerlink" href="#uidgid-setup" title="Permanent link">&para;</a></h2>
 <p>Both <code>pipeline</code> and <code>analysis</code> services run as your host user to prevent root-owned files. Set <code>UID</code> and <code>GID</code> in <code>.env</code> after cloning:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"UID=</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"GID=</span><span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"UID=</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">"GID=</span><span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="s2">"</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>.env
 </code></pre></div>
 <p>See <a href="../installation/">Installation Guide</a> for full explanation.</p>
 <h2 id="api-service">API Service<a class="headerlink" href="#api-service" title="Permanent link">&para;</a></h2>
 <p>The API provides metadata queries and SQL exploration without the full <code>pbi</code> package:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>api
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1"># Available at http://localhost:8000</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>api
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># Available at http://localhost:8000</span>
 </code></pre></div>
 <p>See <a href="../../api/overview/">API Reference</a> for endpoint documentation.</p>
 
