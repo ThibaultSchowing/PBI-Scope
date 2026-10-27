@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Optional `n8n` example container with BLAST-screening and API-watchdog workflows (`n8n/workflows/`); the API is n8n-compatible for custom workflows. See [n8n Workflows](guides/n8n-integration.md).
+- API key authentication (`X-API-Key`, `PBI_API_KEY`) and async BLAST jobs (`POST /blast/jobs`).
+
+### Changed
+
+- Documentation: n8n is presented as an optional example separate from the core services; added the combined `ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678` tunnel command; fixed the analysis port in the Docker guide (8886 → 8888).
+
 ## [0.6.0] - 2026-09-09
 
 ### Added

@@ -105,7 +105,7 @@ Long searches should use `/blast/jobs` (async) rather than `/blast/search` (sync
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/query` | Arbitrary SQL (SELECT only) |
+| POST | `/query` | Read-only SQL (`SELECT`, `WITH`, `SHOW`, `DESCRIBE`, or `EXPLAIN`) |
 
 ---
 
@@ -311,13 +311,13 @@ client.close()
 
 ## Security
 
-- All queries are read-only (SELECT only)
+- SQL query requests are read-only (`SELECT`, `WITH`, `SHOW`, `DESCRIBE`, or `EXPLAIN`)
 - WHERE clauses are validated against injection patterns
 - The API runs inside the Docker network; expose only if needed
 
 ## Authentication
 
-When the `PBI_API_KEY` environment variable is set on the `api` service, all routes **except** `/`, `/health`, `/docs`, `/redoc`, and `/openapi.json` require the `X-API-Key` header:
+When the `PBI_API_KEY` environment variable is set on the `api` service, all routes **except** `/`, `/health`, `/docs`, `/redoc`, `/openapi.json`, and `/favicon.ico` require the `X-API-Key` header:
 
 ```bash
 curl -X POST http://localhost:8000/blast/jobs \

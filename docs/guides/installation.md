@@ -123,14 +123,25 @@ If you use `private_data/` sources, see [Private Data Ingestion](private-data-in
 
 ## Docker Services
 
-PBI-Scope runs three Docker services:
+PBI-Scope runs three core Docker services, plus an optional n8n example container:
 
 | Service | Purpose | Host → Container Port |
 |---------|---------|-----------------------|
 | `pipeline` | Builds/updates the database | — |
 | `analysis` | Read-only data access for users (preferred) — Jupyter Lab | `8886` → `8888` (`docker-compose.yml:69` `8886:8888`; container `8888` defined in `Dockerfile.analysis:57` `EXPOSE 8888` / `Dockerfile.analysis:100` `--port=8888`) |
 | `api` | REST API for metadata queries, sequence retrieval, and SQL exploration | `8000` → `8000` (`docker-compose.yml:44`) |
-| `n8n` | Workflow automation (BLAST screening, data digests, API health alerts) | `5678` → `5678` (`docker-compose.yml` n8n service) |
+
+**Optional example (not part of the core stack):**
+
+| Service | Purpose | Host → Container Port |
+|---------|---------|-----------------------|
+| `n8n` | Quick example of n8n workflows calling the API (BLAST screening, API health alerts); see [n8n Workflows](n8n-integration.md) | `5678` → `5678` (`docker-compose.yml` n8n service) |
+
+Reach all three user-facing services (Jupyter, API, n8n) with a single tunnel:
+
+```bash
+ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server
+```
 
 ## Volumes and Mounts
 

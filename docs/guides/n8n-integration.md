@@ -1,6 +1,8 @@
 # n8n Workflows
 
-PBI-Scope includes an optional **n8n** workflow automation container. n8n lets you build visual workflows on top of the PBI REST API without writing code — for example, screening an unknown sequence with BLAST and alerting on the result, running a daily data digest, or watching the API health.
+> **Quick example only.** The PBI-Scope REST API is n8n-compatible, so you can build your own custom workflows with n8n's HTTP Request node. The bundled container and workflows are a demonstration, not part of the core stack (`pipeline`, `analysis`, `api`).
+
+PBI-Scope includes an optional **n8n** workflow automation container. n8n lets you build visual workflows on top of the PBI REST API without writing code — for example, screening an unknown sequence with BLAST and alerting on the result, or watching the API health.
 
 > **Important:** n8n runs **only on the remote server** — it is not part of local development. It talks to the API over the internal Docker network at `http://api:8000`. You reach it from your laptop through an SSH tunnel.
 
@@ -57,9 +59,11 @@ You should see `pbi-api` and `pbi-n8n` both `Up`.
 Because n8n only runs on the server, forward its port through SSH. From your **laptop**:
 
 ```bash
-# Forward local 5678 → server host 5678 → container 5678
-ssh -L 5678:localhost:5678 user@your-server
+# Forward Jupyter (8888→8886), API (8000) and n8n (5678) in one session
+ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server
 ```
+
+To forward only n8n: `ssh -L 5678:localhost:5678 user@your-server`.
 
 Keep that SSH session open. Then open in your browser:
 
@@ -82,7 +86,7 @@ n8n will prompt you to create an admin account on first login. After logging in,
 You can test the new BLAST job endpoints from your laptop through the same SSH tunnel (forward port 8000 as well):
 
 ```bash
-# In a second terminal on your laptop:
+# Not needed if you used the three-port tunnel above; otherwise, in a second terminal:
 ssh -L 8000:localhost:8000 user@your-server
 ```
 
@@ -153,8 +157,9 @@ Check **n8n UI → Executions** tab to confirm the run, and your Telegram chat f
 ```text
 +----------------+      internal network      +----------------+
 |   Your laptop  | <---------- SSH ---------> |   Server host  |
-|  (browser,     |   -L 5678:localhost:5678   |  docker-compose|
+|  (browser,     |   -L 8888:localhost:8886   |  docker-compose|
 |   curl, ssh)   |   -L 8000:localhost:8000   +----------------+
+|                |   -L 5678:localhost:5678   |                |
 +----------------+                                       |
                                                          v
                                           +-------------+-------------+
@@ -175,7 +180,7 @@ Check **n8n UI → Executions** tab to confirm the run, and your Telegram chat f
 ## Security
 
 - n8n is **not exposed to the internet**. Access it only via the SSH tunnel (`ssh -L 5678:localhost:5678`).
-- The API requires `X-API-Key` on all routes except `/`, `/health`, and the OpenAPI docs (`/docs`, `/openapi.json`). n8n sends the key automatically from `PBI_API_KEY`.
+- When `PBI_API_KEY` is set, the API requires `X-API-Key` on all routes except `/`, `/health`, `/favicon.ico`, and the OpenAPI docs (`/docs`, `/redoc`, `/openapi.json`). n8n sends the key via its Header Auth credential.
 - If you ever expose n8n or the API beyond the tunnel, put them behind a reverse proxy with HTTPS and authentication first.
 
 ## See also

@@ -75,7 +75,7 @@ When private source folders are present, validation and private mapping preparat
 ## Access model
 
 - **Primary**: `pbi` package in the analysis container
-- **REST API**: metadata queries, single sequence retrieval, SQL queries (see [API Reference](../api/overview.md))
+- **REST API**: metadata queries, sequence retrieval, SQL exploration, and BLAST search/jobs; it can be used by custom HTTP workflows such as n8n (see [API Reference](../api/overview.md) and the [optional n8n example](n8n-integration.md))
 
 ## Why host data is handled outside DuckDB
 

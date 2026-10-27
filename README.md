@@ -78,7 +78,8 @@ echo "GID=$(id -g)" >> .env
 # Then edit .env and fill in NCBI_EMAIL (and NCBI_API_KEY if you have one).
 
 # Set up SSH port forwarding first (on your local machine):
-# ssh -L 8888:localhost:8886 username@your-server
+# ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 username@your-server
+# (8888 = Jupyter Lab, 8000 = REST API, 5678 = optional n8n example)
 
 tmux new -s pbi
 
@@ -97,7 +98,21 @@ docker compose up -d api
 
 ```
 
-Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8886 user@server`).
+Open `http://localhost:8888` (Jupyter) and `http://localhost:8000/docs` (API) through the SSH tunnel:
+
+```bash
+ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@server
+```
+
+### 🔌 n8n compatibility (optional example)
+
+The REST API is **n8n-compatible**: build custom no-code workflows (BLAST screening, digests, health alerts) with n8n's HTTP Request node and the `X-API-Key` header. An optional, self-contained **example** `n8n` container is provided purely as a demonstration and is not part of the core stack:
+
+```bash
+docker compose up -d api n8n   # then open http://localhost:5678 through the tunnel
+```
+
+See the [n8n Workflows guide](https://thibaultschowing.github.io/PBI-Scope/guides/n8n-integration/).
 
 ## 🏗️ Infrastructure overview
 
@@ -129,11 +144,14 @@ Open `http://localhost:8888` (with SSH tunnel: `ssh -L 8888:localhost:8886 user@
 +------------------+
 ```
 
+The optional `n8n` example container (not drawn above) joins the same `pbi-network`, calls the API at `http://api:8000`, and stores its state in the `n8n-data` named volume. It has no access to `/data`.
+
 Additional mounts/volumes currently used in `docker-compose.yml`:
 
 - **Named volumes**
   - `pbi-data` → `/data` (pipeline: rw, analysis/api: ro)
   - `pbi-cache` → `/cache` (pipeline: rw)
+  - `n8n-data` → `/home/node/.n8n` (n8n example only)
 - **Bind mounts**
   - `./private_data` → `/private-data` (pipeline: rw, analysis: ro)
   - `./pipeline_logs` → `/pipeline-logs` (pipeline: rw, analysis: ro)
