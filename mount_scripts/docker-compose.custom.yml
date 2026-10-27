@@ -58,6 +58,7 @@ services:
     environment:
       - DATA_PATH=/data/processed
       - HOME=/workspace
+      - PBI_API_KEY=${PBI_API_KEY:-}
     networks:
       - pbi-network
     command: ["jupyter"]
@@ -86,6 +87,7 @@ services:
     environment:
       - DATA_PATH=/data/processed
       - HOME=/workspace
+      - PBI_API_KEY=${PBI_API_KEY:-}
     networks:
       - pbi-network
     command: ["script"]
@@ -116,6 +118,7 @@ services:
       - pbi-data:/data:ro
     environment:
       - DATA_PATH=/data/processed
+      - PBI_API_KEY=${PBI_API_KEY:-}
     networks:
       - pbi-network
     restart: unless-stopped

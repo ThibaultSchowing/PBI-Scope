@@ -44,9 +44,9 @@ Outputs are stored in a shared data volume and made available through the `pbi` 
 
   Create your own R+Python container connected to the PBI-Scope database.
 
-- **[n8n Workflows](guides/n8n-integration.md)**
+- **[n8n Workflows (optional example)](guides/n8n-integration.md)**
 
-  Automate BLAST screening, data digests, and API health alerts with n8n.
+  The REST API is n8n-compatible for custom workflows. A quick example container shows BLAST screening and API health alerts.
 
 - **[Database Reports](reports/database_validation.html)**
 
@@ -146,13 +146,25 @@ Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI-Scope/tr
            +---------v---------+                               +---------v---------+
            | analysis container|                               | api container      |
            | pbi package (main)|                               | REST API           |
-            +-------------------+                               +-------------------+
-                               |
-                               v
-             +----------------+----------------------------------+
-             | n8n container   | workflow automation             |
-             |                 | BLAST screening + alerts        |
-             +----------------+----------------------------------+
+           +-------------------+                               +---------+---------+
+                                                                         .
+                                                                         . optional
+                                                               +---------v---------+
+                                                               | n8n container     |
+                                                               | (quick example)   |
+                                                               | calls API with    |
+                                                               | X-API-Key         |
+                                                               +-------------------+
+```
+
+!!! note "n8n is an optional example"
+    The REST API works with [n8n](https://n8n.io) (or any HTTP client) for custom workflows. The bundled `n8n` container is only a quick demonstration, not part of the core stack (`pipeline`, `analysis`, `api`).
+
+Connect to all three user-facing services from your laptop with one SSH command:
+
+```bash
+ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server
+# Jupyter: http://localhost:8888 | API: http://localhost:8000/docs | n8n: http://localhost:5678
 ```
 
 ## Current status
@@ -166,7 +178,7 @@ Explore the [example notebooks](https://github.com/ThibaultSchowing/PBI-Scope/tr
 | BLAST databases | ✅ Stable | Five pre-built databases (phages, proteins, hosts, private, combined); see notebook `09_blast_search.ipynb` |
 | Analysis workflow | ✅ Stable | Analysis container is the main interface |
 | REST API | ✅ Supported | Metadata queries, sequence retrieval, GFF3 annotations, BLAST search, SQL exploration; see [API Reference](api/overview.md) |
-| n8n workflows | ✅ Supported | BLAST screening, data digests, API health alerts via n8n; see [n8n Workflows](guides/n8n-integration.md) |
+| n8n compatibility | 🧪 Example | API is usable from n8n for custom workflows; an optional example container ships BLAST screening and health-alert workflows; see [n8n Workflows](guides/n8n-integration.md) |
 | Documentation | 🔄 Updated for v0.6.0 | Structure simplified and aligned with current infrastructure |
 
 ## Work in Progress

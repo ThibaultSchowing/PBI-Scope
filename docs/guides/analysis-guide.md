@@ -22,7 +22,7 @@ This configuration is intentional for **local or SSH-tunnelled development only*
 |---|---|
 | Localhost only (port not exposed) | ✅ Safe |
 | SSH tunnel from your laptop to the server | ✅ Safe |
-| Server port 8888 open to the internet | ❌ **Dangerous** |
+| Server port 8886 open to the internet | ❌ **Dangerous** |
 | Server on a shared/untrusted LAN | ❌ **Risky** |
 
 **Before exposing the container to a shared or internet-facing network:**
@@ -130,17 +130,18 @@ Start the container and open an SSH tunnel:
 docker compose up -d analysis
 
 # On your local machine
-ssh -L 8888:localhost:8888 user@your-server
+ssh -L 8888:localhost:8886 user@your-server
 ```
 
 Then open `http://localhost:8888` in your local browser.
 
-> The SSH tunnel forwards local port 8888 to the server's port 8888.
+> Docker maps server port 8886 to Jupyter's container port 8888. The SSH tunnel
+> forwards local port 8888 to the server's port 8886.
 > Traffic never leaves the encrypted SSH connection, so this is safe even though
 > Jupyter authentication is disabled.
 
 !!! tip "API Access"
-    You can also access the REST API remotely via SSH tunnel (`ssh -L 8000:localhost:8000 ...`).
+    You can also access the REST API remotely via SSH tunnel (`ssh -L 8000:localhost:8000 ...`). To access Jupyter, the API, and the optional n8n example through one tunnel, use `ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server`.
     See [Remote Access](../api/overview.md#remote-access) in the API Reference.
 
 ---

@@ -55,6 +55,18 @@ docker compose down
 docker compose restart api
 ```
 
+### n8n (optional example)
+
+```bash
+# Start the n8n example container (requires N8N_ENCRYPTION_KEY and PBI_API_KEY in .env)
+docker compose up -d n8n
+
+# SSH tunnel for Jupyter (8888), API (8000) and n8n (5678)
+ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server
+```
+
+See [n8n Workflows](../guides/n8n-integration.md).
+
 ### Data Access
 
 ```bash

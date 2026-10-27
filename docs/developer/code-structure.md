@@ -69,9 +69,10 @@ PBI-Scope/
 ├── tests/                 # Unit tests
 │   └── test_multi_host_parsing.py  # Host parsing and resolution tests
 │
-├── docker-compose.yml     # Docker orchestration (pipeline, analysis, api)
+├── docker-compose.yml     # Docker orchestration (pipeline, analysis, api; optional n8n example)
 ├── Dockerfile.analysis    # Analysis container (Jupyter Lab + pbi package)
 ├── Dockerfile.api         # API container (FastAPI)
+├── n8n/                   # Optional n8n example (README + workflows/*.json)
 ├── setup.py               # Package configuration
 └── mkdocs.yml             # Documentation configuration
 ```
@@ -164,6 +165,7 @@ All outputs → pbi-data Docker volume
       │
       ├──▶ Analysis container (Jupyter Lab, port 8888) via pbi package
       └──▶ API container (FastAPI, port 8000) for exploration
+                └──▶ (optional example) n8n container, port 5678, calls the API
 ```
 
 ## Development Workflow
@@ -180,7 +182,7 @@ All outputs → pbi-data Docker volume
 - **`workflow/envs/*.yaml`**: Conda environment specifications
 - **`setup.py`**: Python package metadata and dependencies
 - **`mkdocs.yml`**: Documentation configuration
-- **`docker-compose.yml`**: Container orchestration (pipeline, analysis, api services)
+- **`docker-compose.yml`**: Container orchestration (pipeline, analysis, api services; optional n8n example)
 - **`.gitignore`**: Excludes `data/` directory (too large for git)
 
 ## Tests

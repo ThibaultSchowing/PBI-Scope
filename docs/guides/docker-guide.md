@@ -1,6 +1,6 @@
 # Docker Guide
 
-PBI-Scope uses Docker Compose to orchestrate four services: `pipeline`, `analysis`, `api`, and `n8n`.
+PBI-Scope uses Docker Compose to orchestrate three core services (`pipeline`, `analysis`, `api`) plus an optional `n8n` example container.
 
 ## Quick Start
 
@@ -19,9 +19,12 @@ docker compose run --rm pipeline
 docker compose build analysis
 docker compose up -d analysis
 
-# Start API + n8n workflow automation
+# Start the API
 docker compose build api
-docker compose up -d api n8n
+docker compose up -d api
+
+# Optional: n8n example (the API is n8n-compatible for custom workflows)
+docker compose up -d n8n
 ```
 
 See the [Installation Guide](installation.md) for detailed setup instructions.
@@ -31,13 +34,24 @@ See the [Installation Guide](installation.md) for detailed setup instructions.
 | Service | Purpose | Port |
 |---------|---------|------|
 | `pipeline` | Builds/updates the database | — |
-| `analysis` | Jupyter Lab + VS Code Dev Containers | 8889 |
+| `analysis` | Jupyter Lab + VS Code Dev Containers | 8886 (host) → 8888 (container) |
 | `api` | REST API for metadata queries | 8000 |
-| `n8n` | Workflow automation (BLAST screening, alerts) | 5678 |
+
+Optional example (not part of the core stack):
+
+| Service | Purpose | Port |
+|---------|---------|------|
+| `n8n` | Quick n8n workflow example calling the API (BLAST screening, alerts) | 5678 |
+
+Connect to all three user-facing services from your laptop:
+
+```bash
+ssh -L 8888:localhost:8886 -L 8000:localhost:8000 -L 5678:localhost:5678 user@your-server
+```
 
 ## Security
 
-The `analysis` container runs Jupyter Lab with authentication disabled for local development. The `n8n` container requires you to create an admin account on first login. Both are meant to be accessed via SSH tunnel, not exposed directly to the internet. See [Analysis Container Guide](analysis-guide.md#security-notice) and [n8n Workflows](n8n-integration.md#security) for details and hardening steps.
+The `analysis` container runs Jupyter Lab with authentication disabled for local development. The optional `n8n` example requires you to create an admin account on first login. Jupyter and n8n should be accessed via an SSH tunnel, not exposed directly to the internet; the API can also be forwarded over SSH and should be protected with `PBI_API_KEY` when used beyond a trusted network. See [Analysis Container Guide](analysis-guide.md#security-notice), [n8n Workflows](n8n-integration.md#security), and [API Reference](../api/overview.md#authentication) for details.
 
 ## UID/GID Setup
 
@@ -60,4 +74,3 @@ docker compose up api
 ```
 
 See [API Reference](../api/overview.md) for endpoint documentation.
-

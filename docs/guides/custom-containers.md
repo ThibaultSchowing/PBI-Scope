@@ -256,7 +256,7 @@ Rscript -e 'knitr::knit2html("explore_phages.R")'
 
 ## Querying the API from Custom Containers
 
-You can query the PBI-Scope API from within your custom container without loading the database directly. The API runs as a separate service on the same Docker network and can be reached via `http://pbi-api:8000`.
+You can query the PBI-Scope API from within your custom container without loading the database directly. The API runs as a separate service on the same Docker network and can be reached via `http://api:8000`.
 
 ### When to Use the API
 
@@ -270,18 +270,31 @@ You can query the PBI-Scope API from within your custom container without loadin
 | SQL queries | Supported | Supported |
 
 !!! note "Read-only access"
-    The API provides **read-only** access to the database. All queries are validated and restricted to SELECT statements. This makes it safe for shared environments where multiple users or containers need concurrent access.
+    Database queries through the API are read-only and restricted to safe query statements. The service also provides BLAST search and job endpoints, which can run searches and create temporary jobs.
+
+When `PBI_API_KEY` is configured, authenticated routes require the `X-API-Key` header. The custom Compose file forwards `PBI_API_KEY` from the shell into the custom containers; from `mount_scripts/`, load the root `.env` before starting them:
+
+```bash
+set -a
+source ../.env
+set +a
+docker compose -f docker-compose.custom.yml up -d custom-jupyter
+```
+
+The `pbi.APIClient` reads this environment variable and adds the header automatically. For other clients, send `X-API-Key` yourself.
 
 ### Starting the API
 
 ```bash
-# Option 1: Start from the main docker-compose.yml
-docker compose up api
+# Option 1: Start the API from the main docker-compose.yml (recommended)
+docker compose up -d api
 
-# Option 2: Start from the custom docker-compose.yml
-docker compose -f docker-compose.custom.yml up api
+# Option 2: If the main-stack API is not running, start the API from this
+# custom compose file instead:
+docker compose -f docker-compose.custom.yml up -d api
 
-# Option 3: Start everything together
+# Do not start both API services at once; they both use container name pbi-api.
+# If using the custom compose API, you can start it with Jupyter:
 docker compose -f docker-compose.custom.yml up custom-jupyter api
 ```
 
@@ -290,8 +303,9 @@ docker compose -f docker-compose.custom.yml up custom-jupyter api
 ```python
 from pbi import APIClient
 
-# Connect to the API (uses Docker network, not localhost)
-client = APIClient("http://pbi-api:8000")
+# Connect to the API (uses Docker network, not localhost). APIClient sends
+# PBI_API_KEY automatically from the environment when the API requires it.
+client = APIClient("http://api:8000")
 
 # Quick metadata lookup
 phages = client.get_phage_metadata(where_clause="Source_DB = 'RefSeq'", limit=10)
@@ -311,12 +325,14 @@ library(httr)
 library(jsonlite)
 
 # Get database stats
-response <- GET("http://pbi-api:8000/stats")
+# If the API requires a key, include it as the X-API-Key header:
+api_headers <- add_headers("X-API-Key" = Sys.getenv("PBI_API_KEY"))
+response <- GET("http://api:8000/stats", config = api_headers)
 stats <- fromJSON(content(response, "text"))
 cat("Phages:", format(stats$database$phages, big.mark = ","), "\n")
 
 # Query phage metadata
-response <- GET("http://pbi-api:8000/phage-metadata", query = list(limit = 10))
+response <- GET("http://api:8000/phage-metadata", query = list(limit = 10), config = api_headers)
 phages <- fromJSON(content(response, "text"))
 print(phages)
 ```
@@ -324,14 +340,14 @@ print(phages)
 ### curl Example (command line)
 
 ```bash
-# Health check
-curl http://pbi-api:8000/health
+# Health check (does not require an API key)
+curl http://api:8000/health
 
-# Get statistics
-curl http://pbi-api:8000/stats
+# Get statistics (include the key when PBI_API_KEY is configured)
+curl -H "X-API-Key: ${PBI_API_KEY}" http://api:8000/stats
 
 # Query metadata
-curl "http://pbi-api:8000/phage-metadata?limit=10"
+curl -H "X-API-Key: ${PBI_API_KEY}" "http://api:8000/phage-metadata?limit=10"
 ```
 
 See [API Reference](../api/overview.md) for full endpoint documentation.
